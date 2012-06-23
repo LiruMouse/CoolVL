@@ -170,8 +170,9 @@ public:
 	// get (first) xml tag for a given class
 	template <class T> std::string getTag()
 	{
-		factory_map_t::iterator it;
-		for (it = mCreatorFunctions.begin(); it != mCreatorFunctions.end(); ++it)
+		for (factory_map_t::iterator it = mCreatorFunctions.begin(),
+									 end = mCreatorFunctions.end();
+			 it != end; it++)
 		{
 			if (it->second == T::fromXML)
 			{

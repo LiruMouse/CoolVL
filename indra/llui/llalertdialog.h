@@ -42,11 +42,8 @@ class LLCheckBoxCtrl;
 class LLAlertDialogTemplate;
 class LLLineEditor;
 
-// https://wiki.lindenlab.com/mediawiki/index.php?title=LLAlertDialog&oldid=81388
-class LLAlertDialog 
-	: public LLModalDialog,
-	  public LLInitClass<LLAlertDialog>,
-	  public LLInstanceTracker<LLAlertDialog, LLUUID>
+class LLAlertDialog : public LLModalDialog, public LLInitClass<LLAlertDialog>,
+					  public LLInstanceTracker<LLAlertDialog, LLUUID>
 
 {
 public:
@@ -58,48 +55,51 @@ public:
 		virtual void load(const std::string& url) = 0;
 		virtual ~URLLoader() {}
 	};
-	
+
 	static void setURLLoader(URLLoader* loader)
 	{
 		sURLLoader = loader;
 	}
-	
+
 public:
 	// User's responsibility to call show() after creating these.
-	LLAlertDialog( LLNotificationPtr notep, bool is_modal );
+	LLAlertDialog(LLNotificationPtr notep, bool is_modal);
 
-	virtual BOOL	handleKeyHere(KEY key, MASK mask );
+private:
+	// No you can't kill it. It can only kill itself.
+	virtual ~LLAlertDialog();
+
+public:
+	virtual BOOL	handleKeyHere(KEY key, MASK mask);
 
 	virtual void	draw();
-	virtual void	setVisible( BOOL visible );
+	virtual void	setVisible(BOOL visible);
 	virtual void	onClose(bool app_quitting);
 
-	bool 			setCheckBox( const std::string&, const std::string& );	
-	void			setCaution(BOOL val = TRUE) { mCaution = val; }
-	// If mUnique==TRUE only one copy of this message should exist
-	void			setUnique(BOOL val = TRUE) { mUnique = val; }
+	bool 			setCheckBox(const std::string&, const std::string&);
+	void			setCaution(BOOL val = TRUE)				{ mCaution = val; }
+	// If mUnique == TRUE only one copy of this message should exist
+	void			setUnique(BOOL val = TRUE)				{ mUnique = val; }
 	void			setEditTextArgs(const LLSD& edit_args);
-	
-	bool			show();	// May instantly destroy the message if it is unique (returns false)
-	
+
+	// May instantly destroy the message if it is unique (returns false)
+	bool			show();
+
 	//statics
-	static void initClass();
-	static bool onNewNotification(const LLSD& notify, bool is_modal);
-	static void	onButtonPressed(void* userdata);
-	static void onClickIgnore(LLUICtrl* ctrl, void* user_data);
+	static void		initClass();
+	static bool		onNewNotification(const LLSD& notify, bool is_modal);
+	static void		onButtonPressed(void* userdata);
+	static void		onClickIgnore(LLUICtrl* ctrl, void* user_data);
+
+private:
+	// Does it have a readable title label, or minimize or close buttons?
+	BOOL hasTitleBar() const;
 
 private:
 	LLNotificationPtr mNote;
 
 	static std::map<std::string, LLAlertDialog*> sUniqueActiveMap;
 
-	virtual ~LLAlertDialog();
-	// No you can't kill it.  It can only kill itself.
-
-	// Does it have a readable title label, or minimize or close buttons?
-	BOOL hasTitleBar() const;
-
-private:
 	static URLLoader* sURLLoader;
 	static LLControlGroup* sSettings;
 
@@ -118,9 +118,12 @@ private:
 	std::string		mLabel;
 	LLFrameTimer	mDefaultBtnTimer;
 	// For Dialogs that take a line as text as input:
-	LLLineEditor* mLineEditor;
+	LLLineEditor*	mLineEditor;
 
+	S32				mDropShadowFloater;
+	LLColor4		mColorDropShadow;
+	LLColor4		mAlertBoxColor;
+	LLColor4		mAlertCautionBoxColor;
 };
-
 
 #endif  // LL_ALERTDIALOG_H

@@ -1,11 +1,11 @@
-/** 
+/**
  * @file lldrawpooltree.cpp
  * @brief LLDrawPoolTree class implementation
  *
  * $LicenseInfo:firstyear=2002&license=viewergpl$
- * 
+ *
  * Copyright (c) 2002-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -47,14 +47,14 @@
 S32 LLDrawPoolTree::sDiffTex = 0;
 static LLGLSLShader* shader = NULL;
 
-LLDrawPoolTree::LLDrawPoolTree(LLViewerTexture *texturep) :
-	LLFacePool(POOL_TREE),
+LLDrawPoolTree::LLDrawPoolTree(LLViewerTexture* texturep)
+:	LLFacePool(POOL_TREE),
 	mTexturep(texturep)
 {
 	mTexturep->setAddressMode(LLTexUnit::TAM_WRAP);
 }
 
-LLDrawPool *LLDrawPoolTree::instancePool()
+LLDrawPool* LLDrawPoolTree::instancePool()
 {
 	return new LLDrawPoolTree(mTexturep);
 }
@@ -90,7 +90,8 @@ void LLDrawPoolTree::beginRenderPass(S32 pass)
 
 void LLDrawPoolTree::render(S32 pass)
 {
-	LLFastTimer t(LLPipeline::sShadowRender ? LLFastTimer::FTM_SHADOW_TREE : LLFastTimer::FTM_RENDER_TREES);
+	LLFastTimer t(LLPipeline::sShadowRender ? LLFastTimer::FTM_SHADOW_TREE
+											: LLFastTimer::FTM_RENDER_TREES);
 
 	if (mDrawFace.empty())
 	{
@@ -100,7 +101,8 @@ void LLDrawPoolTree::render(S32 pass)
 	LLGLEnable test(GL_ALPHA_TEST);
 	LLOverrideFaceColor color(this, 1.f, 1.f, 1.f, 1.f);
 
-	static LLCachedControl<bool> render_animate_trees(gSavedSettings, "RenderAnimateTrees");
+	static LLCachedControl<bool> render_animate_trees(gSavedSettings,
+													  "RenderAnimateTrees");
 	if (render_animate_trees)
 	{
 		renderTree();
@@ -109,15 +111,18 @@ void LLDrawPoolTree::render(S32 pass)
 	{
 		gGL.getTexUnit(sDiffTex)->bind(mTexturep);
 
-		for (std::vector<LLFace*>::iterator iter = mDrawFace.begin();
-			 iter != mDrawFace.end(); iter++)
+		for (std::vector<LLFace*>::iterator iter = mDrawFace.begin(),
+											end = mDrawFace.end();
+			 iter != end; ++iter)
 		{
-			LLFace *face = *iter;
+			LLFace* face = *iter;
 			LLVertexBuffer* buff = face->getVertexBuffer();
 			if (buff)
 			{
 				buff->setBuffer(LLDrawPoolTree::VERTEX_DATA_MASK);
-				buff->drawRange(LLRender::TRIANGLES, 0, buff->getRequestedVerts() - 1, buff->getRequestedIndices(), 0); 
+				buff->drawRange(LLRender::TRIANGLES, 0,
+								buff->getRequestedVerts() - 1,
+								buff->getRequestedIndices(), 0);
 				gPipeline.addTrianglesDrawn(buff->getRequestedIndices());
 			}
 		}
@@ -167,8 +172,10 @@ void LLDrawPoolTree::beginShadowPass(S32 pass)
 {
 	LLFastTimer t(LLFastTimer::FTM_SHADOW_TREE);
 	gGL.setAlphaRejectSettings(LLRender::CF_GREATER, 0.5f);
-	static LLCachedControl<F32> shadow_offset(gSavedSettings, "RenderDeferredTreeShadowOffset");
-	static LLCachedControl<F32> shadow_bias(gSavedSettings, "RenderDeferredTreeShadowBias");
+	static LLCachedControl<F32> shadow_offset(gSavedSettings,
+											  "RenderDeferredTreeShadowOffset");
+	static LLCachedControl<F32> shadow_bias(gSavedSettings,
+											"RenderDeferredTreeShadowBias");
 	glPolygonOffset(shadow_offset, shadow_bias);
 
 	gDeferredShadowProgram.bind();
@@ -184,8 +191,10 @@ void LLDrawPoolTree::endShadowPass(S32 pass)
 	LLFastTimer t(LLFastTimer::FTM_SHADOW_TREE);
 	gGL.setAlphaRejectSettings(LLRender::CF_DEFAULT);
 
-	static LLCachedControl<F32> shadow_offset(gSavedSettings, "RenderDeferredSpotShadowOffset");
-	static LLCachedControl<F32> shadow_bias(gSavedSettings, "RenderDeferredSpotShadowBias");
+	static LLCachedControl<F32> shadow_offset(gSavedSettings,
+											  "RenderDeferredSpotShadowOffset");
+	static LLCachedControl<F32> shadow_bias(gSavedSettings,
+											"RenderDeferredSpotShadowBias");
 	glPolygonOffset(shadow_offset, shadow_bias);
 
 	//gDeferredShadowProgram.unbind();
@@ -202,11 +211,12 @@ void LLDrawPoolTree::renderTree(BOOL selecting)
 
 	glMatrixMode(GL_MODELVIEW);
 
-	for (std::vector<LLFace*>::iterator iter = mDrawFace.begin();
-		 iter != mDrawFace.end(); iter++)
+	for (std::vector<LLFace*>::iterator iter = mDrawFace.begin(),
+										end = mDrawFace.end();
+		 iter != end; ++iter)
 	{
-		LLFace *face = *iter;
-		LLDrawable *drawablep = face->getDrawable();
+		LLFace* face = *iter;
+		LLDrawable* drawablep = face->getDrawable();
 
 		if (drawablep->isDead() || !face->getVertexBuffer())
 		{
@@ -217,7 +227,7 @@ void LLDrawPoolTree::renderTree(BOOL selecting)
 		U16* indicesp = (U16*) face->getVertexBuffer()->getIndicesPointer();
 
 		// Render each of the trees
-		LLVOTree *treep = (LLVOTree *)drawablep->getVObj().get();
+		LLVOTree* treep = (LLVOTree*)drawablep->getVObj().get();
 
 		LLColor4U color(255,255,255,255);
 
@@ -234,8 +244,10 @@ void LLDrawPoolTree::renderTree(BOOL selecting)
 			glLoadMatrixd(gGLModelView);
 			//glPushMatrix();
 			F32 mat[16];
-			for (U32 i = 0; i < 16; i++)
+			for (U32 i = 0; i < 16; ++i)
+			{
 				mat[i] = (F32) gGLModelView[i];
+			}
 
 			LLMatrix4 matrix(mat);
 
@@ -243,26 +255,28 @@ void LLDrawPoolTree::renderTree(BOOL selecting)
 			const LLVector3 &pos_agent = treep->getPositionAgent();
 			//glTranslatef(pos_agent.mV[VX], pos_agent.mV[VY], pos_agent.mV[VZ] - 0.1f);
 			LLMatrix4 trans_mat;
-			trans_mat.setTranslation(pos_agent.mV[VX], pos_agent.mV[VY], pos_agent.mV[VZ] - 0.1f);
+			trans_mat.setTranslation(pos_agent.mV[VX], pos_agent.mV[VY],
+									 pos_agent.mV[VZ] - 0.1f);
 			trans_mat *= matrix;
 
 			// Rotate to tree position and bend for current trunk/wind
-			// Note that trunk stiffness controls the amount of bend at the trunk as 
+			// Note that trunk stiffness controls the amount of bend at the trunk as
 			// opposed to the crown of the tree
-			// 
+			//
 			const F32 TRUNK_STIFF = 22.f;
 
-			LLQuaternion rot = 
-				LLQuaternion(treep->mTrunkBend.magVec()*TRUNK_STIFF*DEG_TO_RAD, LLVector4(treep->mTrunkBend.mV[VX], treep->mTrunkBend.mV[VY], 0)) *
-				LLQuaternion(90.f*DEG_TO_RAD, LLVector4(0,0,1)) *
-				treep->getRotation();
+			LLQuaternion rot =
+				LLQuaternion(treep->mTrunkBend.magVec() * TRUNK_STIFF*DEG_TO_RAD,
+							 LLVector4(treep->mTrunkBend.mV[VX],
+							 treep->mTrunkBend.mV[VY], 0)) *
+				LLQuaternion(90.f*DEG_TO_RAD, LLVector4(0, 0, 1)) * treep->getRotation();
 
 			LLMatrix4 rot_mat(rot);
 			rot_mat *= trans_mat;
 
 			F32 radius = treep->getScale().magVec()*0.05f;
 			LLMatrix4 scale_mat;
-			scale_mat.mMatrix[0][0] = 
+			scale_mat.mMatrix[0][0] =
 				scale_mat.mMatrix[1][1] =
 				scale_mat.mMatrix[2][2] = radius;
 
@@ -271,14 +285,14 @@ void LLDrawPoolTree::renderTree(BOOL selecting)
 			const F32 THRESH_ANGLE_FOR_BILLBOARD = 15.f;
 			const F32 BLEND_RANGE_FOR_BILLBOARD = 3.f;
 
-			F32 droop = treep->mDroop + 25.f*(1.f - treep->mTrunkBend.magVec());
+			F32 droop = treep->mDroop + 25.f * (1.f - treep->mTrunkBend.magVec());
 
 			S32 stop_depth = 0;
-			F32 app_angle = treep->getAppAngle()*LLVOTree::sTreeFactor;
+			F32 app_angle = treep->getAppAngle() * LLVOTree::sTreeFactor;
 			F32 alpha = 1.0;
 			S32 trunk_LOD = LLVOTree::sMAX_NUM_TREE_LOD_LEVELS;
 
-			for (S32 j = 0; j < 4; j++)
+			for (S32 j = 0; j < 4; ++j)
 			{
 
 				if (app_angle > LLVOTree::sLODAngles[j])
@@ -286,7 +300,7 @@ void LLDrawPoolTree::renderTree(BOOL selecting)
 					trunk_LOD = j;
 					break;
 				}
-			} 
+			}
 			if (trunk_LOD >= LLVOTree::sMAX_NUM_TREE_LOD_LEVELS)
 			{
 				continue;	// do not render.
@@ -295,12 +309,20 @@ void LLDrawPoolTree::renderTree(BOOL selecting)
 			if (app_angle < (THRESH_ANGLE_FOR_BILLBOARD - BLEND_RANGE_FOR_BILLBOARD))
 			{
 				//
-				//  Draw only the billboard 
+				//  Draw only the billboard
 				//
 				//  Only the billboard, can use closer to normal alpha func.
 				stop_depth = -1;
-				LLFacePool::LLOverrideFaceColor clr(this, color); 
-				indices_drawn += treep->drawBranchPipeline(scale_mat, indicesp, trunk_LOD, stop_depth, treep->mDepth, treep->mTrunkDepth, 1.0, treep->mTwist, droop, treep->mBranches, alpha);
+				LLFacePool::LLOverrideFaceColor clr(this, color);
+				indices_drawn += treep->drawBranchPipeline(scale_mat, indicesp,
+														   trunk_LOD,
+														   stop_depth,
+														   treep->mDepth,
+														   treep->mTrunkDepth,
+														   1.0, treep->mTwist,
+														   droop,
+														   treep->mBranches,
+														   alpha);
 			}
 			else // if (app_angle > (THRESH_ANGLE_FOR_BILLBOARD + BLEND_RANGE_FOR_BILLBOARD))
 			{
@@ -308,8 +330,16 @@ void LLDrawPoolTree::renderTree(BOOL selecting)
 				//  Draw only the full geometry tree
 				//
 				//stop_depth = (app_angle < THRESH_ANGLE_FOR_RECURSION_REDUCTION);
-				LLFacePool::LLOverrideFaceColor clr(this, color); 
-				indices_drawn += treep->drawBranchPipeline(scale_mat, indicesp, trunk_LOD, stop_depth, treep->mDepth, treep->mTrunkDepth, 1.0, treep->mTwist, droop, treep->mBranches, alpha);
+				LLFacePool::LLOverrideFaceColor clr(this, color);
+				indices_drawn += treep->drawBranchPipeline(scale_mat, indicesp,
+														   trunk_LOD,
+														   stop_depth,
+														   treep->mDepth,
+														   treep->mTrunkDepth,
+														   1.0, treep->mTwist,
+														   droop,
+														   treep->mBranches,
+														   alpha);
 			}
 
 			//glPopMatrix();
@@ -330,12 +360,12 @@ BOOL LLDrawPoolTree::verify() const
 	return TRUE;
 }
 
-LLViewerTexture *LLDrawPoolTree::getTexture()
+LLViewerTexture* LLDrawPoolTree::getTexture()
 {
 	return mTexturep;
 }
 
-LLViewerTexture *LLDrawPoolTree::getDebugTexture()
+LLViewerTexture* LLDrawPoolTree::getDebugTexture()
 {
 	return mTexturep;
 }

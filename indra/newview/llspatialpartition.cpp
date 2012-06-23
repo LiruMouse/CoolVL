@@ -1,11 +1,11 @@
-/** 
+/**
  * @file llspatialpartition.cpp
  * @brief LLSpatialGroup class implementation and supporting functions
  *
  * $LicenseInfo:firstyear=2003&license=viewergpl$
- * 
+ *
  * Copyright (c) 2003-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -124,7 +124,7 @@ S32 AABBSphereIntersectR2(const LLVector3& min, const LLVector3& max, const LLVe
 		return 2;
 	}
 
-	for (U32 i = 0; i < 3; i++)
+	for (U32 i = 0; i < 3; ++i)
 	{
 		if (origin.mV[i] < min.mV[i])
 		{
@@ -171,7 +171,7 @@ S32 AABBSphereIntersectR2(const LLVector4a& min, const LLVector4a& max, const LL
 		}
 	}
 
-	for (U32 i = 0; i < 3; i++)
+	for (U32 i = 0; i < 3; ++i)
 	{
 		if (origin.mV[i] < min[i])
 		{
@@ -213,15 +213,15 @@ static U8 sOcclusionIndices[] =
 {
 	 //000
 		b111, b110, b010, b011, b001, b101, b100, b110,
-	 //001 
+	 //001
 		b011, b010, b000, b001, b101, b111, b110, b010,
 	 //010
 		b101, b100, b110, b111, b011, b001, b000, b100,
-	 //011 
+	 //011
 		b001, b000, b100, b101, b111, b011, b010, b000,
-	 //100 
+	 //100
 		b110, b000, b010, b011, b111, b101, b100, b000,
-	 //101 
+	 //101
 		b010, b100, b000, b001, b011, b111, b110, b100,
 	 //110
 		b100, b010, b110, b111, b101, b001, b000, b010,
@@ -253,7 +253,7 @@ void LLSpatialGroup::buildOcclusion()
 {
 	if (mOcclusionVerts.isNull())
 	{
-		mOcclusionVerts = new LLVertexBuffer(LLVertexBuffer::MAP_VERTEX, 
+		mOcclusionVerts = new LLVertexBuffer(LLVertexBuffer::MAP_VERTEX,
 											 LLVertexBuffer::sUseStreamDraw ?
 											 mBufferUsage :
 											 0); //if GL has a hard time with VBOs, don't use them for occlusion culling.
@@ -261,7 +261,7 @@ void LLSpatialGroup::buildOcclusion()
 
 		LLStrider<U16> idx;
 		mOcclusionVerts->getIndexStrider(idx);
-		for (U32 i = 0; i < 64; i++)
+		for (U32 i = 0; i < 64; ++i)
 		{
 			*idx++ = sOcclusionIndices[i];
 		}
@@ -299,9 +299,9 @@ void LLSpatialGroup::buildOcclusion()
 			LLVector4a(1.f, 1.f, 1.f),
 		};
 
-		//vertex positions are encoded so the 3 bits of their vertex index 
+		//vertex positions are encoded so the 3 bits of their vertex index
 		//correspond to their axis facing, with bit position 3,2,1 matching
-		//axis facing x,y,z, bit set meaning positive facing, bit clear 
+		//axis facing x,y,z, bit set meaning positive facing, bit clear
 		//meaning negative facing
 		for (S32 i = 0; i < 8; ++i)
 		{
@@ -323,7 +323,7 @@ void LLSpatialGroup::buildOcclusion()
 BOOL earlyFail(LLCamera* camera, LLSpatialGroup* group);
 
 //returns:
-//	0 if sphere and AABB are not intersecting 
+//	0 if sphere and AABB are not intersecting
 //	1 if they are
 //	2 if AABB is entirely inside sphere
 
@@ -333,7 +333,7 @@ S32 LLSphereAABB(const LLVector3& center, const LLVector3& size, const LLVector3
 
 	LLVector3 min = center - size;
 	LLVector3 max = center + size;
-	for (U32 i = 0; i < 3; i++)
+	for (U32 i = 0; i < 3; ++i)
 	{
 		if (min.mV[i] > pos.mV[i] + rad ||
 			max.mV[i] < pos.mV[i] - rad)
@@ -462,7 +462,7 @@ void LLSpatialGroup::validate()
 		LLVector4a max;
 		max.setAdd(center, size);
 
-		for (U32 j = 0; j < 3; j++)
+		for (U32 j = 0; j < 3; ++j)
 		{
 			sg_assert(min[j] >= myMin[j] - 0.02f);
 			sg_assert(max[j] <= myMax[j] + 0.02f);
@@ -504,7 +504,7 @@ BOOL LLSpatialGroup::updateInGroup(LLDrawable *drawablep, BOOL immediate)
 
 	OctreeNode* parent = mOctreeNode->getOctParent();
 
-	if (mOctreeNode->isInside(drawablep->getPositionGroup()) && 
+	if (mOctreeNode->isInside(drawablep->getPositionGroup()) &&
 		(mOctreeNode->contains(drawablep) ||
 		 (drawablep->getBinRadius() > mOctreeNode->getSize()[0] &&
 		  parent && parent->getElementCount() >= gOctreeMaxCapacity)))
@@ -627,7 +627,7 @@ BOOL LLSpatialGroup::boundObjects(BOOL empty, LLVector4a& minOut, LLVector4a& ma
 	if (node->getData().empty())
 	{	//don't do anything if there are no objects
 		if (empty && mOctreeNode->getParent())
-		{	//only root is allowed to be empty
+		{	// only root is allowed to be empty
 			OCT_ERRS << "Empty leaf found in octree." << llendl;
 		}
 		return FALSE;
@@ -648,7 +648,8 @@ BOOL LLSpatialGroup::boundObjects(BOOL empty, LLVector4a& minOut, LLVector4a& ma
 		newMin = minMax[0];
 		newMax = minMax[1];
 
-		for (++i; i != node->getData().end(); ++i)
+		OctreeNode::const_element_iter data_end = node->getData().end();
+		for (++i; i != data_end; ++i)
 		{
 			drawablep = *i;
 			minMax = drawablep->getSpatialExtents();
@@ -721,7 +722,7 @@ LLSpatialGroup* LLSpatialGroup::getParent()
 	return NULL;
 }
 
-BOOL LLSpatialGroup::removeObject(LLDrawable *drawablep, BOOL from_octree)
+BOOL LLSpatialGroup::removeObject(LLDrawable* drawablep, BOOL from_octree)
 {
 	LLMemType mt(LLMemType::MTYPE_SPACE_PARTITION);
 	unbound();
@@ -729,7 +730,8 @@ BOOL LLSpatialGroup::removeObject(LLDrawable *drawablep, BOOL from_octree)
 	{
 		if (!mOctreeNode->remove(drawablep))
 		{
-			OCT_ERRS << "Could not remove drawable from spatial group" << llendl;
+			OCT_ERRS << "Could not remove drawable from spatial group"
+					 << llendl;
 		}
 	}
 	else
@@ -740,7 +742,8 @@ BOOL LLSpatialGroup::removeObject(LLDrawable *drawablep, BOOL from_octree)
 
 		if (drawablep->isSpatialBridge())
 		{
-			for (bridge_list_t::iterator i = mBridgeList.begin(); i != mBridgeList.end(); ++i)
+			for (bridge_list_t::iterator i = mBridgeList.begin(), end = mBridgeList.end();
+				 i != end; ++i)
 			{
 				if (*i == drawablep)
 				{
@@ -751,7 +754,8 @@ BOOL LLSpatialGroup::removeObject(LLDrawable *drawablep, BOOL from_octree)
 		}
 
 		if (getElementCount() == 0)
-		{ //delete draw map on last element removal since a rebuild might never happen
+		{	// delete draw map on last element removal since a rebuild might
+			// never happen
 			clearDrawMap();
 		}
 	}
@@ -811,9 +815,9 @@ public:
 	}
 };
 
-void LLSpatialGroup::setState(U32 state) 
+void LLSpatialGroup::setState(U32 state)
 {
-	mState |= state; 
+	mState |= state;
 
 	if (state > LLSpatialGroup::STATE_MASK)
 	{
@@ -821,7 +825,7 @@ void LLSpatialGroup::setState(U32 state)
 	}
 }
 
-void LLSpatialGroup::setState(U32 state, S32 mode) 
+void LLSpatialGroup::setState(U32 state, S32 mode)
 {
 	LLMemType mt(LLMemType::MTYPE_SPACE_PARTITION);
 
@@ -915,13 +919,13 @@ void LLSpatialGroup::clearState(U32 state, S32 mode)
 }
 
 BOOL LLSpatialGroup::isState(U32 state) const
-{ 
+{
 	if (state > LLSpatialGroup::STATE_MASK)
 	{
 		llerrs << "WTF?" << llendl;
 	}
 
-	return mState & state ? TRUE : FALSE; 
+	return mState & state ? TRUE : FALSE;
 }
 
 //=====================================
@@ -954,7 +958,7 @@ public:
 	}
 };
 
-void LLSpatialGroup::setOcclusionState(U32 state, S32 mode) 
+void LLSpatialGroup::setOcclusionState(U32 state, S32 mode)
 {
 	LLMemType mt(LLMemType::MTYPE_SPACE_PARTITION);
 
@@ -972,7 +976,7 @@ void LLSpatialGroup::setOcclusionState(U32 state, S32 mode)
 		}
 		else
 		{
-			for (U32 i = 0; i < LLViewerCamera::NUM_CAMERAS; i++)
+			for (U32 i = 0; i < LLViewerCamera::NUM_CAMERAS; ++i)
 			{
 				mOcclusionState[i] |= state;
 
@@ -1042,7 +1046,7 @@ void LLSpatialGroup::clearOcclusionState(U32 state, S32 mode)
 		}
 		else
 		{
-			for (U32 i = 0; i < LLViewerCamera::NUM_CAMERAS; i++)
+			for (U32 i = 0; i < LLViewerCamera::NUM_CAMERAS; ++i)
 			{
 				mOcclusionState[i] &= ~state;
 			}
@@ -1063,14 +1067,14 @@ LLSpatialGroup::LLSpatialGroup(OctreeNode* node, LLSpatialPartition* part)
 	mBuilt(0.f),
 	mOctreeNode(node),
 	mSpatialPartition(part),
-	mVertexBuffer(NULL), 
+	mVertexBuffer(NULL),
 	mBufferUsage(part->mBufferUsage),
 	mDistance(0.f),
 	mDepth(0.f),
-	mLastUpdateDistance(-1.f), 
+	mLastUpdateDistance(-1.f),
 	mLastUpdateTime(gFrameTimeSeconds)
 {
-	sNodeCount++;
+	++sNodeCount;
 	LLMemType mt(LLMemType::MTYPE_SPACE_PARTITION);
 
 	mViewAngle.splat(0.f);
@@ -1093,7 +1097,7 @@ LLSpatialGroup::LLSpatialGroup(OctreeNode* node, LLSpatialPartition* part)
 
 	LLSpatialGroup* parent = oct_parent ? (LLSpatialGroup*) oct_parent->getListener(0) : NULL;
 
-	for (U32 i = 0; i < LLViewerCamera::NUM_CAMERAS; i++)
+	for (U32 i = 0; i < LLViewerCamera::NUM_CAMERAS; ++i)
 	{
 		mOcclusionQuery[i] = 0;
 		mOcclusionIssued[i] = 0;
@@ -1273,7 +1277,8 @@ void LLSpatialGroup::handleDestruction(const TreeNode* node)
 	LLMemType mt(LLMemType::MTYPE_SPACE_PARTITION);
 	setState(DEAD);
 
-	for (element_iter i = getData().begin(); i != getData().end(); ++i)
+	for (element_iter i = getData().begin(), end = getData().end();
+		 i != end; ++i)
 	{
 		LLDrawable* drawable = *i;
 		if (drawable->getSpatialGroup() == this)
@@ -1285,7 +1290,7 @@ void LLSpatialGroup::handleDestruction(const TreeNode* node)
 	clearDrawMap();
 	mVertexBuffer = NULL;
 	mBufferMap.clear();
-	sZombieGroups++;
+	++sZombieGroups;
 	mOctreeNode = NULL;
 }
 
@@ -1299,7 +1304,7 @@ void LLSpatialGroup::handleStateChange(const TreeNode* node)
 	unbound();
 }
 
-void LLSpatialGroup::handleChildAddition(const OctreeNode* parent, OctreeNode* child) 
+void LLSpatialGroup::handleChildAddition(const OctreeNode* parent, OctreeNode* child)
 {
 	LLMemType mt(LLMemType::MTYPE_SPACE_PARTITION);
 	if (child->getListenerCount() == 0)
@@ -1321,7 +1326,7 @@ void LLSpatialGroup::handleChildRemoval(const OctreeNode* parent, const OctreeNo
 	unbound();
 }
 
-void LLSpatialGroup::destroyGL() 
+void LLSpatialGroup::destroyGL()
 {
 	setState(LLSpatialGroup::GEOM_DIRTY | LLSpatialGroup::IMAGE_DIRTY);
 	gPipeline.markRebuild(this, TRUE);
@@ -1332,7 +1337,7 @@ void LLSpatialGroup::destroyGL()
 
 	clearDrawMap();
 
-	for (U32 i = 0; i < LLViewerCamera::NUM_CAMERAS; i++)
+	for (U32 i = 0; i < LLViewerCamera::NUM_CAMERAS; ++i)
 	{
 		if (mOcclusionQuery[i])
 		{
@@ -1343,10 +1348,11 @@ void LLSpatialGroup::destroyGL()
 
 	mOcclusionVerts = NULL;
 
-	for (LLSpatialGroup::element_iter i = getData().begin(); i != getData().end(); ++i)
+	for (LLSpatialGroup::element_iter i = getData().begin(), end = getData().end();
+		 i != end; ++i)
 	{
 		LLDrawable* drawable = *i;
-		for (S32 j = 0, count = drawable->getNumFaces(); j < count; j++)
+		for (S32 j = 0, count = drawable->getNumFaces(); j < count; ++j)
 		{
 			LLFace* facep = drawable->getFace(j);
 			if (facep)
@@ -1395,7 +1401,7 @@ BOOL LLSpatialGroup::rebound()
 		newMax = group->mExtents[1];
 
 		//first, rebound children
-		for (U32 i = 1; i < mOctreeNode->getChildCount(); i++)
+		for (U32 i = 1; i < mOctreeNode->getChildCount(); ++i)
 		{
 			group = (LLSpatialGroup*) mOctreeNode->getChild(i)->getListener(0);
 			group->clearState(SKIP_FRUSTUM_CHECK);
@@ -1541,9 +1547,9 @@ void LLSpatialGroup::doOcclusion(LLCamera* camera)
 												 (mSpatialPartition->mDrawableType == LLDrawPool::POOL_WATER ||
 												  mSpatialPartition->mDrawableType == LLDrawPool::POOL_VOIDWATER);
 
-					LLGLEnable clamp(use_depth_clamp ? GL_DEPTH_CLAMP : 0);				
+					LLGLEnable clamp(use_depth_clamp ? GL_DEPTH_CLAMP : 0);
 
-#if 0	//!LL_DARWIN					
+#if 0	//!LL_DARWIN
 					U32 mode = gGLManager.mHasOcclusionQuery2 ? GL_ANY_SAMPLES_PASSED : GL_SAMPLES_PASSED_ARB;
 #else
 					U32 mode = GL_SAMPLES_PASSED_ARB;
@@ -1726,9 +1732,9 @@ public:
 	const LLVector4a& mOffset;
 
 	LLSpatialShift(const LLVector4a& offset) : mOffset(offset) { }
-	virtual void visit(const LLSpatialGroup::OctreeNode* branch) 
-	{ 
-		((LLSpatialGroup*) branch->getListener(0))->shift(mOffset); 
+	virtual void visit(const LLSpatialGroup::OctreeNode* branch)
+	{
+		((LLSpatialGroup*) branch->getListener(0))->shift(mOffset);
 	}
 };
 
@@ -1769,7 +1775,7 @@ public:
 			return;
 		}
 
-		if (mRes == 2 || 
+		if (mRes == 2 ||
 			(mRes && group->isState(LLSpatialGroup::SKIP_FRUSTUM_CHECK)))
 		{	//fully in, just add everything
 			LLSpatialGroup::OctreeTraveler::traverse(n);
@@ -1840,7 +1846,7 @@ public:
 		gPipeline.markNotCulled(group, *mCamera);
 	}
 
-	virtual void visit(const LLSpatialGroup::OctreeNode* branch) 
+	virtual void visit(const LLSpatialGroup::OctreeNode* branch)
 	{
 		LLSpatialGroup* group = (LLSpatialGroup*) branch->getListener(0);
 
@@ -1858,8 +1864,8 @@ public:
 
 class LLOctreeCullNoFarClip : public LLOctreeCull
 {
-public: 
-	LLOctreeCullNoFarClip(LLCamera* camera) 
+public:
+	LLOctreeCullNoFarClip(LLCamera* camera)
 		: LLOctreeCull(camera) { }
 
 	virtual S32 frustumCheck(const LLSpatialGroup* group)
@@ -1924,7 +1930,7 @@ public:
 			LLSpatialGroup::OctreeTraveler::traverse(n);
 		}
 		else
-		{  
+		{
 			mRes = frustumCheck(group);
 
 			if (mRes)
@@ -2008,8 +2014,8 @@ public:
 	{
 		LLSpatialGroup::OctreeNode* branch = group->mOctreeNode;
 
-		for (LLSpatialGroup::OctreeNode::const_element_iter i = branch->getData().begin();
-			 i != branch->getData().end(); ++i)
+		for (LLSpatialGroup::OctreeNode::const_element_iter i = branch->getData().begin(), end = branch->getData().end();
+			 i != end; ++i)
 		{
 			LLDrawable* drawable = *i;
 
@@ -2081,7 +2087,7 @@ void drawBoxOutline(const LLVector3& pos, const LLVector3& size)
 	LLVector3 v3 = size.scaledVec(LLVector3(-1,-1,1));
 	LLVector3 v4 = size.scaledVec(LLVector3(1,-1,1));
 
-	gGL.begin(LLRender::LINES); 
+	gGL.begin(LLRender::LINES);
 
 	//top
 	gGL.vertex3fv((pos+v1).mV);
@@ -2133,7 +2139,9 @@ public:
 		LLSpatialGroup* group = (LLSpatialGroup*) state->getListener(0);
 		group->destroyGL();
 
-		for (LLSpatialGroup::element_iter i = group->getData().begin(); i != group->getData().end(); ++i)
+		for (LLSpatialGroup::element_iter i = group->getData().begin(),
+										  end = group->getData().end();
+			 i != end; ++i)
 		{
 			LLDrawable* drawable = *i;
 			if (drawable->getVObj().notNull() && !group->mSpatialPartition->mRenderByGroup)
@@ -2142,7 +2150,9 @@ public:
 			}
 		}
 
-		for (LLSpatialGroup::bridge_list_t::iterator i = group->mBridgeList.begin(); i != group->mBridgeList.end(); ++i)
+		for (LLSpatialGroup::bridge_list_t::iterator i = group->mBridgeList.begin(),
+													 end = group->mBridgeList.end();
+			 i != end; ++i)
 		{
 			LLSpatialBridge* bridge = *i;
 			traverse(bridge->mOctree);
@@ -2291,9 +2301,13 @@ void pushVerts(LLSpatialGroup* group, U32 mask)
 {
 	LLDrawInfo* params = NULL;
 
-	for (LLSpatialGroup::draw_map_t::iterator i = group->mDrawMap.begin(); i != group->mDrawMap.end(); ++i)
+	for (LLSpatialGroup::draw_map_t::iterator i = group->mDrawMap.begin(),
+											  end = group->mDrawMap.end();
+		 i != end; ++i)
 	{
-		for (LLSpatialGroup::drawmap_elem_t::iterator j = i->second.begin(); j != i->second.end(); ++j) 
+		for (LLSpatialGroup::drawmap_elem_t::iterator j = i->second.begin(),
+													  end2 = i->second.end();
+			 j != end2; ++j)
 		{
 			params = *j;
 			pushVerts(params, mask);
@@ -2320,7 +2334,7 @@ void pushVerts(LLFace* face, U32 mask)
 
 void pushVerts(LLDrawable* drawable, U32 mask)
 {
-	for (S32 i = 0, count = drawable->getNumFaces(); i < count; i++)
+	for (S32 i = 0, count = drawable->getNumFaces(); i < count; ++i)
 	{
 		pushVerts(drawable->getFace(i), mask);
 	}
@@ -2331,7 +2345,7 @@ void pushVerts(LLVolume* volume)
 	if (!volume) return;
 
 	LLVertexBuffer::unbind();
-	for (S32 i = 0, count = volume->getNumVolumeFaces(); i < count; i++)
+	for (S32 i = 0, count = volume->getNumVolumeFaces(); i < count; ++i)
 	{
 		const LLVolumeFace& face = volume->getVolumeFace(i);
 		glVertexPointer(3, GL_FLOAT, 16, face.mPositions);
@@ -2362,14 +2376,17 @@ void pushBufferVerts(LLSpatialGroup* group, U32 mask)
 
 			pushBufferVerts(group->mVertexBuffer, mask);
 
-			for (LLSpatialGroup::buffer_map_t::iterator i = group->mBufferMap.begin();
-				 i != group->mBufferMap.end(); ++i)
+			for (LLSpatialGroup::buffer_map_t::iterator i = group->mBufferMap.begin(),
+														end = group->mBufferMap.end();
+				 i != end; ++i)
 			{
-				for (LLSpatialGroup::buffer_texture_map_t::iterator j = i->second.begin();
-					 j != i->second.end(); ++j)
+				for (LLSpatialGroup::buffer_texture_map_t::iterator
+						j = i->second.begin(), end2 = i->second.end();
+					 j != end2; ++j)
 				{
-					for (LLSpatialGroup::buffer_list_t::iterator k = j->second.begin();
-						 k != j->second.end(); ++k)
+					for (LLSpatialGroup::buffer_list_t::iterator
+							k = j->second.begin(), end3 = j->second.end();
+						 k != end3; ++k)
 					{
 						pushBufferVerts(*k, mask);
 					}
@@ -2401,25 +2418,31 @@ void pushVertsColorCoded(LLSpatialGroup* group, U32 mask)
 
 	U32 col = 0;
 
-	for (LLSpatialGroup::draw_map_t::iterator i = group->mDrawMap.begin(); i != group->mDrawMap.end(); ++i)
+	for (LLSpatialGroup::draw_map_t::iterator i = group->mDrawMap.begin(),
+											  end = group->mDrawMap.end();
+		 i != end; ++i)
 	{
-		for (LLSpatialGroup::drawmap_elem_t::iterator j = i->second.begin(); j != i->second.end(); ++j) 
+		for (LLSpatialGroup::drawmap_elem_t::iterator j = i->second.begin(),
+													  end2 = i->second.end();
+			 j != end2 ; ++j)
 		{
 			params = *j;
 			LLRenderPass::applyModelMatrix(*params);
 			glColor4f(colors[col].mV[0], colors[col].mV[1], colors[col].mV[2], 0.5f);
 			params->mVertexBuffer->setBuffer(mask);
-			params->mVertexBuffer->drawRange(params->mParticle ? LLRender::POINTS : LLRender::TRIANGLES,
-				params->mStart, params->mEnd, params->mCount, params->mOffset);
-			col = (col+1)%col_count;
+			params->mVertexBuffer->drawRange(params->mParticle ? LLRender::POINTS
+															   : LLRender::TRIANGLES,
+											 params->mStart, params->mEnd,
+											 params->mCount, params->mOffset);
+			col = (col + 1) % col_count;
 		}
 	}
 }
 
 void renderOctree(LLSpatialGroup* group)
 {
-	//render solid object bounding box, color
-	//coded by buffer usage and activity
+	// render solid object bounding box, color coded by buffer usage and
+	// activity
 	gGL.setSceneBlendType(LLRender::BT_ADD_WITH_ALPHA);
 	LLVector4 col;
 	if (group->mBuilt > 0.f)
@@ -2429,7 +2452,7 @@ void renderOctree(LLSpatialGroup* group)
 		{
 			col.setVec(1.0f, 0, 0, group->mBuilt*0.5f);
 		}
-		else 
+		else
 		{
 			col.setVec(0.1f,0.1f,1,0.1f);
 			//col.setVec(1.0f, 1.0f, 0, sinf(group->mBuilt*3.14159f)*0.5f);
@@ -2447,7 +2470,9 @@ void renderOctree(LLSpatialGroup* group)
 			gGL.flush();
 			glLineWidth(1.f);
 			gGL.flush();
-			for (LLSpatialGroup::element_iter i = group->getData().begin(); i != group->getData().end(); ++i)
+			for (LLSpatialGroup::element_iter i = group->getData().begin(),
+											  end = group->getData().end();
+				 i != end; ++i)
 			{
 				LLDrawable* drawable = *i;
 				if (!group->mSpatialPartition->isBridge())
@@ -2458,7 +2483,7 @@ void renderOctree(LLSpatialGroup* group)
 				}
 
 				for (S32 j = 0, count = drawable->getNumFaces(); j < count;
-					 j++)
+					 ++j)
 				{
 					LLFace* face = drawable->getFace(j);
 					if (face && face->getVertexBuffer())
@@ -2494,7 +2519,7 @@ void renderOctree(LLSpatialGroup* group)
 	}
 	else
 	{
-		if (group->mBufferUsage == GL_STATIC_DRAW_ARB && !group->getData().empty() 
+		if (group->mBufferUsage == GL_STATIC_DRAW_ARB && !group->getData().empty()
 			&& group->mSpatialPartition->mRenderByGroup)
 		{
 			col.setVec(0.8f, 0.4f, 0.1f, 0.1f);
@@ -2541,9 +2566,13 @@ void renderOctree(LLSpatialGroup* group)
 		if (group->mSpatialPartition->mRenderByGroup)
 		{
 			gGL.color4f(1.0f, 0.75f, 0.25f, 0.6f);
-			for (LLSpatialGroup::draw_map_t::iterator i = group->mDrawMap.begin(); i != group->mDrawMap.end(); ++i)
+			for (LLSpatialGroup::draw_map_t::iterator
+					i = group->mDrawMap.begin(), end = group->mDrawMap.end();
+				 i != end; ++i)
 			{
-				for (LLSpatialGroup::drawmap_elem_t::iterator j = i->second.begin(); j != i->second.end(); ++j)
+				for (LLSpatialGroup::drawmap_elem_t::iterator
+						j = i->second.begin(), end2 = i->second.end();
+					 j != end2; ++j)
 				{
 					LLDrawInfo* draw_info = *j;
 					LLVector4a center;
@@ -2718,7 +2747,7 @@ void renderBoundingBox(LLDrawable* drawable, BOOL set_color = TRUE)
 					break;
 			}
 		}
-		else 
+		else
 		{
 			gGL.color4f(1, 0, 0, 1);
 		}
@@ -2728,7 +2757,7 @@ void renderBoundingBox(LLDrawable* drawable, BOOL set_color = TRUE)
 	LLVector4a pos, size;
 
 	// render face bounding boxes
-	for (S32 i = 0, count = drawable->getNumFaces(); i < count; i++)
+	for (S32 i = 0, count = drawable->getNumFaces(); i < count; ++i)
 	{
 		LLFace* facep = drawable->getFace(i);
 		if (!facep) continue;
@@ -2785,7 +2814,7 @@ void renderNormals(LLDrawable* drawablep)
 		static LLCachedControl<F32> render_debug_normal_scale(gSavedSettings, "RenderDebugNormalScale");
 		LLVector4a scale(render_debug_normal_scale);
 
-		for (S32 i = 0, count = volume->getNumVolumeFaces(); i < count; i++)
+		for (S32 i = 0, count = volume->getNumVolumeFaces(); i < count; ++i)
 		{
 			const LLVolumeFace& face = volume->getVolumeFace(i);
 
@@ -2926,8 +2955,8 @@ void renderPhysicsShape(LLDrawable* drawable, LLVOVolume* volume)
 
 	LLVolumeParams volume_params = volume->getVolume()->getParams();
 
-	LLPhysicsVolumeParams physics_params(volume_params, 
-		physics_type == LLViewerObject::PHYSICS_SHAPE_CONVEX_HULL); 
+	LLPhysicsVolumeParams physics_params(volume_params,
+		physics_type == LLViewerObject::PHYSICS_SHAPE_CONVEX_HULL);
 
 	LLPhysicsShapeBuilderUtil::PhysicsShapeSpecification physics_spec;
 	LLPhysicsShapeBuilderUtil::determinePhysicsShape(physics_params,
@@ -2966,7 +2995,7 @@ void renderPhysicsShape(LLDrawable* drawable, LLVOVolume* volume)
 				}
 			}
 			else if (!decomp->mPhysicsShapeMesh.empty())
-			{ 
+			{
 				// decomp has physics mesh, render that mesh
 				glColor4fv(color.mV);
 				LLVertexBuffer::drawArrays(LLRender::TRIANGLES,
@@ -3004,7 +3033,7 @@ void renderPhysicsShape(LLDrawable* drawable, LLVOVolume* volume)
 		{
 			renderMeshBaseHull(volume, data_mask, color, line_color);
 		}
-#if 1	//LL_WINDOWS 
+#if 1	//LL_WINDOWS
 		else
 		{
 			LLVolumeParams volume_params = volume->getVolume()->getParams();
@@ -3020,7 +3049,7 @@ void renderPhysicsShape(LLDrawable* drawable, LLVOVolume* volume)
 				S32 index_offset = 0;
 
 				for (S32 i = 0, count = phys_volume->getNumVolumeFaces();
-					 i < count; i++)
+					 i < count; ++i)
 				{
 					const LLVolumeFace& face = phys_volume->getVolumeFace(i);
 					if (index_offset + face.mNumVertices > 65535)
@@ -3214,7 +3243,7 @@ void renderPhysicsShape(LLDrawable* drawable, LLVOVolume* volume)
 	{
 		//TODO: implement sculpted prim physics display
 	}
-	else 
+	else
 	{
 		llerrs << "Unhandled type" << llendl;
 	}
@@ -3233,8 +3262,9 @@ void renderPhysicsShape(LLDrawable* drawable, LLVOVolume* volume)
 
 void renderPhysicsShapes(LLSpatialGroup* group)
 {
-	for (LLSpatialGroup::OctreeNode::const_element_iter i = group->getData().begin();
-		 i != group->getData().end(); ++i)
+	for (LLSpatialGroup::OctreeNode::const_element_iter
+			i = group->getData().begin(), end = group->getData().end();
+		 i != end; ++i)
 	{
 		LLDrawable* drawable = *i;
 		LLVOVolume* volume = drawable->getVOVolume();
@@ -3260,7 +3290,7 @@ void renderPhysicsShapes(LLSpatialGroup* group)
 			{
 				// push face vertices for terrain
 				for (S32 i = 0, count = drawable->getNumFaces(); i < count;
-					 i++)
+					 ++i)
 				{
 					LLFace* face = drawable->getFace(i);
 					if (!face) continue;
@@ -3285,7 +3315,7 @@ void renderPhysicsShapes(LLSpatialGroup* group)
 
 void renderTexturePriority(LLDrawable* drawable)
 {
-	for (S32 face = 0, count = drawable->getNumFaces(); face < count; face++)
+	for (S32 face = 0, count = drawable->getNumFaces(); face < count; ++face)
 	{
 		LLFace* facep = drawable->getFace(face);
 		if (!facep) continue;
@@ -3350,7 +3380,7 @@ void renderPoints(LLDrawable* drawablep)
 	{
 		gGL.begin(LLRender::POINTS);
 		gGL.color3f(1,1,1);
-		for (S32 i = 0, count = drawablep->getNumFaces(); i < count; i++)
+		for (S32 i = 0, count = drawablep->getNumFaces(); i < count; ++i)
 		{
 			LLFace* facep = drawablep->getFace(i);
 			if (facep)
@@ -3428,7 +3458,7 @@ void renderLights(LLDrawable* drawablep)
 		LLGLEnable blend(GL_BLEND);
 		glColor4f(0,1,1,0.5f);
 
-		for (S32 i = 0, count = drawablep->getNumFaces(); i < count; i++)
+		for (S32 i = 0, count = drawablep->getNumFaces(); i < count; ++i)
 		{
 			pushVerts(drawablep->getFace(i), LLVertexBuffer::MAP_VERTEX);
 		}
@@ -3457,12 +3487,13 @@ void renderLights(LLDrawable* drawablep)
 class LLRenderOctreeRaycast : public LLOctreeTriangleRayIntersect
 {
 public:
-	
-	
-	LLRenderOctreeRaycast(const LLVector4a& start, const LLVector4a& dir, F32* closest_t)
-		: LLOctreeTriangleRayIntersect(start, dir, NULL, closest_t, NULL, NULL, NULL, NULL)
-	{
 
+
+	LLRenderOctreeRaycast(const LLVector4a& start, const LLVector4a& dir,
+						  F32* closest_t)
+	:	LLOctreeTriangleRayIntersect(start, dir, NULL, closest_t, NULL, NULL,
+									 NULL, NULL)
+	{
 	}
 
 	void visit(const LLOctreeNode<LLVolumeTriangle>* branch)
@@ -3473,7 +3504,7 @@ public:
 
 		if (branch->getData().empty())
 		{
-			gGL.color3f(1.f,0.2f,0.f);
+			gGL.color3f(1.f, 0.2f, 0.f);
 			center.set(branch->getCenter().getF32ptr());
 			size.set(branch->getSize().getF32ptr());
 		}
@@ -3484,22 +3515,23 @@ public:
 			size.set(vl->mBounds[1].getF32ptr());
 		}
 
-		drawBoxOutline(center, size);	
+		drawBoxOutline(center, size);
 
-		for (U32 i = 0; i < 2; i++)
+		for (U32 i = 0; i < 2; ++i)
 		{
-			LLGLDepthTest depth(GL_TRUE, GL_FALSE, i == 1 ? GL_LEQUAL : GL_GREATER);
+			LLGLDepthTest depth(GL_TRUE, GL_FALSE,
+								i == 1 ? GL_LEQUAL : GL_GREATER);
 
 			if (i == 1)
 			{
-				gGL.color4f(0,1,1,0.5f);
+				gGL.color4f(0, 1, 1, 0.5f);
 			}
 			else
 			{
-				gGL.color4f(0,0.5f,0.5f, 0.25f);
+				gGL.color4f(0, 0.5f, 0.5f, 0.25f);
 				drawBoxOutline(center, size);
 			}
-			
+
 			if (i == 1)
 			{
 				gGL.flush();
@@ -3507,16 +3539,16 @@ public:
 			}
 
 			gGL.begin(LLRender::TRIANGLES);
-			for (LLOctreeNode<LLVolumeTriangle>::const_element_iter iter = branch->getData().begin();
-					iter != branch->getData().end();
-					++iter)
+			for (LLOctreeNode<LLVolumeTriangle>::const_element_iter
+					iter = branch->getData().begin(), end = branch->getData().end();
+				 iter != end; ++iter)
 			{
 				const LLVolumeTriangle* tri = *iter;
-				
+
 				gGL.vertex3fv(tri->mV[0]->getF32ptr());
 				gGL.vertex3fv(tri->mV[1]->getF32ptr());
 				gGL.vertex3fv(tri->mV[2]->getF32ptr());
-			}	
+			}
 			gGL.end();
 
 			if (i == 1)
@@ -3556,16 +3588,16 @@ void renderRaycast(LLDrawable* drawablep)
 				LLVector3 trans = drawablep->getRegion()->getOriginAgent();
 
 				for (S32 i = 0, count = volume->getNumVolumeFaces(); i < count;
-					 i++)
+					 ++i)
 				{
 					const LLVolumeFace& face = volume->getVolumeFace(i);
 					if (!face.mOctree)
 					{
-						((LLVolumeFace*) &face)->createOctree(); 
+						((LLVolumeFace*) &face)->createOctree();
 					}
 
 					gGL.pushMatrix();
-					glTranslatef(trans.mV[0], trans.mV[1], trans.mV[2]);					
+					glTranslatef(trans.mV[0], trans.mV[1], trans.mV[2]);
 					glMultMatrixf((F32*) vobj->getRelativeXform().mMatrix);
 
 					LLVector3 start, end;
@@ -3587,7 +3619,7 @@ void renderRaycast(LLDrawable* drawablep)
 					dir.setSub(enda, starta);
 
 					gGL.flush();
-					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);				
+					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 					{
 						//render face positions
@@ -3603,7 +3635,7 @@ void renderRaycast(LLDrawable* drawablep)
 
 						if (!face.mOctree)
 						{
-							((LLVolumeFace*) &face)->createOctree(); 
+							((LLVolumeFace*) &face)->createOctree();
 						}
 
 						LLRenderOctreeRaycast render(starta, dir, &t);
@@ -3611,7 +3643,7 @@ void renderRaycast(LLDrawable* drawablep)
 						render.traverse(face.mOctree);
 					}
 
-					gGL.popMatrix();		
+					gGL.popMatrix();
 					glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 				}
 			}
@@ -3659,7 +3691,7 @@ void renderRaycast(LLDrawable* drawablep)
 
 			LLGLDepthTest depth(GL_FALSE, GL_TRUE);
 			gGL.color4f(0,0.5f,0.5f,1);
-			drawBoxOutline(pos, size);		
+			drawBoxOutline(pos, size);
 		}
 	}
 }
@@ -3696,7 +3728,7 @@ public:
 			node->accept(this);
 			stop_glerror();
 
-			for (U32 i = 0; i < node->getChildCount(); i++)
+			for (U32 i = 0; i < node->getChildCount(); ++i)
 			{
 				traverse(node->getChild(i));
 				stop_glerror();
@@ -3755,7 +3787,9 @@ public:
 			}
 		}
 
-		for (LLSpatialGroup::OctreeNode::const_element_iter i = branch->getData().begin(); i != branch->getData().end(); ++i)
+		for (LLSpatialGroup::OctreeNode::const_element_iter
+				i = branch->getData().begin(), end = branch->getData().end();
+			 i != end; ++i)
 		{
 			LLDrawable* drawable = *i;
 
@@ -3768,7 +3802,7 @@ public:
 			{
 				renderNormals(drawable);
 			}
-			
+
 			if (gPipeline.hasRenderDebugMask(LLPipeline::RENDER_DEBUG_BUILD_QUEUE))
 			{
 				if (drawable->isState(LLDrawable::IN_REBUILD_Q2))
@@ -3783,7 +3817,7 @@ public:
 					size.mul(0.5f);
 					drawBoxOutline(center, size);
 				}
-			}	
+			}
 
 			if (drawable->getVOVolume() && gPipeline.hasRenderDebugMask(LLPipeline::RENDER_DEBUG_TEXTURE_PRIORITY))
 			{
@@ -3823,10 +3857,14 @@ public:
 			}
 		}
 
-		for (LLSpatialGroup::draw_map_t::iterator i = group->mDrawMap.begin(); i != group->mDrawMap.end(); ++i)
+		for (LLSpatialGroup::draw_map_t::iterator i = group->mDrawMap.begin(),
+												  end = group->mDrawMap.end();
+			 i != end; ++i)
 		{
 			LLSpatialGroup::drawmap_elem_t& draw_vec = i->second;
-			for (LLSpatialGroup::drawmap_elem_t::iterator j = draw_vec.begin(); j != draw_vec.end(); ++j)
+			for (LLSpatialGroup::drawmap_elem_t::iterator
+					j = draw_vec.begin(), end2 = draw_vec.end();
+				 j != end2; ++j)
 			{
 				LLDrawInfo* draw_info = *j;
 				if (gPipeline.hasRenderDebugMask(LLPipeline::RENDER_DEBUG_TEXTURE_ANIM))
@@ -3856,12 +3894,14 @@ public:
 	{
 		LLSpatialGroup* group = (LLSpatialGroup*) node->getListener(0);
 
-		if (!mCamera || mCamera->AABBInFrustumNoFarClip(group->mBounds[0], group->mBounds[1]))
+		if (!mCamera ||
+			mCamera->AABBInFrustumNoFarClip(group->mBounds[0],
+											group->mBounds[1]))
 		{
 			node->accept(this);
 			stop_glerror();
 
-			for (U32 i = 0; i < node->getChildCount(); i++)
+			for (U32 i = 0; i < node->getChildCount(); ++i)
 			{
 				traverse(node->getChild(i));
 				stop_glerror();
@@ -3889,11 +3929,12 @@ public:
 	{
 		LLSpatialGroup* group = (LLSpatialGroup*) node->getListener(0);
 
-		if (!mCamera || mCamera->AABBInFrustum(group->mBounds[0], group->mBounds[1]))
+		if (!mCamera ||
+			mCamera->AABBInFrustum(group->mBounds[0], group->mBounds[1]))
 		{
 			node->accept(this);
 
-			for (U32 i = 0; i < node->getChildCount(); i++)
+			for (U32 i = 0; i < node->getChildCount(); ++i)
 			{
 				traverse(node->getChild(i));
 			}
@@ -3904,12 +3945,16 @@ public:
 	{
 		LLSpatialGroup* group = (LLSpatialGroup*) branch->getListener(0);
 
-		if (group->isState(LLSpatialGroup::GEOM_DIRTY) || (mCamera && !mCamera->AABBInFrustumNoFarClip(group->mBounds[0], group->mBounds[1])))
+		if (group->isState(LLSpatialGroup::GEOM_DIRTY) ||
+			(mCamera && !mCamera->AABBInFrustumNoFarClip(group->mBounds[0],
+														 group->mBounds[1])))
 		{
 			return;
 		}
 
-		for (LLSpatialGroup::OctreeNode::const_element_iter i = branch->getData().begin(); i != branch->getData().end(); ++i)
+		for (LLSpatialGroup::OctreeNode::const_element_iter
+				i = branch->getData().begin(), end = branch->getData().end();
+			 i != end; ++i)
 		{
 			LLDrawable* drawable = *i;
 
@@ -3930,8 +3975,8 @@ public:
 	U32 mInheritedMask[LLViewerCamera::NUM_CAMERAS];
 
 	LLOctreeStateCheck()
-	{ 
-		for (U32 i = 0; i < LLViewerCamera::NUM_CAMERAS; i++)
+	{
+		for (U32 i = 0; i < LLViewerCamera::NUM_CAMERAS; ++i)
 		{
 			mInheritedMask[i] = 0;
 		}
@@ -3945,18 +3990,18 @@ public:
 
 		U32 temp[LLViewerCamera::NUM_CAMERAS];
 
-		for (U32 i = 0; i < LLViewerCamera::NUM_CAMERAS; i++)
+		for (U32 i = 0; i < LLViewerCamera::NUM_CAMERAS; ++i)
 		{
 			temp[i] = mInheritedMask[i];
-			mInheritedMask[i] |= group->mOcclusionState[i] & LLSpatialGroup::OCCLUDED; 
+			mInheritedMask[i] |= group->mOcclusionState[i] & LLSpatialGroup::OCCLUDED;
 		}
 
-		for (U32 i = 0; i < node->getChildCount(); i++)
+		for (U32 i = 0; i < node->getChildCount(); ++i)
 		{
 			traverse(node->getChild(i));
 		}
 
-		for (U32 i = 0; i < LLViewerCamera::NUM_CAMERAS; i++)
+		for (U32 i = 0; i < LLViewerCamera::NUM_CAMERAS; ++i)
 		{
 			mInheritedMask[i] = temp[i];
 		}
@@ -3966,7 +4011,7 @@ public:
 	{
 		LLSpatialGroup* group = (LLSpatialGroup*) state->getListener(0);
 
-		for (U32 i = 0; i < LLViewerCamera::NUM_CAMERAS; i++)
+		for (U32 i = 0; i < LLViewerCamera::NUM_CAMERAS; ++i)
 		{
 			if (mInheritedMask[i] && !(group->mOcclusionState[i] & mInheritedMask[i]))
 			{
@@ -4029,7 +4074,7 @@ void LLSpatialPartition::renderDebug()
 									  LLPipeline::RENDER_DEBUG_AVATAR_VOLUME |
 									  LLPipeline::RENDER_DEBUG_AGENT_TARGET |
 									  //LLPipeline::RENDER_DEBUG_BUILD_QUEUE |
-									  LLPipeline::RENDER_DEBUG_SHADOW_FRUSTA)) 
+									  LLPipeline::RENDER_DEBUG_SHADOW_FRUSTA))
 	{
 		return;
 	}
@@ -4122,10 +4167,11 @@ public:
 	{
 	}
 
-	virtual void visit(const LLSpatialGroup::OctreeNode* branch) 
+	virtual void visit(const LLSpatialGroup::OctreeNode* branch)
 	{
-		for (LLSpatialGroup::OctreeNode::const_element_iter i = branch->getData().begin();
-			 i != branch->getData().end(); ++i)
+		for (LLSpatialGroup::OctreeNode::const_element_iter
+				i = branch->getData().begin(), end = branch->getData().end();
+			 i != end; ++i)
 		{
 			check(*i);
 		}
@@ -4142,7 +4188,7 @@ public:
 
 		node->accept(this);
 
-		for (U32 i = 0; i < node->getChildCount(); i++)
+		for (U32 i = 0; i < node->getChildCount(); ++i)
 		{
 			const LLSpatialGroup::OctreeNode* child = node->getChild(i);
 			if (!child)
@@ -4301,7 +4347,7 @@ LLDrawable* LLSpatialPartition::lineSegmentIntersect(const LLVector3& start,
 	return drawable;
 }
 
-LLDrawInfo::LLDrawInfo(U16 start, U16 end, U32 count, U32 offset, 
+LLDrawInfo::LLDrawInfo(U16 start, U16 end, U32 count, U32 offset,
 					   LLViewerTexture* texture, LLVertexBuffer* buffer,
 					   BOOL fullbright, U8 bump, BOOL particle, F32 part_size)
 :
@@ -4312,7 +4358,7 @@ LLDrawInfo::LLDrawInfo(U16 start, U16 end, U32 count, U32 offset,
 	mStart(start),
 	mEnd(end),
 	mCount(count),
-	mOffset(offset), 
+	mOffset(offset),
 	mFullbright(fullbright),
 	mBump(bump),
 	mParticle(particle),
@@ -4356,7 +4402,7 @@ LLVertexBuffer* LLGeometryManager::createVertexBuffer(U32 type_mask, U32 usage)
 	return new LLVertexBuffer(type_mask, usage);
 }
 
-LLCullResult::LLCullResult() 
+LLCullResult::LLCullResult()
 {
 	clear();
 }
@@ -4381,9 +4427,9 @@ void LLCullResult::clear()
 	mVisibleBridgeSize = 0;
 	mVisibleBridgeEnd = mVisibleBridge.begin();
 
-	for (U32 i = 0; i < LLRenderPass::NUM_RENDER_TYPES; i++)
+	for (U32 i = 0; i < LLRenderPass::NUM_RENDER_TYPES; ++i)
 	{
-		for (U32 j = 0; j < mRenderMapSize[i]; j++)
+		for (U32 j = 0; j < mRenderMapSize[i]; ++j)
 		{
 			mRenderMap[i][j] = 0;
 		}
@@ -4562,7 +4608,7 @@ void LLCullResult::pushDrawInfo(U32 type, LLDrawInfo* draw_info)
 
 void LLCullResult::assertDrawMapsEmpty()
 {
-	for (U32 i = 0; i < LLRenderPass::NUM_RENDER_TYPES; i++)
+	for (U32 i = 0; i < LLRenderPass::NUM_RENDER_TYPES; ++i)
 	{
 		if (mRenderMapSize[i] != 0)
 		{

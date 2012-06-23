@@ -68,8 +68,8 @@ public:
 		return sTotalSeconds;
 	}
 
-	// Call this method once per frame to update the current frame time.   This is actually called
-	// at some other times as well
+	// Call this method once per frame to update the current frame time. This
+	// is actually called at some other times as well
 	static void updateFrameTime();
 
 	// Call this method once, and only once, per frame to update the current frame count.

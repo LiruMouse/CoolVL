@@ -108,7 +108,7 @@ GDB_INIT="/tmp/gdb.init.$$"
 if [ "$1" == "--debug" ] ; then
 	shift
 	symbols=$RUN_PATH/bin/secondlife-bin.debug
-	if ! [ -f $symbols ] ; then
+	if [ ! -f $symbols ] ; then
 		# Let's try the build path used by cmake-SL
 		symbols=/usr/src/SL/indra/viewer-linux-i686-release/newview/secondlife-bin.debug
 	fi
@@ -127,7 +127,7 @@ if [ "$1" == "--debug" ] ; then
 fi
 
 # If fmod support is missing, activate OpenAL support
-if ! [ -f "./lib/libfmod-3.75.so" ] ; then
+if [ ! -f "./lib/libfmod-3.75.so" ] ; then
 	unset LL_BAD_OPENAL_DRIVER
 	export LL_BAD_FMOD_DRIVER=x
 fi

@@ -1,11 +1,11 @@
-/** 
+/**
  * @file lldrawpool.cpp
  * @brief LLDrawPool class implementation
  *
  * $LicenseInfo:firstyear=2002&license=viewergpl$
- * 
+ *
  * Copyright (c) 2002-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -60,9 +60,9 @@ S32 LLDrawPool::sNumDrawPools = 0;
 //=============================
 // Draw Pool Implementation
 //=============================
-LLDrawPool *LLDrawPool::createPool(const U32 type, LLViewerTexture *tex0)
+LLDrawPool* LLDrawPool::createPool(const U32 type, LLViewerTexture* tex0)
 {
-	LLDrawPool *poolp = NULL;
+	LLDrawPool* poolp = NULL;
 	switch (type)
 	{
 	case POOL_SIMPLE:
@@ -127,107 +127,97 @@ LLDrawPool::LLDrawPool(const U32 type)
 
 LLDrawPool::~LLDrawPool()
 {
-
 }
 
-LLViewerTexture *LLDrawPool::getDebugTexture()
+LLViewerTexture* LLDrawPool::getDebugTexture()
 {
 	return NULL;
 }
 
 //virtual
-void LLDrawPool::beginRenderPass( S32 pass )
+void LLDrawPool::beginRenderPass(S32 pass)
 {
 }
 
-//virtual 
+//virtual
 S32	 LLDrawPool::getNumPasses()
 {
 	return 1;
 }
-	
-//virtual 
+
+//virtual
 void LLDrawPool::beginDeferredPass(S32 pass)
 {
-
 }
 
-//virtual 
+//virtual
 void LLDrawPool::endDeferredPass(S32 pass)
 {
-
 }
 
-//virtual 
+//virtual
 S32 LLDrawPool::getNumDeferredPasses()
 {
 	return 0;
 }
 
-//virtual 
+//virtual
 void LLDrawPool::renderDeferred(S32 pass)
 {
-
 }
 
-//virtual 
+//virtual
 void LLDrawPool::beginPostDeferredPass(S32 pass)
 {
-
 }
 
-//virtual 
+//virtual
 void LLDrawPool::endPostDeferredPass(S32 pass)
 {
-
 }
 
-//virtual 
+//virtual
 S32 LLDrawPool::getNumPostDeferredPasses()
 {
 	return 0;
 }
 
-//virtual 
+//virtual
 void LLDrawPool::renderPostDeferred(S32 pass)
 {
-
 }
 
 //virtual
-void LLDrawPool::endRenderPass( S32 pass )
+void LLDrawPool::endRenderPass(S32 pass)
 {
 }
 
-//virtual 
+//virtual
 void LLDrawPool::beginShadowPass(S32 pass)
 {
-
 }
 
-//virtual 
+//virtual
 void LLDrawPool::endShadowPass(S32 pass)
 {
-
 }
 
-//virtual 
+//virtual
 S32 LLDrawPool::getNumShadowPasses()
 {
 	return 0;
 }
 
-//virtual 
+//virtual
 void LLDrawPool::renderShadow(S32 pass)
 {
-
 }
 
 //=============================
 // Face Pool Implementation
 //=============================
 LLFacePool::LLFacePool(const U32 type)
-: LLDrawPool(type)
+:	LLDrawPool(type)
 {
 	resetDrawOrders();
 }
@@ -241,7 +231,8 @@ void LLFacePool::destroy()
 {
 	if (!mReferences.empty())
 	{
-		llinfos << mReferences.size() << " references left on deletion of draw pool!" << llendl;
+		llinfos << mReferences.size()
+				<< " references left on deletion of draw pool!" << llendl;
 	}
 }
 
@@ -255,10 +246,11 @@ S32 LLFacePool::drawLoop(face_array_t& face_list)
 	S32 res = 0;
 	if (!face_list.empty())
 	{
-		for (std::vector<LLFace*>::iterator iter = face_list.begin();
-			 iter != face_list.end(); iter++)
+		for (std::vector<LLFace*>::iterator iter = face_list.begin(),
+											end = face_list.end();
+			 iter != end; ++iter)
 		{
-			LLFace *facep = *iter;
+			LLFace* facep = *iter;
 			res += facep->renderIndexed();
 		}
 	}
@@ -271,10 +263,11 @@ S32 LLFacePool::drawLoopSetTex(face_array_t& face_list, S32 stage)
 	S32 res = 0;
 	if (!face_list.empty())
 	{
-		for (std::vector<LLFace*>::iterator iter = face_list.begin();
-			 iter != face_list.end(); iter++)
+		for (std::vector<LLFace*>::iterator iter = face_list.begin(),
+											end = face_list.end();
+			 iter != end; ++iter)
 		{
-			LLFace *facep = *iter;
+			LLFace* facep = *iter;
 			gGL.getTexUnit(stage)->bind(facep->getTexture(), TRUE);
 			gGL.getTexUnit(0)->activate();
 			res += facep->renderIndexed();
@@ -297,14 +290,14 @@ void LLFacePool::enqueue(LLFace* facep)
 }
 
 // virtual
-BOOL LLFacePool::addFace(LLFace *facep)
+BOOL LLFacePool::addFace(LLFace* facep)
 {
 	addFaceReference(facep);
 	return TRUE;
 }
 
 // virtual
-BOOL LLFacePool::removeFace(LLFace *facep)
+BOOL LLFacePool::removeFace(LLFace* facep)
 {
 	removeFaceReference(facep);
 
@@ -313,24 +306,25 @@ BOOL LLFacePool::removeFace(LLFace *facep)
 	return TRUE;
 }
 
-// Not absolutely sure if we should be resetting all of the chained pools as well - djs
+// Not absolutely sure if we should be resetting all of the chained pools as
+// well - djs
 void LLFacePool::resetDrawOrders()
 {
 	mDrawFace.resize(0);
 }
 
-LLViewerTexture *LLFacePool::getTexture()
+LLViewerTexture* LLFacePool::getTexture()
 {
 	return NULL;
 }
 
-void LLFacePool::removeFaceReference(LLFace *facep)
+void LLFacePool::removeFaceReference(LLFace* facep)
 {
 	if (facep->getReferenceIndex() != -1)
 	{
 		if (facep->getReferenceIndex() != (S32)mReferences.size())
 		{
-			LLFace *back = mReferences.back();
+			LLFace* back = mReferences.back();
 			mReferences[facep->getReferenceIndex()] = back;
 			back->setReferenceIndex(facep->getReferenceIndex());
 		}
@@ -339,7 +333,7 @@ void LLFacePool::removeFaceReference(LLFace *facep)
 	facep->setReferenceIndex(-1);
 }
 
-void LLFacePool::addFaceReference(LLFace *facep)
+void LLFacePool::addFaceReference(LLFace* facep)
 {
 	if (-1 == facep->getReferenceIndex())
 	{
@@ -351,14 +345,15 @@ void LLFacePool::addFaceReference(LLFace *facep)
 BOOL LLFacePool::verify() const
 {
 	BOOL ok = TRUE;
-	
-	for (std::vector<LLFace*>::const_iterator iter = mDrawFace.begin();
-		 iter != mDrawFace.end(); iter++)
+
+	for (std::vector<LLFace*>::const_iterator iter = mDrawFace.begin(),
+											  end = mDrawFace.end();
+		 iter != end; ++iter)
 	{
 		const LLFace* facep = *iter;
 		if (facep->getPool() != this)
 		{
-			llinfos << "Face in wrong pool!" << llendl;
+			llinfos << "Face in wrong pool !" << llendl;
 			facep->printDebugInfo();
 			ok = FALSE;
 		}
@@ -393,38 +388,40 @@ void LLFacePool::LLOverrideFaceColor::setColor(F32 r, F32 g, F32 b, F32 a)
 	glColor4f(r,g,b,a);
 }
 
-
 //=============================
 // Render Pass Implementation
 //=============================
 LLRenderPass::LLRenderPass(const U32 type)
 : LLDrawPool(type)
 {
-
 }
 
 LLRenderPass::~LLRenderPass()
 {
-
 }
 
 LLDrawPool* LLRenderPass::instancePool()
 {
 #if LL_RELEASE_FOR_DOWNLOAD
-	llwarns << "Attempting to instance a render pass.  Invalid operation." << llendl;
+	llwarns << "Attempting to instance a render pass. Invalid operation."
+			<< llendl;
 #else
-	llerrs << "Attempting to instance a render pass.  Invalid operation." << llendl;
+	llerrs << "Attempting to instance a render pass. Invalid operation."
+		   << llendl;
 #endif
 	return NULL;
 }
 
-void LLRenderPass::renderGroup(LLSpatialGroup* group, U32 type, U32 mask, BOOL texture)
-{					
+void LLRenderPass::renderGroup(LLSpatialGroup* group, U32 type, U32 mask,
+							   BOOL texture)
+{
 	LLSpatialGroup::drawmap_elem_t& draw_info = group->mDrawMap[type];
-	
-	for (LLSpatialGroup::drawmap_elem_t::iterator k = draw_info.begin(); k != draw_info.end(); ++k)	
+
+	for (LLSpatialGroup::drawmap_elem_t::iterator k = draw_info.begin(),
+												  end = draw_info.end();
+		 k != end; ++k)
 	{
-		LLDrawInfo *pparams = *k;
+		LLDrawInfo* pparams = *k;
 		if (pparams)
 		{
 			pushBatch(*pparams, mask, texture);
@@ -439,10 +436,13 @@ void LLRenderPass::renderTexture(U32 type, U32 mask)
 
 void LLRenderPass::pushBatches(U32 type, U32 mask, BOOL texture)
 {
-	for (LLCullResult::drawinfo_list_t::iterator i = gPipeline.beginRenderMap(type); i != gPipeline.endRenderMap(type); ++i)	
+	for (LLCullResult::drawinfo_list_t::iterator
+			i = gPipeline.beginRenderMap(type),
+			end = gPipeline.endRenderMap(type);
+		 i != end; ++i)
 	{
 		LLDrawInfo* pparams = *i;
-		if (pparams) 
+		if (pparams)
 		{
 			pushBatch(*pparams, mask, texture);
 		}
@@ -476,7 +476,7 @@ void LLRenderPass::pushBatch(LLDrawInfo& params, U32 mask, BOOL texture)
 			if (params.mTextureMatrix)
 			{
 				glMatrixMode(GL_TEXTURE);
-				glLoadMatrixf((GLfloat*) params.mTextureMatrix->mMatrix);
+				glLoadMatrixf((GLfloat*)params.mTextureMatrix->mMatrix);
 				gPipeline.mTextureMatrixOps++;
 			}
 		}
@@ -485,7 +485,7 @@ void LLRenderPass::pushBatch(LLDrawInfo& params, U32 mask, BOOL texture)
 			gGL.getTexUnit(0)->unbind(LLTexUnit::TT_TEXTURE);
 		}
 	}
-	
+
 	if (params.mVertexBuffer.notNull())
 	{
 		if (params.mGroup)
@@ -493,7 +493,9 @@ void LLRenderPass::pushBatch(LLDrawInfo& params, U32 mask, BOOL texture)
 			params.mGroup->rebuildMesh();
 		}
 		params.mVertexBuffer->setBuffer(mask);
-		params.mVertexBuffer->drawRange(params.mDrawMode, params.mStart, params.mEnd, params.mCount, params.mOffset);
+		params.mVertexBuffer->drawRange(params.mDrawMode, params.mStart,
+										params.mEnd, params.mCount,
+										params.mOffset);
 		gPipeline.addTrianglesDrawn(params.mCount, params.mDrawMode);
 	}
 

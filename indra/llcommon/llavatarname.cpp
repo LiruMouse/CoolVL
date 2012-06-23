@@ -39,6 +39,7 @@
 #include "llsd.h"
 
 bool LLAvatarName::sOmitResidentAsLastName = false;
+bool LLAvatarName::sLegacyNamesForFriends = true;
 
 // Store these in pre-built std::strings to avoid memory allocations in
 // LLSD map lookups

@@ -37,7 +37,8 @@
 
 // virtual
 LLCtrlSelectionInterface::~LLCtrlSelectionInterface()
-{ }
+{
+}
 
 BOOL LLCtrlSelectionInterface::selectByValue(LLSD value)
 {
@@ -49,21 +50,23 @@ BOOL LLCtrlSelectionInterface::deselectByValue(LLSD value)
 	return setSelectedByValue(value, FALSE); 
 }
 
-
 // virtual
 LLCtrlListInterface::~LLCtrlListInterface()
-{ }
+{
+}
 
 LLScrollListItem* LLCtrlListInterface::addSimpleElement(const std::string& value)
 {
 	return addSimpleElement(value, ADD_BOTTOM, LLSD());
 }
 
-LLScrollListItem* LLCtrlListInterface::addSimpleElement(const std::string& value, EAddPosition pos)
+LLScrollListItem* LLCtrlListInterface::addSimpleElement(const std::string& value,
+														EAddPosition pos)
 {
 	return addSimpleElement(value, pos, LLSD());
 }
 
 // virtual
 LLCtrlScrollInterface::~LLCtrlScrollInterface()
-{ }
+{
+}

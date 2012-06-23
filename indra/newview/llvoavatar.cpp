@@ -701,7 +701,7 @@ LLVOAvatar::LLVOAvatar(const LLUUID& id,
 	mPelvisp = NULL;
 
 	mBakedTextureDatas.resize(BAKED_NUM_INDICES);
-	for (U32 i = 0; i < mBakedTextureDatas.size(); i++)
+	for (U32 i = 0; i < mBakedTextureDatas.size(); ++i)
 	{
 		mBakedTextureDatas[i].mLastTextureIndex = IMG_DEFAULT_AVATAR;
 		mBakedTextureDatas[i].mTexLayerSet = NULL;
@@ -785,14 +785,14 @@ LLVOAvatar::~LLVOAvatar()
 
 	mNumJoints = 0;
 
-	for (U32 i = 0; i < mBakedTextureDatas.size(); i++)
+	for (U32 i = 0; i < mBakedTextureDatas.size(); ++i)
 	{
 		delete mBakedTextureDatas[i].mTexLayerSet;
 		mBakedTextureDatas[i].mTexLayerSet = NULL;
 		mBakedTextureDatas[i].mMeshes.clear();
 
 		for (morph_list_t::iterator iter2 = mBakedTextureDatas[i].mMaskedMorphs.begin();
-			 iter2 != mBakedTextureDatas[i].mMaskedMorphs.end(); iter2++)
+			 iter2 != mBakedTextureDatas[i].mMaskedMorphs.end(); ++iter2)
 		{
 			LLMaskedMorph* masked_morph = *iter2;
 			delete masked_morph;
@@ -854,7 +854,7 @@ BOOL LLVOAvatar::isFullyBaked()
 	if (mIsDummy) return TRUE;
 	if (getNumTEs() == 0) return FALSE;
 
-	for (U32 i = 0; i < mBakedTextureDatas.size(); i++)
+	for (U32 i = 0; i < mBakedTextureDatas.size(); ++i)
 	{
 		if (!isTextureDefined(mBakedTextureDatas[i].mTextureIndex) &&
 			(i != BAKED_SKIRT || isWearingWearableType(LLWearableType::WT_SKIRT)))
@@ -867,7 +867,7 @@ BOOL LLVOAvatar::isFullyBaked()
 
 void LLVOAvatar::deleteLayerSetCaches(bool clearAll)
 {
-	for (U32 i = 0; i < mBakedTextureDatas.size(); i++)
+	for (U32 i = 0; i < mBakedTextureDatas.size(); ++i)
 	{
 		if (mBakedTextureDatas[i].mTexLayerSet)
 		{
@@ -891,8 +891,10 @@ BOOL LLVOAvatar::areAllNearbyInstancesBaked(S32& grey_avatars)
 {
 	BOOL res = TRUE;
 	grey_avatars = 0;
-	for (std::vector<LLCharacter*>::iterator iter = LLCharacter::sInstances.begin();
-		 iter != LLCharacter::sInstances.end(); ++iter)
+	for (std::vector<LLCharacter*>::iterator
+			iter = LLCharacter::sInstances.begin(),
+			end = LLCharacter::sInstances.end();
+		 iter != end; ++iter)
 	{
 		LLVOAvatar* inst = (LLVOAvatar*) *iter;
 		if (inst->isDead())
@@ -916,8 +918,10 @@ void LLVOAvatar::dumpBakedStatus()
 {
 	LLVector3d camera_pos_global = gAgent.getCameraPositionGlobal();
 
-	for (std::vector<LLCharacter*>::iterator iter = LLCharacter::sInstances.begin();
-		iter != LLCharacter::sInstances.end(); ++iter)
+	for (std::vector<LLCharacter*>::iterator
+			iter = LLCharacter::sInstances.begin(),
+			end = LLCharacter::sInstances.end();
+		 iter != end; ++iter)
 	{
 		LLVOAvatar* inst = (LLVOAvatar*) *iter;
 		llinfos << "Avatar ";
@@ -938,7 +942,7 @@ void LLVOAvatar::dumpBakedStatus()
 
 		if (inst->isDead())
 		{
-			llcont << " DEAD ("<< inst->getNumRefs() << " refs)";
+			llcont << " DEAD (" << inst->getNumRefs() << " refs)";
 		}
 
 		if (inst->isSelf())
@@ -968,9 +972,10 @@ void LLVOAvatar::dumpBakedStatus()
 		{
 			llcont << " Unbaked (";
 
-			for (LLVOAvatarDictionary::BakedTextures::const_iterator iter = LLVOAvatarDictionary::getInstance()->getBakedTextures().begin();
-				 iter != LLVOAvatarDictionary::getInstance()->getBakedTextures().end();
-				 ++iter)
+			for (LLVOAvatarDictionary::BakedTextures::const_iterator
+					iter = LLVOAvatarDictionary::getInstance()->getBakedTextures().begin(),
+					end = LLVOAvatarDictionary::getInstance()->getBakedTextures().end();
+				 iter != end; ++iter)
 			{
 				const LLVOAvatarDictionary::BakedEntry* baked_dict = iter->second;
 				const ETextureIndex index = baked_dict->mTextureIndex;
@@ -997,7 +1002,7 @@ void LLVOAvatar::restoreGL()
 	if (!isAgentAvatarValid()) return;
 
 	gAgentAvatarp->setCompositeUpdatesEnabled(TRUE);
-	for (U32 i = 0; i < gAgentAvatarp->mBakedTextureDatas.size(); i++)
+	for (U32 i = 0; i < gAgentAvatarp->mBakedTextureDatas.size(); ++i)
 	{
 		gAgentAvatarp->invalidateComposite(gAgentAvatarp->mBakedTextureDatas[i].mTexLayerSet, FALSE);
 	}
@@ -1015,8 +1020,10 @@ void LLVOAvatar::destroyGL()
 // static
 void LLVOAvatar::resetImpostors()
 {
-	for (std::vector<LLCharacter*>::iterator iter = LLCharacter::sInstances.begin();
-		iter != LLCharacter::sInstances.end(); ++iter)
+	for (std::vector<LLCharacter*>::iterator
+			iter = LLCharacter::sInstances.begin(),
+			end = LLCharacter::sInstances.end();
+		 iter != end; ++iter)
 	{
 		LLVOAvatar* avatar = (LLVOAvatar*) *iter;
 		avatar->mImpostor.release();
@@ -1029,8 +1036,10 @@ void LLVOAvatar::deleteCachedImages(bool clearAll)
 	if (LLTexLayerSet::sHasCaches)
 	{
 		LL_DEBUGS("Avatar") << "Deleting layer set caches" << LL_ENDL;
-		for (std::vector<LLCharacter*>::iterator iter = LLCharacter::sInstances.begin();
-			 iter != LLCharacter::sInstances.end(); ++iter)
+		for (std::vector<LLCharacter*>::iterator
+				iter = LLCharacter::sInstances.begin(),
+				end = LLCharacter::sInstances.end();
+			 iter != end; ++iter)
 		{
 			LLVOAvatar* inst = (LLVOAvatar*) *iter;
 			inst->deleteLayerSetCaches(clearAll);
@@ -1179,9 +1188,10 @@ void LLVOAvatar::initInstance(void)
 	//-------------------------------------------------------------------------
 	mRoot.setName("mRoot");
 
-	for (LLVOAvatarDictionary::Meshes::const_iterator iter = LLVOAvatarDictionary::getInstance()->getMeshes().begin();
-		 iter != LLVOAvatarDictionary::getInstance()->getMeshes().end();
-		 ++iter)
+	for (LLVOAvatarDictionary::Meshes::const_iterator
+			iter = LLVOAvatarDictionary::getInstance()->getMeshes().begin(),
+			end = LLVOAvatarDictionary::getInstance()->getMeshes().end();
+		 iter != end; ++iter)
 	{
 		const EMeshIndex mesh_index = iter->first;
 		const LLVOAvatarDictionary::MeshEntry* mesh_dict = iter->second;
@@ -1194,7 +1204,7 @@ void LLVOAvatar::initInstance(void)
 		   mHairMesh0.setName("mHairMesh0");
 		   mHairMesh0.setMeshID(MESH_ID_HAIR);
 		   mHairMesh1.setName("mHairMesh1"); */
-		for (U32 lod = 0; lod < mesh_dict->mLOD; lod++)
+		for (U32 lod = 0; lod < mesh_dict->mLOD; ++lod)
 		{
 			LLViewerJointMesh* mesh = new LLViewerJointMesh();
 			std::string mesh_name = "m" + mesh_dict->mName + boost::lexical_cast<std::string>(lod);
@@ -1225,9 +1235,10 @@ void LLVOAvatar::initInstance(void)
 	//-------------------------------------------------------------------------
 	// associate baked textures with meshes
 	//-------------------------------------------------------------------------
-	for (LLVOAvatarDictionary::Meshes::const_iterator iter = LLVOAvatarDictionary::getInstance()->getMeshes().begin();
-		 iter != LLVOAvatarDictionary::getInstance()->getMeshes().end();
-		 ++iter)
+	for (LLVOAvatarDictionary::Meshes::const_iterator
+			iter = LLVOAvatarDictionary::getInstance()->getMeshes().begin(),
+			end = LLVOAvatarDictionary::getInstance()->getMeshes().end();
+		 iter != end; ++iter)
 	{
 		const EMeshIndex mesh_index = iter->first;
 		const LLVOAvatarDictionary::MeshEntry* mesh_dict = iter->second;
@@ -1236,8 +1247,10 @@ void LLVOAvatar::initInstance(void)
 		// Skip it if there's no associated baked texture.
 		if (baked_texture_index == BAKED_NUM_INDICES) continue;
 
-		for (std::vector<LLViewerJointMesh* >::iterator iter = mMeshLOD[mesh_index]->mMeshParts.begin();
-			 iter != mMeshLOD[mesh_index]->mMeshParts.end(); ++iter)
+		for (std::vector<LLViewerJointMesh* >::iterator
+				iter = mMeshLOD[mesh_index]->mMeshParts.begin(),
+				end2 = mMeshLOD[mesh_index]->mMeshParts.end();
+			 iter != end2; ++iter)
 		{
 			LLViewerJointMesh* mesh = (LLViewerJointMesh*) *iter;
 			mBakedTextureDatas[(int)baked_texture_index].mMeshes.push_back(mesh);
@@ -1405,11 +1418,13 @@ void LLVOAvatar::getSpatialExtents(LLVector4a& newMin, LLVector4a& newMax)
 
 	float max_attachment_span = get_default_max_prim_scale() * 5.0f;
 
-	//stretch bounding box by joint positions
-	for (polymesh_map_t::iterator i = mMeshes.begin(); i != mMeshes.end(); ++i)
+	// stretch bounding box by joint positions
+	for (polymesh_map_t::iterator i = mMeshes.begin(), end = mMeshes.end();
+		 i != end; ++i)
 	{
 		LLPolyMesh* mesh = i->second;
-		for (S32 joint_num = 0; joint_num < mesh->mJointRenderData.count(); joint_num++)
+		for (S32 joint_num = 0, count = mesh->mJointRenderData.count();
+			 joint_num < count; ++joint_num)
 		{
 			LLVector4a trans;
 			trans.load3(mesh->mJointRenderData[joint_num]->mWorldMatrix->getTranslation().mV);
@@ -1427,8 +1442,9 @@ void LLVOAvatar::getSpatialExtents(LLVector4a& newMin, LLVector4a& newMax)
 	mPixelArea = LLPipeline::calcPixelArea(center, size, *LLViewerCamera::getInstance());
 
 	//stretch bounding box by attachments
-	for (attachment_map_t::iterator iter = mAttachmentPoints.begin(); 
-		iter != mAttachmentPoints.end(); ++iter)
+	for (attachment_map_t::iterator iter = mAttachmentPoints.begin(),
+									end = mAttachmentPoints.end();
+		 iter != end; ++iter)
 	{
 		LLViewerJointAttachment* attachment = iter->second;
 
@@ -1437,11 +1453,12 @@ void LLVOAvatar::getSpatialExtents(LLVector4a& newMin, LLVector4a& newMax)
 			continue;
 		}
 
-		for (LLViewerJointAttachment::attachedobjs_vec_t::iterator attachment_iter = attachment->mAttachedObjects.begin();
-			 attachment_iter != attachment->mAttachedObjects.end();
-			 ++attachment_iter)
+		for (LLViewerJointAttachment::attachedobjs_vec_t::iterator
+				attachment_iter = attachment->mAttachedObjects.begin(),
+				end2 = attachment->mAttachedObjects.end();
+			 attachment_iter != end2; ++attachment_iter)
 		{
-			const LLViewerObject* attached_object = (*attachment_iter);
+			const LLViewerObject* attached_object = *attachment_iter;
 			if (attached_object && !attached_object->isHUDAttachment())
 			{
 				LLDrawable* drawable = attached_object->mDrawable;
@@ -1457,13 +1474,14 @@ void LLVOAvatar::getSpatialExtents(LLVector4a& newMin, LLVector4a& newMax)
 
 						S32 lt = distance.lessThan(max_span).getGatheredBits() & 0x7;
 
-						// Only add the prim to spatial extents calculations if it isn't a megaprim.
-						// max_attachment_span calculated at the start of the function 
-						// (currently 5 times our max prim size) 
+						// Only add the prim to spatial extents calculations if
+						// it isn't a megaprim.
+						// max_attachment_span calculated at the start of the
+						// function (currently 5 times our max prim size) 
 						if (lt == 0x7)
 						{
-							update_min_max(newMin,newMax,ext[0]);
-							update_min_max(newMin,newMax,ext[1]);
+							update_min_max(newMin, newMax, ext[0]);
+							update_min_max(newMin, newMax, ext[1]);
 						}
 					}
 				}
@@ -1481,7 +1499,7 @@ void LLVOAvatar::getSpatialExtents(LLVector4a& newMin, LLVector4a& newMax)
 //-----------------------------------------------------------------------------
 void LLVOAvatar::renderCollisionVolumes()
 {
-	for (S32 i = 0; i < mNumCollisionVolumes; i++)
+	for (S32 i = 0; i < mNumCollisionVolumes; ++i)
 	{
 		mCollisionVolumes[i].renderCollision();
 	}
@@ -1555,14 +1573,16 @@ BOOL LLVOAvatar::lineSegmentIntersect(const LLVector3& start,
 
 		if (isSelf())
 		{
-			for (attachment_map_t::iterator iter = mAttachmentPoints.begin(); 
-			 iter != mAttachmentPoints.end(); ++iter)
+			for (attachment_map_t::iterator iter = mAttachmentPoints.begin(),
+											end = mAttachmentPoints.end(); 
+				 iter != end; ++iter)
 			{
 				LLViewerJointAttachment* attachment = iter->second;
 
-				for (LLViewerJointAttachment::attachedobjs_vec_t::iterator attachment_iter = attachment->mAttachedObjects.begin();
-					 attachment_iter != attachment->mAttachedObjects.end();
-					 ++attachment_iter)
+				for (LLViewerJointAttachment::attachedobjs_vec_t::iterator
+						attachment_iter = attachment->mAttachedObjects.begin(),
+						end2 = attachment->mAttachedObjects.end();
+					 attachment_iter != end2; ++attachment_iter)
 				{
 					LLViewerObject* attached_object = (*attachment_iter);
 
@@ -1571,8 +1591,10 @@ BOOL LLVOAvatar::lineSegmentIntersect(const LLVector3& start,
 					{
 						LLDrawable* drawable = attached_object->mDrawable;
 						if (drawable->isState(LLDrawable::RIGGED))
-						{	//regenerate octree for rigged attachment
-							gPipeline.markRebuild(mDrawable, LLDrawable::REBUILD_RIGGED, TRUE);
+						{	// regenerate octree for rigged attachment
+							gPipeline.markRebuild(mDrawable,
+												  LLDrawable::REBUILD_RIGGED,
+												  TRUE);
 						}
 					}
 				}
@@ -1616,14 +1638,16 @@ LLViewerObject* LLVOAvatar::lineSegmentIntersectRiggedAttachments(const LLVector
 		LLVector3 local_end = end;
 		LLVector3 local_intersection;
 
-		for (attachment_map_t::iterator iter = mAttachmentPoints.begin(); 
-			iter != mAttachmentPoints.end(); ++iter)
+		for (attachment_map_t::iterator iter = mAttachmentPoints.begin(),
+										end = mAttachmentPoints.end(); 
+			 iter != end; ++iter)
 		{
 			LLViewerJointAttachment* attachment = iter->second;
 
-			for (LLViewerJointAttachment::attachedobjs_vec_t::iterator attachment_iter = attachment->mAttachedObjects.begin();
-					attachment_iter != attachment->mAttachedObjects.end();
-					++attachment_iter)
+			for (LLViewerJointAttachment::attachedobjs_vec_t::iterator
+					attachment_iter = attachment->mAttachedObjects.begin(),
+					end2 = attachment->mAttachedObjects.end();
+				 attachment_iter != end2; ++attachment_iter)
 			{
 				LLViewerObject* attached_object = *attachment_iter;
 
@@ -1740,16 +1764,17 @@ BOOL LLVOAvatar::setupBone(const LLVOAvatarBoneInfo* info,
 	if (info->mIsJoint)
 	{
 		joint->setSkinOffset(info->mPivot);
-		joint_num++;
+		++joint_num;
 	}
 	else // collision volume
 	{
-		volume_num++;
+		++volume_num;
 	}
 
 	// setup children
-	LLVOAvatarBoneInfo::child_list_t::const_iterator iter;
-	for (iter = info->mChildList.begin(); iter != info->mChildList.end(); ++iter)
+	for (LLVOAvatarBoneInfo::child_list_t::const_iterator
+			iter = info->mChildList.begin(), end = info->mChildList.end();
+		 iter != end; ++iter)
 	{
 		LLVOAvatarBoneInfo* child_info = *iter;
 		if (!setupBone(child_info, joint, volume_num, joint_num))
@@ -1784,16 +1809,18 @@ BOOL LLVOAvatar::buildSkeleton(const LLVOAvatarSkeletonInfo* info)
 	{
 		if (!allocateCollisionVolumes(info->mNumCollisionVolumes))
 		{
-			llerrs << "Can't allocate " << info->mNumCollisionVolumes << " collision volumes" << llendl;
+			llerrs << "Can't allocate " << info->mNumCollisionVolumes
+				   << " collision volumes" << llendl;
 			return FALSE;
 		}
 	}
 
 	S32 current_joint_num = 0;
 	S32 current_volume_num = 0;
-	LLVOAvatarSkeletonInfo::bone_info_list_t::const_iterator iter;
-	for (iter = info->mBoneInfoList.begin(); iter != info->mBoneInfoList.end();
-		 ++iter)
+	for (LLVOAvatarSkeletonInfo::bone_info_list_t::const_iterator
+			iter = info->mBoneInfoList.begin(),
+			end = info->mBoneInfoList.end();
+		 iter != end; ++iter)
 	{
 		LLVOAvatarBoneInfo* info = *iter;
 		if (!setupBone(info, NULL, current_volume_num, current_joint_num))
@@ -1856,12 +1883,15 @@ void LLVOAvatar::buildCharacter()
 	//-------------------------------------------------------------------------
 	// clear mesh data
 	//-------------------------------------------------------------------------
-	for (std::vector<LLViewerJoint*>::iterator jointIter = mMeshLOD.begin();
-		jointIter != mMeshLOD.end(); ++jointIter)
+	for (std::vector<LLViewerJoint*>::iterator jointIter = mMeshLOD.begin(),
+											   end = mMeshLOD.end();
+		 jointIter != end; ++jointIter)
 	{
 		LLViewerJoint* joint = (LLViewerJoint*) *jointIter;
-		for (std::vector<LLViewerJointMesh*>::iterator meshIter = joint->mMeshParts.begin();
-			meshIter != joint->mMeshParts.end(); ++meshIter)
+		for (std::vector<LLViewerJointMesh*>::iterator
+				meshIter = joint->mMeshParts.begin(),
+				end2 = joint->mMeshParts.end();
+			 meshIter != end2; ++meshIter)
 		{
 			LLViewerJointMesh* mesh = (LLViewerJointMesh*) *meshIter;
 			mesh->setMesh(NULL);
@@ -2003,8 +2033,9 @@ void LLVOAvatar::releaseMeshData()
 	//llinfos << "Releasing" << llendl;
 
 	// cleanup mesh data
-	for (std::vector<LLViewerJoint*>::iterator iter = mMeshLOD.begin();
-		 iter != mMeshLOD.end(); ++iter)
+	for (std::vector<LLViewerJoint*>::iterator iter = mMeshLOD.begin(),
+											   end = mMeshLOD.end();
+		 iter != end; ++iter)
 	{
 		LLViewerJoint* joint = (LLViewerJoint*) *iter;
 		joint->setValid(FALSE, TRUE);
@@ -2018,7 +2049,7 @@ void LLVOAvatar::releaseMeshData()
 		{
 			facep->setSize(0, 0);
 			for (S32 i = mNumInitFaces, count = mDrawable->getNumFaces();
-				 i < count; i++)
+				 i < count; ++i)
 			{
 				facep = mDrawable->getFace(i);
 				if (facep)
@@ -2029,8 +2060,9 @@ void LLVOAvatar::releaseMeshData()
 		}
 	}
 
-	for (attachment_map_t::iterator iter = mAttachmentPoints.begin(); 
-		 iter != mAttachmentPoints.end(); ++iter)
+	for (attachment_map_t::iterator iter = mAttachmentPoints.begin(),
+									end = mAttachmentPoints.end(); 
+		 iter != end; ++iter)
 	{
 		LLViewerJointAttachment* attachment = iter->second;
 		if (!attachment->getIsHUDAttachment())
@@ -2054,8 +2086,9 @@ void LLVOAvatar::restoreMeshData()
 	mMeshValid = TRUE;
 	updateJointLODs();
 
-	for (attachment_map_t::iterator iter = mAttachmentPoints.begin(); 
-		 iter != mAttachmentPoints.end(); ++iter)
+	for (attachment_map_t::iterator iter = mAttachmentPoints.begin(),
+									end = mAttachmentPoints.end(); 
+		 iter != end; ++iter)
 	{
 		LLViewerJointAttachment* attachment = iter->second;
 		if (!attachment->getIsHUDAttachment())
@@ -2167,7 +2200,7 @@ void LLVOAvatar::updateMeshData()
 					   << " in LLVOAvatar::restoreMeshData" << llendl;
 			}
 
-			for (S32 k = j; k < part_index; k++)
+			for (S32 k = j; k < part_index; ++k)
 			{
 				bool rigid = false;
 				if (k == MESH_ID_EYEBALL_LEFT || k == MESH_ID_EYEBALL_RIGHT)
@@ -2189,7 +2222,7 @@ void LLVOAvatar::updateMeshData()
 			}
 			else
 			{
-				f_num++;
+				++f_num;
 			}
 		}
 	}
@@ -2564,24 +2597,31 @@ void LLVOAvatar::idleUpdateMisc(bool detailed_update)
 	if (detailed_update || !sUseImpostors)
 	{
 		LLFastTimer t(LLFastTimer::FTM_ATTACHMENT_UPDATE);
-		for (attachment_map_t::iterator iter = mAttachmentPoints.begin(); 
-			 iter != mAttachmentPoints.end(); ++iter)
+		for (attachment_map_t::iterator iter = mAttachmentPoints.begin(),
+										end = mAttachmentPoints.end(); 
+			 iter != end; ++iter)
 		{
 			LLViewerJointAttachment* attachment = iter->second;
 
-			for (LLViewerJointAttachment::attachedobjs_vec_t::iterator attachment_iter = attachment->mAttachedObjects.begin();
-				 attachment_iter != attachment->mAttachedObjects.end();
-				 ++attachment_iter)
+			for (LLViewerJointAttachment::attachedobjs_vec_t::iterator
+					attachment_iter = attachment->mAttachedObjects.begin(),
+					end2 = attachment->mAttachedObjects.end();
+				 attachment_iter != end2; ++attachment_iter)
 			{
 				LLViewerObject* attached_object = (*attachment_iter);
-				BOOL visibleAttachment = visible || (attached_object && 
-													!(attached_object->mDrawable->getSpatialBridge() &&
-													  attached_object->mDrawable->getSpatialBridge()->getRadius() < 2.0));
+				BOOL visibleAttachment = visible ||
+										 (attached_object && 
+										  !(attached_object->mDrawable->getSpatialBridge() &&
+										  attached_object->mDrawable->getSpatialBridge()->getRadius() < 2.0));
 
-				if (visibleAttachment && attached_object && !attached_object->isDead() && attachment->getValid())
+				if (visibleAttachment && attached_object &&
+					!attached_object->isDead() && attachment->getValid())
 				{
-					// if selecting any attachments, update all of them as non-damped
-					if (LLSelectMgr::getInstance()->getSelection()->getObjectCount() && LLSelectMgr::getInstance()->getSelection()->isAttachment())
+					LLObjectSelectionHandle selection = LLSelectMgr::getInstance()->getSelection();
+					// if selecting any attachments, update all of them as
+					// non-damped
+					if (selection->getObjectCount() &&
+						selection->isAttachment())
 					{
 						gPipeline.updateMoveNormalAsync(attached_object->mDrawable);
 					}
@@ -2611,7 +2651,7 @@ void LLVOAvatar::idleUpdateMisc(bool detailed_update)
 
 		getImpostorValues(ext, angle, distance);
 
-		for (U32 i = 0; i < 3 && !mNeedsImpostorUpdate; i++)
+		for (U32 i = 0; i < 3 && !mNeedsImpostorUpdate; ++i)
 		{
 			F32 cur_angle = angle.mV[i];
 			F32 old_angle = mImpostorAngle.mV[i];
@@ -2961,7 +3001,7 @@ void LLVOAvatar::idleUpdateNameTag(const LLVector3& root_pos_last)
 					mNameText->setMaxLines(11);
 					mNameText->setFadeDistance(CHAT_NORMAL_RADIUS, 5.f);
 					mNameText->setUseBubble(TRUE);
-					sNumVisibleChatBubbles++;
+					++sNumVisibleChatBubbles;
 					new_name = true;
 				}
 
@@ -3040,9 +3080,10 @@ void LLVOAvatar::idleUpdateNameTag(const LLVector3& root_pos_last)
 				}
 			}
 
-			bool is_away = mSignaledAnimations.find(ANIM_AGENT_AWAY) != mSignaledAnimations.end();
-			bool is_busy = mSignaledAnimations.find(ANIM_AGENT_BUSY) != mSignaledAnimations.end();
-			bool is_appearance = mSignaledAnimations.find(ANIM_AGENT_CUSTOMIZE) != mSignaledAnimations.end();
+			AnimIterator end_signaled_anims = mSignaledAnimations.end();
+			bool is_away = mSignaledAnimations.find(ANIM_AGENT_AWAY) != end_signaled_anims;
+			bool is_busy = mSignaledAnimations.find(ANIM_AGENT_BUSY) != end_signaled_anims;
+			bool is_appearance = mSignaledAnimations.find(ANIM_AGENT_CUSTOMIZE) != end_signaled_anims;
 			bool chat_muted = false;
 			S32 mute_flags = -1;
 			std::string mute_desc;
@@ -3141,6 +3182,7 @@ void LLVOAvatar::idleUpdateNameTag(const LLVector3& root_pos_last)
 				char line[MAX_STRING];		/* Flawfinder: ignore */
 				line[0] = '\0';
 				std::deque<LLChat>::iterator chat_iter = mChats.begin();
+				std::deque<LLChat>::iterator chat_end = mChats.end();
 				mNameText->clearString();
 
 				LLColor4 new_chat = LLColor4(avatar_name_color);
@@ -3151,9 +3193,10 @@ void LLVOAvatar::idleUpdateNameTag(const LLVector3& root_pos_last)
 					++chat_iter;
 				}
 
-				for ( ; chat_iter != mChats.end(); ++chat_iter)
+				for ( ; chat_iter != chat_end; ++chat_iter)
 				{
-					F32 chat_fade_amt = llclamp((F32)((LLFrameTimer::getElapsedSeconds() - chat_iter->mTime) / CHAT_FADE_TIME), 0.f, 4.f);
+					F32 chat_fade_amt = llclamp((F32)((LLFrameTimer::getElapsedSeconds() - chat_iter->mTime) / CHAT_FADE_TIME),
+												0.f, 4.f);
 					LLFontGL::StyleFlags style;
 					switch (chat_iter->mChatType)
 					{
@@ -3258,9 +3301,10 @@ void LLVOAvatar::invalidateNameTag(const LLUUID& agent_id)
 // static
 void LLVOAvatar::invalidateNameTags()
 {
-	std::vector<LLCharacter*>::iterator it;
-	for (it = LLCharacter::sInstances.begin();
-		 it != LLCharacter::sInstances.end(); ++it)
+	for (std::vector<LLCharacter*>::iterator
+			it = LLCharacter::sInstances.begin(),
+			end =  LLCharacter::sInstances.end();
+		 it != end; ++it)
 	{
 		LLVOAvatar* avatar = dynamic_cast<LLVOAvatar*>(*it);
 		if (!avatar) continue;
@@ -3303,8 +3347,10 @@ BOOL LLVOAvatar::updateCharacter(LLAgent &agent)
 	mDebugText.clear();
 	if (LLVOAvatar::sShowAnimationDebug)
 	{
-		for (LLMotionController::motion_list_t::iterator iter = mMotionController.getActiveMotions().begin();
-			 iter != mMotionController.getActiveMotions().end(); ++iter)
+		for (LLMotionController::motion_list_t::iterator
+				iter = mMotionController.getActiveMotions().begin(),
+				end = mMotionController.getActiveMotions().end();
+			 iter != end; ++iter)
 		{
 			LLMotion* motionp = *iter;
 			if (motionp->getMinPixelArea() < getPixelArea())
@@ -3514,7 +3560,8 @@ BOOL LLVOAvatar::updateCharacter(LLAgent &agent)
 		//--------------------------------------------------------------------
 		// Propagate viewer object rotation to root of avatar
 		//--------------------------------------------------------------------
-		if (!isAnyAnimationSignaled(AGENT_NO_ROTATE_ANIMS, NUM_AGENT_NO_ROTATE_ANIMS))
+		if (!isAnyAnimationSignaled(AGENT_NO_ROTATE_ANIMS,
+									NUM_AGENT_NO_ROTATE_ANIMS))
 		{
 			LLQuaternion iQ;
 			LLVector3 upDir(0.0f, 0.0f, 1.0f);
@@ -3953,16 +4000,18 @@ void LLVOAvatar::updateVisibility()
 			llinfos << "PA: " << getPositionAgent() << llendl;
 			/*llinfos << "SPA: " << sel_pos_agent << llendl;
 			llinfos << "WPA: " << wrist_right_pos_agent << llendl;*/
-			for (attachment_map_t::iterator iter = mAttachmentPoints.begin(); 
-				 iter != mAttachmentPoints.end(); ++iter)
+			for (attachment_map_t::iterator iter = mAttachmentPoints.begin(),
+											end = mAttachmentPoints.end(); 
+				 iter != end; ++iter)
 			{
 				LLViewerJointAttachment* attachment = iter->second;
 
-				for (LLViewerJointAttachment::attachedobjs_vec_t::iterator attachment_iter = attachment->mAttachedObjects.begin();
-					 attachment_iter != attachment->mAttachedObjects.end();
-					 ++attachment_iter)
+				for (LLViewerJointAttachment::attachedobjs_vec_t::iterator
+						attachment_iter = attachment->mAttachedObjects.begin(),
+						end2 = attachment->mAttachedObjects.end();
+					 attachment_iter != end2; ++attachment_iter)
 				{
-					if (LLViewerObject* attached_object = (*attachment_iter))
+					if (LLViewerObject* attached_object = *attachment_iter)
 					{
 						if (attached_object->mDrawable->isVisible())
 						{
@@ -4431,7 +4480,7 @@ void LLVOAvatar::updateTextures()
 	}
 
 	std::vector<bool> layer_baked;
-	for (U32 i = 0; i < mBakedTextureDatas.size(); i++)
+	for (U32 i = 0; i < mBakedTextureDatas.size(); ++i)
 	{
 		layer_baked.push_back(isTextureDefined(mBakedTextureDatas[i].mTextureIndex));
 		// bind the texture so that they'll be decoded slightly 
@@ -4449,7 +4498,7 @@ void LLVOAvatar::updateTextures()
 	mMinPixelArea = 99999999.f;
 	mHasGrey = FALSE; // debug
 	for (U32 texture_index = 0, count = getNumTEs(); texture_index < count;
-		 texture_index++)
+		 ++texture_index)
 	{
 		LLWearableType::EType wearable_type = LLVOAvatarDictionary::getTEWearableType((ETextureIndex)texture_index);
 		U32 num_wearables = gAgentWearables.getWearableCount(wearable_type);
@@ -4457,7 +4506,7 @@ void LLVOAvatar::updateTextures()
 		const F32 texel_area_ratio = fabs(te->mScaleS * te->mScaleT);
 		LLViewerFetchedTexture* imagep = NULL;
 		for (U32 wearable_index = 0; wearable_index < num_wearables;
-			 wearable_index++)
+			 ++wearable_index)
 		{
 			imagep = LLViewerTextureManager::staticCastToFetchedTexture(getImage(texture_index,
 																				 wearable_index),
@@ -4530,7 +4579,8 @@ void LLVOAvatar::checkTextureLoading()
 		return; 
 	}
 
-	if (mCallbackTextureList.empty()) // when is self or no callbacks. Note: this list for self is always empty.
+	// when is self or no callbacks. Note: this list for self is always empty.
+	if (mCallbackTextureList.empty())
 	{ 
 		mLoadedCallbacksPaused = pause;
 		return; // nothing to check.
@@ -4541,8 +4591,10 @@ void LLVOAvatar::checkTextureLoading()
 		return; // have not been invisible for enough time.
 	}
 
-	for	(LLLoadedCallbackEntry::source_callback_list_t::iterator iter = mCallbackTextureList.begin();
-		 iter != mCallbackTextureList.end(); ++iter)
+	for	(LLLoadedCallbackEntry::source_callback_list_t::iterator
+			iter = mCallbackTextureList.begin(),
+			end = mCallbackTextureList.end();
+		 iter != end; ++iter)
 	{
 		LLViewerFetchedTexture* tex = gTextureList.findImage(*iter);
 		if(tex)
@@ -4551,7 +4603,8 @@ void LLVOAvatar::checkTextureLoading()
 			{	// pause texture fetching.
 				tex->pauseLoadedCallbacks(&mCallbackTextureList);
 
-				//set to terminate texture fetching after MAX_TEXTURE_UPDATE_INTERVAL frames.
+				// Set to terminate texture fetching after
+				// MAX_TEXTURE_UPDATE_INTERVAL frames.
 				tex->setMaxVirtualSizeResetInterval(MAX_TEXTURE_UPDATE_INTERVAL);
 				tex->resetMaxVirtualSizeResetCounter();
 			}
@@ -4560,7 +4613,8 @@ void LLVOAvatar::checkTextureLoading()
 				static const F32 START_AREA = 100.f;
 
 				tex->unpauseLoadedCallbacks(&mCallbackTextureList);
-				tex->addTextureStats(START_AREA); // jump start the fetching again
+				// jump start the fetching again
+				tex->addTextureStats(START_AREA);
 			}
 		}
 	}
@@ -4736,50 +4790,52 @@ void LLVOAvatar::processAnimationStateChanges()
 		startMotion(ANIM_AGENT_BODY_NOISE);
 	}
 
+	AnimIterator end_signaled_anims = mSignaledAnimations.end();
+
 	// clear all current animations
-	AnimIterator anim_it;
-	for (anim_it = mPlayingAnimations.begin(); anim_it != mPlayingAnimations.end(); )
+	for (AnimIterator anim_it = mPlayingAnimations.begin(),
+					  end = mPlayingAnimations.end();
+		 anim_it != end; )
 	{
 		AnimIterator found_anim = mSignaledAnimations.find(anim_it->first);
 
 		// playing, but not signaled, so stop
-		if (found_anim == mSignaledAnimations.end())
+		if (found_anim == end_signaled_anims)
 		{
 			processSingleAnimationStateChange(anim_it->first, FALSE);
 			mPlayingAnimations.erase(anim_it++);
-			continue;
 		}
-
-		++anim_it;
+		else
+		{
+			++anim_it;
+		}
 	}
 
 	// start up all new anims
-	for (anim_it = mSignaledAnimations.begin(); anim_it != mSignaledAnimations.end(); )
+	for (AnimIterator anim_it = mSignaledAnimations.begin();
+		 anim_it != end_signaled_anims; ++anim_it)
 	{
 		AnimIterator found_anim = mPlayingAnimations.find(anim_it->first);
 
 		// signaled but not playing, or different sequence id, start motion
-		if (found_anim == mPlayingAnimations.end() || found_anim->second != anim_it->second)
+		if (found_anim == mPlayingAnimations.end() ||
+			found_anim->second != anim_it->second)
 		{
 			if (processSingleAnimationStateChange(anim_it->first, TRUE))
 			{
 				mPlayingAnimations[anim_it->first] = anim_it->second;
-				++anim_it;
-				continue;
 			}
 		}
-
-		++anim_it;
 	}
 
 	// clear source information for animations which have been stopped
 	if (isSelf())
 	{
-		AnimSourceIterator source_it = mAnimationSources.begin();
-
-		for (source_it = mAnimationSources.begin(); source_it != mAnimationSources.end(); )
+		for (AnimSourceIterator source_it = mAnimationSources.begin(),
+								end = mAnimationSources.end();
+			 source_it != end; )
 		{
-			if (mSignaledAnimations.find(source_it->second) == mSignaledAnimations.end())
+			if (mSignaledAnimations.find(source_it->second) == end_signaled_anims)
 			{
 				mAnimationSources.erase(source_it++);
 			}
@@ -4813,16 +4869,21 @@ BOOL LLVOAvatar::processSingleAnimationStateChange(const LLUUID& anim_id, BOOL s
 				if (LLViewerParcelMgr::getInstance()->canHearSound(char_pos_global)
 				    && (!ml || !ml->isMuted(getID(), LLMute::flagObjectSounds)))
 				{
-					// RN: uncomment this to play on typing sound at fixed volume once sound engine is fixed
-					// to support both spatialized and non-spatialized instances of the same sound
-					//if (isSelf())
-					//{
-					//	gAudiop->triggerSound(LLUUID(gSavedSettings.getString("UISndTyping")), 1.0f, LLAudioEngine::AUDIO_TYPE_UI);
-					//}
-					//else
+					LLUUID sound_id = LLUUID(gSavedSettings.getString("UISndTyping"));
+#if 0				// RN: anable this to play on typing sound at fixed volume
+					// once sound engine is fixed to support both spatialized
+					// and non-spatialized instances of the same sound
+					if (isSelf())
 					{
-						LLUUID sound_id = LLUUID(gSavedSettings.getString("UISndTyping"));
-						gAudiop->triggerSound(sound_id, getID(), 1.0f, LLAudioEngine::AUDIO_TYPE_SFX, char_pos_global);
+						gAudiop->triggerSound(sound_id, 1.0f,
+											  LLAudioEngine::AUDIO_TYPE_UI);
+					}
+					else
+#endif
+					{
+						gAudiop->triggerSound(sound_id, getID(), 1.0f,
+											  LLAudioEngine::AUDIO_TYPE_SFX,
+											  char_pos_global);
 					}
 				}
 			}
@@ -4860,7 +4921,7 @@ BOOL LLVOAvatar::processSingleAnimationStateChange(const LLUUID& anim_id, BOOL s
 BOOL LLVOAvatar::isAnyAnimationSignaled(const LLUUID* anim_array,
 										const S32 num_anims) const
 {
-	for (S32 i = 0; i < num_anims; i++)
+	for (S32 i = 0; i < num_anims; ++i)
 	{
 		if (mSignaledAnimations.find(anim_array[i]) != mSignaledAnimations.end())
 		{
@@ -4970,7 +5031,7 @@ LLJoint* LLVOAvatar::findCollisionVolume(U32 volume_id)
 //-----------------------------------------------------------------------------
 S32 LLVOAvatar::getCollisionVolumeID(std::string &name)
 {
-	for (S32 i = 0; i < mNumCollisionVolumes; i++)
+	for (S32 i = 0; i < mNumCollisionVolumes; ++i)
 	{
 		if (mCollisionVolumes[i].getName() == name)
 		{
@@ -5196,7 +5257,7 @@ BOOL LLVOAvatar::allocateCharacterJoints(U32 num)
 
 	mSkeleton = new LLViewerJoint[num];
 
-	for (S32 joint_num = 0; joint_num < (S32)num; joint_num++)
+	for (S32 joint_num = 0; joint_num < (S32)num; ++joint_num)
 	{
 		mSkeleton[joint_num].setJointNum(joint_num);
 	}
@@ -5336,8 +5397,10 @@ BOOL LLVOAvatar::loadAvatar()
 	}
 
 	// avatar_lad.xml : <morph_masks>
-	for (LLVOAvatarXmlInfo::morph_info_list_t::iterator iter = sAvatarXmlInfo->mMorphMaskInfoList.begin();
-		 iter != sAvatarXmlInfo->mMorphMaskInfoList.end(); ++iter)
+	for (LLVOAvatarXmlInfo::morph_info_list_t::iterator
+			iter = sAvatarXmlInfo->mMorphMaskInfoList.begin(),
+			end = sAvatarXmlInfo->mMorphMaskInfoList.end();
+		 iter != end; ++iter)
 	{
 		LLVOAvatarXmlInfo::LLVOAvatarMorphInfo* info = *iter;
 
@@ -5358,9 +5421,10 @@ BOOL LLVOAvatar::loadAvatar()
 	loadLayersets();
 
 	// avatar_lad.xml : <driver_parameters>
-	LLVOAvatarXmlInfo::driver_info_list_t::iterator iter;
-	for (iter = sAvatarXmlInfo->mDriverInfoList.begin();
-		 iter != sAvatarXmlInfo->mDriverInfoList.end(); ++iter)
+	for (LLVOAvatarXmlInfo::driver_info_list_t::iterator
+			iter = sAvatarXmlInfo->mDriverInfoList.begin(),
+			end = sAvatarXmlInfo->mDriverInfoList.end();
+		 iter != end; ++iter)
 	{
 		LLDriverParamInfo* info = *iter;
 		LLDriverParam* driver_param = new LLDriverParam(this);
@@ -5368,7 +5432,8 @@ BOOL LLVOAvatar::loadAvatar()
 		{
 			addVisualParam(driver_param);
 			LLVisualParam*(LLVOAvatar::*avatar_function)(S32)const = &LLVOAvatar::getVisualParam; 
-			if (!driver_param->linkDrivenParams(boost::bind(avatar_function, (LLVOAvatar*)this, _1),
+			if (!driver_param->linkDrivenParams(boost::bind(avatar_function,
+															(LLVOAvatar*)this, _1),
 												false))
 			{
 				llwarns << "could not link driven params for avatar "
@@ -5380,7 +5445,8 @@ BOOL LLVOAvatar::loadAvatar()
 		else
 		{
 			delete driver_param;
-			llwarns << "avatar file: driver_param->parseData() failed" << llendl;
+			llwarns << "avatar file: driver_param->parseData() failed"
+					<< llendl;
 			return FALSE;
 		}
 	}
@@ -5395,8 +5461,9 @@ BOOL LLVOAvatar::loadSkeletonNode()
 {
 	mRoot.addChild(&mSkeleton[0]);
 
-	for (std::vector<LLViewerJoint*>::iterator iter = mMeshLOD.begin();
-		iter != mMeshLOD.end(); ++iter)
+	for (std::vector<LLViewerJoint*>::iterator iter = mMeshLOD.begin(),
+											   end = mMeshLOD.end();
+		 iter != end; ++iter)
 	{
 		LLViewerJoint* joint = (LLViewerJoint*) *iter;
 		joint->mUpdateXform = FALSE;
@@ -5430,9 +5497,10 @@ BOOL LLVOAvatar::loadSkeletonNode()
 
 	// SKELETAL DISTORTIONS
 	{
-		LLVOAvatarXmlInfo::skeletal_distortion_info_list_t::iterator iter;
-		for (iter = sAvatarXmlInfo->mSkeletalDistortionInfoList.begin();
-			 iter != sAvatarXmlInfo->mSkeletalDistortionInfoList.end(); ++iter)
+		for (LLVOAvatarXmlInfo::skeletal_distortion_info_list_t::iterator
+				iter = sAvatarXmlInfo->mSkeletalDistortionInfoList.begin(),
+				end = sAvatarXmlInfo->mSkeletalDistortionInfoList.end();
+			 iter != end; ++iter)
 		{
 			LLPolySkeletalDistortionInfo* info = *iter;
 			LLPolySkeletalDistortion* param = new LLPolySkeletalDistortion(this);
@@ -5450,9 +5518,10 @@ BOOL LLVOAvatar::loadSkeletonNode()
 
 	// ATTACHMENTS
 	{
-		LLVOAvatarXmlInfo::attachment_info_list_t::iterator iter;
-		for (iter = sAvatarXmlInfo->mAttachmentInfoList.begin();
-			 iter != sAvatarXmlInfo->mAttachmentInfoList.end(); ++iter)
+		for (LLVOAvatarXmlInfo::attachment_info_list_t::iterator
+				iter = sAvatarXmlInfo->mAttachmentInfoList.begin(),
+				end = sAvatarXmlInfo->mAttachmentInfoList.end();
+			 iter != end; ++iter)
 		{
 			LLVOAvatarXmlInfo::LLVOAvatarAttachmentInfo* info = *iter;
 			if (!isSelf() && info->mJointName == "mScreen")
@@ -5542,9 +5611,10 @@ BOOL LLVOAvatar::loadSkeletonNode()
 //-----------------------------------------------------------------------------
 BOOL LLVOAvatar::loadMeshNodes()
 {
-	for (LLVOAvatarXmlInfo::mesh_info_list_t::const_iterator meshinfo_iter = sAvatarXmlInfo->mMeshInfoList.begin();
-		 meshinfo_iter != sAvatarXmlInfo->mMeshInfoList.end(); 
-		 ++meshinfo_iter)
+	for (LLVOAvatarXmlInfo::mesh_info_list_t::const_iterator
+			meshinfo_iter = sAvatarXmlInfo->mMeshInfoList.begin(),
+			end = sAvatarXmlInfo->mMeshInfoList.end();
+		 meshinfo_iter != end; ++meshinfo_iter)
 	{
 		const LLVOAvatarXmlInfo::LLVOAvatarMeshInfo* info = *meshinfo_iter;
 		const std::string &type = info->mType;
@@ -5558,9 +5628,10 @@ BOOL LLVOAvatar::loadMeshNodes()
 			switch (lod)
 			  case 0:
 				mesh = &mHairMesh0; */
-		for (LLVOAvatarDictionary::Meshes::const_iterator mesh_iter = LLVOAvatarDictionary::getInstance()->getMeshes().begin();
-			 mesh_iter != LLVOAvatarDictionary::getInstance()->getMeshes().end();
-			 ++mesh_iter)
+		for (LLVOAvatarDictionary::Meshes::const_iterator
+				mesh_iter = LLVOAvatarDictionary::getInstance()->getMeshes().begin(),
+				end2 = LLVOAvatarDictionary::getInstance()->getMeshes().end();
+			 mesh_iter != end2; ++mesh_iter)
 		{
 			const EMeshIndex mesh_index = mesh_iter->first;
 			const LLVOAvatarDictionary::MeshEntry* mesh_dict = mesh_iter->second;
@@ -5580,7 +5651,8 @@ BOOL LLVOAvatar::loadMeshNodes()
 			}
 			else
 			{
-				llwarns << "Avatar file: <mesh> has invalid lod setting " << lod << llendl;
+				llwarns << "Avatar file: <mesh> has invalid lod setting "
+						<< lod << llendl;
 				return FALSE;
 			}
 		}
@@ -5631,9 +5703,10 @@ BOOL LLVOAvatar::loadMeshNodes()
 		mesh->setMesh(poly_mesh);
 		mesh->setLOD(info->mMinPixelArea);
 
-		for (LLVOAvatarXmlInfo::LLVOAvatarMeshInfo::morph_info_list_t::const_iterator xmlinfo_iter = info->mPolyMorphTargetInfoList.begin();
-			 xmlinfo_iter != info->mPolyMorphTargetInfoList.end(); 
-			 ++xmlinfo_iter)
+		for (LLVOAvatarXmlInfo::LLVOAvatarMeshInfo::morph_info_list_t::const_iterator
+				xmlinfo_iter = info->mPolyMorphTargetInfoList.begin(),
+				end2 = info->mPolyMorphTargetInfoList.end();
+			 xmlinfo_iter != end2; ++xmlinfo_iter)
 		{
 			const LLVOAvatarXmlInfo::LLVOAvatarMeshInfo::morph_info_pair_t* info_pair = &(*xmlinfo_iter);
 			LLPolyMorphTarget* param = new LLPolyMorphTarget(mesh->getMesh());
@@ -5665,8 +5738,10 @@ BOOL LLVOAvatar::loadMeshNodes()
 BOOL LLVOAvatar::loadLayersets()
 {
 	BOOL success = TRUE;
-	for (LLVOAvatarXmlInfo::layer_info_list_t::const_iterator layerset_iter = sAvatarXmlInfo->mLayerInfoList.begin();
-		 layerset_iter != sAvatarXmlInfo->mLayerInfoList.end(); ++layerset_iter)
+	for (LLVOAvatarXmlInfo::layer_info_list_t::const_iterator
+			layerset_iter = sAvatarXmlInfo->mLayerInfoList.begin(),
+			end = sAvatarXmlInfo->mLayerInfoList.end();
+		 layerset_iter != end; ++layerset_iter)
 	{
 		// Construct a layerset for each one specified in avatar_lad.xml and
 		// initialize it as such.
@@ -5804,7 +5879,7 @@ BOOL LLVOAvatar::updateJointLODs()
 		BOOL res = mRoot.updateLOD(mAdjustedPixelArea, TRUE);
  		if (res)
 		{
-			sNumLODChangesThisFrame++;
+			++sNumLODChangesThisFrame;
 			dirtyMesh(2);
 			return TRUE;
 		}
@@ -6015,8 +6090,9 @@ const LLViewerJointAttachment* LLVOAvatar::attachObject(LLViewerObject* viewer_o
 U32 LLVOAvatar::getNumAttachments() const
 {
 	U32 num_attachments = 0;
-	for (attachment_map_t::const_iterator iter = mAttachmentPoints.begin();
-		 iter != mAttachmentPoints.end(); ++iter)
+	for (attachment_map_t::const_iterator iter = mAttachmentPoints.begin(),
+										  end = mAttachmentPoints.end();
+		 iter != end; ++iter)
 	{
 		const LLViewerJointAttachment* attachment_pt = (*iter).second;
 		num_attachments += attachment_pt->getNumObjects();
@@ -6048,7 +6124,7 @@ void LLVOAvatar::lazyAttach()
 {
 	std::vector<LLPointer<LLViewerObject> > still_pending;
 
-	for (U32 i = 0; i < mPendingAttachment.size(); i++)
+	for (U32 i = 0; i < mPendingAttachment.size(); ++i)
 	{
 		if (mPendingAttachment[i]->mDrawable)
 		{
@@ -6076,17 +6152,19 @@ void LLVOAvatar::lazyAttach()
 
 void LLVOAvatar::resetHUDAttachments()
 {
-	for (attachment_map_t::iterator iter = mAttachmentPoints.begin(); 
-		 iter != mAttachmentPoints.end(); ++iter)
+	for (attachment_map_t::iterator iter = mAttachmentPoints.begin(),
+									end = mAttachmentPoints.end(); 
+		 iter != end; ++iter)
 	{
 		LLViewerJointAttachment* attachment = iter->second;
 		if (attachment->getIsHUDAttachment())
 		{
-			for (LLViewerJointAttachment::attachedobjs_vec_t::iterator attachment_iter = attachment->mAttachedObjects.begin();
-				 attachment_iter != attachment->mAttachedObjects.end();
-				 ++attachment_iter)
+			for (LLViewerJointAttachment::attachedobjs_vec_t::iterator
+					attachment_iter = attachment->mAttachedObjects.begin(),
+					end2 = attachment->mAttachedObjects.end();
+				 attachment_iter != end2; ++attachment_iter)
 			{
-				const LLViewerObject* attached_object = (*attachment_iter);
+				const LLViewerObject* attached_object = *attachment_iter;
 				if (attached_object && attached_object->mDrawable.notNull())
 				{
 					gPipeline.markMoved(attached_object->mDrawable);
@@ -6100,13 +6178,15 @@ void LLVOAvatar::rebuildRiggedAttachments(void)
 {
 	LL_DEBUGS("Avatar") << "LLVOAvatar::rebuildRiggedAttachments() called for avatar: "
 						<< getID() << LL_ENDL;
-	for (attachment_map_t::iterator iter = mAttachmentPoints.begin();
-		 iter != mAttachmentPoints.end(); ++iter)
+	for (attachment_map_t::iterator iter = mAttachmentPoints.begin(),
+									end = mAttachmentPoints.end();
+		 iter != end; ++iter)
 	{
 		LLViewerJointAttachment* pAttachment = iter->second;
-		LLViewerJointAttachment::attachedobjs_vec_t::iterator attachmentIterEnd = pAttachment->mAttachedObjects.end();
 
-		for (LLViewerJointAttachment::attachedobjs_vec_t::iterator attachmentIter = pAttachment->mAttachedObjects.begin();
+		for (LLViewerJointAttachment::attachedobjs_vec_t::iterator
+				attachmentIter = pAttachment->mAttachedObjects.begin(),
+				attachmentIterEnd = pAttachment->mAttachedObjects.end();
 			 attachmentIter != attachmentIterEnd; ++attachmentIter)
 		{
 			const LLViewerObject* pAttachedObject = *attachmentIter;
@@ -6153,8 +6233,9 @@ void LLVOAvatar::cleanupAttachedMesh(LLViewerObject* pVO)
 // virtual
 BOOL LLVOAvatar::detachObject(LLViewerObject* viewer_object)
 {
-	for (attachment_map_t::iterator iter = mAttachmentPoints.begin(); 
-		 iter != mAttachmentPoints.end(); ++iter)
+	for (attachment_map_t::iterator iter = mAttachmentPoints.begin(),
+									end = mAttachmentPoints.end(); 
+		 iter != end; ++iter)
 	{
 		LLViewerJointAttachment* attachment = iter->second;
 
@@ -6272,8 +6353,9 @@ void LLVOAvatar::getOffObject()
 		LLFollowCamMgr::setCameraActive(sit_object->getID(), FALSE);
 
 		LLViewerObject::const_child_list_t& child_list = sit_object->getChildren();
-		for (LLViewerObject::child_list_t::const_iterator iter = child_list.begin();
-			 iter != child_list.end(); ++iter)
+		for (LLViewerObject::child_list_t::const_iterator
+					iter = child_list.begin(), end = child_list.end();
+			 iter != end; ++iter)
 		{
 			LLViewerObject* child_objectp = *iter;
 
@@ -6416,7 +6498,7 @@ void LLVOAvatar::onGlobalColorChanged(const LLTexGlobalColor* global_color,
 		if (!isTextureDefined(mBakedTextureDatas[BAKED_HAIR].mTextureIndex))
 		{
 			LLColor4 color = mTexHairColor->getColor();
-			for (U32 i = 0; i < mBakedTextureDatas[BAKED_HAIR].mMeshes.size(); i++)
+			for (U32 i = 0; i < mBakedTextureDatas[BAKED_HAIR].mMeshes.size(); ++i)
 			{
 				mBakedTextureDatas[BAKED_HAIR].mMeshes[i]->setColor(color.mV[VX],
 																	color.mV[VY],
@@ -6517,7 +6599,7 @@ BOOL LLVOAvatar::processFullyLoadedChange(bool loading)
 
 	mPreviousFullyLoaded = mFullyLoaded;
 	mFullyLoadedInitialized = TRUE;
-	mFullyLoadedFrameCounter++;
+	++mFullyLoadedFrameCounter;
 
 	return changed;
 }
@@ -6546,7 +6628,7 @@ void LLVOAvatar::updateMeshTextures()
 	if (gNoRender) return;
 
 	// if user has never specified a texture, assign the default
-	for (U32 i = 0, count = getNumTEs(); i < count; i++)
+	for (U32 i = 0, count = getNumTEs(); i < count; ++i)
 	{
 		const LLViewerTexture* te_image = getImage(i, 0);
 		if (!te_image || te_image->getID().isNull() ||
@@ -6575,7 +6657,7 @@ void LLVOAvatar::updateMeshTextures()
 	std::vector<bool> use_lkg_baked_layer; // lkg = "last known good"
 	use_lkg_baked_layer.resize(mBakedTextureDatas.size(), false);
 
-	for (U32 i = 0; i < mBakedTextureDatas.size(); i++)
+	for (U32 i = 0; i < mBakedTextureDatas.size(); ++i)
 	{
 		is_layer_baked[i] = isTextureDefined(mBakedTextureDatas[i].mTextureIndex);
 
@@ -6616,13 +6698,13 @@ void LLVOAvatar::updateMeshTextures()
 				<< llendl;
 	}
 
-	for (U32 i = 0; i < mBakedTextureDatas.size(); i++)
+	for (U32 i = 0; i < mBakedTextureDatas.size(); ++i)
 	{
 		if (!self_customizing && use_lkg_baked_layer[i])
 		{
 			LLViewerFetchedTexture* baked_img = LLViewerTextureManager::getFetchedTextureFromHost(mBakedTextureDatas[i].mLastTextureIndex, target_host);
 			mBakedTextureDatas[i].mIsUsed = TRUE;
-			for (U32 k = 0; k < mBakedTextureDatas[i].mMeshes.size(); k++)
+			for (U32 k = 0; k < mBakedTextureDatas[i].mMeshes.size(); ++k)
 			{
 				mBakedTextureDatas[i].mMeshes[k]->setTexture(baked_img);
 			}
@@ -6659,7 +6741,7 @@ void LLVOAvatar::updateMeshTextures()
 			mBakedTextureDatas[i].mTexLayerSet->createComposite();
 			mBakedTextureDatas[i].mTexLayerSet->setUpdatesEnabled(TRUE);
 			mBakedTextureDatas[i].mIsUsed = FALSE;
-			for (U32 k = 0; k < mBakedTextureDatas[i].mMeshes.size(); k++)
+			for (U32 k = 0; k < mBakedTextureDatas[i].mMeshes.size(); ++k)
 			{
 				mBakedTextureDatas[i].mMeshes[k]->setLayerSet(mBakedTextureDatas[i].mTexLayerSet);
 			}
@@ -6675,7 +6757,7 @@ void LLVOAvatar::updateMeshTextures()
 		const LLColor4 color = mTexHairColor ? mTexHairColor->getColor()
 											 : LLColor4(1, 1, 1, 1);
 		LLViewerTexture* hair_img = getImage(TEX_HAIR, 0);
-		for (U32 i = 0; i < mBakedTextureDatas[BAKED_HAIR].mMeshes.size(); i++)
+		for (U32 i = 0; i < mBakedTextureDatas[BAKED_HAIR].mMeshes.size(); ++i)
 		{
 			mBakedTextureDatas[BAKED_HAIR].mMeshes[i]->setColor(color.mV[VX],
 																color.mV[VY],
@@ -6687,16 +6769,18 @@ void LLVOAvatar::updateMeshTextures()
 
 	if (isSelf())
 	{
-		for (LLVOAvatarDictionary::BakedTextures::const_iterator baked_iter = LLVOAvatarDictionary::getInstance()->getBakedTextures().begin();
-			 baked_iter != LLVOAvatarDictionary::getInstance()->getBakedTextures().end();
-			 baked_iter++)
+		for (LLVOAvatarDictionary::BakedTextures::const_iterator
+				baked_iter = LLVOAvatarDictionary::getInstance()->getBakedTextures().begin(),
+				end = LLVOAvatarDictionary::getInstance()->getBakedTextures().end();
+			 baked_iter != end; ++baked_iter)
 		{
 			const EBakedTextureIndex baked_index = baked_iter->first;
 			const LLVOAvatarDictionary::BakedEntry* baked_dict = baked_iter->second;
 
-			for (texture_vec_t::const_iterator local_tex_iter = baked_dict->mLocalTextures.begin();
-				 local_tex_iter != baked_dict->mLocalTextures.end();
-				 local_tex_iter++)
+			for (texture_vec_t::const_iterator
+					local_tex_iter = baked_dict->mLocalTextures.begin(),
+					end2 = baked_dict->mLocalTextures.end();
+				 local_tex_iter != end2; ++local_tex_iter)
 			{
 				const ETextureIndex texture_index = *local_tex_iter;
 				const BOOL is_baked_ready = (is_layer_baked[baked_index] &&
@@ -6810,12 +6894,15 @@ void LLVOAvatar::applyMorphMask(U8* tex_data,
 {
 	if (index >= BAKED_NUM_INDICES)
 	{
-		llwarns << "invalid baked texture index passed to applyMorphMask" << llendl;
+		llwarns << "invalid baked texture index passed to applyMorphMask"
+				<< llendl;
 		return;
 	}
 
-	for (morph_list_t::const_iterator iter = mBakedTextureDatas[index].mMaskedMorphs.begin();
-		 iter != mBakedTextureDatas[index].mMaskedMorphs.end(); ++iter)
+	for (morph_list_t::const_iterator
+			iter = mBakedTextureDatas[index].mMaskedMorphs.begin(),
+			end = mBakedTextureDatas[index].mMaskedMorphs.end();
+		 iter != end; ++iter)
 	{
 		const LLMaskedMorph* maskedMorph = *iter;
 		maskedMorph->mMorphTarget->applyMask(tex_data, width, height,
@@ -6847,7 +6934,7 @@ void LLVOAvatar::releaseComponentTextures()
 		}
 	}
 
-	for (U8 baked_index = 0; baked_index < BAKED_NUM_INDICES; baked_index++)
+	for (U8 baked_index = 0; baked_index < BAKED_NUM_INDICES; ++baked_index)
 	{
 		const LLVOAvatarDictionary::BakedEntry* bakedDicEntry;
 		bakedDicEntry = LLVOAvatarDictionary::getInstance()->getBakedTexture((EBakedTextureIndex)baked_index);
@@ -6861,7 +6948,7 @@ void LLVOAvatar::releaseComponentTextures()
 		}
 
 		for (U8 texture = 0; texture < bakedDicEntry->mLocalTextures.size();
-			 texture++)
+			 ++texture)
 		{
 			const U8 te = (ETextureIndex)bakedDicEntry->mLocalTextures[texture];
 			setTETexture(te, IMG_DEFAULT_AVATAR);
@@ -7031,9 +7118,10 @@ BOOL LLVOAvatar::isWearingWearableType(LLWearableType::EType type) const
 	/* switch (type)
 		case LLWearableType::WT_SHIRT:
 			indicator_te = TEX_UPPER_SHIRT; */
-	for (LLVOAvatarDictionary::Textures::const_iterator tex_iter = LLVOAvatarDictionary::getInstance()->getTextures().begin();
-		 tex_iter != LLVOAvatarDictionary::getInstance()->getTextures().end();
-		 ++tex_iter)
+	for (LLVOAvatarDictionary::Textures::const_iterator
+			tex_iter = LLVOAvatarDictionary::getInstance()->getTextures().begin(),
+			end = LLVOAvatarDictionary::getInstance()->getTextures().end();
+		 tex_iter != end; ++tex_iter)
 	{
 		const LLVOAvatarDictionary::TextureEntry* texture_dict = tex_iter->second;
 		if (texture_dict->mWearableType == type)
@@ -7066,8 +7154,9 @@ void LLVOAvatar::clampAttachmentPositions()
 	{
 		return;
 	}
-	for (attachment_map_t::iterator iter = mAttachmentPoints.begin(); 
-		 iter != mAttachmentPoints.end(); ++iter)
+	for (attachment_map_t::iterator iter = mAttachmentPoints.begin(),
+									end = mAttachmentPoints.end(); 
+		 iter != end; ++iter)
 	{
 		LLViewerJointAttachment* attachment = iter->second;
 		if (attachment)
@@ -7079,8 +7168,9 @@ void LLVOAvatar::clampAttachmentPositions()
 
 BOOL LLVOAvatar::hasHUDAttachment() const
 {
-	for (attachment_map_t::const_iterator iter = mAttachmentPoints.begin(); 
-		 iter != mAttachmentPoints.end(); ++iter)
+	for (attachment_map_t::const_iterator iter = mAttachmentPoints.begin(),
+										  end = mAttachmentPoints.end(); 
+		 iter != end; ++iter)
 	{
 		LLViewerJointAttachment* attachment = iter->second;
 		if (attachment->getIsHUDAttachment() && attachment->getNumObjects() > 0)
@@ -7094,29 +7184,33 @@ BOOL LLVOAvatar::hasHUDAttachment() const
 LLBBox LLVOAvatar::getHUDBBox() const
 {
 	LLBBox bbox;
-	for (attachment_map_t::const_iterator iter = mAttachmentPoints.begin(); 
-		 iter != mAttachmentPoints.end(); ++iter)
+	for (attachment_map_t::const_iterator iter = mAttachmentPoints.begin(),
+										  end = mAttachmentPoints.end(); 
+		 iter != end; ++iter)
 	{
 		LLViewerJointAttachment* attachment = iter->second;
 		if (attachment->getIsHUDAttachment())
 		{
-			for (LLViewerJointAttachment::attachedobjs_vec_t::iterator attachment_iter = attachment->mAttachedObjects.begin();
-				 attachment_iter != attachment->mAttachedObjects.end();
-				 ++attachment_iter)
+			for (LLViewerJointAttachment::attachedobjs_vec_t::iterator
+					attachment_iter = attachment->mAttachedObjects.begin(),
+					end2 = attachment->mAttachedObjects.end();
+				 attachment_iter != end2; ++attachment_iter)
 			{
-				const LLViewerObject* attached_object = (*attachment_iter);
+				const LLViewerObject* attached_object = *attachment_iter;
 				if (attached_object == NULL)
 				{
 					llwarns << "HUD attached object is NULL!" << llendl;
 					continue;
 				}
-				// initialize bounding box to contain identity orientation and center point for attached object
+				// initialize bounding box to contain identity orientation and
+				// center point for attached object
 				bbox.addPointLocal(attached_object->getPosition());
 				// add rotated bounding box for attached object
 				bbox.addBBoxAgent(attached_object->getBoundingBoxAgent());
 				LLViewerObject::const_child_list_t& child_list = attached_object->getChildren();
-				for (LLViewerObject::child_list_t::const_iterator iter = child_list.begin();
-					 iter != child_list.end(); ++iter)
+				for (LLViewerObject::child_list_t::const_iterator
+						iter = child_list.begin(), end3 = child_list.end();
+					 iter != end3; ++iter)
 				{
 					const LLViewerObject* child_objectp = *iter;
 					bbox.addBBoxAgent(child_objectp->getBoundingBoxAgent());
@@ -7149,7 +7243,7 @@ void LLVOAvatar::onFirstTEMessageReceived()
 			paused = mLoadedCallbacksPaused;
 		}
 
-		for (U32 i = 0; i < mBakedTextureDatas.size(); i++)
+		for (U32 i = 0; i < mBakedTextureDatas.size(); ++i)
 		{
 			const bool layer_baked = isTextureDefined(mBakedTextureDatas[i].mTextureIndex);
 
@@ -7259,7 +7353,7 @@ void LLVOAvatar::processAvatarAppearance(LLMessageSystem* mesgsys)
 //	dumpAvatarTEs("POST processAvatarAppearance()");
 
 	// prevent the overwriting of valid baked textures with invalid baked textures
-	for (U8 baked_index = 0; baked_index < mBakedTextureDatas.size(); baked_index++)
+	for (U8 baked_index = 0; baked_index < mBakedTextureDatas.size(); ++baked_index)
 	{
 		if (!isTextureDefined(mBakedTextureDatas[baked_index].mTextureIndex) &&
 			mBakedTextureDatas[baked_index].mLastTextureIndex != IMG_DEFAULT &&
@@ -7307,7 +7401,7 @@ void LLVOAvatar::processAvatarAppearance(LLMessageSystem* mesgsys)
 		}
 		else
 		{
-			for (S32 i = 0; i < num_blocks; i++)
+			for (S32 i = 0; i < num_blocks; ++i)
 			{
 				while (param && param->getGroup() != VISUAL_PARAM_GROUP_TWEAKABLE) // should not be any of group VISUAL_PARAM_GROUP_TWEAKABLE_NO_TRANSMIT
 				{
@@ -7399,7 +7493,7 @@ void LLVOAvatar::processAvatarAppearance(LLMessageSystem* mesgsys)
 void LLVOAvatar::getAnimLabels(LLDynamicArray<std::string>* labels)
 {
 	S32 i;
-	for (i = 0; i < gUserAnimStatesCount; i++)
+	for (i = 0; i < gUserAnimStatesCount; ++i)
 	{
 		labels->put(LLAnimStateLabels::getStateLabel(gUserAnimStates[i].mName));
 	}
@@ -7413,7 +7507,7 @@ void LLVOAvatar::getAnimNames(LLDynamicArray<std::string>* names)
 {
 	S32 i;
 
-	for (i = 0; i < gUserAnimStatesCount; i++)
+	for (i = 0; i < gUserAnimStatesCount; ++i)
 	{
 		names->put(std::string(gUserAnimStates[i].mName));
 	}
@@ -7474,9 +7568,10 @@ void LLVOAvatar::onBakedTextureMasksLoaded(BOOL success,
 					 self->mBakedTextureDatas[BAKED_HEAD].mTexLayerSet->applyMorphMask(aux_src->getData(), aux_src->getWidth(), aux_src->getHeight(), 1);
 					 maskData->mLastDiscardLevel = discard_level; */
 			bool found_texture_id = false;
-			for (LLVOAvatarDictionary::Textures::const_iterator iter = LLVOAvatarDictionary::getInstance()->getTextures().begin();
-				 iter != LLVOAvatarDictionary::getInstance()->getTextures().end();
-				 ++iter)
+			for (LLVOAvatarDictionary::Textures::const_iterator
+					iter = LLVOAvatarDictionary::getInstance()->getTextures().begin(),
+					end = LLVOAvatarDictionary::getInstance()->getTextures().end();
+				 iter != end; ++iter)
 			{
 				const LLVOAvatarDictionary::TextureEntry* texture_dict = iter->second;
 				if (texture_dict->mIsUsedByBakedTexture)
@@ -7589,7 +7684,7 @@ void LLVOAvatar::useBakedTexture(const LLUUID& id)
 		 mLastHeadBakedID = id;
 		 mHeadMesh0.setTexture(head_baked);
 		 mHeadMesh1.setTexture(head_baked); */
-	for (U32 i = 0; i < mBakedTextureDatas.size(); i++)
+	for (U32 i = 0, count = mBakedTextureDatas.size(); i < count; ++i)
 	{
 		LLViewerTexture* image_baked = getImage(mBakedTextureDatas[i].mTextureIndex, 0);
 		if (id == image_baked->getID())
@@ -7597,27 +7692,30 @@ void LLVOAvatar::useBakedTexture(const LLUUID& id)
 			mBakedTextureDatas[i].mIsLoaded = true;
 			mBakedTextureDatas[i].mLastTextureIndex = id;
 			mBakedTextureDatas[i].mIsUsed = true;
-			for (U32 k = 0; k < mBakedTextureDatas[i].mMeshes.size(); k++)
+			for (U32 k = 0; k < mBakedTextureDatas[i].mMeshes.size(); ++k)
 			{
 				mBakedTextureDatas[i].mMeshes[k]->setTexture(image_baked);
 			}
 			if (isSelf())
 			{
 				const LLVOAvatarDictionary::BakedEntry* baked_dict = LLVOAvatarDictionary::getInstance()->getBakedTexture((EBakedTextureIndex)i);
-				for (texture_vec_t::const_iterator local_tex_iter = baked_dict->mLocalTextures.begin();
-					 local_tex_iter != baked_dict->mLocalTextures.end();
-					 ++local_tex_iter)
+				for (texture_vec_t::const_iterator
+						local_tex_iter = baked_dict->mLocalTextures.begin(),
+						end = baked_dict->mLocalTextures.end();
+					 local_tex_iter != end; ++local_tex_iter)
 				{
 					setBakedReady(*local_tex_iter, TRUE);
 				}
 			}
 
 			// ! BACKWARDS COMPATIBILITY !
-			// Workaround for viewing avatars from old viewers that haven't baked hair textures.
-			// This is paired with similar code in updateMeshTextures that sets hair mesh color.
+			// Workaround for viewing avatars from old viewers that haven't
+			// baked hair textures. This is paired with similar code in
+			// updateMeshTextures that sets hair mesh color.
 			if (i == BAKED_HAIR)
 			{
-				for (U32 i = 0; i < mBakedTextureDatas[BAKED_HAIR].mMeshes.size(); i++)
+				for (U32 i = 0, count2 = mBakedTextureDatas[BAKED_HAIR].mMeshes.size();
+					 i < count2; ++i)
 				{
 					mBakedTextureDatas[BAKED_HAIR].mMeshes[i]->setColor(1.f, 1.f, 1.f, 1.f);
 				}
@@ -7662,7 +7760,7 @@ void LLVOAvatar::dumpXMLCallback(LLFilePicker::ESaveFilter type,
 
 	// only body parts, not clothing.
 	for (S32 type = LLWearableType::WT_SHAPE;
-		 type <= LLWearableType::WT_EYES; type++)
+		 type <= LLWearableType::WT_EYES; ++type)
 	{
 		const std::string& wearable_name = LLWearableType::getTypeName((LLWearableType::EType)type);
 		apr_file_printf(file, "\n\t\t<!-- wearable: %s -->\n", wearable_name.c_str());
@@ -7678,7 +7776,7 @@ void LLVOAvatar::dumpXMLCallback(LLFilePicker::ESaveFilter type,
 			}
 		}
 
-		for (U8 te = 0; te < TEX_NUM_INDICES; te++)
+		for (U8 te = 0; te < TEX_NUM_INDICES; ++te)
 		{
 			if (LLVOAvatarDictionary::getTEWearableType((ETextureIndex)te) == type)
 			{
@@ -7712,8 +7810,10 @@ void LLVOAvatar::setVisibilityRank(U32 rank)
 S32 LLVOAvatar::getUnbakedPixelAreaRank()
 {
 	S32 rank = 1;
-	for (std::vector<LLCharacter*>::iterator iter = LLCharacter::sInstances.begin();
-		iter != LLCharacter::sInstances.end(); ++iter)
+	for (std::vector<LLCharacter*>::iterator
+			iter = LLCharacter::sInstances.begin(),
+			end = LLCharacter::sInstances.end();
+		 iter != end; ++iter)
 	{
 		LLVOAvatar* inst = (LLVOAvatar*) *iter;
 		if (inst == this)
@@ -7722,7 +7822,7 @@ S32 LLVOAvatar::getUnbakedPixelAreaRank()
 		}
 		else if (!inst->isDead() && !inst->isFullyBaked())
 		{
-			rank++;
+			++rank;
 		}
 	}
 
@@ -7741,12 +7841,15 @@ struct CompareScreenAreaGreater
 // static
 void LLVOAvatar::cullAvatarsByPixelArea()
 {
-	std::sort(LLCharacter::sInstances.begin(), LLCharacter::sInstances.end(), CompareScreenAreaGreater());
+	std::sort(LLCharacter::sInstances.begin(), LLCharacter::sInstances.end(),
+			  CompareScreenAreaGreater());
 
 	// Update the avatars that have changed status
 	U32 rank = 2; //1 is reserved for self. 
-	for (std::vector<LLCharacter*>::iterator iter = LLCharacter::sInstances.begin();
-		iter != LLCharacter::sInstances.end(); ++iter)
+	for (std::vector<LLCharacter*>::iterator
+			iter = LLCharacter::sInstances.begin(),
+			end = LLCharacter::sInstances.end();
+		 iter != end; ++iter)
 	{
 		LLVOAvatar* inst = (LLVOAvatar*) *iter;
 		BOOL culled;
@@ -7830,17 +7933,22 @@ LLVOAvatar::LLVOAvatarXmlInfo::LLVOAvatarXmlInfo()
 LLVOAvatar::LLVOAvatarXmlInfo::~LLVOAvatarXmlInfo()
 {
 	std::for_each(mMeshInfoList.begin(), mMeshInfoList.end(), DeletePointer());
-	std::for_each(mSkeletalDistortionInfoList.begin(), mSkeletalDistortionInfoList.end(), DeletePointer());
-	std::for_each(mAttachmentInfoList.begin(), mAttachmentInfoList.end(), DeletePointer());
+	std::for_each(mSkeletalDistortionInfoList.begin(),
+				  mSkeletalDistortionInfoList.end(), DeletePointer());
+	std::for_each(mAttachmentInfoList.begin(), mAttachmentInfoList.end(),
+				  DeletePointer());
 	delete mTexSkinColorInfo;
 	mTexSkinColorInfo = NULL;
 	delete mTexHairColorInfo;
 	mTexHairColorInfo = NULL;
 	delete mTexEyeColorInfo;
 	mTexEyeColorInfo = NULL;
-	std::for_each(mLayerInfoList.begin(), mLayerInfoList.end(), DeletePointer());
-	std::for_each(mDriverInfoList.begin(), mDriverInfoList.end(), DeletePointer());
-	std::for_each(mMorphMaskInfoList.begin(), mMorphMaskInfoList.end(), DeletePointer());
+	std::for_each(mLayerInfoList.begin(), mLayerInfoList.end(),
+				  DeletePointer());
+	std::for_each(mDriverInfoList.begin(), mDriverInfoList.end(),
+				  DeletePointer());
+	std::for_each(mMorphMaskInfoList.begin(), mMorphMaskInfoList.end(),
+				  DeletePointer());
 }
 
 //-----------------------------------------------------------------------------
@@ -8408,13 +8516,15 @@ U32 LLVOAvatar::getPartitionType() const
 // static
 void LLVOAvatar::updateImpostors() 
 {
-	for (std::vector<LLCharacter*>::iterator iter = LLCharacter::sInstances.begin();
-		iter != LLCharacter::sInstances.end(); ++iter)
+	for (std::vector<LLCharacter*>::iterator
+			iter = LLCharacter::sInstances.begin(),
+			end = LLCharacter::sInstances.end();
+		 iter != end; ++iter)
 	{
 		LLVOAvatar* avatar = (LLVOAvatar*) *iter;
 
 		if (!avatar->isDead() && avatar->needsImpostorUpdate() &&
-			 avatar->isVisible() && avatar->isImpostor())
+			avatar->isVisible() && avatar->isImpostor())
 		{
 			gPipeline.generateImpostor(avatar);
 		}
@@ -8480,7 +8590,7 @@ void LLVOAvatar::idleUpdateRenderCost()
 	U32 cost = 0;
 	LLVOVolume::texture_cost_t textures;
 
-	for (U8 baked_index = 0; baked_index < BAKED_NUM_INDICES; baked_index++)
+	for (U8 baked_index = 0; baked_index < BAKED_NUM_INDICES; ++baked_index)
 	{
 		const LLVOAvatarDictionary::BakedEntry* baked_dict = LLVOAvatarDictionary::getInstance()->getBakedTexture((EBakedTextureIndex)baked_index);
 		ETextureIndex tex_index = baked_dict->mTextureIndex;
@@ -8494,15 +8604,17 @@ void LLVOAvatar::idleUpdateRenderCost()
 		}
 	}
 
-	for (attachment_map_t::const_iterator iter = mAttachmentPoints.begin(); 
-		 iter != mAttachmentPoints.end(); ++iter)
+	for (attachment_map_t::const_iterator iter = mAttachmentPoints.begin(),
+										  end = mAttachmentPoints.end();
+		 iter != end; ++iter)
 	{
 		LLViewerJointAttachment* attachment = iter->second;
-		for (LLViewerJointAttachment::attachedobjs_vec_t::iterator attachment_iter = attachment->mAttachedObjects.begin();
-			 attachment_iter != attachment->mAttachedObjects.end();
-			 ++attachment_iter)
+		for (LLViewerJointAttachment::attachedobjs_vec_t::iterator
+				attachment_iter = attachment->mAttachedObjects.begin(),
+				end2 = attachment->mAttachedObjects.end();
+			 attachment_iter != end2; ++attachment_iter)
 		{
-			const LLViewerObject* attached_object = (*attachment_iter);
+			const LLViewerObject* attached_object = *attachment_iter;
 			if (attached_object && !attached_object->isHUDAttachment())
 			{
 				textures.clear();
@@ -8515,8 +8627,10 @@ void LLVOAvatar::idleUpdateRenderCost()
 						cost += volume->getRenderCost(textures);
 
 						const_child_list_t children = volume->getChildren();
-						for (const_child_list_t::const_iterator child_iter = children.begin();
-							 child_iter != children.end(); ++child_iter)
+						for (const_child_list_t::const_iterator
+								child_iter = children.begin(),
+								end3 = children.end();
+							 child_iter != end3; ++child_iter)
 						{
 							LLViewerObject* child_obj = *child_iter;
 							LLVOVolume* child = dynamic_cast<LLVOVolume*>(child_obj);
@@ -8526,8 +8640,9 @@ void LLVOAvatar::idleUpdateRenderCost()
 							}
 						}
 
-						for (LLVOVolume::texture_cost_t::iterator iter = textures.begin();
-							 iter != textures.end(); ++iter)
+						for (LLVOVolume::texture_cost_t::iterator
+								iter = textures.begin(), end3 = textures.end();
+							 iter != end3; ++iter)
 						{
 							// add the cost of each individual texture in the linkset
 							cost += iter->second;
@@ -8563,9 +8678,10 @@ const std::string LLVOAvatar::getBakedStatusForPrintout() const
 {
 	std::string line;
 
-	for (LLVOAvatarDictionary::Textures::const_iterator iter = LLVOAvatarDictionary::getInstance()->getTextures().begin();
-		 iter != LLVOAvatarDictionary::getInstance()->getTextures().end();
-		 ++iter)
+	for (LLVOAvatarDictionary::Textures::const_iterator
+			iter = LLVOAvatarDictionary::getInstance()->getTextures().begin(),
+			end = LLVOAvatarDictionary::getInstance()->getTextures().end();
+		 iter != end; ++iter)
 	{
 		const ETextureIndex index = iter->first;
 		const LLVOAvatarDictionary::TextureEntry* texture_dict = iter->second;

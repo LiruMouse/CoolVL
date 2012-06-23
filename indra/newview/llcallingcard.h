@@ -1,11 +1,11 @@
-/** 
+/**
  * @file llcallingcard.h
  * @brief Definition of the LLPreviewCallingCard class
  *
  * $LicenseInfo:firstyear=2002&license=viewergpl$
- * 
+ *
  * Copyright (c) 2002-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -41,6 +41,8 @@
 #include "lluuid.h"
 #include "v3dmath.h"
 
+#define TRACK_POWER 0	// Not implemented
+
 //class LLInventoryModel;
 //class LLInventoryObserver;
 class LLMessageSystem;
@@ -51,7 +53,7 @@ public:
 	// This enumeration is a way to refer to what changed in a more
 	// human readable format. You can mask the value provided by
 	// chaged() to see if the observer is interested in the change.
-	enum 
+	enum
 	{
 		NONE = 0,
 		ADD = 1,
@@ -64,14 +66,14 @@ public:
 	virtual void changed(U32 mask) = 0;
 };
 
-/*
+#if TRACK_POWER
 struct LLBuddyInfo
 {
 	bool mIsOnline;
 	bool mIsEmpowered;
 	LLBuddyInfo() : mIsOnline(false), mIsEmpowered(false) {}
 };
-*/
+#endif
 
 // This is used as a base class for doing operations on all buddies.
 class LLRelationshipFunctor
@@ -80,17 +82,26 @@ public:
 	virtual ~LLRelationshipFunctor() {}
 	virtual bool operator()(const LLUUID& buddy_id, LLRelationship* buddy) = 0;
 };
-	
 
 class LLAvatarTracker
 {
+
+private:
+	// don't you dare create or delete this object
+	LLAvatarTracker();
+	~LLAvatarTracker();
+
+	// do not implement
+	LLAvatarTracker(const LLAvatarTracker&);
+	bool operator==(const LLAvatarTracker&);
+
 public:
-	static LLAvatarTracker& instance() { return sInstance; }
-	
+	static LLAvatarTracker& instance()		{ return sInstance; }
+
 	void track(const LLUUID& avatar_id, const std::string& name);
 	void untrack(const LLUUID& avatar_id);
-	bool isTrackedAgentValid() { return mTrackedAgentValid; }
-	void setTrackedAgentValid(bool valid) { mTrackedAgentValid = valid; }
+	bool isTrackedAgentValid()				{ return mTrackedAgentValid; }
+	void setTrackedAgentValid(bool valid)	{ mTrackedAgentValid = valid; }
 	void findAgent();
 
 	// coarse update information
@@ -132,6 +143,7 @@ public:
 	void setBuddyOnline(const LLUUID& id, bool is_online);
 	bool isBuddyOnline(const LLUUID& id) const;
 
+#if TRACK_POWER
 	// simple empowered status
 	void setBuddyEmpowered(const LLUUID& id, bool is_empowered);
 	bool isBuddyEmpowered(const LLUUID& id) const;
@@ -139,6 +151,7 @@ public:
 	// set the empower bit & message the server.
 	void empowerList(const buddy_map_t& list, bool grant);
 	void empower(const LLUUID& id, bool grant); // wrapper for above
+#endif
 
 	// register callbacks
 	void registerCallbacks(LLMessageSystem* msg);
@@ -184,16 +197,6 @@ protected:
 
 	typedef std::vector<LLFriendObserver*> observer_list_t;
 	observer_list_t mObservers;
-
-private:
-	// do not implement
-	LLAvatarTracker(const LLAvatarTracker&);
-	bool operator==(const LLAvatarTracker&);
-
-public:
-	// don't you dare create or delete this object
-	LLAvatarTracker();
-	~LLAvatarTracker();
 };
 
 // collect set of LLUUIDs we're a proxy for

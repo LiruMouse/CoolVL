@@ -147,7 +147,7 @@ BOOL LLFloaterFriends::tick()
 // static
 void LLFloaterFriends::show(void*)
 {
-	if(sInstance)
+	if (sInstance)
 	{
 		sInstance->open();	/*Flawfinder: ignore*/
 	}
@@ -201,7 +201,7 @@ void LLFloaterFriends::updateFriends(U32 changed_mask)
 	else if (changed_mask & LLFriendObserver::POWERS)
 	{
 		--mNumRightsChanged;
-		if(mNumRightsChanged > 0)
+		if (mNumRightsChanged > 0)
 		{
 			mPeriod = RIGHTS_CHANGE_TIMEOUT;	
 			mEventTimer.start();
@@ -218,7 +218,7 @@ void LLFloaterFriends::updateFriends(U32 changed_mask)
 		// but we don't really care here, because refreshUI() will
 		// clean up the interface.
 		friends_list->setCurrentByID(selected_id);
-		for(LLDynamicArray<LLUUID>::iterator itr = selected_friends.begin(); itr != selected_friends.end(); ++itr)
+		for (LLDynamicArray<LLUUID>::iterator itr = selected_friends.begin(); itr != selected_friends.end(); ++itr)
 		{
 			friends_list->setSelectedByValue(*itr, true);
 		}
@@ -267,7 +267,7 @@ BOOL LLFloaterFriends::addFriend(const LLUUID& agent_id)
 	if (!sInstance) return FALSE;
 	LLAvatarTracker& at = LLAvatarTracker::instance();
 	const LLRelationship* relationInfo = at.getBuddyInfo(agent_id);
-	if(!relationInfo) return FALSE;
+	if (!relationInfo) return FALSE;
 
 	bool isOnlineSIP = LLVoiceClient::getInstance()->isOnlineSIP(agent_id);
 	bool isOnline = relationInfo->isOnline();
@@ -276,7 +276,8 @@ BOOL LLFloaterFriends::addFriend(const LLUUID& agent_id)
 	BOOL have_name = gCacheName->getFullName(agent_id, fullname);
 	if (have_name)
 	{
-		if (LLAvatarNameCache::useDisplayNames() && !gSavedSettings.getBOOL("LegacyNamesForFriends"))
+		if (!LLAvatarName::sLegacyNamesForFriends &&
+			LLAvatarNameCache::useDisplayNames())
 		{
 			LLAvatarName avatar_name;
 			if (LLAvatarNameCache::get(agent_id, &avatar_name))
@@ -310,7 +311,7 @@ BOOL LLFloaterFriends::addFriend(const LLUUID& agent_id)
 		friend_column["font-style"] = "BOLD";	
 		online_status_column["value"] = "icon_avatar_online.tga";
 	}
-	else if(isOnlineSIP)
+	else if (isOnlineSIP)
 	{
 		friend_column["font-style"] = "BOLD";	
 		online_status_column["value"] = ONLINE_SIP_ICON_NAME;
@@ -375,7 +376,8 @@ BOOL LLFloaterFriends::updateFriendItem(const LLUUID& agent_id, const LLRelation
 	BOOL have_name = gCacheName->getFullName(agent_id, fullname);
 	if (have_name)
 	{
-		if (LLAvatarNameCache::useDisplayNames() && !gSavedSettings.getBOOL("LegacyNamesForFriends"))
+		if (!LLAvatarName::sLegacyNamesForFriends &&
+			LLAvatarNameCache::useDisplayNames())
 		{
 			LLAvatarName avatar_name;
 			if (LLAvatarNameCache::get(agent_id, &avatar_name))
@@ -395,11 +397,11 @@ BOOL LLFloaterFriends::updateFriendItem(const LLUUID& agent_id, const LLRelation
 	// Name of the status icon to use
 	std::string statusIcon;
 	
-	if(isOnline)
+	if (isOnline)
 	{
 		statusIcon = "icon_avatar_online.tga";
 	}
-	else if(isOnlineSIP)
+	else if (isOnlineSIP)
 	{
 		statusIcon = ONLINE_SIP_ICON_NAME;
 	}
@@ -589,7 +591,7 @@ BOOL LLFloaterFriends::refreshNamesPresence(const LLAvatarTracker::buddy_map_t &
 		{
 			++item_it;
 		}
-		else //if(item_uuid > buddy_uuid)
+		else //if (item_uuid > buddy_uuid)
 		{
 			++buddy_it;
 		}
@@ -744,7 +746,7 @@ void LLFloaterFriends::onPickAvatar(const std::vector<std::string>& names,
 void LLFloaterFriends::requestFriendshipDialog(const LLUUID& id,
 											   const std::string& name)
 {
-	if(id == gAgentID)
+	if (id == gAgentID)
 	{
 		LLNotifications::instance().add("AddSelfFriend");
 		return;
@@ -793,8 +795,8 @@ void LLFloaterFriends::onClickRemove(void* user_data)
 			std::string name;
 			if (gCacheName->getFullName(agent_id, name))
 			{
-				if (LLAvatarNameCache::useDisplayNames() &&
-					!gSavedSettings.getBOOL("LegacyNamesForFriends"))
+				if (!LLAvatarName::sLegacyNamesForFriends &&
+					LLAvatarNameCache::useDisplayNames())
 				{
 					LLAvatarName avatar_name;
 					if (LLAvatarNameCache::get(agent_id, &avatar_name))
@@ -868,8 +870,8 @@ void LLFloaterFriends::confirmModifyRights(rights_map_t& ids, EGrantRevoke comma
 			std::string name;
 			if (gCacheName->getFullName(agent_id, name))
 			{
-				if (LLAvatarNameCache::useDisplayNames() &&
-					!gSavedSettings.getBOOL("LegacyNamesForFriends"))
+				if (!LLAvatarName::sLegacyNamesForFriends &&
+					LLAvatarNameCache::useDisplayNames())
 				{
 					LLAvatarName avatar_name;
 					if (LLAvatarNameCache::get(agent_id, &avatar_name))
@@ -963,7 +965,7 @@ void LLFloaterFriends::applyRightsToFriends()
 		if (buddy_relationship->isRightGrantedTo(LLRelationship::GRANT_ONLINE_STATUS) != show_online_staus)
 		{
 			rights_changed = TRUE;
-			if(show_online_staus) 
+			if (show_online_staus) 
 			{
 				rights |= LLRelationship::GRANT_ONLINE_STATUS;
 			}
@@ -979,7 +981,7 @@ void LLFloaterFriends::applyRightsToFriends()
 		if (buddy_relationship->isRightGrantedTo(LLRelationship::GRANT_MAP_LOCATION) != show_map_location)
 		{
 			rights_changed = TRUE;
-			if(show_map_location) 
+			if (show_map_location) 
 			{
 				// ONLINE_STATUS necessary for MAP_LOCATION
 				rights |= LLRelationship::GRANT_MAP_LOCATION;
@@ -998,7 +1000,7 @@ void LLFloaterFriends::applyRightsToFriends()
 			rights_changed = TRUE;
 			need_confirmation = TRUE;
 
-			if(allow_modify_objects)
+			if (allow_modify_objects)
 			{
 				rights |= LLRelationship::GRANT_MODIFY_OBJECTS;
 				confirmation_type = GRANT;
@@ -1044,7 +1046,7 @@ void LLFloaterFriends::sendRightsGrant(rights_map_t& ids)
 
 	rights_map_t::iterator id_it;
 	rights_map_t::iterator end_it = ids.end();
-	for(id_it = ids.begin(); id_it != end_it; ++id_it)
+	for (id_it = ids.begin(); id_it != end_it; ++id_it)
 	{
 		msg->nextBlockFast(_PREHASH_Rights);
 		msg->addUUID(_PREHASH_AgentRelated, id_it->first);
@@ -1061,23 +1063,28 @@ bool LLFloaterFriends::handleRemove(const LLSD& notification, const LLSD& respon
 	S32 option = LLNotification::getSelectedOption(notification, response);
 
 	const LLSD& ids = notification["payload"]["ids"];
-	for (LLSD::array_const_iterator itr = ids.beginArray(); itr != ids.endArray(); ++itr)
+	for (LLSD::array_const_iterator itr = ids.beginArray();
+		 itr != ids.endArray(); ++itr)
 	{
 		LLUUID id = itr->asUUID();
 		const LLRelationship* ip = LLAvatarTracker::instance().getBuddyInfo(id);
 		if (ip)
 		{			
-			switch(option)
+			switch (option)
 			{
 			case 0: // YES
 				if (ip->isRightGrantedTo(LLRelationship::GRANT_MODIFY_OBJECTS))
 				{
+#if TRACK_POWER
 					LLAvatarTracker::instance().empower(id, FALSE);
+#endif
 					LLAvatarTracker::instance().notifyObservers();
 				}
 				LLAvatarTracker::instance().terminateBuddy(id);
 				LLAvatarTracker::instance().notifyObservers();
-				gInventory.addChangedMask(LLInventoryObserver::LABEL | LLInventoryObserver::CALLING_CARD, LLUUID::null);
+				gInventory.addChangedMask(LLInventoryObserver::LABEL |
+										  LLInventoryObserver::CALLING_CARD,
+										  LLUUID::null);
 				gInventory.notifyObservers();
 				break;
 

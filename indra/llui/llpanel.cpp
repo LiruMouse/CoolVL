@@ -158,8 +158,8 @@ void LLPanel::removeBorder()
 void LLPanel::clearCtrls()
 {
 	LLView::ctrl_list_t ctrls = getCtrlList();
-	for (LLView::ctrl_list_t::iterator ctrl_it = ctrls.begin();
-		 ctrl_it != ctrls.end(); ++ctrl_it)
+	for (LLView::ctrl_list_t::iterator ctrl_it = ctrls.begin(), end = ctrls.end();
+		 ctrl_it != end; ++ctrl_it)
 	{
 		LLUICtrl* ctrl = *ctrl_it;
 		ctrl->setFocus(FALSE);
@@ -171,8 +171,8 @@ void LLPanel::clearCtrls()
 void LLPanel::setCtrlsEnabled(BOOL b)
 {
 	LLView::ctrl_list_t ctrls = getCtrlList();
-	for (LLView::ctrl_list_t::iterator ctrl_it = ctrls.begin();
-		 ctrl_it != ctrls.end(); ++ctrl_it)
+	for (LLView::ctrl_list_t::iterator ctrl_it = ctrls.begin(), end = ctrls.end();
+		 ctrl_it != end; ++ctrl_it)
 	{
 		LLUICtrl* ctrl = *ctrl_it;
 		ctrl->setEnabled(b);
@@ -393,8 +393,9 @@ void LLPanel::setFocus(BOOL b)
 		{
 			//RN: why is this here?
 			LLView::ctrl_list_t ctrls = getCtrlList();
-			for (LLView::ctrl_list_t::iterator ctrl_it = ctrls.begin();
-				 ctrl_it != ctrls.end(); ++ctrl_it)
+			for (LLView::ctrl_list_t::iterator ctrl_it = ctrls.begin(),
+											   end = ctrls.end();
+				 ctrl_it != end; ++ctrl_it)
 			{
 				LLUICtrl* ctrl = *ctrl_it;
 				ctrl->setFocus(FALSE);
@@ -1166,19 +1167,22 @@ void LLLayoutStack::draw()
 {
 	updateLayout();
 
-	e_panel_list_t::iterator panel_it;
-	for (panel_it = mPanels.begin(); panel_it != mPanels.end(); ++panel_it)
+	for (e_panel_list_t::iterator panel_it = mPanels.begin(),
+								  end = mPanels.end();
+		 panel_it != end; ++panel_it)
 	{
 		// clip to layout rectangle, not bounding rectangle
 		LLRect clip_rect = (*panel_it)->mPanel->getRect();
 		// scale clipping rectangle by visible amount
 		if (mOrientation == HORIZONTAL)
 		{
-			clip_rect.mRight = clip_rect.mLeft + llround((F32)clip_rect.getWidth() * (*panel_it)->getCollapseFactor());
+			clip_rect.mRight = clip_rect.mLeft +
+							   llround((F32)clip_rect.getWidth() * (*panel_it)->getCollapseFactor());
 		}
 		else
 		{
-			clip_rect.mBottom = clip_rect.mTop - llround((F32)clip_rect.getHeight() * (*panel_it)->getCollapseFactor());
+			clip_rect.mBottom = clip_rect.mTop -
+								llround((F32)clip_rect.getHeight() * (*panel_it)->getCollapseFactor());
 		}
 
 		LLPanel* panelp = (*panel_it)->mPanel;
@@ -1195,7 +1199,8 @@ void LLLayoutStack::removeCtrl(LLUICtrl* ctrl)
 
 	if (embedded_panelp)
 	{
-		mPanels.erase(std::find(mPanels.begin(), mPanels.end(), embedded_panelp));
+		mPanels.erase(std::find(mPanels.begin(), mPanels.end(),
+					  embedded_panelp));
 		delete embedded_panelp;
 	}
 
@@ -1371,15 +1376,17 @@ void LLLayoutStack::addPanel(LLPanel* panel, S32 min_width, S32 min_height,
 														  auto_resize,
 														  user_resize);
 
-	mPanels.insert(mPanels.begin() + llclamp(index, 0, (S32)mPanels.size()), embedded_panel);
+	mPanels.insert(mPanels.begin() + llclamp(index, 0, (S32)mPanels.size()),
+				   embedded_panel);
 
 	addChild(panel);
 	addChild(embedded_panel->mResizeBar);
 
 	// bring all resize bars to the front so that they are clickable even over
 	// the panels with a bit of overlap
-	for (e_panel_list_t::iterator panel_it = mPanels.begin();
-		 panel_it != mPanels.end(); ++panel_it)
+	for (e_panel_list_t::iterator panel_it = mPanels.begin(),
+								  end = mPanels.end();
+		 panel_it != end; ++panel_it)
 	{
 		LLResizeBar* resize_barp = (*panel_it)->mResizeBar;
 		sendChildToFront(resize_barp);
@@ -1416,8 +1423,9 @@ void LLLayoutStack::updateLayout(BOOL force_resize)
 	const F32 ANIM_OPEN_TIME = 0.02f;
 	const F32 ANIM_CLOSE_TIME = 0.03f;
 
-	e_panel_list_t::iterator panel_it;
-	for (panel_it = mPanels.begin(); panel_it != mPanels.end();	++panel_it)
+	for (e_panel_list_t::iterator panel_it = mPanels.begin(),
+								  end = mPanels.end();
+		 panel_it != end; ++panel_it)
 	{
 		LLPanel* panelp = (*panel_it)->mPanel;
 		if (panelp->getVisible()) 
@@ -1483,7 +1491,9 @@ void LLLayoutStack::updateLayout(BOOL force_resize)
 	S32 num_resizable_panels = 0;
 	S32 shrink_headroom_available = 0;
 	S32 shrink_headroom_total = 0;
-	for (panel_it = mPanels.begin(); panel_it != mPanels.end(); ++panel_it)
+	for (e_panel_list_t::iterator panel_it = mPanels.begin(),
+								  end = mPanels.end();
+		 panel_it != end; ++panel_it)
 	{
 		// panels that are not fully visible do not count towards shrink
 		// headroom
@@ -1509,7 +1519,7 @@ void LLLayoutStack::updateLayout(BOOL force_resize)
 		}
 		else
 		{
-			num_resizable_panels++;
+			++num_resizable_panels;
 			if (mOrientation == HORIZONTAL)
 			{
 				shrink_headroom_available += (*panel_it)->mPanel->getRect().getWidth() - (*panel_it)->mMinWidth;
@@ -1539,7 +1549,9 @@ void LLLayoutStack::updateLayout(BOOL force_resize)
 	S32 cur_x = 0;
 	S32 cur_y = getRect().getHeight();
 
-	for (panel_it = mPanels.begin(); panel_it != mPanels.end(); ++panel_it)
+	for (e_panel_list_t::iterator panel_it = mPanels.begin(),
+								  end = mPanels.end();
+		 panel_it != end; ++panel_it)
 	{
 		LLPanel* panelp = (*panel_it)->mPanel;
 
@@ -1551,9 +1563,9 @@ void LLLayoutStack::updateLayout(BOOL force_resize)
 		S32 delta_size = 0;
 
 		// if panel can automatically resize (not animating, and resize flag set)...
-		if ((*panel_it)->getCollapseFactor() == 1.f 
-			&& (force_resize || (*panel_it)->mAutoResize) 
-			&& !(*panel_it)->mResizeBar->hasMouseCapture()) 
+		if ((*panel_it)->getCollapseFactor() == 1.f &&
+			(force_resize || (*panel_it)->mAutoResize) &&
+			!(*panel_it)->mResizeBar->hasMouseCapture()) 
 		{
 			if (mOrientation == HORIZONTAL)
 			{
@@ -1645,7 +1657,9 @@ void LLLayoutStack::updateLayout(BOOL force_resize)
 
 	// update resize bars with new limits
 	LLResizeBar* last_resize_bar = NULL;
-	for (panel_it = mPanels.begin(); panel_it != mPanels.end(); ++panel_it)
+	for (e_panel_list_t::iterator panel_it = mPanels.begin(),
+								  end = mPanels.end();
+		 panel_it != end; ++panel_it)
 	{
 		LLPanel* panelp = (*panel_it)->mPanel;
 
@@ -1681,7 +1695,8 @@ void LLLayoutStack::updateLayout(BOOL force_resize)
 	if (force_resize == FALSE &&
 		// layout did not complete by reaching target position
 		((mOrientation == VERTICAL && cur_y != -mPanelSpacing) ||
-		 (mOrientation == HORIZONTAL && cur_x != getRect().getWidth() + mPanelSpacing)))
+		 (mOrientation == HORIZONTAL &&
+		  cur_x != getRect().getWidth() + mPanelSpacing)))
 	{
 		// do another layout pass with all stacked elements contributing even
 		// those that don't usually resize
@@ -1692,8 +1707,9 @@ void LLLayoutStack::updateLayout(BOOL force_resize)
 
 LLLayoutStack::LLEmbeddedPanel* LLLayoutStack::findEmbeddedPanel(LLPanel* panelp) const
 {
-	e_panel_list_t::const_iterator panel_it;
-	for (panel_it = mPanels.begin(); panel_it != mPanels.end(); ++panel_it)
+	for (e_panel_list_t::const_iterator panel_it = mPanels.begin(),
+										end = mPanels.end();
+		 panel_it != end; ++panel_it)
 	{
 		if ((*panel_it)->mPanel == panelp)
 		{
@@ -1708,13 +1724,13 @@ void LLLayoutStack::calcMinExtents()
 	mMinWidth = 0;
 	mMinHeight = 0;
 
-	e_panel_list_t::iterator panel_it;
-	for (panel_it = mPanels.begin(); panel_it != mPanels.end(); ++panel_it)
+	for (e_panel_list_t::iterator panel_it = mPanels.begin(),
+								  end = mPanels.end();
+		 panel_it != end; ++panel_it)
 	{
 		if (mOrientation == HORIZONTAL)
 		{
-			mMinHeight = llmax(	mMinHeight, 
-								(*panel_it)->mMinHeight);
+			mMinHeight = llmax(mMinHeight, (*panel_it)->mMinHeight);
             mMinWidth += (*panel_it)->mMinWidth;
 			if (panel_it != mPanels.begin())
 			{
@@ -1723,8 +1739,7 @@ void LLLayoutStack::calcMinExtents()
 		}
 		else // VERTICAL
 		{
-	        mMinWidth = llmax(	mMinWidth, 
-								(*panel_it)->mMinWidth);
+	        mMinWidth = llmax(mMinWidth, (*panel_it)->mMinWidth);
 			mMinHeight += (*panel_it)->mMinHeight;
 			if (panel_it != mPanels.begin())
 			{

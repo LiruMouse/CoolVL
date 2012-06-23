@@ -35,6 +35,7 @@
 
 #include "stdtypes.h"
 #include "stdenums.h"
+
 #include "llstring.h"
 
 class LLSD;
@@ -63,7 +64,8 @@ public:
 
 	virtual S32		getFirstSelectedIndex() const = 0;
 
-	// TomY TODO: Simply cast the UUIDs to LLSDs, using the selectByValue function
+	// TomY TODO: Simply cast the UUIDs to LLSDs, using the selectByValue
+	// function
 	virtual BOOL	setCurrentByID( const LLUUID& id ) = 0;
 	virtual LLUUID	getCurrentID() const = 0;
 
@@ -83,15 +85,24 @@ class LLCtrlListInterface : public LLCtrlSelectionInterface
 public:
 	virtual ~LLCtrlListInterface();
 	
-	virtual void addColumn(const LLSD& column, EAddPosition pos = ADD_BOTTOM) = 0;
+	virtual void addColumn(const LLSD& column,
+						   EAddPosition pos = ADD_BOTTOM) = 0;
 	virtual void clearColumns() = 0;
-	virtual void setColumnLabel(const std::string& column, const std::string& label) = 0;
+	virtual void setColumnLabel(const std::string& column,
+								const std::string& label) = 0;
 	// TomY TODO: Document this
-	virtual LLScrollListItem* addElement(const LLSD& value, EAddPosition pos = ADD_BOTTOM, void* userdata = NULL) = 0;
+	virtual LLScrollListItem* addElement(const LLSD& value,
+										 EAddPosition pos = ADD_BOTTOM,
+										 void* userdata = NULL) = 0;
 
-	LLScrollListItem* addSimpleElement(const std::string& value); // defaults to bottom
-	LLScrollListItem* addSimpleElement(const std::string& value, EAddPosition pos); // defaults to no LLSD() id
-	virtual LLScrollListItem* addSimpleElement(const std::string& value, EAddPosition pos, const LLSD& id) = 0;
+	 // defaults to bottom:
+	LLScrollListItem* addSimpleElement(const std::string& value);
+	// defaults to no LLSD() id:
+	LLScrollListItem* addSimpleElement(const std::string& value,
+									   EAddPosition pos);
+	virtual LLScrollListItem* addSimpleElement(const std::string& value,
+											   EAddPosition pos,
+											   const LLSD& id) = 0;
 
 	virtual void clearRows() = 0;
 	virtual void sortByColumn(const std::string& name, BOOL ascending) = 0;

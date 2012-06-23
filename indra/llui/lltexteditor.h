@@ -657,7 +657,9 @@ private:
 	LLColor4		mWriteableBgColor;
 	LLColor4		mReadOnlyBgColor;
 	LLColor4		mFocusBgColor;
-
+	LLColor4		mTextEmbeddedItemColor;
+	LLColor4		mTextEmbeddedItemReadOnlyColor;
+	
 	BOOL			mReadOnly;
 	BOOL			mWordWrap;
 	BOOL			mShowLineNumbers;

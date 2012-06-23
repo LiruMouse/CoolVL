@@ -34,6 +34,7 @@
 #include "llboost.h"
 
 #include "llalertdialog.h"
+
 #include "llfontgl.h"
 #include "llresmgr.h"
 #include "lltextbox.h"
@@ -59,20 +60,27 @@ const S32 MSG_PAD = 8;
 //static
 void LLAlertDialog::initClass()
 {
-	LLNotificationChannel::buildChannel("Alerts", "Visible", LLNotificationFilters::filterBy<std::string>(&LLNotification::getType, "alert"));
-	LLNotificationChannel::buildChannel("AlertModal", "Visible", LLNotificationFilters::filterBy<std::string>(&LLNotification::getType, "alertmodal"));
-	LLNotifications::instance().getChannel("Alerts")->connectChanged(boost::bind(&onNewNotification, _1, false));
-	LLNotifications::instance().getChannel("AlertModal")->connectChanged(boost::bind(&onNewNotification, _1, true));
+	LLNotificationChannel::buildChannel("Alerts", "Visible",
+										LLNotificationFilters::filterBy<std::string>(&LLNotification::getType,
+																					 "alert"));
+	LLNotificationChannel::buildChannel("AlertModal", "Visible",
+										LLNotificationFilters::filterBy<std::string>(&LLNotification::getType,
+																					 "alertmodal"));
+	LLNotifications::instance().getChannel("Alerts")->connectChanged(boost::bind(&onNewNotification,
+																				 _1, false));
+	LLNotifications::instance().getChannel("AlertModal")->connectChanged(boost::bind(&onNewNotification,
+																					 _1, true));
 }
 
 //static 
 bool LLAlertDialog::onNewNotification(const LLSD& notify, bool is_modal)
 {
 	LLNotificationPtr notification = LLNotifications::instance().find(notify["id"].asUUID());
-	
-	if(notification)
+
+	if (notification)
 	{
-		if (notify["sigtype"].asString() == "add" || notify["sigtype"].asString() == "load")
+		if (notify["sigtype"].asString() == "add" ||
+			notify["sigtype"].asString() == "load")
 		{
 			LLAlertDialog* dialog = new LLAlertDialog(notification, is_modal);
 			dialog->show();
@@ -86,7 +94,8 @@ bool LLAlertDialog::onNewNotification(const LLSD& notify, bool is_modal)
 			}
 			else
 			{
-				LLAlertDialog* dialog = new LLAlertDialog(notification, is_modal);
+				LLAlertDialog* dialog = new LLAlertDialog(notification,
+														  is_modal);
 				dialog->show();
 			}
 		}
@@ -94,7 +103,6 @@ bool LLAlertDialog::onNewNotification(const LLSD& notify, bool is_modal)
 
 	return false;
 }
-
 
 //-----------------------------------------------------------------------------
 // Private methods
@@ -104,17 +112,21 @@ static const S32 HPAD = 25;
 static const S32 BTN_HPAD = 8;
 static const LLFONT_ID FONT_NAME = LLFONT_SANSSERIF;
 
-LLAlertDialog::LLAlertDialog( LLNotificationPtr notification, bool modal)
-	:	LLModalDialog( notification->getLabel(), 100, 100, modal ),  // dummy size.  Will reshape below.
-		LLInstanceTracker<LLAlertDialog, LLUUID>(notification->getID()),
-		mDefaultOption( 0 ),
-		mCheck(NULL),
-		mCaution(notification->getPriority() >= NOTIFICATION_PRIORITY_HIGH),
-		mLabel(notification->getName()),
-		mLineEditor(NULL),
-		mNote(notification)
+LLAlertDialog::LLAlertDialog(LLNotificationPtr notification, bool modal)
+:	LLModalDialog(notification->getLabel(), 100, 100, modal),  // dummy size. Will reshape below.
+	LLInstanceTracker<LLAlertDialog, LLUUID>(notification->getID()),
+	mDefaultOption(0),
+	mCheck(NULL),
+	mCaution(notification->getPriority() >= NOTIFICATION_PRIORITY_HIGH),
+	mLabel(notification->getName()),
+	mLineEditor(NULL),
+	mNote(notification),
+	mDropShadowFloater(LLUI::sConfigGroup->getS32("DropShadowFloater")),
+	mColorDropShadow(LLUI::sColorsGroup->getColor("ColorDropShadow")),
+	mAlertBoxColor(LLUI::sColorsGroup->getColor("AlertBoxColor")),
+	mAlertCautionBoxColor(LLUI::sColorsGroup->getColor("AlertCautionBoxColor"))
 {
-	const LLFontGL* font = LLResMgr::getInstance()->getRes( FONT_NAME );
+	const LLFontGL* font = LLResMgr::getInstance()->getRes(FONT_NAME);
 	const S32 LINE_HEIGHT = llfloor(font->getLineHeight() + 0.99f);
 	const S32 EDITOR_HEIGHT = 20;
 
@@ -126,7 +138,6 @@ LLAlertDialog::LLAlertDialog( LLNotificationPtr notification, bool modal)
 	setBackgroundVisible(TRUE);
 	setBackgroundOpaque(TRUE);
 
-
 	typedef std::vector<std::pair<std::string, std::string> > options_t;
 	options_t supplied_options;
 
@@ -134,17 +145,19 @@ LLAlertDialog::LLAlertDialog( LLNotificationPtr notification, bool modal)
 	LLSD form_sd = form->asLLSD();
 
 	S32 option_index = 0;
-	for (LLSD::array_const_iterator it = form_sd.beginArray(); it != form_sd.endArray(); ++it)
+	for (LLSD::array_const_iterator it = form_sd.beginArray();
+		 it != form_sd.endArray(); ++it)
 	{
 		std::string type = (*it)["type"].asString();
 		if (type == "button")
 		{
-			if((*it)["default"])
+			if ((*it)["default"])
 			{
 				mDefaultOption = option_index;
 			}
 
-			supplied_options.push_back(std::make_pair((*it)["name"].asString(), (*it)["text"].asString()));
+			supplied_options.push_back(std::make_pair((*it)["name"].asString(),
+									   (*it)["text"].asString()));
 
 			ButtonData data;
 			data.mSelf = this;
@@ -154,7 +167,7 @@ LLAlertDialog::LLAlertDialog( LLNotificationPtr notification, bool modal)
 			}
 
 			mButtonData.push_back(data);
-			option_index++;
+			++option_index;
 		}
 		else if (type == "text")
 		{
@@ -173,12 +186,13 @@ LLAlertDialog::LLAlertDialog( LLNotificationPtr notification, bool modal)
 	options_t options;
 	if (supplied_options.empty())
 	{
-		options.push_back(std::make_pair(std::string("close"), std::string("Close")));
+		options.push_back(std::make_pair(std::string("close"),
+										 std::string("Close")));
 
 		// add data for ok button.
 		ButtonData ok_button;
 		ok_button.mSelf = this;
-		
+
 		mButtonData.push_back(ok_button);
 		mDefaultOption = 0;
 	}
@@ -192,25 +206,27 @@ LLAlertDialog::LLAlertDialog( LLNotificationPtr notification, bool modal)
 	// Calc total width of buttons
 	S32 button_width = 0;
 	S32 sp = font->getWidth(std::string("OO"));
-	for( S32 i = 0; i < num_options; i++ )
+	for (S32 i = 0; i < num_options; ++i)
 	{
-		S32 w = S32(font->getWidth( options[i].second ) + 0.99f) + sp + 2 * LLBUTTON_H_PAD;
-		button_width = llmax( w, button_width );
+		S32 w = S32(font->getWidth(options[i].second) + 0.99f) + sp + 2 * LLBUTTON_H_PAD;
+		button_width = llmax(w, button_width);
 	}
 	S32 btn_total_width = button_width;
-	if( num_options > 1 )
+	if (num_options > 1)
 	{
-		btn_total_width = (num_options * button_width) + ((num_options - 1) * BTN_HPAD);
+		btn_total_width = num_options * button_width + (num_options - 1) * BTN_HPAD;
 	}
 
-	// Message: create text box using raw string, as text has been structure deliberately
+	// Message: create text box using raw string, as text has been structured
+	// deliberately.
 	// Use size of created text box to generate dialog box size
 	std::string msg = mNote->getMessage();
 	llwarns << "Alert: " << msg << llendl;
-	LLTextBox* msg_box = new LLTextBox( std::string("Alert message"), msg, (F32)MAX_ALLOWED_MSG_WIDTH, font );
+	LLTextBox* msg_box = new LLTextBox(std::string("Alert message"), msg,
+									   (F32)MAX_ALLOWED_MSG_WIDTH, font);
 
 	const LLRect& text_rect = msg_box->getRect();
-	S32 dialog_width = llmax( btn_total_width, text_rect.getWidth() ) + 2 * HPAD;
+	S32 dialog_width = llmax(btn_total_width, text_rect.getWidth()) + 2 * HPAD;
 	S32 dialog_height = text_rect.getHeight() + 3 * VPAD + BTN_HEIGHT;
 
 	if (hasTitleBar())
@@ -218,11 +234,13 @@ LLAlertDialog::LLAlertDialog( LLNotificationPtr notification, bool modal)
 		dialog_height += LINE_HEIGHT; // room for title bar
 	}
 
-	// it's ok for the edit text body to be empty, but we want the name to exist if we're going to draw it
+	// It's ok for the edit text body to be empty, but we want the name to
+	// exist if we're going to draw it
 	if (!edit_text_name.empty())
 	{
 		dialog_height += EDITOR_HEIGHT + VPAD;
-		dialog_width = llmax(dialog_width, (S32)(font->getWidth( edit_text_contents ) + 0.99f));
+		dialog_width = llmax(dialog_width,
+							 (S32)(font->getWidth(edit_text_contents) + 0.99f));
 	}
 
 	if (mCaution)
@@ -231,7 +249,7 @@ LLAlertDialog::LLAlertDialog( LLNotificationPtr notification, bool modal)
 		dialog_width += 32 + HPAD;
 	}
 
-	reshape( dialog_width, dialog_height, FALSE );
+	reshape(dialog_width, dialog_height, FALSE);
 
 	S32 msg_y = getRect().getHeight() - VPAD;
 	S32 msg_x = HPAD;
@@ -242,45 +260,46 @@ LLAlertDialog::LLAlertDialog( LLNotificationPtr notification, bool modal)
 
 	if (mCaution)
 	{
-		LLIconCtrl* icon = new LLIconCtrl(std::string("icon"), LLRect(msg_x, msg_y, msg_x+32, msg_y-32), std::string("notify_caution_icon.tga"));
+		LLIconCtrl* icon = new LLIconCtrl(std::string("icon"),
+										  LLRect(msg_x, msg_y, msg_x + 32, msg_y - 32),
+										  std::string("notify_caution_icon.tga"));
 		icon->setMouseOpaque(FALSE);
 		addChild(icon);
 		msg_x += 32 + HPAD;
-		msg_box->setColor( LLUI::sColorsGroup->getColor( "AlertCautionTextColor" ) );
+		msg_box->setColor(LLUI::sColorsGroup->getColor("AlertCautionTextColor"));
 	}
 	else
 	{
-		msg_box->setColor( LLUI::sColorsGroup->getColor( "AlertTextColor" ) );
+		msg_box->setColor(LLUI::sColorsGroup->getColor("AlertTextColor"));
 	}
 
 	LLRect rect;
-	rect.setLeftTopAndSize( msg_x, msg_y, text_rect.getWidth(), text_rect.getHeight() );
-	msg_box->setRect( rect );
+	rect.setLeftTopAndSize(msg_x, msg_y, text_rect.getWidth(),
+						   text_rect.getHeight());
+	msg_box->setRect(rect);
 	addChild(msg_box);
 
-	// Buttons	
+	// Buttons
 	S32 button_left = (getRect().getWidth() - btn_total_width) / 2;
 
-	for( S32 i = 0; i < num_options; i++ )
+	for (S32 i = 0; i < num_options; ++i)
 	{
 		LLRect button_rect;
-		button_rect.setOriginAndSize( button_left, VPAD, button_width, BTN_HEIGHT );
+		button_rect.setOriginAndSize(button_left, VPAD, button_width,
+									 BTN_HEIGHT);
 
-		LLButton* btn = new LLButton(
-			options[i].first, button_rect,
-			"","", "", 
-			NULL, NULL,
-			font,
-			options[i].second, 
-			options[i].second);
+		LLButton* btn = new LLButton(options[i].first, button_rect, "", "", "",
+									 NULL, NULL, font, options[i].second, 
+									 options[i].second);
 
 		mButtonData[i].mButton = btn;
 
-		btn->setClickedCallback(&LLAlertDialog::onButtonPressed, (void*)(&mButtonData[i]));
+		btn->setClickedCallback(&LLAlertDialog::onButtonPressed,
+								(void*)(&mButtonData[i]));
 
 		addChild(btn);
 
-		if( i == mDefaultOption )
+		if (i == mDefaultOption)
 		{
 			btn->setFocus(TRUE);
 		}
@@ -288,22 +307,22 @@ LLAlertDialog::LLAlertDialog( LLNotificationPtr notification, bool modal)
 		button_left += button_width + BTN_HPAD;
 	}
 
-	// (Optional) Edit Box	
+	// (Optional) Edit Box
 	if (!edit_text_name.empty())
 	{
 		S32 y = VPAD + BTN_HEIGHT + VPAD/2;
 		mLineEditor = new LLLineEditor(edit_text_name,
-			LLRect( HPAD, y+EDITOR_HEIGHT, dialog_width-HPAD, y),
-			edit_text_contents,
-			LLFontGL::getFontSansSerif(),
-			STD_STRING_STR_LEN);
+									   LLRect(HPAD, y + EDITOR_HEIGHT, dialog_width - HPAD, y),
+									   edit_text_contents,
+									   LLFontGL::getFontSansSerif(),
+									   STD_STRING_STR_LEN);
 
 		// make sure all edit keys get handled properly (DEV-22396)
 		mLineEditor->setHandleEditKeysDirectly(TRUE);
 
 		addChild(mLineEditor);
 	}
-	
+
 	if (mLineEditor)
 	{
 		mLineEditor->setDrawAsterixes(is_password);
@@ -315,27 +334,22 @@ LLAlertDialog::LLAlertDialog( LLNotificationPtr notification, bool modal)
 
 	if (form->getIgnoreType() == LLNotificationForm::IGNORE_WITH_DEFAULT_RESPONSE)
 	{
-		setCheckBox(LLNotifications::instance().getGlobalString("skipnexttime"), ignore_label);
+		setCheckBox(LLNotifications::instance().getGlobalString("skipnexttime"),
+					ignore_label);
 	}
 	else if (form->getIgnoreType() == LLNotificationForm::IGNORE_WITH_LAST_RESPONSE)
 	{
-		setCheckBox(LLNotifications::instance().getGlobalString("alwayschoose"), ignore_label);
+		setCheckBox(LLNotifications::instance().getGlobalString("alwayschoose"),
+					ignore_label);
 	}
 }
 
-// All logic for deciding not to show an alert is done here,
-// so that the alert is valid until show() is called.
+// All logic for deciding not to show an alert is done here, so that the alert
+// is valid until show() is called.
 bool LLAlertDialog::show()
 {
 	// If this is a caution message, change the color and add an icon.
-	if (mCaution)
-	{
-		setBackgroundColor( LLUI::sColorsGroup->getColor( "AlertCautionBoxColor" ) );
-	}
-	else
-	{
-		setBackgroundColor( LLUI::sColorsGroup->getColor( "AlertBoxColor" ) );
-	}
+	setBackgroundColor(mCaution ? mAlertCautionBoxColor : mAlertBoxColor);
 
 	startModal();
 	gFloaterView->adjustToFitScreen(this, FALSE);
@@ -346,7 +360,7 @@ bool LLAlertDialog::show()
 		mLineEditor->setFocus(TRUE);
 		mLineEditor->selectAll();
 	}
-	if(mDefaultOption >= 0)
+	if (mDefaultOption >= 0)
 	{
 		// delay before enabling default button
 		mDefaultBtnTimer.start();
@@ -355,7 +369,8 @@ bool LLAlertDialog::show()
 
 	// attach to floater if necessary
 	LLUUID context_key = mNote->getPayload()["context"].asUUID();
-	LLFloaterNotificationContext* contextp = dynamic_cast<LLFloaterNotificationContext*>(LLNotificationContext::getInstance(context_key));
+	LLFloaterNotificationContext* contextp =
+		dynamic_cast<LLFloaterNotificationContext*>(LLNotificationContext::getInstance(context_key));
 	if (contextp && contextp->getFloater())
 	{
 		contextp->getFloater()->addDependentFloater(this, FALSE);
@@ -363,13 +378,14 @@ bool LLAlertDialog::show()
 	return true;
 }
 
-bool LLAlertDialog::setCheckBox( const std::string& check_title, const std::string& check_control )
+bool LLAlertDialog::setCheckBox(const std::string& check_title,
+								const std::string& check_control)
 {
-	const LLFontGL* font = LLResMgr::getInstance()->getRes( FONT_NAME );
+	const LLFontGL* font = LLResMgr::getInstance()->getRes(FONT_NAME);
 	const S32 LINE_HEIGHT = llfloor(font->getLineHeight() + 0.99f);
-	
+
 	// Extend dialog for "check next time"
-	S32 max_msg_width = getRect().getWidth() - 2 * HPAD;		
+	S32 max_msg_width = getRect().getWidth() - 2 * HPAD;
 	S32 check_width = S32(font->getWidth(check_title) + 0.99f) + 16;
 	max_msg_width = llmax(max_msg_width, check_width);
 	S32 dialog_width = max_msg_width + 2 * HPAD;
@@ -378,25 +394,26 @@ bool LLAlertDialog::setCheckBox( const std::string& check_title, const std::stri
 	dialog_height += LINE_HEIGHT;
 	dialog_height += LINE_HEIGHT / 2;
 
-	reshape( dialog_width, dialog_height, FALSE );
+	reshape(dialog_width, dialog_height, FALSE);
 
 	S32 msg_x = (getRect().getWidth() - max_msg_width) / 2;
-	
+
 	LLRect check_rect;
-	check_rect.setOriginAndSize(msg_x, VPAD+BTN_HEIGHT+LINE_HEIGHT/2, 
+	check_rect.setOriginAndSize(msg_x, VPAD + BTN_HEIGHT + LINE_HEIGHT / 2,
 								max_msg_width, LINE_HEIGHT);
 
-	mCheck = new LLCheckboxCtrl(std::string("check"), check_rect, check_title, font, onClickIgnore, this);
+	mCheck = new LLCheckboxCtrl(std::string("check"), check_rect, check_title,
+								font, onClickIgnore, this);
 	addChild(mCheck);
 
 	return true;
 }
 
-void LLAlertDialog::setVisible( BOOL visible )
+void LLAlertDialog::setVisible(BOOL visible)
 {
-	LLModalDialog::setVisible( visible );
-	
-	if( visible )
+	LLModalDialog::setVisible(visible);
+
+	if (visible)
 	{
 		centerOnScreen();
 		make_ui_sound("UISndAlert");
@@ -414,16 +431,15 @@ LLAlertDialog::~LLAlertDialog()
 
 BOOL LLAlertDialog::hasTitleBar() const
 {
-	return (getCurrentTitle() != "" && getCurrentTitle() != " ")	// has title
-			|| isMinimizeable()
-			|| isCloseable();
+	return (getCurrentTitle() != "" && getCurrentTitle() != " ") || // has title
+		   isMinimizeable() || isCloseable();
 }
 
-BOOL LLAlertDialog::handleKeyHere(KEY key, MASK mask )
+BOOL LLAlertDialog::handleKeyHere(KEY key, MASK mask)
 {
-	if( KEY_RETURN == key && mask == MASK_NONE )
+	if (KEY_RETURN == key && mask == MASK_NONE)
 	{
-		LLModalDialog::handleKeyHere( key, mask );
+		LLModalDialog::handleKeyHere(key, mask);
 		return TRUE;
 	}
 	else if (KEY_RIGHT == key)
@@ -448,25 +464,24 @@ BOOL LLAlertDialog::handleKeyHere(KEY key, MASK mask )
 	}
 	else
 	{
-		return LLModalDialog::handleKeyHere( key, mask );
+		return LLModalDialog::handleKeyHere(key, mask);
 	}
 }
 
 // virtual
 void LLAlertDialog::draw()
 {
-	// if the default button timer has just expired, activate the default button
-	if(mDefaultBtnTimer.hasExpired() && mDefaultBtnTimer.getStarted())
+	// If the default button timer has just expired, activate the default
+	// button
+	if (mDefaultBtnTimer.hasExpired() && mDefaultBtnTimer.getStarted())
 	{
-		mDefaultBtnTimer.stop();  // prevent this block from being run more than once
+		// prevent this block from being run more than once:
+		mDefaultBtnTimer.stop();
 		setDefaultBtn(mButtonData[mDefaultOption].mButton);
 	}
 
-	LLColor4 shadow_color = LLUI::sColorsGroup->getColor("ColorDropShadow");
-	S32 shadow_lines = LLUI::sConfigGroup->getS32("DropShadowFloater");
-
-	gl_drop_shadow( 0, getRect().getHeight(), getRect().getWidth(), 0,
-		shadow_color, shadow_lines);
+	gl_drop_shadow(0, getRect().getHeight(), getRect().getWidth(), 0,
+				   mColorDropShadow, mDropShadowFloater);
 
 	LLModalDialog::draw();
 }
@@ -480,12 +495,13 @@ void LLAlertDialog::setEditTextArgs(const LLSD& edit_args)
 	}
 	else
 	{
-		llwarns << "LLAlertDialog::setEditTextArgs called on dialog with no line editor" << llendl;
+		llwarns << "LLAlertDialog::setEditTextArgs called on dialog with no line editor"
+				<< llendl;
 	}
 }
 
 // static 
-void LLAlertDialog::onButtonPressed( void* userdata )
+void LLAlertDialog::onButtonPressed(void* userdata)
 {
 	ButtonData* button_data = (ButtonData*)userdata;
 	LLAlertDialog* self = button_data->mSelf;
@@ -512,8 +528,8 @@ void LLAlertDialog::onClickIgnore(LLUICtrl* ctrl, void* user_data)
 {
 	LLAlertDialog* self = (LLAlertDialog*)user_data;
 
-	// checkbox sometimes means "hide and do the default" and
-	// other times means "warn me again".  Yuck. JC
+	// checkbox sometimes means "hide and do the default" and other times means
+	// "warn me again". Yuck. JC
 	BOOL check = ctrl->getValue();
 	if (self->mNote->getForm()->getIgnoreType() == LLNotificationForm::IGNORE_SHOW_AGAIN)
 	{
@@ -523,5 +539,3 @@ void LLAlertDialog::onClickIgnore(LLUICtrl* ctrl, void* user_data)
 
 	self->mNote->setIgnored(check);
 }
-
-

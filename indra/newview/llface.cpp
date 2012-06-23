@@ -62,7 +62,6 @@ BOOL LLFace::sSafeRenderSelect = TRUE; // FALSE
 
 #define DOTVEC(a,b) (a.mV[0]*b.mV[0] + a.mV[1]*b.mV[1] + a.mV[2]*b.mV[2])
 
-
 /*
 For each vertex, given:
 	B - binormal
@@ -122,7 +121,8 @@ void sphericalProjection(LLVector2 &tc, const LLVector4a& normal,
 	}*/
 }
 
-void cylindricalProjection(LLVector2 &tc, const LLVector4a& normal, const LLVector4a &mCenter, const LLVector4a& vec)
+void cylindricalProjection(LLVector2 &tc, const LLVector4a& normal,
+						   const LLVector4a &mCenter, const LLVector4a& vec)
 {	//BROKEN
 	/*LLVector3 binormal;
 	float d = vd.mNormal * LLVector3(1,0,0);
@@ -192,7 +192,6 @@ void LLFace::init(LLDrawable* drawablep, LLViewerObject* objp)
 	mBoundingSphereRadius = 0.0f;
 }
 
-
 void LLFace::destroy()
 {
 	if (gDebugGL)
@@ -207,7 +206,8 @@ void LLFace::destroy()
 
 	if (mDrawPoolp)
 	{
-		if (this->isState(LLFace::RIGGED) && mDrawPoolp->getType() == LLDrawPool::POOL_AVATAR)
+		if (this->isState(LLFace::RIGGED) &&
+			mDrawPoolp->getType() == LLDrawPool::POOL_AVATAR)
 		{
 			((LLDrawPoolAvatar*) mDrawPoolp)->removeRiggedFace(this);
 		}
@@ -246,9 +246,10 @@ void LLFace::initClass()
 {
 }
 
-void LLFace::setWorldMatrix(const LLMatrix4 &mat)
+void LLFace::setWorldMatrix(const LLMatrix4& mat)
 {
-	llerrs << "Faces on this drawable are not independently modifiable\n" << llendl;
+	llerrs << "Faces on this drawable are not independently modifiable\n"
+		   << llendl;
 }
 
 void LLFace::setPool(LLFacePool* pool)
@@ -274,7 +275,8 @@ void LLFace::setPool(LLFacePool* new_pool, LLViewerTexture *texturep)
 
 			if (mDrawablep)
 			{
-				gPipeline.markRebuild(mDrawablep, LLDrawable::REBUILD_ALL, TRUE);
+				gPipeline.markRebuild(mDrawablep, LLDrawable::REBUILD_ALL,
+									  TRUE);
 			}
 		}
 		mGeomIndex = 0;
@@ -350,10 +352,10 @@ void LLFace::unsetFaceColor()
 	clearState(USE_FACE_COLOR);
 }
 
-void LLFace::setDrawable(LLDrawable *drawable)
+void LLFace::setDrawable(LLDrawable* drawable)
 {
-	mDrawablep  = drawable;
-	mXform      = &drawable->mXform;
+	mDrawablep = drawable;
+	mXform = &drawable->mXform;
 }
 
 void LLFace::setSize(S32 num_vertices, S32 num_indices, bool align)
@@ -395,20 +397,19 @@ void LLFace::setIndicesIndex(S32 idx)
 
 //============================================================================
 
-U16 LLFace::getGeometryAvatar(
-						LLStrider<LLVector3> &vertices,
-						LLStrider<LLVector3> &normals,
-						LLStrider<LLVector2> &tex_coords,
-						LLStrider<F32>		 &vertex_weights,
-						LLStrider<LLVector4> &clothing_weights)
+U16 LLFace::getGeometryAvatar(LLStrider<LLVector3>& vertices,
+							  LLStrider<LLVector3>& normals,
+							  LLStrider<LLVector2>& tex_coords,
+							  LLStrider<F32>& vertex_weights,
+							  LLStrider<LLVector4>& clothing_weights)
 {
 	LLMemType mt1(LLMemType::MTYPE_DRAWABLE);
 
 	if (mVertexBuffer.notNull())
 	{
-		mVertexBuffer->getVertexStrider      (vertices, mGeomIndex);
-		mVertexBuffer->getNormalStrider      (normals, mGeomIndex);
-		mVertexBuffer->getTexCoord0Strider    (tex_coords, mGeomIndex);
+		mVertexBuffer->getVertexStrider(vertices, mGeomIndex);
+		mVertexBuffer->getNormalStrider(normals, mGeomIndex);
+		mVertexBuffer->getTexCoord0Strider(tex_coords, mGeomIndex);
 		mVertexBuffer->getWeightStrider(vertex_weights, mGeomIndex);
 		mVertexBuffer->getClothWeightStrider(clothing_weights, mGeomIndex);
 	}
@@ -416,8 +417,10 @@ U16 LLFace::getGeometryAvatar(
 	return mGeomIndex;
 }
 
-U16 LLFace::getGeometry(LLStrider<LLVector3> &vertices, LLStrider<LLVector3> &normals,
-					    LLStrider<LLVector2> &tex_coords, LLStrider<U16> &indicesp)
+U16 LLFace::getGeometry(LLStrider<LLVector3>& vertices,
+						LLStrider<LLVector3>& normals,
+					    LLStrider<LLVector2>& tex_coords,
+						LLStrider<U16> &indicesp)
 {
 	LLMemType mt1(LLMemType::MTYPE_DRAWABLE);
 
@@ -515,7 +518,6 @@ void LLFace::renderSelected(LLViewerTexture *imagep, const LLColor4& color)
 		gGL.popMatrix();
 	}
 }
-
 
 /* removed in lieu of raycast uv detection
 void LLFace::renderSelectedUV()
@@ -625,7 +627,7 @@ void LLFace::printDebugInfo() const
 	S32 indices_count = getIndicesCount();
 	S32 geom_start = getGeomStart();
 
-	for (S32 i = 0; i < indices_count; i++)
+	for (S32 i = 0; i < indices_count; ++i)
 	{
 		llinfos << i << ":" << indicesp[i] << ":" << (S32)(indicesp[i] - geom_start) << llendl;
 	}
@@ -633,7 +635,7 @@ void LLFace::printDebugInfo() const
 
 	llinfos << "Vertices:" << llendl;
 	llinfos << "--------------------" << llendl;
-	for (S32 i = 0; i < mGeomCount; i++)
+	for (S32 i = 0; i < mGeomCount; ++i)
 	{
 		llinfos << mGeomIndex + i << ":" << poolp->getVertex(mGeomIndex + i) << llendl;
 	}
@@ -668,7 +670,6 @@ static void xform(LLVector2 &tex_coord, F32 cosAng, F32 sinAng, F32 offS, F32 of
 	tex_coord.mV[0] = s;
 	tex_coord.mV[1] = t;
 }
-
 
 BOOL LLFace::genVolumeBBoxes(const LLVolume &volume, S32 f,
 								const LLMatrix4& mat_vert_in, const LLMatrix3& mat_normal_in, BOOL global_volume)
@@ -751,7 +752,7 @@ BOOL LLFace::genVolumeBBoxes(const LLVolume &volume, S32 f,
 
 		newMin = newMax = center;
 
-		for (U32 i = 0; i < 4; i++)
+		for (U32 i = 0; i < 4; ++i)
 		{
 			LLVector4a delta;
 			delta.setAbs(v[i]);
@@ -853,7 +854,6 @@ LLVector2 LLFace::surfaceToTexture(LLVector2 surface_coord, LLVector3 position, 
 		xform(tc, cos(tep->getRotation()), sin(tep->getRotation()),
 			  tep->mOffsetS, tep->mOffsetT, tep->mScaleS, tep->mScaleT);
 	}
-
 
 	return tc;
 }
@@ -1138,7 +1138,7 @@ BOOL LLFace::getGeometryVolume(const LLVolume& volume,
 
 		S32 end = num_indices / 8;
 
-		for (S32 i = 0; i < end; i++)
+		for (S32 i = 0; i < end; ++i)
 		{
 			__m128i res = _mm_add_epi16(src[i], offset);
 			_mm_storeu_si128(dst + i, res);
@@ -1304,7 +1304,7 @@ BOOL LLFace::getGeometryVolume(const LLVolume& volume,
 					}
 					else
 					{
-						for (S32 i = 0; i < num_vertices; i++)
+						for (S32 i = 0; i < num_vertices; ++i)
 						{
 							LLVector2 tc(vf.mTexCoords[i]);
 							xform(tc, cos_ang, sin_ang, os, ot, ms, mt);
@@ -1314,7 +1314,7 @@ BOOL LLFace::getGeometryVolume(const LLVolume& volume,
 				}
 				else
 				{ //do tex mat, no texgen, no bump
-					for (S32 i = 0; i < num_vertices; i++)
+					for (S32 i = 0; i < num_vertices; ++i)
 					{
 						LLVector2 tc(vf.mTexCoords[i]);
 						//LLVector4a& norm = vf.mNormals[i];
@@ -1332,7 +1332,7 @@ BOOL LLFace::getGeometryVolume(const LLVolume& volume,
 			{	//no bump, tex gen planar
 				if (do_tex_mat)
 				{
-					for (S32 i = 0; i < num_vertices; i++)
+					for (S32 i = 0; i < num_vertices; ++i)
 					{
 						LLVector2 tc(vf.mTexCoords[i]);
 						LLVector4a& norm = vf.mNormals[i];
@@ -1351,7 +1351,7 @@ BOOL LLFace::getGeometryVolume(const LLVolume& volume,
 				}
 				else
 				{
-					for (S32 i = 0; i < num_vertices; i++)
+					for (S32 i = 0; i < num_vertices; ++i)
 					{
 						LLVector2 tc(vf.mTexCoords[i]);
 						LLVector4a& norm = vf.mNormals[i];
@@ -1369,7 +1369,7 @@ BOOL LLFace::getGeometryVolume(const LLVolume& volume,
 		}
 		else
 		{	// bump mapped, just do the whole expensive loop
-			for (S32 i = 0; i < num_vertices; i++)
+			for (S32 i = 0; i < num_vertices; ++i)
 			{
 				LLVector2 tc(vf.mTexCoords[i]);
 
@@ -1462,7 +1462,7 @@ BOOL LLFace::getGeometryVolume(const LLVolume& volume,
 
 	if (rebuild_normal)
 	{
-		for (S32 i = 0; i < num_vertices; i++)
+		for (S32 i = 0; i < num_vertices; ++i)
 		{
 			LLVector4a normal;
 			mat_normal.rotate(vf.mNormals[i], normal);
@@ -1473,7 +1473,7 @@ BOOL LLFace::getGeometryVolume(const LLVolume& volume,
 
 	if (rebuild_binormal)
 	{
-		for (S32 i = 0; i < num_vertices; i++)
+		for (S32 i = 0; i < num_vertices; ++i)
 		{
 			LLVector4a binormal;
 			mat_normal.rotate(vf.mBinormals[i], binormal);
@@ -1506,7 +1506,7 @@ BOOL LLFace::getGeometryVolume(const LLVolume& volume,
 			++num_vecs;
 		}
 
-		for (S32 i = 0; i < num_vecs; i++)
+		for (S32 i = 0; i < num_vecs; ++i)
 		{
 			dst[i] = src;
 		}
@@ -1803,7 +1803,7 @@ BOOL LLFace::verify(const U32* indices_array) const
 
 	const U32 *indicesp = indices_array ? indices_array + mIndicesIndex : getRawIndices();
 
-	for (S32 i = 0; i < indices_count; i++)
+	for (S32 i = 0; i < indices_count; ++i)
 	{
 		S32 delta = indicesp[i] - geom_start;
 		if (0 > delta)
@@ -1827,7 +1827,6 @@ BOOL LLFace::verify(const U32* indices_array) const
 	}
 	return ok;
 }
-
 
 void LLFace::setViewerObject(LLViewerObject* objp)
 {
@@ -1993,7 +1992,7 @@ U32 LLFace::getRiggedDataMask(U32 type)
 U32 LLFace::getRiggedVertexBufferDataMask() const
 {
 	U32 data_mask = 0;
-	for (U32 i = 0; i < mRiggedIndex.size(); ++i)
+	for (U32 i = 0, count = mRiggedIndex.size(); i < count; ++i)
 	{
 		if (mRiggedIndex[i] > -1)
 		{
@@ -2021,7 +2020,7 @@ void LLFace::setRiggedIndex(U32 type, S32 index)
 	if (mRiggedIndex.empty())
 	{
 		mRiggedIndex.resize(LLDrawPoolAvatar::NUM_RIGGED_PASSES);
-		for (U32 i = 0; i < mRiggedIndex.size(); ++i)
+		for (U32 i = 0, count = mRiggedIndex.size(); i < count; ++i)
 		{
 			mRiggedIndex[i] = -1;
 		}

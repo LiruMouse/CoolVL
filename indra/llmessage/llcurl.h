@@ -207,6 +207,7 @@ private:
 	static LLMutex* sHandleMutexp;
 	static S32      sTotalHandles;
 	static S32      sMaxHandles;
+	static S32      sMaxFreeHandles;
 
 public:
 	static bool     sNotQuitting;
@@ -330,7 +331,7 @@ public:
 	S32 mErrorCount;
 
 private:
-	void easyFree(LLCurl::Easy*);
+	void easyFree(LLCurl::Easy*, bool bad_handle = false);
 	void cleanup(bool deleted = false);
 
 	CURLM* mCurlMultiHandle;

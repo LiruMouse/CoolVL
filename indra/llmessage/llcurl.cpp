@@ -96,7 +96,8 @@ LLMutex* LLCurl::sHandleMutexp = NULL;
 S32      LLCurl::sTotalHandles = 0;
 bool     LLCurl::sNotQuitting = true;
 F32      LLCurl::sCurlRequestTimeOut = 120.f; //seconds
-S32      LLCurl::sMaxHandles = 256; //max number of handles, (multi handles and easy handles combined).
+S32      LLCurl::sMaxHandles = 256; // max number of handles, (multi handles and easy handles combined).
+S32      LLCurl::sMaxFreeHandles = 64; // max number of free handles.
 
 void check_curl_code(CURLcode code)
 {
@@ -104,7 +105,7 @@ void check_curl_code(CURLcode code)
 	{
 		// linux appears to throw a curl error once per session for a bad initialization
 		// at a pretty random time (when enabling cookies).
-		llinfos << "curl error detected: " << strerror(code) << llendl;
+		llinfos << "curl error detected: " << curl_easy_strerror(code) << llendl;
 	}
 }
 
@@ -238,7 +239,7 @@ CURL* LLCurl::Easy::allocEasyHandle()
 
 	CURL* ret = NULL;
 
-	LLMutexLock lock(sHandleMutexp);
+	LLMutexLock lock(LLCurl::Easy::sHandleMutexp);
 
 	if (sFreeHandles.empty())
 	{
@@ -247,12 +248,18 @@ CURL* LLCurl::Easy::allocEasyHandle()
 	else
 	{
 		ret = *(sFreeHandles.begin());
-		sFreeHandles.erase(ret);
 		curl_easy_reset(ret);
+		LL_DEBUGS("CurlVerbose") << "Removing handle " << ret
+								 << " from the list of the free handles."
+								 << LL_ENDL;
+		sFreeHandles.erase(ret);
 	}
 
 	if (ret)
 	{
+		LL_DEBUGS("CurlVerbose") << "Adding handle " << ret
+								 << " to the list of the active handles."
+								 << LL_ENDL;
 		sActiveHandles.insert(ret);
 	}
 
@@ -262,21 +269,26 @@ CURL* LLCurl::Easy::allocEasyHandle()
 //static
 void LLCurl::Easy::releaseEasyHandle(CURL* handle)
 {
-	static const S32 MAX_NUM_FREE_HANDLES = 32;
-
 	if (!handle)
 	{
 		return; // handle allocation failed.
-		//llerrs << "handle cannot be NULL!" << llendl;
 	}
 
-	LLMutexLock lock(sHandleMutexp);
+	LLMutexLock lock(LLCurl::Easy::sHandleMutexp);
 
-	if (sActiveHandles.find(handle) != sActiveHandles.end())
+	if (sActiveHandles.count(handle))
 	{
+		LL_DEBUGS("CurlVerbose") << "Removing handle "
+								 << handle
+								 << " from the list of the active handles."
+								 << LL_ENDL;
 		sActiveHandles.erase(handle);
-		if (sFreeHandles.size() < MAX_NUM_FREE_HANDLES)
+		if (sFreeHandles.size() < sMaxFreeHandles)
 		{
+			LL_DEBUGS("CurlVerbose") << "Adding handle "
+									 << handle
+									 << " to the list of the free handles."
+									 << LL_ENDL;
 			sFreeHandles.insert(handle);
 		}
 		else
@@ -286,7 +298,7 @@ void LLCurl::Easy::releaseEasyHandle(CURL* handle)
 	}
 	else
 	{
-		llerrs << "Invalid handle." << llendl;
+		llwarns << "Invalid handle: " << handle << llendl;
 	}
 }
 
@@ -318,14 +330,11 @@ LLCurl::Easy* LLCurl::Easy::getEasy()
 									   CURLOPT_DNS_CACHE_TIMEOUT, 0);
 	check_curl_code(result);
 
-#if OPENSSL_V1
-	// Disable SSL/TLS session caching. Some servers refuse to talk to us when
-	// session ids are enabled. Not an issue with OpenSSL v0.9 but fails with
-	// OpenSSL v1.0.
+	// Set no DNS caching as default for all easy handles. This prevents them
+	// adopting a multi handles cache if they are added to one.
 	result = curl_easy_setopt(easy->mCurlEasyHandle,
 							  CURLOPT_SSL_SESSIONID_CACHE, 0);
 	check_curl_code(result);
-#endif
 
 	++gCurlEasyCount;
 
@@ -401,9 +410,12 @@ void LLCurl::Easy::setHeaders()
 
 void LLCurl::Easy::getTransferInfo(LLCurl::TransferInfo* info)
 {
-	check_curl_code(curl_easy_getinfo(mCurlEasyHandle, CURLINFO_SIZE_DOWNLOAD, &info->mSizeDownload));
-	check_curl_code(curl_easy_getinfo(mCurlEasyHandle, CURLINFO_TOTAL_TIME, &info->mTotalTime));
-	check_curl_code(curl_easy_getinfo(mCurlEasyHandle, CURLINFO_SPEED_DOWNLOAD, &info->mSpeedDownload));
+	check_curl_code(curl_easy_getinfo(mCurlEasyHandle, CURLINFO_SIZE_DOWNLOAD,
+									  &info->mSizeDownload));
+	check_curl_code(curl_easy_getinfo(mCurlEasyHandle, CURLINFO_TOTAL_TIME,
+									  &info->mTotalTime));
+	check_curl_code(curl_easy_getinfo(mCurlEasyHandle, CURLINFO_SPEED_DOWNLOAD,
+									  &info->mSpeedDownload));
 }
 
 U32 LLCurl::Easy::report(CURLcode code)
@@ -724,7 +736,7 @@ bool LLCurl::Multi::waitToComplete()
 		return true;
 	}
 
-	if (!mMutexp) //not threaded
+	if (!mMutexp) // not threaded
 	{
 		doPerform();
 		return true;
@@ -760,29 +772,39 @@ bool LLCurl::Multi::doPerform()
 		setState(STATE_COMPLETED);
 		mQueued = 0;
 	}
-	else if (getState() != STATE_COMPLETED)
+	else if (mCurlMultiHandle && getState() != STATE_COMPLETED)
 	{
 		setState(STATE_PERFORMING);
 
 		S32 q = 0;
-		for (S32 call_count = 0; call_count < MULTI_PERFORM_CALL_REPEAT;
-			 call_count++)
+		CURLMcode code;
 		{
 			LLMutexLock lock(mMutexp);
 
-			// WARNING: curl_multi_perform will block for many hundreds of
-			// milliseconds. NEVER call this from the main thread, and NEVER
-			// allow the main thread to wait on a mutex held by this thread
-			// while curl_multi_perform is executing
-			CURLMcode code = curl_multi_perform(mCurlMultiHandle, &q);
-			if (CURLM_CALL_MULTI_PERFORM != code || q == 0)
+			for (S32 call_count = 0; call_count < MULTI_PERFORM_CALL_REPEAT;
+				 ++call_count)
 			{
-				check_curl_multi_code(code);
-				break;
+				// WARNING: curl_multi_perform will block for many hundreds of
+				// milliseconds. NEVER call this from the main thread and NEVER
+				// allow the main thread to wait on a mutex held by this thread
+				// while curl_multi_perform is executing
+				code = curl_multi_perform(mCurlMultiHandle, &q);
+				if (CURLM_CALL_MULTI_PERFORM != code || q == 0)
+				{
+					check_curl_multi_code(code);
+					break;
+				}
 			}
 		}
 
-		mQueued = q;
+		if (code != CURLM_BAD_HANDLE && code != CURLM_BAD_EASY_HANDLE)
+		{
+			mQueued = q;
+		}
+		else
+		{
+			mQueued = 0;	// Abort
+		}
 		setState(STATE_COMPLETED);
 		mIdleTimer.reset();
 	}
@@ -897,7 +919,7 @@ bool LLCurl::Multi::addEasy(Easy* easy)
 	return true;
 }
 
-void LLCurl::Multi::easyFree(Easy* easy)
+void LLCurl::Multi::easyFree(Easy* easy, bool bad_handle)
 {
 	if (mEasyMutexp)
 	{
@@ -907,7 +929,7 @@ void LLCurl::Multi::easyFree(Easy* easy)
 	mEasyActiveList.erase(easy);
 	mEasyActiveMap.erase(easy->getCurlHandle());
 
-	if (mEasyFreeList.size() < EASY_HANDLE_POOL_SIZE)
+	if (mEasyFreeList.size() < EASY_HANDLE_POOL_SIZE && !bad_handle)
 	{
 		mEasyFreeList.insert(easy);
 
@@ -930,12 +952,15 @@ void LLCurl::Multi::easyFree(Easy* easy)
 
 void LLCurl::Multi::removeEasy(Easy* easy)
 {
+	CURLMcode mcode;
 	{
 		LLMutexLock lock(mMutexp);
-		check_curl_multi_code(curl_multi_remove_handle(mCurlMultiHandle,
-													   easy->getCurlHandle()));
+		mcode = curl_multi_remove_handle(mCurlMultiHandle,
+										 easy->getCurlHandle());
+		check_curl_multi_code(mcode);
 	}
-	easyFree(easy);
+	easyFree(easy,
+			 mcode == CURLM_BAD_EASY_HANDLE || mcode == CURLM_BAD_HANDLE);
 }
 
 //------------------------------------------------------------
@@ -1052,18 +1077,7 @@ void LLCurlThread::cleanupMulti(LLCurl::Multi* multi)
 //static
 std::string LLCurl::strerror(CURLcode errorcode)
 {
-#if LL_DARWIN
-	// curl_easy_strerror was added in libcurl 7.12.0. Unfortunately, the
-	// version in the Mac OS X 10.3.9 SDK is 7.10.2...
-	// There's a problem with the custom curl headers in our build that keeps
-	// me from #ifdefing this on the libcurl version number
-	// (the correct check would be #if LIBCURL_VERSION_NUM >= 0x070c00).
-	// We'll fix the header problem soon, but for now just punt and print the
-	// numeric error code on the Mac.
-	return llformat("%d", errorcode);
-#else // LL_DARWIN
 	return std::string(curl_easy_strerror(errorcode));
-#endif // LL_DARWIN
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -1080,10 +1094,11 @@ LLCurlRequest::LLCurlRequest()
 LLCurlRequest::~LLCurlRequest()
 {
 	// stop all Multi handle background threads
-	for (curlmulti_set_t::iterator iter = mMultiSet.begin();
-		 iter != mMultiSet.end(); ++iter)
+	for (curlmulti_set_t::iterator iter = mMultiSet.begin(),
+								   end = mMultiSet.end();
+		 iter != end; )
 	{
-		LLCurl::getCurlThread()->killMulti(*iter);
+		LLCurl::getCurlThread()->killMulti(*iter++);
 	}
 	mMultiSet.clear();
 }
@@ -1524,6 +1539,8 @@ void LLCurl::initClass(F32 curl_reuest_timeout,
 	sCurlRequestTimeOut = curl_reuest_timeout; //seconds
 	// max number of handles (multi handles and easy handles combined).
 	sMaxHandles = max_number_handles;
+	// Max number of free handles.
+	sMaxFreeHandles = max_number_handles / 4;
 
 	// Do not change this "unless you are familiar with and mean to control
 	// internal operations of libcurl"
@@ -1545,8 +1562,8 @@ void LLCurl::initClass(F32 curl_reuest_timeout,
 	sCurlThread = new LLCurlThread(multi_threaded);
 	if (multi_threaded)
 	{
-		sHandleMutexp = new LLMutex(NULL);
-		Easy::sHandleMutexp = new LLMutex(NULL);
+		LLCurl::sHandleMutexp = new LLMutex(NULL);
+		LLCurl::Easy::sHandleMutexp = new LLMutex(NULL);
 	}
 }
 
@@ -1571,32 +1588,35 @@ void LLCurl::cleanupClass()
 	for_each(sSSLMutex.begin(), sSSLMutex.end(), DeletePointer());
 #endif
 
-	for (std::set<CURL*>::iterator iter = Easy::sFreeHandles.begin();
-		 iter != Easy::sFreeHandles.end(); ++iter)
+	for (std::set<CURL*>::iterator iter = Easy::sFreeHandles.begin(),
+								   end = Easy::sFreeHandles.end();
+		 iter != end; )
 	{
-		CURL* curl = *iter;
+		CURL* curl = *iter++;
 		LLCurl::deleteEasyHandle(curl);
 	}
 
 	Easy::sFreeHandles.clear();
 
-	delete Easy::sHandleMutexp;
-	Easy::sHandleMutexp = NULL;
+	delete LLCurl::Easy::sHandleMutexp;
+	LLCurl::Easy::sHandleMutexp = NULL;
 
-	delete sHandleMutexp;
-	sHandleMutexp = NULL;
+	delete LLCurl::sHandleMutexp;
+	LLCurl::sHandleMutexp = NULL;
 
-	llassert(Easy::sActiveHandles.empty());
+	// removed as per https://jira.secondlife.com/browse/SH-3115
+	//llassert(Easy::sActiveHandles.empty());
 }
 
 //static 
 CURLM* LLCurl::newMultiHandle()
 {
-	LLMutexLock lock(sHandleMutexp);
+	LLMutexLock lock(LLCurl::sHandleMutexp);
 
 	if (sTotalHandles + 1 > sMaxHandles)
 	{
-		return NULL; //failed
+		llwarns << "no more handles available." << llendl;
+		return NULL; // failed
 	}
 	sTotalHandles++;
 
@@ -1610,11 +1630,11 @@ CURLM* LLCurl::newMultiHandle()
 }
 
 //static 
-CURLMcode  LLCurl::deleteMultiHandle(CURLM* handle)
+CURLMcode LLCurl::deleteMultiHandle(CURLM* handle)
 {
 	if (handle)
 	{
-		LLMutexLock lock(sHandleMutexp);
+		LLMutexLock lock(LLCurl::sHandleMutexp);
 		sTotalHandles--;
 		return curl_multi_cleanup(handle);
 	}
@@ -1622,9 +1642,9 @@ CURLMcode  LLCurl::deleteMultiHandle(CURLM* handle)
 }
 
 //static 
-CURL*  LLCurl::newEasyHandle()
+CURL* LLCurl::newEasyHandle()
 {
-	LLMutexLock lock(sHandleMutexp);
+	LLMutexLock lock(LLCurl::sHandleMutexp);
 
 	if (sTotalHandles + 1 > sMaxHandles)
 	{
@@ -1643,11 +1663,11 @@ CURL*  LLCurl::newEasyHandle()
 }
 
 //static 
-void  LLCurl::deleteEasyHandle(CURL* handle)
+void LLCurl::deleteEasyHandle(CURL* handle)
 {
 	if (handle)
 	{
-		LLMutexLock lock(sHandleMutexp);
+		LLMutexLock lock(LLCurl::sHandleMutexp);
 		curl_easy_cleanup(handle);
 		sTotalHandles--;
 	}

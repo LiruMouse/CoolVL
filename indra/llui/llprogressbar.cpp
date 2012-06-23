@@ -98,12 +98,12 @@ void LLProgressBar::setPercent(const F32 percent)
 
 void LLProgressBar::setImageBar( const std::string &bar_name )
 {
-	mImageBar = LLUI::getUIImage(bar_name)->getImage();
+	mImageBar = LLUI::getUIImage(bar_name);
 }
 
 void LLProgressBar::setImageShadow(const std::string &shadow_name)
 {
-	mImageShadow = LLUI::getUIImage(shadow_name)->getImage();
+	mImageShadow = LLUI::getUIImage(shadow_name);
 }
 
 void LLProgressBar::setColorBar(const LLColor4 &c)
@@ -135,7 +135,8 @@ LLXMLNodePtr LLProgressBar::getXML(bool save_children) const
 }
 
 // static
-LLView* LLProgressBar::fromXML(LLXMLNodePtr node, LLView *parent, LLUICtrlFactory *factory)
+LLView* LLProgressBar::fromXML(LLXMLNodePtr node, LLView *parent,
+							   LLUICtrlFactory *factory)
 {
 	std::string name("progress_bar");
 	node->getAttributeString("name", name);
@@ -144,13 +145,24 @@ LLView* LLProgressBar::fromXML(LLXMLNodePtr node, LLView *parent, LLUICtrlFactor
 
 
 	std::string image_bar;
-	if (node->hasAttribute("image_bar")) node->getAttributeString("image_bar",image_bar);
-	if (image_bar != LLStringUtil::null) progress->setImageBar(image_bar);
-
+	if (node->hasAttribute("image_bar"))
+	{
+		node->getAttributeString("image_bar",image_bar);
+	}
+	if (image_bar != LLStringUtil::null)
+	{
+		progress->setImageBar(image_bar);
+	}
 
 	std::string image_shadow;
-	if (node->hasAttribute("image_shadow")) node->getAttributeString("image_shadow",image_shadow);
-	if (image_shadow != LLStringUtil::null) progress->setImageShadow(image_shadow);
+	if (node->hasAttribute("image_shadow"))
+	{
+		node->getAttributeString("image_shadow",image_shadow);
+	}
+	if (image_shadow != LLStringUtil::null)
+	{
+		progress->setImageShadow(image_shadow);
+	}
 
 
 	LLColor4 color_bar;
@@ -180,7 +192,7 @@ LLView* LLProgressBar::fromXML(LLXMLNodePtr node, LLView *parent, LLUICtrlFactor
 	LLColor4 color_bg;
 	if (node->hasAttribute("color_bg"))
 	{
-		node->getAttributeColor4("color_bg",color_bg);
+		node->getAttributeColor4("color_bg", color_bg);
 		progress->setColorBackground(color_bg);
 	}
 

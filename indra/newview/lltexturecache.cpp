@@ -1,11 +1,11 @@
-/** 
+/**
  * @file lltexturecache.cpp
  * @brief Object which handles local texture caching
  *
  * $LicenseInfo:firstyear=2000&license=viewergpl$
- * 
+ *
  * Copyright (c) 2000-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -41,7 +41,7 @@
 #include "llviewercontrol.h"
 
 // Included to allow LLTextureCache::purgeTextures() to pause watchdog timeout
-#include "llappviewer.h" 
+#include "llappviewer.h"
 
 // Cache organization:
 // cache/texture.entries
@@ -292,7 +292,7 @@ public:
 	LLTextureCacheRemoteWorker(LLTextureCache* cache, U32 priority, const LLUUID& id,
 						 U8* data, S32 datasize, S32 offset,
 						 S32 imagesize, // for writes
-						 LLTextureCache::Responder* responder) 
+						 LLTextureCache::Responder* responder)
 			: LLTextureCacheWorker(cache, priority, id, data, datasize, offset, imagesize, responder),
 			mState(INIT)
 	{
@@ -336,7 +336,7 @@ bool LLTextureCacheRemoteWorker::doRead()
 	if (mState == INIT)
 	{
 		std::string filename = mCache->getLocalFileName(mID);
-		// Is it a JPEG2000 file? 
+		// Is it a JPEG2000 file?
 		{
 			local_filename = filename + ".j2c";
 			local_size = LLAPRFile::size(local_filename,
@@ -413,7 +413,7 @@ bool LLTextureCacheRemoteWorker::doRead()
 		if (idx < 0)
 		{
 			// The texture is *not* cached. We're done here...
-			mDataSize = 0; // no data 
+			mDataSize = 0; // no data
 			done = true;
 		}
 		else
@@ -630,7 +630,7 @@ bool LLTextureCacheRemoteWorker::doWrite()
 			done = true;
 		}
 
-		// If we wrote everything (may be more with padding) in the header cache, 
+		// If we wrote everything (may be more with padding) in the header cache,
 		// we're done so we don't have a body to store
 		if (mDataSize <= bytes_written)
 		{
@@ -756,7 +756,7 @@ LLTextureCache::LLTextureCache(bool threaded)
 	mHeaderMutex(NULL),
 	mListMutex(NULL),
 	mHeaderAPRFile(NULL),
-	mReadOnly(TRUE), //do not allow to change the texture cache until setReadOnly() is called.
+	mReadOnly(TRUE), // do not allow to change the texture cache until setReadOnly() is called.
 	mTexturesSizeTotal(0),
 	mDoPurge(FALSE)
 {
@@ -791,23 +791,27 @@ S32 LLTextureCache::update(F32 max_time_ms)
 
 	lockWorkers();
 
-	for (handle_list_t::iterator iter1 = priorty_list.begin();
-		 iter1 != priorty_list.end(); ++iter1)
+	handle_map_t::iterator writers_end = mWriters.end();
+	for (handle_list_t::iterator iter1 = priorty_list.begin(),
+								 end = priorty_list.end();
+		 iter1 != end; ++iter1)
 	{
 		handle_t handle = *iter1;
 		handle_map_t::iterator iter2 = mWriters.find(handle);
-		if (iter2 != mWriters.end())
+		if (iter2 != writers_end)
 		{
 			LLTextureCacheWorker* worker = iter2->second;
 			worker->setPriority(LLWorkerThread::PRIORITY_HIGH | worker->mPriority);
 		}
 	}
 
-	unlockWorkers(); 
+	unlockWorkers();
 
-	// call 'completed' with workers list unlocked (may call readComplete() or writeComplete()
-	for (responder_list_t::iterator iter1 = completed_list.begin();
-		 iter1 != completed_list.end(); ++iter1)
+	// call 'completed' with workers list unlocked (may call readComplete()
+	// or writeComplete()
+	for (responder_list_t::iterator iter1 = completed_list.begin(),
+									end = completed_list.end();
+		 iter1 != end; ++iter1)
 	{
 		Responder *responder = iter1->first;
 		bool success = iter1->second;
@@ -840,12 +844,13 @@ std::string LLTextureCache::getTextureFileName(const LLUUID& id)
 {
 	std::string idstr = id.asString();
 	std::string delem = gDirUtilp->getDirDelimiter();
-	std::string filename = mTexturesDirName + delem + idstr[0] + delem + idstr + ".texture";
+	std::string filename = mTexturesDirName + delem + idstr[0] + delem +
+						   idstr + ".texture";
 	return filename;
 }
 
 //debug
-BOOL LLTextureCache::isInCache(const LLUUID& id) 
+BOOL LLTextureCache::isInCache(const LLUUID& id)
 {
 	LLMutexLock lock(&mHeaderMutex);
 	id_map_t::const_iterator iter = mHeaderIDMap.find(id);
@@ -854,13 +859,13 @@ BOOL LLTextureCache::isInCache(const LLUUID& id)
 }
 
 //debug
-BOOL LLTextureCache::isInLocal(const LLUUID& id) 
+BOOL LLTextureCache::isInLocal(const LLUUID& id)
 {
 	S32 local_size = 0;
 	std::string local_filename;
 
 	std::string filename = getLocalFileName(id);
-	// Is it a JPEG2000 file? 
+	// Is it a JPEG2000 file?
 	{
 		local_filename = filename + ".j2c";
 		local_size = LLAPRFile::size(local_filename, getLocalAPRFilePool());
@@ -984,11 +989,11 @@ S64 LLTextureCache::initCache(ELLPath location, S64 max_size,
 
 	setDirNames(location);
 
-	if (texture_cache_mismatch) 
+	if (texture_cache_mismatch)
 	{
 		//if readonly, disable the texture cache,
 		//otherwise wipe out the texture cache.
-		purgeAllTextures(true); 
+		purgeAllTextures(true);
 
 		if (mReadOnly)
 		{
@@ -1001,7 +1006,7 @@ S64 LLTextureCache::initCache(ELLPath location, S64 max_size,
 		LLFile::mkdir(mTexturesDirName);
 
 		const char* subdirs = "0123456789abcdef";
-		for (S32 i = 0; i < 16; i++)
+		for (S32 i = 0; i < 16; ++i)
 		{
 			std::string dirname = mTexturesDirName + gDirUtilp->getDirDelimiter() + subdirs[i];
 			LLFile::mkdir(dirname);
@@ -1100,7 +1105,8 @@ S32 LLTextureCache::openAndReadEntry(const LLUUID& id, Entry& entry, bool create
 			else
 			{
 				// Look for a still valid entry in the LRU
-				for (std::set<LLUUID>::iterator iter2 = mLRU.begin(); iter2 != mLRU.end();)
+				for (std::set<LLUUID>::iterator iter2 = mLRU.begin();
+					 iter2 != mLRU.end(); )
 				{
 					std::set<LLUUID>::iterator curiter2 = iter2++;
 					LLUUID oldid = *curiter2;
@@ -1111,11 +1117,12 @@ S32 LLTextureCache::openAndReadEntry(const LLUUID& id, Entry& entry, bool create
 					if (iter3 != mHeaderIDMap.end() && iter3->second >= 0)
 					{
 						idx = iter3->second;
-						removeCachedTexture(oldid); //remove the existing cached texture to release the entry index.
+						 // remove the existing cached texture to release the entry index.
+						removeCachedTexture(oldid);
 						break;
 					}
 				}
-				// if (idx < 0) at this point, we will rebuild the LRU 
+				// if (idx < 0) at this point, we will rebuild the LRU
 				//  and retry if called from setHeaderCacheEntry(),
 				//  otherwise this shouldn't happen and will trigger an error
 			}
@@ -1141,7 +1148,8 @@ S32 LLTextureCache::openAndReadEntry(const LLUUID& id, Entry& entry, bool create
 		{
 			readEntryFromHeaderImmediately(idx, entry);
 		}
-		if (entry.mImageSize <= entry.mBodySize)//it happens on 64-bit systems, do not know why
+		// it happens on 64-bit systems, do not know why
+		if (entry.mImageSize <= entry.mBodySize)
 		{
 			llwarns << "corrupted entry: " << id << " entry image size: "
 					<< entry.mImageSize << " entry body size: "
@@ -1158,7 +1166,8 @@ S32 LLTextureCache::openAndReadEntry(const LLUUID& id, Entry& entry, bool create
 }
 
 //mHeaderMutex is locked before calling this.
-void LLTextureCache::writeEntryToHeaderImmediately(S32& idx, Entry& entry, bool write_header)
+void LLTextureCache::writeEntryToHeaderImmediately(S32& idx, Entry& entry,
+												   bool write_header)
 {
 	LLAPRFile* aprfile;
 	S32 bytes_written;
@@ -1237,7 +1246,7 @@ bool LLTextureCache::updateEntry(S32& idx, Entry& entry, S32 new_image_size, S32
 	{
 		return true; //nothing changed.
 	}
-	else 
+	else
 	{
 		bool purge = false;
 
@@ -1261,7 +1270,7 @@ bool LLTextureCache::updateEntry(S32& idx, Entry& entry, S32 new_image_size, S32
 			mTexturesSizeTotal += new_body_size;
 		}
 		entry.mTime = time(NULL);
-		entry.mImageSize = new_image_size; 
+		entry.mImageSize = new_image_size;
 		entry.mBodySize = new_body_size;
 
 		writeEntryToHeaderImmediately(idx, entry, update_header);
@@ -1291,7 +1300,7 @@ U32 LLTextureCache::openAndReadEntries(std::vector<Entry>& entries)
 	mFreeList.clear();
 	mTexturesSizeTotal = 0;
 
-	LLAPRFile* aprfile = NULL; 
+	LLAPRFile* aprfile = NULL;
 	if (mUpdatedEntryMap.empty())
 	{
 		aprfile = openHeaderEntriesFile(true, (S32)sizeof(EntriesInfo));
@@ -1306,7 +1315,7 @@ U32 LLTextureCache::openAndReadEntries(std::vector<Entry>& entries)
 		}
 		aprfile->seek(APR_SET, (S32)sizeof(EntriesInfo));
 	}
-	for (U32 idx = 0; idx < num_entries; idx++)
+	for (U32 idx = 0; idx < num_entries; ++idx)
 	{
 		Entry entry;
 		S32 bytes_read = aprfile->read((void*)(&entry), (S32)sizeof(Entry));
@@ -1345,7 +1354,7 @@ void LLTextureCache::writeEntriesAndClose(const std::vector<Entry>& entries)
 	if (!mReadOnly)
 	{
 		LLAPRFile* aprfile = openHeaderEntriesFile(false, (S32)sizeof(EntriesInfo));
-		for (S32 idx = 0; idx < num_entries; idx++)
+		for (S32 idx = 0; idx < num_entries; ++idx)
 		{
 			S32 bytes_written = aprfile->write((void*)(&entries[idx]), (S32)sizeof(Entry));
 			if (bytes_written != sizeof(Entry))
@@ -1388,7 +1397,9 @@ void LLTextureCache::updatedHeaderEntriesFile()
 		S32 entry_size = (S32)sizeof(Entry);
 		S32 prev_idx = -1;
 		S32 delta_idx;
-		for (idx_entry_map_t::iterator iter = mUpdatedEntryMap.begin(); iter != mUpdatedEntryMap.end(); ++iter)
+		for (idx_entry_map_t::iterator iter = mUpdatedEntryMap.begin(),
+									   end = mUpdatedEntryMap.end();
+			 iter != end; ++iter)
 		{
 			delta_idx = iter->first - prev_idx - 1;
 			prev_idx = iter->first;
@@ -1397,7 +1408,8 @@ void LLTextureCache::updatedHeaderEntriesFile()
 				mHeaderAPRFile->seek(APR_CUR, delta_idx * entry_size);
 			}
 
-			bytes_written = mHeaderAPRFile->write((void*)(&iter->second), entry_size);
+			bytes_written = mHeaderAPRFile->write((void*)(&iter->second),
+												  entry_size);
 			if (bytes_written != entry_size)
 			{
 				clearCorruptedCache(); //clear the cache.
@@ -1435,7 +1447,7 @@ void LLTextureCache::readHeaderCache()
 			typedef std::pair<U32, S32> lru_data_t;
 			std::set<lru_data_t> lru;
 			std::set<U32> purge_list;
-			for (U32 i = 0; i < num_entries; i++)
+			for (U32 i = 0; i < num_entries; ++i)
 			{
 				Entry& entry = entries[i];
 				if (entry.mImageSize <= 0)
@@ -1462,36 +1474,44 @@ void LLTextureCache::readHeaderCache()
 			if (num_entries - empty_entries > sCacheMaxEntries)
 			{
 				// Special case: cache size was reduced, need to remove entries
-				// Note: After we prune entries, we will call this again and create the LRU
+				// Note: After we prune entries, we will call this again and
+				// create the LRU
 				U32 entries_to_purge = (num_entries - empty_entries) - sCacheMaxEntries;
 				llinfos << "Texture Cache Entries: " << num_entries << " Max: "
 						<< sCacheMaxEntries << " Empty: " << empty_entries
 						<< " Purging: " << entries_to_purge << llendl;
-				for (std::set<lru_data_t>::iterator iter = lru.begin();
-					 iter != lru.end(); ++iter)
+				for (std::set<lru_data_t>::iterator iter = lru.begin(),
+													end = lru.end();
+					 iter != end; ++iter)
 				{
 					purge_list.insert(iter->second);
 					if (purge_list.size() >= entries_to_purge)
+					{
 						break;
+					}
 				}
 			}
 			else
 			{
 				S32 lru_entries = (S32)((F32)sCacheMaxEntries * TEXTURE_CACHE_LRU_SIZE);
-				for (std::set<lru_data_t>::iterator iter = lru.begin();
-					 iter != lru.end(); ++iter)
+				for (std::set<lru_data_t>::iterator iter = lru.begin(),
+													end = lru.end();
+					 iter != end; ++iter)
 				{
 					mLRU.insert(entries[iter->second].mID);
 // 					llinfos << "LRU: " << iter->first << " : " << iter->second << llendl;
 					if (--lru_entries <= 0)
+					{
 						break;
+					}
 				}
 			}
 
 			if (purge_list.size() > 0)
 			{
-				for (std::set<U32>::iterator iter = purge_list.begin();
-					 iter != purge_list.end(); ++iter)
+				for (std::set<U32>::iterator iter = purge_list.begin(),
+											 end = purge_list.end();
+					 iter != end; ++iter)
 				{
 					std::string tex_filename = getTextureFileName(entries[*iter].mID);
 					removeEntry((S32)*iter, entries[*iter], tex_filename);
@@ -1499,7 +1519,7 @@ void LLTextureCache::readHeaderCache()
 				// If we removed any entries, we need to rebuild the entries list,
 				// write the header, and call this again
 				std::vector<Entry> new_entries;
-				for (U32 i = 0; i < num_entries; i++)
+				for (U32 i = 0; i < num_entries; ++i)
 				{
 					const Entry& entry = entries[i];
 					if (entry.mImageSize > 0)
@@ -1515,10 +1535,7 @@ void LLTextureCache::readHeaderCache()
 				readHeaderCache(); // repeat with new entries file
 				mHeaderMutex.lock();
 			}
-			else
-			{
-				//entries are not changed, nothing here.
-			}
+//			else // entries are not changed, nothing here.
 		}
 	}
 	mHeaderMutex.unlock();
@@ -1540,7 +1557,7 @@ void LLTextureCache::clearCorruptedCache()
 		LLFile::mkdir(mTexturesDirName);
 
 		const char* subdirs = "0123456789abcdef";
-		for (S32 i = 0; i < 16; i++)
+		for (S32 i = 0; i < 16; ++i)
 		{
 			std::string dirname = mTexturesDirName + gDirUtilp->getDirDelimiter() + subdirs[i];
 			LLFile::mkdir(dirname);
@@ -1557,7 +1574,7 @@ void LLTextureCache::purgeAllTextures(bool purge_directories)
 		const char* subdirs = "0123456789abcdef";
 		std::string delem = gDirUtilp->getDirDelimiter();
 		std::string mask = delem + "*";
-		for (S32 i = 0; i < 16; i++)
+		for (S32 i = 0; i < 16; ++i)
 		{
 			std::string dirname = mTexturesDirName + delem + subdirs[i];
 			llinfos << "Deleting files in directory: " << dirname << llendl;
@@ -1624,13 +1641,15 @@ void LLTextureCache::purgeTextures(bool validate)
 	// Use mTexturesSizeMap to collect UUIDs of textures with bodies
 	typedef std::set<std::pair<U32,S32> > time_idx_set_t;
 	time_idx_set_t time_idx_set;
-	for (size_map_t::iterator iter1 = mTexturesSizeMap.begin();
-		 iter1 != mTexturesSizeMap.end(); ++iter1)
+	id_map_t::iterator header_id_map_end = mHeaderIDMap.end();
+	for (size_map_t::iterator iter1 = mTexturesSizeMap.begin(),
+							  end = mTexturesSizeMap.end();
+		 iter1 != end; ++iter1)
 	{
 		if (iter1->second > 0)
 		{
 			id_map_t::iterator iter2 = mHeaderIDMap.find(iter1->first);
-			if (iter2 != mHeaderIDMap.end())
+			if (iter2 != header_id_map_end)
 			{
 				S32 idx = iter2->second;
 				time_idx_set.insert(std::make_pair(entries[idx].mTime, idx));
@@ -1666,8 +1685,9 @@ void LLTextureCache::purgeTextures(bool validate)
 	S64 cache_size = mTexturesSizeTotal;
 	S64 purged_cache_size = (TEXTURE_PURGED_CACHE_SIZE * sCacheMaxTexturesSize) / (S64)100;
 	S32 purge_count = 0;
-	for (time_idx_set_t::iterator iter = time_idx_set.begin();
-		 iter != time_idx_set.end(); ++iter)
+	for (time_idx_set_t::iterator iter = time_idx_set.begin(),
+								  end = time_idx_set.end();
+		 iter != end; ++iter)
 	{
 		S32 idx = iter->second;
 		bool purge_entry = false;
@@ -1702,7 +1722,7 @@ void LLTextureCache::purgeTextures(bool validate)
 
 		if (purge_entry)
 		{
-			purge_count++;
+			++purge_count;
 			mFilesToDelete.insert(std::make_pair(entries[idx].mID, filename));
 			cache_size -= entries[idx].mBodySize;
 			removeEntry(idx, entries[idx], filename, false); // remove the entry but not the file
@@ -1754,7 +1774,7 @@ void LLTextureCache::purgeTextureFilesTimeSliced(bool force)
 		std::string filename;
 
 		for (LLTextureCache::purge_map_t::iterator iter = mFilesToDelete.begin();
-			 iter != mFilesToDelete.end(); ) 
+			 iter != mFilesToDelete.end(); )
 		{
 			LLTextureCache::purge_map_t::iterator curiter = iter++;
 			// Only remove files for textures that have not been cached again
@@ -1771,9 +1791,9 @@ void LLTextureCache::purgeTextureFilesTimeSliced(bool force)
 										  << LL_ENDL;
 			}
 			mFilesToDelete.erase(curiter);
-			purged++;
+			++purged;
 
-			if (!force && mSlicedPurgeTimer.getElapsedTimeF32() > max_time_per_pass) 
+			if (!force && mSlicedPurgeTimer.getElapsedTimeF32() > max_time_per_pass)
 			{
 				break;
 			}

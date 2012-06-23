@@ -1,11 +1,11 @@
-/** 
+/**
  * @file llviewertexturelist.h
  * @brief Object for managing the list of images within a region
  *
  * $LicenseInfo:firstyear=2000&license=viewergpl$
- * 
+ *
  * Copyright (c) 2000-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,34 +13,35 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
  * $/LicenseInfo$
  */
 
-#ifndef LL_LLVIEWERTEXTURELIST_H					
+#ifndef LL_LLVIEWERTEXTURELIST_H
 #define LL_LLVIEWERTEXTURELIST_H
 
-#include "lluuid.h"
-//#include "message.h"
-#include "llgl.h"
-#include "llstat.h"
-#include "llviewertexture.h"
-#include "llui.h"
 #include <list>
 #include <set>
+
+#include "llviewertexture.h"
+
+#include "llgl.h"
+#include "llstat.h"
+#include "llui.h"
+#include "lluuid.h"
 
 const U32 LL_IMAGE_REZ_LOSSLESS_CUTOFF = 128;
 
@@ -67,18 +68,21 @@ typedef	void (*LLImageCallback)(BOOL success,
 
 class LLViewerTextureList
 {
-        LOG_CLASS(LLViewerTextureList);
+	LOG_CLASS(LLViewerTextureList);
 
 	friend class LLTextureView;
 	friend class LLViewerTextureManager;
-	
+
 public:
-	static BOOL createUploadFile(const std::string& filename, const std::string& out_filename, const U8 codec);
+	static BOOL createUploadFile(const std::string& filename,
+								 const std::string& out_filename,
+								 const U8 codec);
 	static LLPointer<LLImageJ2C> convertToUploadFile(LLPointer<LLImageRaw> raw_image);
-	static void processImageNotInDatabase(LLMessageSystem *msg, void **user_data);
+	static void processImageNotInDatabase(LLMessageSystem *msg,
+										  void** user_data);
 	static S32 calcMaxTextureRAM();
-	static void receiveImageHeader(LLMessageSystem *msg, void **user_data);
-	static void receiveImagePacket(LLMessageSystem *msg, void **user_data);
+	static void receiveImageHeader(LLMessageSystem *msg, void** user_data);
+	static void receiveImagePacket(LLMessageSystem *msg, void** user_data);
 
 public:
 	LLViewerTextureList();
@@ -100,7 +104,7 @@ public:
 	void forceImmediateUpdate(LLViewerFetchedTexture* imagep);
 
 	// Decode and create textures for all images currently in list.
-	void decodeAllImages(F32 max_decode_time); 
+	void decodeAllImages(F32 max_decode_time);
 
 	void handleIRCallback(void **data, const S32 number);
 
@@ -132,49 +136,52 @@ private:
 	void addImageToList(LLViewerFetchedTexture *image);
 	void removeImageFromList(LLViewerFetchedTexture *image);
 
-	LLViewerFetchedTexture * getImage(const LLUUID &image_id,									 
-									 BOOL usemipmap = TRUE,
-									 LLViewerTexture::EBoostLevel boost_priority = LLViewerTexture::BOOST_NONE,		// Get the requested level immediately upon creation.
-									 S8 texture_type = LLViewerTexture::FETCHED_TEXTURE,
-									 LLGLint internal_format = 0,
-									 LLGLenum primary_format = 0,
-									 LLHost request_from_host = LLHost()
-									 );
+	LLViewerFetchedTexture * getImage(const LLUUID &image_id,									
+									  BOOL usemipmap = TRUE,
+									  // Get the requested level immediately upon creation:
+									  LLViewerTexture::EBoostLevel boost_priority = LLViewerTexture::BOOST_NONE,
+									  S8 texture_type = LLViewerTexture::FETCHED_TEXTURE,
+									  LLGLint internal_format = 0,
+									  LLGLenum primary_format = 0,
+									  LLHost request_from_host = LLHost());
 
-	LLViewerFetchedTexture * getImageFromFile(const std::string& filename,									 
-									 BOOL usemipmap = TRUE,
-									 LLViewerTexture::EBoostLevel boost_priority = LLViewerTexture::BOOST_NONE,		// Get the requested level immediately upon creation.
-									 S8 texture_type = LLViewerTexture::FETCHED_TEXTURE,
-									 LLGLint internal_format = 0,
-									 LLGLenum primary_format = 0,
-									 const LLUUID& force_id = LLUUID::null
-									 );
+	LLViewerFetchedTexture * getImageFromFile(const std::string& filename,									
+											  BOOL usemipmap = TRUE,
+											  // Get the requested level immediately upon creation:
+											  LLViewerTexture::EBoostLevel boost_priority = LLViewerTexture::BOOST_NONE,
+											  S8 texture_type = LLViewerTexture::FETCHED_TEXTURE,
+											  LLGLint internal_format = 0,
+											  LLGLenum primary_format = 0,
+											  const LLUUID& force_id = LLUUID::null);
 
 	LLViewerFetchedTexture* getImageFromUrl(const std::string& url,
-									 BOOL usemipmap = TRUE,
-									 LLViewerTexture::EBoostLevel boost_priority = LLViewerTexture::BOOST_NONE,		// Get the requested level immediately upon creation.
-									 S8 texture_type = LLViewerTexture::FETCHED_TEXTURE,
-									 LLGLint internal_format = 0,
-									 LLGLenum primary_format = 0,
-									 const LLUUID& force_id = LLUUID::null
-									 );
+											BOOL usemipmap = TRUE,
+											// Get the requested level immediately upon creation:
+											LLViewerTexture::EBoostLevel boost_priority = LLViewerTexture::BOOST_NONE,
+											S8 texture_type = LLViewerTexture::FETCHED_TEXTURE,
+											LLGLint internal_format = 0,
+											LLGLenum primary_format = 0,
+											const LLUUID& force_id = LLUUID::null);
 
 	LLViewerFetchedTexture* createImage(const LLUUID &image_id,
-									 BOOL usemipmap = TRUE,
-									 LLViewerTexture::EBoostLevel boost_priority = LLViewerTexture::BOOST_NONE,		// Get the requested level immediately upon creation.
-									 S8 texture_type = LLViewerTexture::FETCHED_TEXTURE,
-									 LLGLint internal_format = 0,
-									 LLGLenum primary_format = 0,
-									 LLHost request_from_host = LLHost()
-									 );
+										BOOL usemipmap = TRUE,
+										// Get the requested level immediately upon creation.
+										LLViewerTexture::EBoostLevel boost_priority = LLViewerTexture::BOOST_NONE,
+										S8 texture_type = LLViewerTexture::FETCHED_TEXTURE,
+										LLGLint internal_format = 0,
+										LLGLenum primary_format = 0,
+										LLHost request_from_host = LLHost());
 
 	// Request image from a specific host, used for baked avatar textures.
 	// Implemented in header in case someone changes default params above. JC
 	LLViewerFetchedTexture* getImageFromHost(const LLUUID& image_id, LLHost host)
-		{ return getImage(image_id, TRUE, LLViewerTexture::BOOST_NONE, LLViewerTexture::LOD_TEXTURE, 0, 0, host); }
+	{
+		return getImage(image_id, TRUE, LLViewerTexture::BOOST_NONE,
+						LLViewerTexture::LOD_TEXTURE, 0, 0, host);
+	}
 
 public:
-	typedef std::set<LLPointer<LLViewerFetchedTexture> > image_list_t;	
+	typedef std::set<LLPointer<LLViewerFetchedTexture> > image_list_t;
 	image_list_t mLoadingStreamList;
 	image_list_t mCreateTextureList;
 	image_list_t mCallbackList;
@@ -190,7 +197,7 @@ private:
 	LLUUID mLastUpdateUUID;
 	LLUUID mLastFetchUUID;
 
-	typedef std::set<LLPointer<LLViewerFetchedTexture>, LLViewerFetchedTexture::Compare> image_priority_list_t;	
+	typedef std::set<LLPointer<LLViewerFetchedTexture>, LLViewerFetchedTexture::Compare> image_priority_list_t;
 	image_priority_list_t mImageList;
 
 	// simply holds on to LLViewerFetchedTexture references to stop them from being purged too soon
@@ -228,20 +235,35 @@ public:
 
 	bool initFromFile();
 
-	LLUIImagePtr preloadUIImage(const std::string& name, const std::string& filename, BOOL use_mips, const LLRect& scale_rect);
+	LLUIImagePtr preloadUIImage(const std::string& name,
+								const std::string& filename,
+								BOOL use_mips,
+								const LLRect& scale_rect);
 
-	static void onUIImageLoaded( BOOL success, LLViewerFetchedTexture *src_vi, LLImageRaw* src, LLImageRaw* src_aux, S32 discard_level, BOOL final, void* userdata );
+	static void onUIImageLoaded(BOOL success,
+								LLViewerFetchedTexture *src_vi,
+								LLImageRaw* src,
+								LLImageRaw* src_aux,
+								S32 discard_level,
+								BOOL final,
+								void* userdata);
 
 private:
-	LLUIImagePtr loadUIImageByName(const std::string& name, const std::string& filename,
-		                           BOOL use_mips = FALSE, const LLRect& scale_rect = LLRect::null, 
+	LLUIImagePtr loadUIImageByName(const std::string& name,
+								   const std::string& filename,
+		                           BOOL use_mips = FALSE,
+								   const LLRect& scale_rect = LLRect::null,
 		                           LLViewerTexture::EBoostLevel boost_priority = LLViewerTexture::BOOST_UI);
 
 	LLUIImagePtr loadUIImageByID(const LLUUID& id,
-								 BOOL use_mips = FALSE, const LLRect& scale_rect = LLRect::null, 
+								 BOOL use_mips = FALSE,
+								 const LLRect& scale_rect = LLRect::null,
 								 LLViewerTexture::EBoostLevel boost_priority = LLViewerTexture::BOOST_UI);
 
-	LLUIImagePtr loadUIImage(LLViewerFetchedTexture* imagep, const std::string& name, BOOL use_mips = FALSE, const LLRect& scale_rect = LLRect::null);
+	LLUIImagePtr loadUIImage(LLViewerFetchedTexture* imagep,
+							 const std::string& name,
+							 BOOL use_mips = FALSE,
+							 const LLRect& scale_rect = LLRect::null);
 
 	struct LLUIImageLoadData
 	{

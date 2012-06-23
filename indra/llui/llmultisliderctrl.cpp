@@ -1,11 +1,11 @@
-/** 
+/**
  * @file llmultisliderctrl.cpp
  * @brief LLMultiSliderCtrl base class
  *
  * $LicenseInfo:firstyear=2007&license=viewergpl$
- * 
+ *
  * Copyright (c) 2007-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -34,111 +34,115 @@
 
 #include "llmultisliderctrl.h"
 
-#include "llmath.h"
+#include "llcontrol.h"
+#include "llfocusmgr.h"
 #include "llfontgl.h"
 #include "llgl.h"
 #include "llkeyboard.h"
 #include "lllineeditor.h"
+#include "llmath.h"
 #include "llmultislider.h"
+#include "llresmgr.h"
 #include "llstring.h"
 #include "lltextbox.h"
 #include "llui.h"
 #include "lluiconstants.h"
-#include "llcontrol.h"
-#include "llfocusmgr.h"
-#include "llresmgr.h"
 
 static LLRegisterWidget<LLMultiSliderCtrl> r("multi_slider");
 
 const U32 MAX_STRING_LENGTH = 10;
 
- 
-LLMultiSliderCtrl::LLMultiSliderCtrl(const std::string& name, const LLRect& rect, 
-						   const std::string& label,
-						   const LLFontGL* font,
-						   S32 label_width,
-						   S32 text_left,
-						   BOOL show_text,
-						   BOOL can_edit_text,
-						   void (*commit_callback)(LLUICtrl*, void*),
-						   void* callback_user_data,
-						   F32 initial_value, F32 min_value, F32 max_value, F32 increment,
-						   S32 max_sliders, BOOL allow_overlap,
-						   BOOL draw_track,
-						   BOOL use_triangle,
-						   const std::string& control_which)
-	: LLUICtrl(name, rect, TRUE, commit_callback, callback_user_data ),
-	  mFont(font),
-	  mShowText( show_text ),
-	  mCanEditText( can_edit_text ),
-	  mPrecision( 3 ),
-	  mLabelBox( NULL ),
-	  mLabelWidth( label_width ),
-
-	  mEditor( NULL ),
-	  mTextBox( NULL ),
-	  mTextEnabledColor( LLUI::sColorsGroup->getColor( "LabelTextColor" ) ),
-	  mTextDisabledColor( LLUI::sColorsGroup->getColor( "LabelDisabledColor" ) ),
-	  mSliderMouseUpCallback( NULL ),
-	  mSliderMouseDownCallback( NULL )
+LLMultiSliderCtrl::LLMultiSliderCtrl(const std::string& name,
+									 const LLRect& rect,
+						 			 const std::string& label,
+									 const LLFontGL* font,
+									 S32 label_width,
+									 S32 text_left,
+									 BOOL show_text,
+									 BOOL can_edit_text,
+									 void (*commit_callback)(LLUICtrl*, void*),
+									 void* callback_user_data,
+									 F32 initial_value,
+									 F32 min_value,
+									 F32 max_value,
+									 F32 increment,
+									 S32 max_sliders,
+									 BOOL allow_overlap,
+									 BOOL draw_track,
+									 BOOL use_triangle,
+									 const std::string& control_which)
+:	LLUICtrl(name, rect, TRUE, commit_callback, callback_user_data),
+	mFont(font),
+	mShowText(show_text),
+	mCanEditText(can_edit_text),
+	mPrecision(3),
+	mLabelBox(NULL),
+	mLabelWidth(label_width),
+	mEditor(NULL),
+	mTextBox(NULL),
+	mTextEnabledColor(LLUI::sColorsGroup->getColor("LabelTextColor")),
+	mTextDisabledColor(LLUI::sColorsGroup->getColor("LabelDisabledColor")),
+	mSliderMouseUpCallback(NULL),
+	mSliderMouseDownCallback(NULL)
 {
 	S32 top = getRect().getHeight();
 	S32 bottom = 0;
 	S32 left = 0;
 
 	// Label
-	if( !label.empty() )
+	if (!label.empty())
 	{
 		if (label_width == 0)
 		{
 			label_width = font->getWidth(label);
 		}
-		LLRect label_rect( left, top, label_width, bottom );
-		mLabelBox = new LLTextBox( std::string("MultiSliderCtrl Label"), label_rect, label, font );
+		LLRect label_rect(left, top, label_width, bottom);
+		mLabelBox = new LLTextBox(std::string("MultiSliderCtrl Label"),
+								  label_rect, label, font);
 		addChild(mLabelBox);
 	}
 
 	S32 slider_right = getRect().getWidth();
-	if( show_text )
+	if (show_text)
 	{
 		slider_right = text_left - MULTI_SLIDERCTRL_SPACING;
 	}
 
 	S32 slider_left = label_width ? label_width + MULTI_SLIDERCTRL_SPACING : 0;
-	LLRect slider_rect( slider_left, top, slider_right, bottom );
-	mMultiSlider = new LLMultiSlider( 
-		std::string("multi_slider"),
-		slider_rect, 
-		LLMultiSliderCtrl::onSliderCommit, this, 
-		initial_value, min_value, max_value, increment,
-		max_sliders, allow_overlap, draw_track,
-		use_triangle,
-		control_which );
-	addChild( mMultiSlider );
+	LLRect slider_rect(slider_left, top, slider_right, bottom);
+	mMultiSlider = new LLMultiSlider(std::string("multi_slider"), slider_rect,
+									 LLMultiSliderCtrl::onSliderCommit, this,
+									 initial_value, min_value, max_value,
+									 increment, max_sliders, allow_overlap,
+									 draw_track, use_triangle, control_which);
+	addChild(mMultiSlider);
 	mCurValue = mMultiSlider->getCurSliderValue();
-	
-	if( show_text )
+
+	if (show_text)
 	{
-		LLRect text_rect( text_left, top, getRect().getWidth(), bottom );
-		if( can_edit_text )
+		LLRect text_rect(text_left, top, getRect().getWidth(), bottom);
+		if (can_edit_text)
 		{
-			mEditor = new LLLineEditor( std::string("MultiSliderCtrl Editor"), text_rect,
-				LLStringUtil::null, font,
-				MAX_STRING_LENGTH,
-				&LLMultiSliderCtrl::onEditorCommit, NULL, NULL, this,
-				&LLLineEditor::prevalidateFloat );
+			mEditor = new LLLineEditor(std::string("MultiSliderCtrl Editor"),
+									   text_rect, LLStringUtil::null, font,
+									   MAX_STRING_LENGTH,
+									   &LLMultiSliderCtrl::onEditorCommit,
+									   NULL, NULL, this,
+									   &LLLineEditor::prevalidateFloat);
 			mEditor->setFollowsLeft();
 			mEditor->setFollowsBottom();
-			mEditor->setFocusReceivedCallback( &LLMultiSliderCtrl::onEditorGainFocus, this );
+			mEditor->setFocusReceivedCallback(&LLMultiSliderCtrl::onEditorGainFocus,
+											  this);
 			mEditor->setIgnoreTab(TRUE);
-			// don't do this, as selecting the entire text is single clicking in some cases
-			// and double clicking in others
+			// Don't do this, as selecting the entire text is single clicking
+			// in some cases and double clicking in others:
 			//mEditor->setSelectAllonFocusReceived(TRUE);
 			addChild(mEditor);
 		}
 		else
 		{
-			mTextBox = new LLTextBox( std::string("MultiSliderCtrl Text"), text_rect,	LLStringUtil::null,	font);
+			mTextBox = new LLTextBox(std::string("MultiSliderCtrl Text"),
+									 text_rect, LLStringUtil::null,	font);
 			mTextBox->setFollowsLeft();
 			mTextBox->setFollowsBottom();
 			addChild(mTextBox);
@@ -154,14 +158,14 @@ LLMultiSliderCtrl::~LLMultiSliderCtrl()
 }
 
 // static
-void LLMultiSliderCtrl::onEditorGainFocus( LLFocusableElement* caller, void *userdata )
+void LLMultiSliderCtrl::onEditorGainFocus(LLFocusableElement* caller,
+										  void* userdata)
 {
 	LLMultiSliderCtrl* self = (LLMultiSliderCtrl*) userdata;
-	llassert( caller == self->mEditor );
+	llassert(caller == self->mEditor);
 
 	self->onFocusReceived();
 }
-
 
 void LLMultiSliderCtrl::setValue(const LLSD& value)
 {
@@ -170,9 +174,10 @@ void LLMultiSliderCtrl::setValue(const LLSD& value)
 	updateText();
 }
 
-void LLMultiSliderCtrl::setSliderValue(const std::string& name, F32 v, BOOL from_event)
+void LLMultiSliderCtrl::setSliderValue(const std::string& name, F32 v,
+									   BOOL from_event)
 {
-	mMultiSlider->setSliderValue(name, v, from_event );
+	mMultiSlider->setSliderValue(name, v, from_event);
 	mCurValue = mMultiSlider->getCurSliderValue();
 	updateText();
 }
@@ -183,7 +188,8 @@ void LLMultiSliderCtrl::setCurSlider(const std::string& name)
 	mCurValue = mMultiSlider->getCurSliderValue();
 }
 
-BOOL LLMultiSliderCtrl::setLabelArg( const std::string& key, const LLStringExplicit& text )
+BOOL LLMultiSliderCtrl::setLabelArg(const std::string& key,
+									const LLStringExplicit& text)
 {
 	BOOL res = FALSE;
 	if (mLabelBox)
@@ -196,11 +202,11 @@ BOOL LLMultiSliderCtrl::setLabelArg( const std::string& key, const LLStringExpli
 			S32 prev_right = rect.mRight;
 			rect.mRight = rect.mLeft + label_width;
 			mLabelBox->setRect(rect);
-				
+
 			S32 delta = rect.mRight - prev_right;
 			rect = mMultiSlider->getRect();
 			S32 left = rect.mLeft + delta;
-			left = llclamp(left, 0, rect.mRight-MULTI_SLIDERCTRL_SPACING);
+			left = llclamp(left, 0, rect.mRight - MULTI_SLIDERCTRL_SPACING);
 			rect.mLeft = left;
 			mMultiSlider->setRect(rect);
 		}
@@ -211,9 +217,10 @@ BOOL LLMultiSliderCtrl::setLabelArg( const std::string& key, const LLStringExpli
 const std::string& LLMultiSliderCtrl::addSlider()
 {
 	const std::string& name = mMultiSlider->addSlider();
-	
+
 	// if it returns null, pass it on
-	if(name == LLStringUtil::null) {
+	if (name == LLStringUtil::null)
+	{
 		return LLStringUtil::null;
 	}
 
@@ -228,7 +235,8 @@ const std::string& LLMultiSliderCtrl::addSlider(F32 val)
 	const std::string& name = mMultiSlider->addSlider(val);
 
 	// if it returns null, pass it on
-	if(name == LLStringUtil::null) {
+	if (name == LLStringUtil::null)
+	{
 		return LLStringUtil::null;
 	}
 
@@ -245,22 +253,20 @@ void LLMultiSliderCtrl::deleteSlider(const std::string& name)
 	updateText();
 }
 
-
 void LLMultiSliderCtrl::clear()
 {
 	setCurSliderValue(0.0f);
-	if( mEditor )
+	if (mEditor)
 	{
 		mEditor->setText(std::string(""));
 	}
-	if( mTextBox )
+	if (mTextBox)
 	{
 		mTextBox->setText(std::string(""));
 	}
 
 	// get rid of sliders
 	mMultiSlider->clear();
-
 }
 
 BOOL LLMultiSliderCtrl::isMouseHeldDown()
@@ -270,88 +276,94 @@ BOOL LLMultiSliderCtrl::isMouseHeldDown()
 
 void LLMultiSliderCtrl::updateText()
 {
-	if( mEditor || mTextBox )
+	if (mEditor || mTextBox)
 	{
 		LLLocale locale(LLLocale::USER_LOCALE);
 
 		// Don't display very small negative values as -0.000
-		F32 displayed_value = (F32)(floor(getCurSliderValue() * pow(10.0, (F64)mPrecision) + 0.5) / pow(10.0, (F64)mPrecision));
+		F32 displayed_value = (F32)(floor(getCurSliderValue() *
+							   pow(10.0, (F64)mPrecision) + 0.5) /
+							   pow(10.0, (F64)mPrecision));
 
 		std::string format = llformat("%%.%df", mPrecision);
 		std::string text = llformat(format.c_str(), displayed_value);
-		if( mEditor )
+		if (mEditor)
 		{
-			mEditor->setText( text );
+			mEditor->setText(text);
 		}
 		else
 		{
-			mTextBox->setText( text );
+			mTextBox->setText(text);
 		}
 	}
 }
 
 // static
-void LLMultiSliderCtrl::onEditorCommit( LLUICtrl* caller, void *userdata )
+void LLMultiSliderCtrl::onEditorCommit(LLUICtrl* caller, void* userdata)
 {
 	LLMultiSliderCtrl* self = (LLMultiSliderCtrl*) userdata;
-	llassert( caller == self->mEditor );
+	llassert(caller == self->mEditor);
 
 	BOOL success = FALSE;
 	F32 val = self->mCurValue;
 	F32 saved_val = self->mCurValue;
 
 	std::string text = self->mEditor->getText();
-	if( LLLineEditor::postvalidateFloat( text ) )
+	if (LLLineEditor::postvalidateFloat(text))
 	{
 		LLLocale locale(LLLocale::USER_LOCALE);
-		val = (F32) atof( text.c_str() );
-		if( self->mMultiSlider->getMinValue() <= val && val <= self->mMultiSlider->getMaxValue() )
+		val = (F32) atof(text.c_str());
+		if (self->mMultiSlider->getMinValue() <= val &&
+			val <= self->mMultiSlider->getMaxValue())
 		{
-			if( self->mValidateCallback )
+			if (self->mValidateCallback)
 			{
-				self->setCurSliderValue( val );  // set the value temporarily so that the callback can retrieve it.
-				if( self->mValidateCallback( self, self->mCallbackUserData ) )
+				// set the value temporarily so that the callback can retrieve
+				// it:
+				self->setCurSliderValue(val);
+				if (self->mValidateCallback(self, self->mCallbackUserData))
 				{
 					success = TRUE;
 				}
 			}
 			else
 			{
-				self->setCurSliderValue( val );
+				self->setCurSliderValue(val);
 				success = TRUE;
 			}
 		}
 	}
 
-	if( success )
+	if (success)
 	{
 		self->onCommit();
 	}
 	else
 	{
-		if( self->getCurSliderValue() != saved_val )
+		if (self->getCurSliderValue() != saved_val)
 		{
-			self->setCurSliderValue( saved_val );
+			self->setCurSliderValue(saved_val);
 		}
-		self->reportInvalidData();		
+		self->reportInvalidData();
 	}
 	self->updateText();
 }
 
 // static
-void LLMultiSliderCtrl::onSliderCommit( LLUICtrl* caller, void *userdata )
+void LLMultiSliderCtrl::onSliderCommit(LLUICtrl* caller, void* userdata)
 {
 	LLMultiSliderCtrl* self = (LLMultiSliderCtrl*) userdata;
-	//llassert( caller == self->mSlider );
+	//llassert(caller == self->mSlider);
 
 	BOOL success = FALSE;
 	F32 saved_val = self->mCurValue;
 	F32 new_val = self->mMultiSlider->getCurSliderValue();
 
-	if( self->mValidateCallback )
+	if (self->mValidateCallback)
 	{
-		self->mCurValue = new_val;  // set the value temporarily so that the callback can retrieve it.
-		if( self->mValidateCallback( self, self->mCallbackUserData ) )
+		// set the value temporarily so that the callback can retrieve it:
+		self->mCurValue = new_val;
+		if (self->mValidateCallback(self, self->mCallbackUserData))
 		{
 			success = TRUE;
 		}
@@ -362,66 +374,63 @@ void LLMultiSliderCtrl::onSliderCommit( LLUICtrl* caller, void *userdata )
 		success = TRUE;
 	}
 
-	if( success )
+	if (success)
 	{
 		self->onCommit();
 	}
 	else
 	{
-		if( self->mCurValue != saved_val )
+		if (self->mCurValue != saved_val)
 		{
-			self->setCurSliderValue( saved_val );
+			self->setCurSliderValue(saved_val);
 		}
-		self->reportInvalidData();		
+		self->reportInvalidData();
 	}
 	self->updateText();
 }
 
 void LLMultiSliderCtrl::setEnabled(BOOL b)
 {
-	LLUICtrl::setEnabled( b );
+	LLUICtrl::setEnabled(b);
 
-	if( mLabelBox )
+	if (mLabelBox)
 	{
-		mLabelBox->setColor( b ? mTextEnabledColor : mTextDisabledColor );
+		mLabelBox->setColor(b ? mTextEnabledColor : mTextDisabledColor);
 	}
 
-	mMultiSlider->setEnabled( b );
+	mMultiSlider->setEnabled(b);
 
-	if( mEditor )
+	if (mEditor)
 	{
-		mEditor->setEnabled( b );
+		mEditor->setEnabled(b);
 	}
 
-	if( mTextBox )
+	if (mTextBox)
 	{
-		mTextBox->setColor( b ? mTextEnabledColor : mTextDisabledColor );
+		mTextBox->setColor(b ? mTextEnabledColor : mTextDisabledColor);
 	}
 }
 
-
 void LLMultiSliderCtrl::setTentative(BOOL b)
 {
-	if( mEditor )
+	if (mEditor)
 	{
 		mEditor->setTentative(b);
 	}
 	LLUICtrl::setTentative(b);
 }
 
-
 void LLMultiSliderCtrl::onCommit()
 {
 	setTentative(FALSE);
 
-	if( mEditor )
+	if (mEditor)
 	{
 		mEditor->setTentative(FALSE);
 	}
 
 	LLUICtrl::onCommit();
 }
-
 
 void LLMultiSliderCtrl::setPrecision(S32 precision)
 {
@@ -435,44 +444,45 @@ void LLMultiSliderCtrl::setPrecision(S32 precision)
 	updateText();
 }
 
-void LLMultiSliderCtrl::setSliderMouseDownCallback( void (*slider_mousedown_callback)(LLUICtrl* caller, void* userdata) )
+void LLMultiSliderCtrl::setSliderMouseDownCallback(void (*slider_mousedown_callback)(LLUICtrl* caller,
+																					 void* userdata))
 {
 	mSliderMouseDownCallback = slider_mousedown_callback;
-	mMultiSlider->setMouseDownCallback( LLMultiSliderCtrl::onSliderMouseDown );
+	mMultiSlider->setMouseDownCallback(LLMultiSliderCtrl::onSliderMouseDown);
 }
 
 // static
 void LLMultiSliderCtrl::onSliderMouseDown(LLUICtrl* caller, void* userdata)
 {
 	LLMultiSliderCtrl* self = (LLMultiSliderCtrl*) userdata;
-	if( self->mSliderMouseDownCallback )
+	if (self->mSliderMouseDownCallback)
 	{
-		self->mSliderMouseDownCallback( self, self->mCallbackUserData );
+		self->mSliderMouseDownCallback(self, self->mCallbackUserData);
 	}
 }
 
-
-void LLMultiSliderCtrl::setSliderMouseUpCallback( void (*slider_mouseup_callback)(LLUICtrl* caller, void* userdata) )
+void LLMultiSliderCtrl::setSliderMouseUpCallback(void (*slider_mouseup_callback)(LLUICtrl* caller,
+																				 void* userdata))
 {
 	mSliderMouseUpCallback = slider_mouseup_callback;
-	mMultiSlider->setMouseUpCallback( LLMultiSliderCtrl::onSliderMouseUp );
+	mMultiSlider->setMouseUpCallback(LLMultiSliderCtrl::onSliderMouseUp);
 }
 
 // static
 void LLMultiSliderCtrl::onSliderMouseUp(LLUICtrl* caller, void* userdata)
 {
 	LLMultiSliderCtrl* self = (LLMultiSliderCtrl*) userdata;
-	if( self->mSliderMouseUpCallback )
+	if (self->mSliderMouseUpCallback)
 	{
-		self->mSliderMouseUpCallback( self, self->mCallbackUserData );
+		self->mSliderMouseUpCallback(self, self->mCallbackUserData);
 	}
 }
 
 void LLMultiSliderCtrl::onTabInto()
 {
-	if( mEditor )
+	if (mEditor)
 	{
-		mEditor->onTabInto(); 
+		mEditor->onTabInto();
 	}
 }
 
@@ -488,7 +498,8 @@ std::string LLMultiSliderCtrl::getControlName() const
 }
 
 // virtual
-void LLMultiSliderCtrl::setControlName(const std::string& control_name, LLView* context)
+void LLMultiSliderCtrl::setControlName(const std::string& control_name,
+									   LLView* context)
 {
 	mMultiSlider->setControlName(control_name, context);
 }
@@ -511,7 +522,8 @@ LLXMLNodePtr LLMultiSliderCtrl::getXML(bool save_children) const
 		node->createChild("label", TRUE)->setStringValue(mLabelBox->getText());
 	}
 
-	// TomY TODO: Do we really want to export the transient state of the slider?
+	// TomY TODO: Do we really want to export the transient state of the
+	// slider ?
 	node->createChild("value", TRUE)->setFloatValue(mCurValue);
 
 	if (mMultiSlider)
@@ -521,13 +533,16 @@ LLXMLNodePtr LLMultiSliderCtrl::getXML(bool save_children) const
 		node->createChild("max_val", TRUE)->setFloatValue(mMultiSlider->getMaxValue());
 		node->createChild("increment", TRUE)->setFloatValue(mMultiSlider->getIncrement());
 	}
-	addColorXML(node, mTextEnabledColor, "text_enabled_color", "LabelTextColor");
-	addColorXML(node, mTextDisabledColor, "text_disabled_color", "LabelDisabledColor");
+	addColorXML(node, mTextEnabledColor, "text_enabled_color",
+				"LabelTextColor");
+	addColorXML(node, mTextDisabledColor, "text_disabled_color",
+				"LabelDisabledColor");
 
 	return node;
 }
 
-LLView* LLMultiSliderCtrl::fromXML(LLXMLNodePtr node, LLView *parent, LLUICtrlFactory *factory)
+LLView* LLMultiSliderCtrl::fromXML(LLXMLNodePtr node, LLView* parent,
+								   LLUICtrlFactory* factory)
 {
 	std::string name("multi_slider");
 	node->getAttributeString("name", name);
@@ -554,7 +569,7 @@ LLView* LLMultiSliderCtrl::fromXML(LLXMLNodePtr node, LLView *parent, LLUICtrlFa
 
 	BOOL can_edit_text = FALSE;
 	node->getAttributeBOOL("can_edit_text", can_edit_text);
-	
+
 	BOOL allow_overlap = FALSE;
 	node->getAttributeBOOL("allow_overlap", allow_overlap);
 
@@ -570,7 +585,7 @@ LLView* LLMultiSliderCtrl::fromXML(LLXMLNodePtr node, LLView *parent, LLUICtrlFa
 	F32 min_value = 0.f;
 	node->getAttributeF32("min_val", min_value);
 
-	F32 max_value = 1.f; 
+	F32 max_value = 1.f;
 	node->getAttributeF32("max_val", max_value);
 
 	F32 increment = 0.1f;
@@ -582,19 +597,28 @@ LLView* LLMultiSliderCtrl::fromXML(LLXMLNodePtr node, LLView *parent, LLUICtrlFa
 	S32 max_sliders = 1;
 	node->getAttributeS32("max_sliders", max_sliders);
 
-
 	S32 text_left = 0;
 	if (show_text)
 	{
-		// calculate the size of the text box (log max_value is number of digits - 1 so plus 1)
-		if ( max_value )
-			text_left = font->getWidth(std::string("0")) * ( static_cast < S32 > ( log10  ( max_value ) ) + precision + 1 );
+		// calculate the size of the text box (log max_value is number of
+		// digits - 1 so plus 1)
+		if (max_value)
+		{
+			text_left = font->getWidth(std::string("0")) *
+						(static_cast<S32>(log10(max_value)) + precision + 1);
+		}
 
-		if ( increment < 1.0f )
-			text_left += font->getWidth(std::string("."));	// (mostly) take account of decimal point in value
+		if (increment < 1.0f)
+		{
+			// (mostly) take account of decimal point in value
+			text_left += font->getWidth(std::string("."));
+		}
 
-		if ( min_value < 0.0f || max_value < 0.0f )
-			text_left += font->getWidth(std::string("-"));	// (mostly) take account of minus sign 
+		if (min_value < 0.0f || max_value < 0.0f)
+		{
+			// (mostly) take account of minus sign
+			text_left += font->getWidth(std::string("-"));
+		}
 
 		// padding to make things look nicer
 		text_left += 8;
@@ -607,30 +631,23 @@ LLView* LLMultiSliderCtrl::fromXML(LLXMLNodePtr node, LLView *parent, LLUICtrlFa
 		label.assign(node->getTextContents());
 	}
 
-	LLMultiSliderCtrl* slider = new LLMultiSliderCtrl(name,
-							rect,
-							label,
-							font,
-							label_width,
-							rect.getWidth() - text_left,
-							show_text,
-							can_edit_text,
-							callback,
-							NULL,
-							initial_value,
-							min_value, 
-							max_value,
-							increment,
-							max_sliders,
-							allow_overlap,
-							draw_track,
-							use_triangle);
+	LLMultiSliderCtrl* slider = new LLMultiSliderCtrl(name, rect, label, font,
+													  label_width,
+													  rect.getWidth() - text_left,
+													  show_text, can_edit_text,
+													  callback, NULL,
+													  initial_value, min_value,
+													  max_value, increment,
+													  max_sliders,
+													  allow_overlap,
+													  draw_track,
+													  use_triangle);
 
 	slider->setPrecision(precision);
 
 	slider->initFromXML(node, parent);
 
 	slider->updateText();
-	
+
 	return slider;
 }

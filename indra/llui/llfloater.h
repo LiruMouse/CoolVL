@@ -104,7 +104,7 @@ public:
 	
 	LLFloater();
  	LLFloater(const std::string& name); //simple constructor for data-driven initialization
-	LLFloater(	const std::string& name, const LLRect& rect, const std::string& title,
+	LLFloater(const std::string& name, const LLRect& rect, const std::string& title,
 		BOOL resizable = FALSE,
 		S32 min_width = DEFAULT_MIN_WIDTH,
 		S32 min_height = DEFAULT_MIN_HEIGHT,
@@ -113,7 +113,7 @@ public:
 		BOOL close_btn = TRUE,
 		BOOL bordered = BORDER_NO);
 
-	LLFloater(	const std::string& name, const std::string& rect_control, const std::string& title,
+	LLFloater(const std::string& name, const std::string& rect_control, const std::string& title,
 		BOOL resizable = FALSE,
 		S32 min_width = DEFAULT_MIN_WIDTH, 
 		S32 min_height = DEFAULT_MIN_HEIGHT,
@@ -325,6 +325,13 @@ private:
 	
 	LLFloaterNotificationContext* mNotificationContext;
 	LLRootHandle<LLFloater>		mHandle;	
+
+	S32				mDropShadowFloater;
+	LLColor4		mColorDropShadow;
+	LLColor4		mTitleBarFocusColor;
+	LLColor4		mFloaterFocusBorderColor;
+	LLColor4		mFloaterUnfocusBorderColor;
+	LLColor4		mFloaterButtonImageColor;
 };
 
 /////////////////////////////////////////////////////////////

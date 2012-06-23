@@ -547,6 +547,7 @@ static bool handleOmitResidentAsLastNameChanged(const LLSD& newvalue)
 
 static bool handleLegacyNamesForFriendsChanged(const LLSD& newvalue)
 {
+	LLAvatarName::sLegacyNamesForFriends = (bool)newvalue.asBoolean();
 	LLAvatarTracker::instance().dirtyBuddies();
 	return true;
 }
@@ -692,6 +693,18 @@ static bool handleSpellCheckChanged(const LLSD& newvalue)
 static bool handleSwapShoutWhisperShortcutsChanged(const LLSD& newvalue)
 {
 	LLChatBar::sSwappedShortcuts = newvalue.asBoolean();
+	return true;
+}
+
+static bool handleYieldTimeChanged(const LLSD& newvalue)
+{
+	LLAppViewer::instance()->setYieldTime(newvalue.asInteger());
+	return true;
+}
+
+static bool handleMainloopTimeoutDefaultChanged(const LLSD& newvalue)
+{
+	LLAppViewer::instance()->setMainloopTimeoutDefault(newvalue.asReal());
 	return true;
 }
 
@@ -889,4 +902,6 @@ void settings_setup_listeners()
 	gSavedSettings.getControl("SpellCheckShow")->getSignal()->connect(boost::bind(&handleSpellCheckChanged, _2));
 	gSavedSettings.getControl("SpellCheckLanguage")->getSignal()->connect(boost::bind(&handleSpellCheckChanged, _2));
 	gSavedSettings.getControl("SwapShoutWhisperShortcuts")->getSignal()->connect(boost::bind(&handleSwapShoutWhisperShortcutsChanged, _2));
+	gSavedSettings.getControl("YieldTime")->getSignal()->connect(boost::bind(&handleYieldTimeChanged, _2));
+	gSavedSettings.getControl("MainloopTimeoutDefault")->getSignal()->connect(boost::bind(&handleMainloopTimeoutDefaultChanged, _2));
 }

@@ -369,6 +369,8 @@ public:
 	LLCachedControl<bool>		mAllowSelectAvatar;
 	LLCachedControl<bool>		mDebugSelectMgr;
 	LLCachedControl<bool>		mEditLinkedParts;
+	LLCachedControl<bool>		mSelectOwnedOnly;
+	LLCachedControl<bool>		mSelectMovableOnly;
 
 public:
 	LLSelectMgr();

@@ -1,11 +1,11 @@
-/** 
+/**
  * @file llmodaldialog.h
  * @brief LLModalDialog base class
  *
  * $LicenseInfo:firstyear=2002&license=viewergpl$
- * 
+ *
  * Copyright (c) 2002-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -35,23 +35,26 @@
 
 #include "llfloater.h"
 #include "llframetimer.h"
+#include "v4color.h"
 
 class LLModalDialog;
 
-// By default, a ModalDialog is modal, i.e. no other window can have focus
-// However, for the sake of code reuse and simplicity, if mModal == false,
-// the dialog behaves like a normal floater
-// https://wiki.lindenlab.com/mediawiki/index.php?title=LLModalDialog&oldid=81385
+// By default, a ModalDialog is modal, i.e. no other window can have focus.
+// However, for the sake of code reuse and simplicity, if mModal == false, the
+// dialog behaves like a normal floater
+
 class LLModalDialog : public LLFloater
 {
 public:
-	LLModalDialog( const std::string& title, S32 width, S32 height, BOOL modal = true );
+	LLModalDialog(const std::string& title, S32 width, S32 height,
+				  BOOL modal = true);
 	/*virtual*/ ~LLModalDialog();
 
 	/*virtual*/ void	open();	/* Flawfinder: ignore */
-	
-	/*virtual*/ void 	reshape(S32 width, S32 height, BOOL called_from_parent = TRUE);
-	
+
+	/*virtual*/ void 	reshape(S32 width, S32 height,
+								BOOL called_from_parent = TRUE);
+
 	/*virtual*/ void	startModal();
 	/*virtual*/ void	stopModal();
 
@@ -61,29 +64,33 @@ public:
 	/*virtual*/ BOOL	handleScrollWheel(S32 x, S32 y, S32 clicks);
 	/*virtual*/ BOOL	handleDoubleClick(S32 x, S32 y, MASK mask);
 	/*virtual*/ BOOL	handleRightMouseDown(S32 x, S32 y, MASK mask);
-	/*virtual*/ BOOL	handleKeyHere(KEY key, MASK mask );
+	/*virtual*/ BOOL	handleKeyHere(KEY key, MASK mask);
 
 	/*virtual*/ void	onClose(bool app_quitting);
 
 	/*virtual*/ void	setVisible(BOOL visible);
 	/*virtual*/ void	draw();
 
-	BOOL isModal() const { return mModal; }
+	BOOL			isModal() const		{ return mModal; }
 
 	static void		onAppFocusLost();
 	static void		onAppFocusGained();
 
-	static S32		activeCount() { return sModalStack.size(); }
+	static S32		activeCount()		{ return sModalStack.size(); }
 	static void		shutdownModals();
-	
+
 protected:
 	void			centerOnScreen();
 
 private:
+	S32				mDropShadowFloater;
+	LLColor4		mColorDropShadow;
+
 	LLFrameTimer 	mVisibleTime;
 	const BOOL		mModal;
 
-	static std::list<LLModalDialog*> sModalStack;  // Top of stack is currently being displayed
+	// Top of stack is currently being displayed
+	static std::list<LLModalDialog*> sModalStack;
 };
 
 #endif  // LL_LLMODALDIALOG_H

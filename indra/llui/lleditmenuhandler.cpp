@@ -36,4 +36,3 @@
 
 /* static */
 LLEditMenuHandler* LLEditMenuHandler::gEditMenuHandler = NULL;
-

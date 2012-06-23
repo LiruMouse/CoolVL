@@ -672,7 +672,7 @@ protected:
 	callback_list_t mInventoryCallbacks;
 	S16 mInventorySerialNum;
 
-	LLViewerRegion	*mRegionp;					// Region that this object belongs to.
+	LLViewerRegion*	mRegionp;					// Region that this object belongs to.
 	BOOL			mInventoryPending;
 	BOOL			mInventoryDirty;
 	BOOL			mDead;
@@ -700,32 +700,33 @@ protected:
 	bool mCostStale;
 	mutable bool mPhysicsShapeUnknown;
 
-	static			U32			sNumZombieObjects;			// Objects which are dead, but not deleted
+	static U32			sNumZombieObjects;	// Objects which are dead, but not deleted
 
-	static			BOOL		sMapDebug;					// Map render mode
-	static			LLColor4	sEditSelectColor;
-	static			LLColor4	sNoEditSelectColor;
-	static			F32			sCurrentPulse;
-	static			BOOL		sPulseEnabled;
+	static BOOL			sMapDebug;			// Map render mode
+	static LLColor4		sEditSelectColor;
+	static LLColor4		sNoEditSelectColor;
+	static F32			sCurrentPulse;
+	static BOOL			sPulseEnabled;
 
-	static			S32			sAxisArrowLength;
+	static S32			sAxisArrowLength;
 
-	// These two caches are only correct for non-parented objects right now!
-	mutable LLVector3		mPositionRegion;
-	mutable LLVector3		mPositionAgent;
+	// These two caches are only correct for non-parented objects right now !
+	mutable LLVector3	mPositionRegion;
+	mutable LLVector3	mPositionAgent;
 
 private:
-	static S32 sNumObjects;
+	static S32			sNumObjects;
 
 public:
-	const LLUUID &getAttachmentItemID() const;
-	void setAttachmentItemID(const LLUUID &id);
-	const LLUUID &extractAttachmentItemID(); // find&set the inventory item ID of the attached object
+	const LLUUID&		getAttachmentItemID() const;
+	void				setAttachmentItemID(const LLUUID &id);
+	// find & set the inventory item ID of the attached object:
+	const LLUUID&		extractAttachmentItemID();
 
-	EObjectUpdateType getLastUpdateType() const;
-	void setLastUpdateType(EObjectUpdateType last_update_type);
-	BOOL getLastUpdateCached() const;
-	void setLastUpdateCached(BOOL last_update_cached);
+	EObjectUpdateType	getLastUpdateType() const;
+	void				setLastUpdateType(EObjectUpdateType last_update_type);
+	BOOL				getLastUpdateCached() const;
+	void				setLastUpdateCached(BOOL last_update_cached);
 
 private:
 	LLUUID mAttachmentItemID; // ItemID of the associated object is in user inventory.
@@ -747,7 +748,8 @@ inline void LLViewerObject::setRotation(const LLQuaternion& quat, BOOL damped)
 	updateDrawable(damped);
 }
 
-inline void LLViewerObject::setRotation(const F32 x, const F32 y, const F32 z, BOOL damped)
+inline void LLViewerObject::setRotation(const F32 x, const F32 y,
+										const F32 z, BOOL damped)
 {
 	LLPrimitive::setRotation(x, y, z);
 	setChanged(ROTATED | SILHOUETTE);
@@ -757,7 +759,12 @@ inline void LLViewerObject::setRotation(const F32 x, const F32 y, const F32 z, B
 class LLViewerObjectMedia
 {
 public:
-	LLViewerObjectMedia() : mMediaURL(), mPassedWhitelist(FALSE), mMediaType(0) { }
+	LLViewerObjectMedia()
+	:	mMediaURL(),
+		mPassedWhitelist(FALSE),
+		mMediaType(0)
+	{
+	}
 
 	std::string mMediaURL;	// for web pages on surfaces, one per prim
 	BOOL mPassedWhitelist;	// user has OK'd display
@@ -768,9 +775,12 @@ public:
 class LLAlphaObject : public LLViewerObject
 {
 public:
-	LLAlphaObject(const LLUUID &id, const LLPCode pcode, LLViewerRegion *regionp)
-	: LLViewerObject(id, pcode, regionp) 
-	{ mDepth = 0.f; }
+	LLAlphaObject(const LLUUID& id, const LLPCode pcode,
+				  LLViewerRegion* regionp)
+	:	LLViewerObject(id, pcode, regionp),
+		mDepth(0.f)
+	{
+	}
 
 	virtual F32 getPartSize(S32 idx);
 	virtual void getGeometry(S32 idx,
@@ -786,9 +796,11 @@ public:
 class LLStaticViewerObject : public LLViewerObject
 {
 public:
-	LLStaticViewerObject(const LLUUID& id, const LLPCode pcode, LLViewerRegion* regionp, BOOL is_global = FALSE)
-		: LLViewerObject(id, pcode, regionp, is_global)
-	{ }
+	LLStaticViewerObject(const LLUUID& id, const LLPCode pcode,
+						 LLViewerRegion* regionp, BOOL is_global = FALSE)
+	:	LLViewerObject(id, pcode, regionp, is_global)
+	{
+	}
 
 	virtual void updateDrawable(BOOL force_damped);
 };

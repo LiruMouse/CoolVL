@@ -590,14 +590,14 @@ bool LLTextureFetchWorker::doWork(S32 param)
 			return true; // abort
 		}
 	}
-	if(mImagePriority < F_ALMOST_ZERO)
+	if (mImagePriority < F_ALMOST_ZERO)
 	{
 		if (mState == INIT || mState == LOAD_FROM_NETWORK || mState == LOAD_FROM_SIMULATOR)
 		{
 			return true; // abort
 		}
 	}
-	if(mState > CACHE_POST && !mCanUseNET && !mCanUseHTTP)
+	if (mState > CACHE_POST && !mCanUseNET && !mCanUseHTTP)
 	{
 		//nowhere to get data, abort.
 		return true;
@@ -675,7 +675,7 @@ bool LLTextureFetchWorker::doWork(S32 param)
 				mCacheReadHandle = mFetcher->mTextureCache->readFromCache(mID, cache_priority,
 																		  offset, size, responder);
 			}
-			else if(mCanUseHTTP)
+			else if (mCanUseHTTP)
 			{
 				if (!(mUrl.compare(0, 7, "http://") == 0))
 				{
@@ -783,7 +783,7 @@ bool LLTextureFetchWorker::doWork(S32 param)
 			mFetcher->removeFromNetworkQueue(this, false); // failsafe
 			mState = SEND_HTTP_REQ;
 			setPriority(LLWorkerThread::PRIORITY_HIGH | mWorkPriority);
-			if(mWriteToCacheState != NOT_WRITE)
+			if (mWriteToCacheState != NOT_WRITE)
 			{
 				mWriteToCacheState = CAN_WRITE;
 			}
@@ -1805,7 +1805,8 @@ S32 LLTextureFetch::update(F32 max_time_ms)
 		S32 processed = mCurlGetRequest->process();
 		if (processed > 0)
 		{
-			LL_DEBUGS("Texture") << "processed: " << processed << " messages." << LL_ENDL;
+			LL_DEBUGS("Texture") << "processed: " << processed << " messages."
+								 << LL_ENDL;
 		}
 	}
 
@@ -1815,7 +1816,7 @@ S32 LLTextureFetch::update(F32 max_time_ms)
 //called in the MAIN thread after the TextureCacheThread shuts down.
 void LLTextureFetch::shutDownTextureCacheThread() 
 {
-	if(mTextureCache)
+	if (mTextureCache)
 	{
 		llassert_always(mTextureCache->isQuitting() || mTextureCache->isStopped());
 		mTextureCache = NULL;
@@ -1825,7 +1826,7 @@ void LLTextureFetch::shutDownTextureCacheThread()
 //called in the MAIN thread after the ImageDecodeThread shuts down.
 void LLTextureFetch::shutDownImageDecodeThread() 
 {
-	if(mImageDecodeThread)
+	if (mImageDecodeThread)
 	{
 		llassert_always(mImageDecodeThread->isQuitting() || mImageDecodeThread->isStopped());
 		mImageDecodeThread = NULL;
@@ -1865,7 +1866,8 @@ void LLTextureFetch::threadedUpdate()
 	S32 processed = mCurlGetRequest->process();
 	if (processed > 0)
 	{
-		LL_DEBUGS("Texture") << "processed: " << processed << " messages." << LL_ENDL;
+		LL_DEBUGS("Texture") << "processed: " << processed << " messages."
+							 << LL_ENDL;
 	}
 
 #if 0
@@ -1881,7 +1883,6 @@ void LLTextureFetch::threadedUpdate()
 		}
 	}
 #endif
-
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1911,49 +1912,53 @@ void LLTextureFetch::sendRequestListToSimulators()
 	typedef std::map< LLHost, request_list_t > work_request_map_t;
 	work_request_map_t requests;
 	{
-	LLMutexLock lock2(&mNetworkQueueMutex);
-	for (queue_t::iterator iter = mNetworkQueue.begin(); iter != mNetworkQueue.end(); )
-	{
-		queue_t::iterator curiter = iter++;
-		LLTextureFetchWorker* req = getWorker(*curiter);
-		if (!req)
+		LLMutexLock lock2(&mNetworkQueueMutex);
+		for (queue_t::iterator iter = mNetworkQueue.begin();
+			 iter != mNetworkQueue.end(); )
 		{
-			// This happens when a request was removed from mRequestMap in a race
-			// with adding it to mNetworkQueue by doWork (see SNOW-196).
-			mNetworkQueue.erase(curiter);
-			continue;
-		}
-		if ((req->mState != LLTextureFetchWorker::LOAD_FROM_NETWORK) &&
-			(req->mState != LLTextureFetchWorker::LOAD_FROM_SIMULATOR))
-		{
-			// We already received our URL, remove from the queue
-			llwarns << "Worker: " << req->mID << " in mNetworkQueue but in wrong state: " << req->mState << llendl;
-			mNetworkQueue.erase(curiter);
-			continue;
-		}
-		if (req->mID == mDebugID)
-		{
-			mDebugCount++; // for setting breakpoints
-		}
-		if (req->mSentRequest == LLTextureFetchWorker::SENT_SIM &&
-			req->mTotalPackets > 0 &&
-			req->mLastPacket >= req->mTotalPackets-1)
-		{
-			// We have all the packets... make sure this is high priority
-// 			req->setPriority(LLWorkerThread::PRIORITY_HIGH | req->mWorkPriority);
-			continue;
-		}
-		F32 elapsed = req->mRequestedTimer.getElapsedTimeF32();
-		{
-			F32 delta_priority = llabs(req->mRequestedPriority - req->mImagePriority);
-			if ((req->mSimRequestedDiscard != req->mDesiredDiscard) ||
-				(delta_priority > MIN_DELTA_PRIORITY && elapsed >= MIN_REQUEST_TIME) ||
-				(elapsed >= SIM_LAZY_FLUSH_TIMEOUT))
+			queue_t::iterator curiter = iter++;
+			LLTextureFetchWorker* req = getWorker(*curiter);
+			if (!req)
 			{
-				requests[req->mHost].insert(req);
+				// This happens when a request was removed from mRequestMap in
+				// a race with adding it to mNetworkQueue by doWork (see
+				// SNOW-196).
+				mNetworkQueue.erase(curiter);
+				continue;
+			}
+			if (req->mState != LLTextureFetchWorker::LOAD_FROM_NETWORK &&
+				req->mState != LLTextureFetchWorker::LOAD_FROM_SIMULATOR)
+			{
+				// We already received our URL, remove from the queue
+				llwarns << "Worker: " << req->mID
+						<< " in mNetworkQueue but in wrong state: "
+						<< req->mState << llendl;
+				mNetworkQueue.erase(curiter);
+				continue;
+			}
+			if (req->mID == mDebugID)
+			{
+				++mDebugCount; // for setting breakpoints
+			}
+			if (req->mSentRequest == LLTextureFetchWorker::SENT_SIM &&
+				req->mTotalPackets > 0 &&
+				req->mLastPacket >= req->mTotalPackets-1)
+			{
+				// We have all the packets... make sure this is high priority
+// 				req->setPriority(LLWorkerThread::PRIORITY_HIGH | req->mWorkPriority);
+				continue;
+			}
+			F32 elapsed = req->mRequestedTimer.getElapsedTimeF32();
+			{
+				F32 delta_priority = llabs(req->mRequestedPriority - req->mImagePriority);
+				if (req->mSimRequestedDiscard != req->mDesiredDiscard ||
+					(delta_priority > MIN_DELTA_PRIORITY && elapsed >= MIN_REQUEST_TIME) ||
+					elapsed >= SIM_LAZY_FLUSH_TIMEOUT)
+				{
+					requests[req->mHost].insert(req);
+				}
 			}
 		}
-	}
 	}
 
 	for (work_request_map_t::iterator iter1 = requests.begin();
@@ -2088,12 +2093,15 @@ bool LLTextureFetchWorker::insertPacket(S32 index, U8* data, S32 size)
 	mRequestedTimer.reset();
 	if (index >= mTotalPackets)
 	{
-// 		llwarns << "Received Image Packet " << index << " > max: " << mTotalPackets << " for image: " << mID << llendl;
+		//llwarns << "Received Image Packet " << index << " > max: "
+		//		<< mTotalPackets << " for image: " << mID << llendl;
 		return false;
 	}
 	if (index > 0 && index < mTotalPackets-1 && size != MAX_IMG_PACKET_SIZE)
 	{
-// 		llwarns << "Received bad sized packet: " << index << ", " << size << " != " << MAX_IMG_PACKET_SIZE << " for image: " << mID << llendl;
+ 		//llwarns << "Received bad sized packet: " << index << ", " << size
+		//		<< " != " << MAX_IMG_PACKET_SIZE << " for image: " << mID
+		//		<< llendl;
 		return false;
 	}
 
@@ -2103,7 +2111,8 @@ bool LLTextureFetchWorker::insertPacket(S32 index, U8* data, S32 size)
 	}
 	else if (mPackets[index] != NULL)
 	{
-// 		llwarns << "Received duplicate packet: " << index << " for image: " << mID << llendl;
+		//llwarns << "Received duplicate packet: " << index << " for image: "
+		//		<< mID << llendl;
 		return false;
 	}
 
@@ -2115,7 +2124,8 @@ bool LLTextureFetchWorker::insertPacket(S32 index, U8* data, S32 size)
 	return true;
 }
 
-bool LLTextureFetch::receiveImageHeader(const LLHost& host, const LLUUID& id, U8 codec, U16 packets, U32 totalbytes,
+bool LLTextureFetch::receiveImageHeader(const LLHost& host, const LLUUID& id,
+										U8 codec, U16 packets, U32 totalbytes,
 										U16 data_size, U8* data)
 {
 	LLTextureFetchWorker* worker = getWorker(id);
@@ -2170,7 +2180,9 @@ bool LLTextureFetch::receiveImageHeader(const LLHost& host, const LLUUID& id, U8
 	return res;
 }
 
-bool LLTextureFetch::receiveImagePacket(const LLHost& host, const LLUUID& id, U16 packet_num, U16 data_size, U8* data)
+bool LLTextureFetch::receiveImagePacket(const LLHost& host, const LLUUID& id,
+										U16 packet_num, U16 data_size,
+										U8* data)
 {
 	LLTextureFetchWorker* worker = getWorker(id);
 	bool res = true;
@@ -2218,7 +2230,7 @@ bool LLTextureFetch::receiveImagePacket(const LLHost& host, const LLUUID& id, U1
 		removeFromNetworkQueue(worker, true); // failsafe
 	}
 
-	if(packet_num >= (worker->mTotalPackets - 1))
+	if (packet_num >= (worker->mTotalPackets - 1))
 	{
 		static LLCachedControl<bool> log_to_viewer_log(gSavedSettings, "LogTextureDownloadsToViewerLog");
 		static LLCachedControl<bool> log_to_sim(gSavedSettings, "LogTextureDownloadsToSimulator");

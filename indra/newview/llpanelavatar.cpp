@@ -45,7 +45,6 @@
 #include "llpluginclassmedia.h"
 #include "llscrolllistctrl.h"
 #include "lltabcontainer.h"
-#include "lltabcontainervertical.h"
 #include "lltexturectrl.h"
 #include "lluiconstants.h"
 #include "lluictrlfactory.h"

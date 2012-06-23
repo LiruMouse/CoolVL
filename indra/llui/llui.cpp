@@ -1,11 +1,11 @@
-/** 
+/**
  * @file llui.cpp
  * @brief UI implementation
  *
  * $LicenseInfo:firstyear=2001&license=viewergpl$
- * 
+ *
  * Copyright (c) 2001-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -202,7 +202,7 @@ void gl_rect_2d(S32 left, S32 top, S32 right, S32 bottom, BOOL filled)
 			// Work around bug in ATI driver: vertical lines are offset by (-1, -1)
 			gGL.begin(LLRender::LINES);
 
-				// Verticals 
+				// Verticals
 				gGL.vertex2i(left + 1, top);
 				gGL.vertex2i(left + 1, bottom);
 
@@ -559,7 +559,7 @@ void gl_draw_scaled_image_with_border(S32 x, S32 y, S32 width, S32 height,
 			gGL.texCoord2f(scale_rect_uv.mRight, scale_rect_uv.mBottom);
 			gGL.vertex2i(draw_scale_rect.mRight, draw_scale_rect.mBottom);
 
-			// draw left 
+			// draw left
 			gGL.texCoord2f(uv_rect.mLeft, scale_rect_uv.mBottom);
 			gGL.vertex2i(0, draw_scale_rect.mBottom);
 
@@ -585,7 +585,7 @@ void gl_draw_scaled_image_with_border(S32 x, S32 y, S32 width, S32 height,
 			gGL.texCoord2f(scale_rect_uv.mLeft, scale_rect_uv.mTop);
 			gGL.vertex2i(draw_scale_rect.mLeft, draw_scale_rect.mTop);
 
-			// draw right 
+			// draw right
 			gGL.texCoord2f(scale_rect_uv.mRight, scale_rect_uv.mBottom);
 			gGL.vertex2i(draw_scale_rect.mRight, draw_scale_rect.mBottom);
 
@@ -920,9 +920,9 @@ void gl_rect_2d_checkerboard(const LLRect& rect)
 	static BOOL first = TRUE;
 	if (first)
 	{
-		for (S32 i = 0; i < PIXELS; i++)
+		for (S32 i = 0; i < PIXELS; ++i)
 		{
-			for (S32 j = 0; j < PIXELS; j++)
+			for (S32 j = 0; j < PIXELS; ++j)
 			{
 				checkerboard[i * PIXELS + j] = ((i & 1) ^ (j & 1)) * 0xFF;
 			}
@@ -1089,13 +1089,13 @@ void gl_rect_2d_simple(S32 width, S32 height)
 	gGL.end();
 }
 
-void gl_segmented_rect_2d_tex(const S32 left, 
-							  const S32 top, 
-							  const S32 right, 
-							  const S32 bottom, 
-							  const S32 texture_width, 
-							  const S32 texture_height, 
-							  const S32 border_size, 
+void gl_segmented_rect_2d_tex(const S32 left,
+							  const S32 top,
+							  const S32 right,
+							  const S32 bottom,
+							  const S32 texture_width,
+							  const S32 texture_height,
+							  const S32 border_size,
 							  const U32 edges)
 {
 	S32 width = llabs(right - left);
@@ -1164,7 +1164,7 @@ void gl_segmented_rect_2d_tex(const S32 left,
 		gGL.texCoord2f(1.f - border_uv_scale.mV[VX], border_uv_scale.mV[VY]);
 		gGL.vertex2fv((width_vec - border_width_right + border_height_bottom).mV);
 
-		// draw left 
+		// draw left
 		gGL.texCoord2f(0.f, border_uv_scale.mV[VY]);
 		gGL.vertex2fv(border_height_bottom.mV);
 
@@ -1190,7 +1190,7 @@ void gl_segmented_rect_2d_tex(const S32 left,
 		gGL.texCoord2f(border_uv_scale.mV[VX], 1.f - border_uv_scale.mV[VY]);
 		gGL.vertex2fv((border_width_left + height_vec - border_height_top).mV);
 
-		// draw right 
+		// draw right
 		gGL.texCoord2f(1.f - border_uv_scale.mV[VX], border_uv_scale.mV[VY]);
 		gGL.vertex2fv((width_vec - border_width_right + border_height_bottom).mV);
 
@@ -1247,15 +1247,15 @@ void gl_segmented_rect_2d_tex(const S32 left,
 	gGL.popMatrix();
 }
 
-void gl_segmented_rect_2d_fragment_tex(const S32 left, 
-									   const S32 top, 
-									   const S32 right, 
-									   const S32 bottom, 
-									   const S32 texture_width, 
-									   const S32 texture_height, 
-									   const S32 border_size, 
-									   const F32 start_fragment, 
-									   const F32 end_fragment, 
+void gl_segmented_rect_2d_fragment_tex(const S32 left,
+									   const S32 top,
+									   const S32 right,
+									   const S32 bottom,
+									   const S32 texture_width,
+									   const S32 texture_height,
+									   const S32 border_size,
+									   const F32 start_fragment,
+									   const F32 end_fragment,
 									   const U32 edges)
 {
 	S32 width = llabs(right - left);
@@ -1313,7 +1313,7 @@ void gl_segmented_rect_2d_fragment_tex(const S32 left,
 			gGL.texCoord2f(u_min, border_uv_scale.mV[VY]);
 			gGL.vertex2fv((x_min + border_height_bottom).mV);
 
-			// draw left 
+			// draw left
 			gGL.texCoord2f(u_min, border_uv_scale.mV[VY]);
 			gGL.vertex2fv((x_min + border_height_bottom).mV);
 
@@ -1405,7 +1405,7 @@ void gl_segmented_rect_2d_fragment_tex(const S32 left,
 			gGL.texCoord2f(u_min, border_uv_scale.mV[VY]);
 			gGL.vertex2fv((x_min + border_height_bottom).mV);
 
-			// draw right 
+			// draw right
 			gGL.texCoord2f(u_min, border_uv_scale.mV[VY]);
 			gGL.vertex2fv((x_min + border_height_bottom).mV);
 
@@ -1491,7 +1491,7 @@ void gl_segmented_rect_3d_tex(const LLVector2& border_scale,
 		gGL.texCoord2f(1.f - border_scale.mV[VX], border_scale.mV[VY]);
 		gGL.vertex3fv((width_vec - right_border_width + bottom_border_height).mV);
 
-		// draw left 
+		// draw left
 		gGL.texCoord2f(0.f, border_scale.mV[VY]);
 		gGL.vertex3fv(bottom_border_height.mV);
 
@@ -1517,7 +1517,7 @@ void gl_segmented_rect_3d_tex(const LLVector2& border_scale,
 		gGL.texCoord2f(border_scale.mV[VX], 1.f - border_scale.mV[VY]);
 		gGL.vertex3fv((left_border_width + height_vec - top_border_height).mV);
 
-		// draw right 
+		// draw right
 		gGL.texCoord2f(1.f - border_scale.mV[VX], border_scale.mV[VY]);
 		gGL.vertex3fv((width_vec - right_border_width + bottom_border_height).mV);
 
@@ -1589,9 +1589,9 @@ bool handleShowXUINamesChanged(const LLSD& newvalue)
 	return true;
 }
 
-void LLUI::initClass(LLControlGroup* config, 
-					 LLControlGroup* ignores, 
-					 LLControlGroup* colors, 
+void LLUI::initClass(LLControlGroup* config,
+					 LLControlGroup* ignores,
+					 LLControlGroup* colors,
 					 LLImageProviderInterface* image_provider,
 					 LLUIAudioCallback audio_callback,
 					 const LLVector2* scale_factor,
@@ -1646,7 +1646,7 @@ void LLUI::popMatrix()
 	LLFontGL::sOriginStack.pop_back();
 }
 
-//static 
+//static
 void LLUI::loadIdentity()
 {
 	glLoadIdentity();
@@ -1669,7 +1669,7 @@ void LLUI::setLineWidth(F32 width)
 							 0.5f));
 }
 
-//static 
+//static
 void LLUI::setCursorPositionScreen(S32 x, S32 y)
 {
 	S32 screen_x, screen_y;
@@ -1682,7 +1682,7 @@ void LLUI::setCursorPositionScreen(S32 x, S32 y)
 	LLView::getWindow()->setCursorPosition(window_point);
 }
 
-//static 
+//static
 void LLUI::setCursorPositionLocal(const LLView* viewp, S32 x, S32 y)
 {
 	S32 screen_x, screen_y;
@@ -1691,7 +1691,7 @@ void LLUI::setCursorPositionLocal(const LLView* viewp, S32 x, S32 y)
 	setCursorPositionScreen(screen_x, screen_y);
 }
 
-//static 
+//static
 void LLUI::getCursorPositionLocal(const LLView* viewp, S32 *x, S32 *y)
 {
 	LLCoordWindow cursor_pos_window;
@@ -1814,7 +1814,7 @@ LLPointer<LLUIImage> LLUI::getUIImageByID(const LLUUID& image_id, S32 priority)
 	}
 }
 
-//static 
+//static
 LLPointer<LLUIImage> LLUI::getUIImage(const std::string& name, S32 priority)
 {
 	if (sImageProvider && !name.empty())
@@ -1827,7 +1827,7 @@ LLPointer<LLUIImage> LLUI::getUIImage(const std::string& name, S32 priority)
 	}
 }
 
-// static 
+// static
 void LLUI::setHtmlHelp(LLHtmlHelp* html_help)
 {
 	LLUI::sHtmlHelp = html_help;
@@ -1853,7 +1853,7 @@ LLScreenClipRect::~LLScreenClipRect()
 	updateScissorRegion();
 }
 
-//static 
+//static
 void LLScreenClipRect::pushClipRect(const LLRect& rect)
 {
 	LLRect combined_clip_rect = rect;
@@ -1865,7 +1865,7 @@ void LLScreenClipRect::pushClipRect(const LLRect& rect)
 	sClipRectStack.push(combined_clip_rect);
 }
 
-//static 
+//static
 void LLScreenClipRect::popClipRect()
 {
 	sClipRectStack.pop();
@@ -1889,8 +1889,8 @@ void LLScreenClipRect::updateScissorRegion()
 
 LLLocalClipRect::LLLocalClipRect(const LLRect &rect, BOOL enabled)
 :	LLScreenClipRect(LLRect(rect.mLeft + LLFontGL::sCurOrigin.mX,
-							rect.mTop + LLFontGL::sCurOrigin.mY, 
-							rect.mRight + LLFontGL::sCurOrigin.mX, 
+							rect.mTop + LLFontGL::sCurOrigin.mY,
+							rect.mRight + LLFontGL::sCurOrigin.mX,
 							rect.mBottom + LLFontGL::sCurOrigin.mY),
 					 enabled)
 {
@@ -1910,16 +1910,16 @@ LLUIImage::LLUIImage(const std::string& name, LLPointer<LLTexture> image)
 {
 }
 
-void LLUIImage::setClipRegion(const LLRectf& region) 
-{ 
-	mClipRegion = region; 
+void LLUIImage::setClipRegion(const LLRectf& region)
+{
+	mClipRegion = region;
 	mNoClip = mClipRegion.mLeft == 0.f && mClipRegion.mRight == 1.f &&
 			  mClipRegion.mBottom == 0.f && mClipRegion.mTop == 1.f;
 }
 
-void LLUIImage::setScaleRegion(const LLRectf& region) 
-{ 
-	mScaleRegion = region; 
+void LLUIImage::setScaleRegion(const LLRectf& region)
+{
+	mScaleRegion = region;
 	mUniformScaling = mScaleRegion.mLeft == 0.f && mScaleRegion.mRight == 1.f &&
 					  mScaleRegion.mBottom == 0.f && mScaleRegion.mTop == 1.f;
 }
@@ -1961,15 +1961,15 @@ void LLUIImage::drawBorder(S32 x, S32 y, S32 width, S32 height,
 }
 
 S32 LLUIImage::getWidth() const
-{ 
+{
 	// return clipped dimensions of actual image area
-	return llround((F32)mImage->getWidth(0) * mClipRegion.getWidth()); 
+	return llround((F32)mImage->getWidth(0) * mClipRegion.getWidth());
 }
 
 S32 LLUIImage::getHeight() const
-{ 
+{
 	// return clipped dimensions of actual image area
-	return llround((F32)mImage->getHeight(0) * mClipRegion.getHeight()); 
+	return llround((F32)mImage->getHeight(0) * mClipRegion.getHeight());
 }
 
 S32 LLUIImage::getTextureWidth() const

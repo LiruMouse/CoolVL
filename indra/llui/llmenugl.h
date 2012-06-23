@@ -303,8 +303,7 @@ private:
 // FUCKING EFFICIENT, because it may need to be checked a lot.
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class LLMenuItemCheckGL 
-:	public LLMenuItemCallGL
+class LLMenuItemCheckGL : public LLMenuItemCallGL
 {
 public:
 	LLMenuItemCheckGL(const std::string& name, 
@@ -540,10 +539,13 @@ private:
 	static BOOL		sKeyboardMode;
 
 	LLColor4		mBackgroundColor;
+	LLColor4		mColorDropShadow;
+	S32				mDropShadowFloater;
+
 	BOOL			mBgVisible;
 	LLMenuItemGL*	mParentMenuItem;
 	LLUIString		mLabel;
-	BOOL mDropShadowed; 	//  Whether to drop shadow 
+	BOOL 			mDropShadowed; 	//  Whether to drop shadow 
 	BOOL			mHasSelection;
 	LLFrameTimer	mFadeTimer;
 	BOOL			mTornOff;
@@ -623,8 +625,7 @@ private:
 // A circular menu of items, icons, etc.
 //-----------------------------------------------------------------------------
 
-class LLPieMenu
-: public LLMenuGL
+class LLPieMenu : public LLMenuGL
 {
 public:
 	LLPieMenu(const std::string& name, const std::string& label);
@@ -675,6 +676,11 @@ private:
 	F32				mOuterRingAlpha; // for rendering pie menus as both bounded and unbounded
 	F32				mCurRadius;
 	BOOL			mRightMouseDown;
+
+	F32				mPieMenuLineWidth;
+	LLColor4		mPieMenuLineColor;
+	LLColor4		mPieMenuBgColor;
+	LLColor4		mPieMenuSelectedColor;
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

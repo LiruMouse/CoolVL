@@ -155,7 +155,7 @@ public:
 	virtual const LLSD getValue() const;
 
 private:
-	LLDate		mDate;
+	LLDate mDate;
 };
 
 /*
@@ -725,6 +725,9 @@ private:
 	LLColor4		mHighlightedColor;
 
 	S32				mBorderThickness;
+
+	F32				mTypeAheadTimeout;
+
 	void			(*mOnDoubleClickCallback)(void* userdata);
 	void			(*mOnMaximumSelectCallback)(void* userdata);
 	void			(*mOnSortChangedCallback)(void* userdata);

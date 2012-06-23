@@ -4895,16 +4895,16 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
-    <key>RadarUpdateRate</key>
+    <key>RadarUpdatesPerSecond</key>
     <map>
       <key>Comment</key>
-      <string>Radar update rate (0 = high, 1 = medium, 2 = low)</string>
+      <string>Radar updates per second</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
       <string>U32</string>
       <key>Value</key>
-      <integer>1</integer>
+      <integer>4</integer>
     </map>
     <key>RadarAlertSim</key>
     <map>
@@ -10892,6 +10892,17 @@
       <string>Boolean</string>
       <key>Value</key>
       <integer>1</integer>
+    </map>
+    <key>ThreadedFilesystem</key>
+    <map>
+      <key>Comment</key>
+      <string>If TRUE, use threaded VFS operations (experimental, requires a restart).</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>0</integer>
     </map>
     <key>CurlMaximumNumberOfHandles</key>
     <map>

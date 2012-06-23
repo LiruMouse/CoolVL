@@ -205,8 +205,9 @@ void LLAgentWearables::sendAgentWearablesUpdate()
 	// First make sure that we have inventory items for each wearable
 	for (S32 type = 0; type < LLWearableType::WT_COUNT; ++type)
 	{
-		for (U32 index = 0;
-			 index < getWearableCount((LLWearableType::EType)type); ++index)
+		for (U32 index = 0,
+				 count = getWearableCount((LLWearableType::EType)type);
+			 index < count; ++index)
 		{
 			LLWearable* wearable = getWearable((LLWearableType::EType)type,index);
 			if (wearable)
@@ -410,7 +411,8 @@ void LLAgentWearables::saveWearableAs(const LLWearableType::EType type,
 #endif
 }
 
-void LLAgentWearables::revertWearable(const LLWearableType::EType type, const U32 index)
+void LLAgentWearables::revertWearable(const LLWearableType::EType type,
+									  const U32 index)
 {
 	LLWearable* wearable = getWearable(type, index);
 	if (wearable)
@@ -427,9 +429,10 @@ void LLAgentWearables::saveAllWearables()
 	//	return;
 	//}
 
-	for (S32 i = 0; i < LLWearableType::WT_COUNT; i++)
+	for (S32 i = 0; i < LLWearableType::WT_COUNT; ++i)
 	{
-		for (U32 j = 0; j < getWearableCount((LLWearableType::EType)i); j++)
+		for (U32 j = 0, count = getWearableCount((LLWearableType::EType)i);
+			 j < count; ++j)
 		{
 			saveWearable((LLWearableType::EType)i, j, FALSE);
 		}
@@ -442,9 +445,10 @@ void LLAgentWearables::saveAllWearables()
 void LLAgentWearables::setWearableName(const LLUUID& item_id,
 									   const std::string& new_name)
 {
-	for (S32 i = 0; i < LLWearableType::WT_COUNT; i++)
+	for (S32 i = 0; i < LLWearableType::WT_COUNT; ++i)
 	{
-		for (U32 j = 0; j < getWearableCount((LLWearableType::EType)i); j++)
+		for (U32 j = 0, count = getWearableCount((LLWearableType::EType)i);
+			 j < count; ++j)
 		{
 			LLUUID curr_item_id = getWearableItemID((LLWearableType::EType)i, j);
 			if (curr_item_id == item_id)
@@ -471,7 +475,8 @@ void LLAgentWearables::setWearableName(const LLUUID& item_id,
 	}
 }
 
-BOOL LLAgentWearables::isWearableModifiable(LLWearableType::EType type, U32 index) const
+BOOL LLAgentWearables::isWearableModifiable(LLWearableType::EType type,
+											U32 index) const
 {
 	LLUUID item_id = getWearableItemID(type, index);
 	return item_id.notNull() ? isWearableModifiable(item_id) : FALSE;
@@ -492,7 +497,8 @@ BOOL LLAgentWearables::isWearableModifiable(const LLUUID& item_id) const
 	return FALSE;
 }
 
-BOOL LLAgentWearables::isWearableCopyable(LLWearableType::EType type, U32 index) const
+BOOL LLAgentWearables::isWearableCopyable(LLWearableType::EType type,
+										  U32 index) const
 {
 	LLUUID item_id = getWearableItemID(type, index);
 	if (!item_id.isNull())
@@ -507,7 +513,8 @@ BOOL LLAgentWearables::isWearableCopyable(LLWearableType::EType type, U32 index)
 	return FALSE;
 }
 
-LLInventoryItem* LLAgentWearables::getWearableInventoryItem(LLWearableType::EType type, U32 index)
+LLInventoryItem* LLAgentWearables::getWearableInventoryItem(LLWearableType::EType type,
+															U32 index)
 {
 	LLUUID item_id = getWearableItemID(type, index);
 	LLInventoryItem* item = NULL;
@@ -521,9 +528,10 @@ LLInventoryItem* LLAgentWearables::getWearableInventoryItem(LLWearableType::ETyp
 const LLWearable* LLAgentWearables::getWearableFromItemID(const LLUUID& item_id) const
 {
 	const LLUUID& base_item_id = gInventory.getLinkedItemID(item_id);
-	for (S32 i = 0; i < LLWearableType::WT_COUNT; i++)
+	for (S32 i = 0; i < LLWearableType::WT_COUNT; ++i)
 	{
-		for (U32 j = 0; j < getWearableCount((LLWearableType::EType)i); j++)
+		for (U32 j = 0, count = getWearableCount((LLWearableType::EType)i);
+			 j < count; ++j)
 		{
 			const LLWearable* curr_wearable = getWearable((LLWearableType::EType)i, j);
 			if (curr_wearable && (curr_wearable->getItemID() == base_item_id))
@@ -538,9 +546,10 @@ const LLWearable* LLAgentWearables::getWearableFromItemID(const LLUUID& item_id)
 LLWearable* LLAgentWearables::getWearableFromItemID(const LLUUID& item_id)
 {
 	const LLUUID& base_item_id = gInventory.getLinkedItemID(item_id);
-	for (S32 i = 0; i < LLWearableType::WT_COUNT; i++)
+	for (S32 i = 0; i < LLWearableType::WT_COUNT; ++i)
 	{
-		for (U32 j = 0; j < getWearableCount((LLWearableType::EType)i); j++)
+		for (U32 j = 0, count = getWearableCount((LLWearableType::EType)i);
+			 j < count; ++j)
 		{
 			LLWearable * curr_wearable = getWearable((LLWearableType::EType)i, j);
 			if (curr_wearable && curr_wearable->getItemID() == base_item_id)
@@ -554,9 +563,10 @@ LLWearable* LLAgentWearables::getWearableFromItemID(const LLUUID& item_id)
 
 LLWearable*	LLAgentWearables::getWearableFromAssetID(const LLUUID& asset_id)
 {
-	for (S32 i = 0; i < LLWearableType::WT_COUNT; i++)
+	for (S32 i = 0; i < LLWearableType::WT_COUNT; ++i)
 	{
-		for (U32 j = 0; j < getWearableCount((LLWearableType::EType)i); j++)
+		for (U32 j = 0, count = getWearableCount((LLWearableType::EType)i);
+			 j < count; ++j)
 		{
 			LLWearable * curr_wearable = getWearable((LLWearableType::EType)i, j);
 			if (curr_wearable && curr_wearable->getAssetID() == asset_id)
@@ -749,7 +759,7 @@ U32	LLAgentWearables::getWearableIndex(const LLWearable *wearable) const
 		return MAX_CLOTHING_PER_TYPE;
 	}
 	const wearableentry_vec_t& wearable_vec = wearable_iter->second;
-	for (U32 index = 0; index < wearable_vec.size(); index++)
+	for (U32 index = 0, count = wearable_vec.size(); index < count; ++index)
 	{
 		if (wearable_vec[index] == wearable)
 		{
@@ -895,7 +905,7 @@ void LLAgentWearables::processAgentInitialWearablesUpdate(LLMessageSystem* mesgs
 		// MULTI-WEARABLE: DEPRECATED: Message only supports one wearable per
 		// type, will be ignored in future.
 		std::pair<LLUUID, LLUUID> asset_id_array[LLWearableType::WT_COUNT];
-		for (S32 i = 0; i < num_wearables; i++)
+		for (S32 i = 0; i < num_wearables; ++i)
 		{
 			// Parse initial wearables data from message system
 			U8 type_u8 = 0;
@@ -939,7 +949,7 @@ void LLAgentWearables::processAgentInitialWearablesUpdate(LLMessageSystem* mesgs
 		}
 
 		// now that we have the asset ids...request the wearable assets
-		for (S32 i = 0; i < LLWearableType::WT_COUNT; i++)
+		for (S32 i = 0; i < LLWearableType::WT_COUNT; ++i)
 		{
 			LL_DEBUGS("Wearables") << "      fetching "
 								   << asset_id_array[i].first << LL_ENDL;
@@ -1004,7 +1014,7 @@ void LLAgentWearables::onInitialWearableAssetArrived(LLWearable* wearable, void*
 	if (!gAgentWearables.mWearablesLoaded)
 	{
 		gAgentWearables.mWearablesLoaded = TRUE;
-		for (S32 i = 0; i < LLWearableType::WT_COUNT; i++)
+		for (S32 i = 0; i < LLWearableType::WT_COUNT; ++i)
 		{
 			if (gAgentWearables.getWearableItemID((LLWearableType::EType)i, 0).notNull() &&
 				!gAgentWearables.getWearable((LLWearableType::EType)i, 0))
@@ -1126,7 +1136,7 @@ void LLAgentWearables::createStandardWearables(BOOL female)
 		FALSE  //WT_PHYSICS
 	};
 
-	for (S32 i = 0; i < LLWearableType::WT_COUNT; i++)
+	for (S32 i = 0; i < LLWearableType::WT_COUNT; ++i)
 	{
 		bool once = false;
 		LLPointer<LLRefCount> donecb = NULL;
@@ -1212,7 +1222,8 @@ void LLAgentWearables::makeNewOutfit(const std::string& new_folder_name,
 			type = (LLWearableType::EType)wearables_to_include[i];
 			bool use_link = do_link ||
 							(cloth_link && type >= LLWearableType::WT_SHIRT);
-			for (U32 index = 0; index < getWearableCount(type); index++)
+			for (U32 index = 0, count = getWearableCount(type); index < count;
+				 ++index)
 			{
 				old_wearable = getWearable(type, index);
 				if (old_wearable)
@@ -1297,15 +1308,16 @@ void LLAgentWearables::makeNewOutfit(const std::string& new_folder_name,
 	if (attachments_to_include.count())
 	{
 		LLViewerJointAttachment* attachment;
-		for (S32 i = 0; i < attachments_to_include.count(); i++)
+		for (S32 i = 0, count = attachments_to_include.count(); i < count; ++i)
 		{
 			S32 attachment_pt = attachments_to_include[i];
 			attachment = get_if_there(gAgentAvatarp->mAttachmentPoints,
 									  attachment_pt, (LLViewerJointAttachment*)NULL);
 			if (!attachment) continue;
-			for (LLViewerJointAttachment::attachedobjs_vec_t::iterator attachment_iter = attachment->mAttachedObjects.begin();
-				 attachment_iter != attachment->mAttachedObjects.end();
-				 ++attachment_iter)
+			for (LLViewerJointAttachment::attachedobjs_vec_t::iterator
+					attachment_iter = attachment->mAttachedObjects.begin(),
+					end = attachment->mAttachedObjects.end();
+				 attachment_iter != end; ++attachment_iter)
  			{
 				LLViewerObject* attached_object = *attachment_iter;
 				if (!attached_object) continue;
@@ -1407,7 +1419,7 @@ void LLAgentWearables::removeWearable(const LLWearableType::EType type,
 		if (is_teen_and_underwear)
 		{
 			// Remove all but one layer
-			for (U32 index = count - 1; index > 0; index--)
+			for (U32 index = count - 1; index > 0; --index)
 			{
 				removeWearableFinal(type, false, index);
 			}
@@ -1476,7 +1488,7 @@ void LLAgentWearables::removeWearableFinal(const LLWearableType::EType type,
 	if (do_remove_all)
 	{
 		S32 max_entry = mWearableDatas[type].size() - 1;
-		for (S32 i = max_entry; i >= 0; i--)
+		for (S32 i = max_entry; i >= 0; --i)
 		{
 			LLWearable* old_wearable = getWearable(type, i);
 			//queryWearableCache(); // moved below
@@ -1565,7 +1577,7 @@ void LLAgentWearables::setWearableOutfit(const LLInventoryItem::item_array_t& it
 	// to which duplicate part will actually be worn in the end.
 	std::set<LLWearableType::EType> new_bodyparts;
 	std::set<S32> skip_wearable;
-	for (i = count - 1; i >= 0; i--)
+	for (i = count - 1; i >= 0; --i)
 	{
 		LLWearableType::EType type = wearables[i]->getType();
 		if (LLWearableType::getAssetType(type) == LLAssetType::AT_BODYPART)
@@ -1594,7 +1606,7 @@ void LLAgentWearables::setWearableOutfit(const LLInventoryItem::item_array_t& it
 	// RestrainedLove locked items).
 	// It also always removes the body parts that will be replaced with the new
 	// wearables.
-	for (i = 0; i < (S32)LLWearableType::WT_COUNT; i++)
+	for (i = 0; i < (S32)LLWearableType::WT_COUNT; ++i)
 	{
 		LLWearableType::EType type = (LLWearableType::EType)i;
 		if (new_bodyparts.count(type) ||
@@ -1609,7 +1621,7 @@ void LLAgentWearables::setWearableOutfit(const LLInventoryItem::item_array_t& it
 	BOOL no_multiple_shoes = gSavedSettings.getBOOL("NoMultipleShoes");
 	BOOL no_multiple_skirts = gSavedSettings.getBOOL("NoMultipleSkirts");
 
-	for (i = 0; i < count; i++)
+	for (i = 0; i < count; ++i)
 	{
 		if (skip_wearable.count(i)) continue;
 
@@ -1878,7 +1890,7 @@ void LLAgentWearables::queryWearableCache()
 	gMessageSystem->addS32Fast(_PREHASH_SerialNum, gAgentQueryManager.mWearablesCacheQueryID);
 
 	S32 num_queries = 0;
-	for (U8 baked_index = 0; baked_index < BAKED_NUM_INDICES; baked_index++)
+	for (U8 baked_index = 0; baked_index < BAKED_NUM_INDICES; ++baked_index)
 	{
 		LLUUID hash_id = computeBakedTextureHash((EBakedTextureIndex) baked_index);
 		if (hash_id.notNull())
@@ -1917,7 +1929,7 @@ LLUUID LLAgentWearables::computeBakedTextureHash(LLVOAvatarDefines::EBakedTextur
 	const LLVOAvatarDictionary::BakedEntry* baked_dict;
 	baked_dict = LLVOAvatarDictionary::getInstance()->getBakedTexture(baked_index);
 
-	for (U8 i = 0; i < baked_dict->mWearables.size(); i++)
+	for (U8 i = 0, count = baked_dict->mWearables.size(); i < count; ++i)
 	{
 		const LLWearableType::EType baked_type = baked_dict->mWearables[i];
 		const U32 num_wearables = getWearableCount(baked_type);
@@ -2007,8 +2019,9 @@ void LLAgentWearables::userRemoveAllClothesStep2(BOOL proceed, void* userdata)
 }
 
 #if 0	// Currently unused in the Cool VL Viewer
-// Combines userRemoveAllAttachments() and userAttachMultipleAttachments() logic to
-// get attachments into desired state with minimal number of adds/removes.
+// Combines userRemoveAllAttachments() and userAttachMultipleAttachments()
+// logic to get attachments into desired state with minimal number of
+// adds/removes.
 void LLAgentWearables::userUpdateAttachments(LLInventoryModel::item_array_t& obj_item_array)
 {
 	// Possible cases:
@@ -2020,19 +2033,21 @@ void LLAgentWearables::userUpdateAttachments(LLInventoryModel::item_array_t& obj
 
 	std::set<LLUUID> requested_item_ids;
 	std::set<LLUUID> current_item_ids;
-	for (S32 i = 0; i < obj_item_array.count(); i++)
+	for (S32 i = 0, count = obj_item_array.count(); i < count; ++i)
 	{
 		requested_item_ids.insert(obj_item_array[i].get()->getLinkedUUID());
 	}
 
 	// Build up list of objects to be removed and items currently attached.
 	llvo_vec_t objects_to_remove;
-	for (LLVOAvatar::attachment_map_t::iterator iter = gAgentAvatarp->mAttachmentPoints.begin(); 
+	for (LLVOAvatar::attachment_map_t::iterator
+			iter = gAgentAvatarp->mAttachmentPoints.begin(); 
 		 iter != gAgentAvatarp->mAttachmentPoints.end(); )
 	{
 		LLVOAvatar::attachment_map_t::iterator curiter = iter++;
 		LLViewerJointAttachment* attachment = curiter->second;
-		for (LLViewerJointAttachment::attachedobjs_vec_t::iterator attachment_iter = attachment->mAttachedObjects.begin();
+		for (LLViewerJointAttachment::attachedobjs_vec_t::iterator
+				attachment_iter = attachment->mAttachedObjects.begin();
 			 attachment_iter != attachment->mAttachedObjects.end();
 			 ++attachment_iter)
 		{
@@ -2090,8 +2105,9 @@ void LLAgentWearables::userRemoveMultipleAttachments(llvo_vec_t& objects_to_remo
 	gMessageSystem->addUUIDFast(_PREHASH_AgentID, gAgentID);
 	gMessageSystem->addUUIDFast(_PREHASH_SessionID, gAgent.getSessionID());
 
-	for (llvo_vec_t::iterator it = objects_to_remove.begin();
-		 it != objects_to_remove.end(); ++it)
+	for (llvo_vec_t::iterator it = objects_to_remove.begin(),
+							  end = objects_to_remove.end();
+		 it != end; ++it)
 	{
 		LLViewerObject* objectp = *it;
 //MK
@@ -2112,16 +2128,18 @@ void LLAgentWearables::userRemoveAllAttachments()
 
 	llvo_vec_t objects_to_remove;
 
-	for (LLVOAvatar::attachment_map_t::iterator iter = gAgentAvatarp->mAttachmentPoints.begin(); 
-		 iter != gAgentAvatarp->mAttachmentPoints.end(); )
+	for (LLVOAvatar::attachment_map_t::iterator
+			iter = gAgentAvatarp->mAttachmentPoints.begin(),
+			end = gAgentAvatarp->mAttachmentPoints.end();
+		 iter != end; ++iter)
 	{
-		LLVOAvatar::attachment_map_t::iterator curiter = iter++;
-		LLViewerJointAttachment* attachment = curiter->second;
-		for (LLViewerJointAttachment::attachedobjs_vec_t::iterator attachment_iter = attachment->mAttachedObjects.begin();
-			 attachment_iter != attachment->mAttachedObjects.end();
-			 ++attachment_iter)
+		LLViewerJointAttachment* attachment = iter->second;
+		for (LLViewerJointAttachment::attachedobjs_vec_t::iterator
+				attachment_iter = attachment->mAttachedObjects.begin(),
+				end2 = attachment->mAttachedObjects.end();
+			 attachment_iter != end2; ++attachment_iter)
 		{
-			LLViewerObject *attached_object = (*attachment_iter);
+			LLViewerObject *attached_object = *attachment_iter;
 			if (attached_object)
 			{
 				objects_to_remove.push_back(attached_object);
@@ -2174,7 +2192,8 @@ void LLAgentWearables::userAttachMultipleAttachments(LLInventoryModel::item_arra
 		msg->addStringFast(_PREHASH_Name, item->getName());
 		msg->addStringFast(_PREHASH_Description, item->getDescription());
 
-		if (obj_count == i + 1 || i % OBJECTS_PER_PACKET == OBJECTS_PER_PACKET - 1)
+		if (obj_count == i + 1 ||
+			i % OBJECTS_PER_PACKET == OBJECTS_PER_PACKET - 1)
 		{
 			// End of message chunk
 			msg->sendReliable(gAgent.getRegion()->getHost());
@@ -2184,7 +2203,8 @@ void LLAgentWearables::userAttachMultipleAttachments(LLInventoryModel::item_arra
 
 // Returns false if the given wearable is already topmost/bottommost
 // (depending on closer_to_body parameter).
-bool LLAgentWearables::canMoveWearable(const LLUUID& item_id, bool closer_to_body)
+bool LLAgentWearables::canMoveWearable(const LLUUID& item_id,
+									   bool closer_to_body)
 {
 	const LLWearable* wearable = getWearableFromItemID(item_id);
 	if (!wearable) return false;
@@ -2207,7 +2227,7 @@ BOOL LLAgentWearables::areWearablesLoaded() const
 void LLAgentWearables::updateWearablesLoaded()
 {
 	mWearablesLoaded = TRUE;
-	for (S32 i = 0; i < LLWearableType::WT_COUNT; i++)
+	for (S32 i = 0; i < LLWearableType::WT_COUNT; ++i)
 	{
 		if (getWearableItemID((LLWearableType::EType)i, 0).notNull() &&
 			!getWearable((LLWearableType::EType)i, 0))
@@ -2244,9 +2264,9 @@ void LLAgentWearables::animateAllWearableParams(F32 delta, BOOL upload_bake)
 {
 	for (S32 type = 0; type < LLWearableType::WT_COUNT; ++type)
 	{
-		for (S32 count = 0;
-			 count < (S32)getWearableCount((LLWearableType::EType)type);
-			 ++count)
+		for (S32 count = 0,
+				 total = getWearableCount((LLWearableType::EType)type);
+			 count < total; ++count)
 		{
 			LLWearable* wearable = getWearable((LLWearableType::EType)type,
 											   count);

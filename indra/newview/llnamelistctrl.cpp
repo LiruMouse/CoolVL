@@ -452,8 +452,8 @@ bool LLNameListCtrl::getResidentName(const LLUUID& agent_id, std::string& fullna
 	LLAvatarName av_name;
 	if (LLAvatarNameCache::get(agent_id, &av_name))
 	{
-		if (mUseDisplayNames && LLAvatarNameCache::useDisplayNames() &&
-			!gSavedSettings.getBOOL("LegacyNamesForFriends"))
+		if (!LLAvatarName::sLegacyNamesForFriends && mUseDisplayNames &&
+			LLAvatarNameCache::useDisplayNames())
 		{
 			if (LLAvatarNameCache::useDisplayNames() == 2)
 			{
@@ -484,8 +484,8 @@ void LLNameListCtrl::onAvatarNameCache(const LLUUID& agent_id,
 									   const LLAvatarName& av_name)
 {
 	std::string fullname;
-	if (mUseDisplayNames && LLAvatarNameCache::useDisplayNames() &&
-		!gSavedSettings.getBOOL("LegacyNamesForFriends"))
+	if (!LLAvatarName::sLegacyNamesForFriends && mUseDisplayNames &&
+		LLAvatarNameCache::useDisplayNames())
 	{
 		if (LLAvatarNameCache::useDisplayNames() == 2)
 		{

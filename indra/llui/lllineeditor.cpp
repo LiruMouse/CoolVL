@@ -375,7 +375,7 @@ S32 LLLineEditor::calculateCursorFromMouse(S32 local_mouse_x)
 	LLWString asterix_text;
 	if (mDrawAsterixes)
 	{
-		for (S32 i = 0; i < mText.length(); i++)
+		for (S32 i = 0, len = mText.length(); i < len; ++i)
 		{
 			asterix_text += (llwchar) 0x2022L;
 		}
@@ -632,13 +632,13 @@ std::vector<S32> LLLineEditor::getMisspelledWordsPositions()
 			if (text[word_end] == L'\'')
 			{
 				// Do not coun't "'" at the start of a word
-				word_end++;
+				++word_end;
 			}
 			word_start = word_end;
 			while (word_end < (S32)text.length() &&
 				   LLWStringUtil::isPartOfLexicalWord(text[word_end]))
 			{
-				word_end++;
+				++word_end;
 			}	
 			if (text[word_end - 1] == L'\'')
 			{
@@ -662,7 +662,7 @@ std::vector<S32> LLLineEditor::getMisspelledWordsPositions()
 				}
 			}
 		}
-		word_end++;
+		++word_end;
 	}
 
 	return bad_words_pos;
@@ -701,7 +701,7 @@ BOOL LLLineEditor::handleDoubleClick(S32 x, S32 y, MASK mask)
 			while (mCursorPos < (S32)wtext.length() &&
 				   LLWStringUtil::isPartOfWord(wtext[mCursorPos]))
 			{	// Find the end of the word
-				mCursorPos++;
+				++mCursorPos;
 			}
 			mSelectionEnd = mCursorPos;
 
@@ -836,7 +836,7 @@ BOOL LLLineEditor::handleRightMouseDown(S32 x, S32 y, MASK mask)
 		LLMenuItemCallGL* menu_item;
 
 		// Remove old suggestions
-		for (S32 i = 0; i < (S32)mSuggestionMenuItems.size(); i++)
+		for (S32 i = 0, count = mSuggestionMenuItems.size(); i < count; ++i)
 		{
 			menu_bind = mSuggestionMenuItems[i];
 			if (menu_bind)
@@ -870,7 +870,7 @@ BOOL LLLineEditor::handleRightMouseDown(S32 x, S32 y, MASK mask)
 					std::vector<std::string> suggestions;
 					S32 count = LLSpellCheck::instance().getSuggestions(selected_word,
 																		suggestions);
-					for (S32 i = 0; i < count; i++)
+					for (S32 i = 0; i < count; ++i)
 					{
 						menu_bind = new SpellMenuBind;
 						menu_bind->mOrigin = this;
@@ -1133,11 +1133,11 @@ S32 LLLineEditor::nextWordPos(S32 cursorPos) const
 	const LLWString& wtext = mText.getWString();
 	while (cursorPos < getLength() && LLWStringUtil::isPartOfWord(wtext[cursorPos]))
 	{
-		cursorPos++;
+		++cursorPos;
 	}
 	while (cursorPos < getLength() && wtext[cursorPos] == ' ')
 	{
-		cursorPos++;
+		++cursorPos;
 	}
 	return cursorPos;
 }
@@ -1157,13 +1157,13 @@ BOOL LLLineEditor::getWordBoundriesAt(const S32 at, S32* word_begin,
 		if (wtext[pos] == L'\'')
 		{
 			// Do not coun't "'" at the start of a word
-			pos++;
+			++pos;
 		}
 		start = pos;
 		while (pos < (S32)wtext.length() &&
 			   LLWStringUtil::isPartOfLexicalWord(wtext[pos]))
 		{
-			pos++;
+			++pos;
 		}
 		if (wtext[pos - 1] == L'\'')
 		{
@@ -1919,7 +1919,7 @@ void LLLineEditor::drawMisspelled(LLRect background)
 		S32 wstart;
 		S32 wend;
 
-		for (S32 i = 0; i < misspells; i++)
+		for (S32 i = 0; i < misspells; ++i)
 		{
 			{
 				LLFastTimer t(LLFastTimer::FTM_SPELL_WORD_BOUNDARIES);
@@ -1961,7 +1961,7 @@ void LLLineEditor::draw()
 	{
 		saved_text = mText.getString();
 		std::string text;
-		for (S32 i = 0; i < mText.length(); i++)
+		for (S32 i = 0, len = mText.length(); i < len; ++i)
 		{
 			text += '*';
 		}
@@ -2029,7 +2029,7 @@ void LLLineEditor::draw()
 	if (hasPreeditString())
 	{
 		// Draw preedit markers.  This needs to be before drawing letters.
-		for (U32 i = 0; i < mPreeditStandouts.size(); i++)
+		for (U32 i = 0, size = mPreeditStandouts.size(); i < size; ++i)
 		{
 			const S32 preedit_left = mPreeditPositions[i];
 			const S32 preedit_right = mPreeditPositions[i + 1];
@@ -2372,10 +2372,10 @@ BOOL LLLineEditor::prevalidateFloat(const LLWString &str)
 		// First character can be a negative sign
 		if ('-' == trimmed[0])
 		{
-			i++;
+			++i;
 		}
 
-		for (; i < len; i++)
+		for ( ; i < len; ++i)
 		{
 			if (decimal_point != trimmed[i] && !LLStringOps::isDigit(trimmed[i]))
 			{
@@ -2407,13 +2407,13 @@ BOOL LLLineEditor::postvalidateFloat(const std::string &str)
 		// First character can be a negative sign
 		if ('-' == trimmed[0])
 		{
-			i++;
+			++i;
 		}
 
 		// May be a comma or period, depending on the locale
 		llwchar decimal_point = (llwchar)LLResMgr::getInstance()->getDecimalPoint();
 
-		for (; i < len; i++)
+		for ( ; i < len; ++i)
 		{
 			if (decimal_point == trimmed[i])
 			{
@@ -2468,10 +2468,10 @@ BOOL LLLineEditor::prevalidateInt(const LLWString &str)
 		// First character can be a negative sign
 		if ('-' == trimmed[0])
 		{
-			i++;
+			++i;
 		}
 
-		for (; i < len; i++)
+		for ( ; i < len; ++i)
 		{
 			if (!LLStringOps::isDigit(trimmed[i]))
 			{
@@ -2997,8 +2997,9 @@ void LLLineEditor::updatePreedit(const LLWString& preedit_string,
 	mPreeditWString = preedit_string;
 	mPreeditPositions.resize(preedit_segment_lengths.size() + 1);
 	S32 position = insert_preedit_at;
-	for (segment_lengths_t::size_type i = 0;
-		 i < preedit_segment_lengths.size(); i++)
+	for (segment_lengths_t::size_type i = 0,
+									  size = preedit_segment_lengths.size();
+		 i < size; ++i)
 	{
 		mPreeditPositions[i] = position;
 		position += preedit_segment_lengths[i];
@@ -3051,12 +3052,14 @@ BOOL LLLineEditor::getPreeditLocation(S32 query_offset, LLCoordGL* coord,
 	}
 	if (preedit_right_column < mScrollHPos)
 	{
-		// This should not occure...
+		// This should not occur...
 		return FALSE;
 	}
 
-	const S32 query = query_offset >= 0 ? preedit_left_column + query_offset : getCursor();
-	if (query < mScrollHPos || query < preedit_left_column || query > preedit_right_column)
+	const S32 query = query_offset >= 0 ? preedit_left_column + query_offset
+										: getCursor();
+	if (query < mScrollHPos || query < preedit_left_column ||
+		query > preedit_right_column)
 	{
 		return FALSE;
 	}
@@ -3078,7 +3081,7 @@ BOOL LLLineEditor::getPreeditLocation(S32 query_offset, LLCoordGL* coord,
 										getRect().getWidth() - mBorderThickness);
 		if (preedit_left_local > preedit_right_local)
 		{
-			// Is this condition possible?
+			// Is this condition possible ?
 			preedit_right_local = preedit_left_local;
 		}
 

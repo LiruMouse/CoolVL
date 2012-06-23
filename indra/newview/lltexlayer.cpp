@@ -1,11 +1,11 @@
-/** 
+/**
  * @file lltexlayer.cpp
  * @brief A texture layer. Used for avatars.
  *
  * $LicenseInfo:firstyear=2002&license=viewergpl$
- * 
+ *
  * Copyright (c) 2010, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -106,7 +106,7 @@ LLBakedUploadData::LLBakedUploadData(const LLVOAvatarSelf* avatar,
 	mID(id),
 	mStartTime(LLFrameTimer::getTotalTime()),		// Record starting time
 	mIsHighestRes(highest_res)
-{ 
+{
 }
 
 //-----------------------------------------------------------------------------
@@ -117,7 +117,7 @@ LLBakedUploadData::LLBakedUploadData(const LLVOAvatarSelf* avatar,
 // static
 S32 LLTexLayerSetBuffer::sGLByteCount = 0;
 
-LLTexLayerSetBuffer::LLTexLayerSetBuffer(LLTexLayerSet* const owner, 
+LLTexLayerSetBuffer::LLTexLayerSetBuffer(LLTexLayerSet* const owner,
 										 S32 width, S32 height)
 :	LLViewerDynamicTexture(width, height, 4, LLViewerDynamicTexture::ORDER_LAST, TRUE), 	// ORDER_LAST => must render these after the hints are created.
 	mUploadPending(FALSE), // Not used for any logic here, just to sync sending of updates
@@ -137,26 +137,26 @@ LLTexLayerSetBuffer::~LLTexLayerSetBuffer()
 {
 	LLTexLayerSetBuffer::sGLByteCount -= getSize();
 	destroyGLTexture();
-	for (S32 order = 0; order < ORDER_COUNT; order++)
+	for (S32 order = 0; order < ORDER_COUNT; ++order)
 	{
 		LLViewerDynamicTexture::sInstances[order].erase(this);  // will fail in all but one case.
 	}
 }
 
-//virtual 
-S8 LLTexLayerSetBuffer::getType() const 
+//virtual
+S8 LLTexLayerSetBuffer::getType() const
 {
 	return LLViewerDynamicTexture::LL_TEX_LAYER_SET_BUFFER;
 }
 
-//virtual 
-void LLTexLayerSetBuffer::restoreGLTexture() 
+//virtual
+void LLTexLayerSetBuffer::restoreGLTexture()
 {
 	LLViewerDynamicTexture::restoreGLTexture();
 }
 
-//virtual 
-void LLTexLayerSetBuffer::destroyGLTexture() 
+//virtual
+void LLTexLayerSetBuffer::destroyGLTexture()
 {
 	LLViewerDynamicTexture::destroyGLTexture();
 }
@@ -259,7 +259,7 @@ BOOL LLTexLayerSetBuffer::needsRender()
 
 	// Don't render if we are trying to create a shirt texture but aren't
 	// wearing a skirt.
-	if (gAgentAvatarp->getBakedTE(mTexLayerSet) == LLVOAvatarDefines::TEX_SKIRT_BAKED && 
+	if (gAgentAvatarp->getBakedTE(mTexLayerSet) == LLVOAvatarDefines::TEX_SKIRT_BAKED &&
 		!gAgentAvatarp->isWearingWearableType(LLWearableType::WT_SKIRT))
 	{
 		cancelUpload();
@@ -421,7 +421,7 @@ BOOL LLTexLayerSetBuffer::isReadyToUpdate() const
 		// resolution, then update.
 		const BOOL is_update_textures_timeout = mNeedsUpdateTimer.getElapsedTimeF32() >= (F32)texture_timeout;
 		const BOOL has_lower_lod = mTexLayerSet->isLocalTextureDataAvailable();
-		if (has_lower_lod && is_update_textures_timeout) return TRUE; 
+		if (has_lower_lod && is_update_textures_timeout) return TRUE;
 	}
 
 	return FALSE;
@@ -465,7 +465,7 @@ void LLTexLayerSetBuffer::doUpload()
 	LLGLSUIDefault gls_ui;
 	LLPointer<LLImageRaw> baked_mask_image = new LLImageRaw(mFullWidth,
 															mFullHeight, 1);
-	U8* baked_mask_data = baked_mask_image->getData(); 
+	U8* baked_mask_data = baked_mask_image->getData();
 	mTexLayerSet->gatherMorphMaskAlpha(baked_mask_data, mFullWidth,
 									   mFullHeight);
 
@@ -475,16 +475,16 @@ void LLTexLayerSetBuffer::doUpload()
 													   baked_image_components);
 	U8* baked_image_data = baked_image->getData();
 	S32 i = 0;
-	for (S32 u = 0; u < mFullWidth; u++)
+	for (S32 u = 0; u < mFullWidth; ++u)
 	{
-		for (S32 v = 0; v < mFullHeight; v++)
+		for (S32 v = 0; v < mFullHeight; ++v)
 		{
 			baked_image_data[5 * i + 0] = baked_color_data[4 * i + 0];
 			baked_image_data[5 * i + 1] = baked_color_data[4 * i + 1];
 			baked_image_data[5 * i + 2] = baked_color_data[4 * i + 2];
 			baked_image_data[5 * i + 3] = baked_color_data[4 * i + 3]; // alpha should be correct for eyelashes.
 			baked_image_data[5 * i + 4] = baked_mask_data[i];
-			i++;
+			++i;
 		}
 	}
 
@@ -520,8 +520,8 @@ void LLTexLayerSetBuffer::doUpload()
 			{
 				const bool highest_lod = mTexLayerSet->isLocalTextureDataFinal();
 				// Baked_upload_data is owned by the responder and deleted after the request completes.
-				LLBakedUploadData* baked_upload_data = new LLBakedUploadData(gAgentAvatarp, 
-																			 this->mTexLayerSet, 
+				LLBakedUploadData* baked_upload_data = new LLBakedUploadData(gAgentAvatarp,
+																			 this->mTexLayerSet,
 																			 asset_id,
 																			 highest_lod);
 				// upload ID is used to avoid overlaps, e.g. when the user rapidly makes two changes outside of Face Edit.
@@ -542,7 +542,7 @@ void LLTexLayerSetBuffer::doUpload()
 																   baked_upload_data));
 					llinfos << "Baked texture upload via capability of "
 							<< mUploadID << " to " << url << llendl;
-				} 
+				}
 				else
 				{
 					gAssetStorage->storeAssetData(tid,
@@ -557,7 +557,7 @@ void LLTexLayerSetBuffer::doUpload()
 
 				if (highest_lod)
 				{
-					// Sending the final LOD for the baked texture.  All done, pause 
+					// Sending the final LOD for the baked texture.  All done, pause
 					// the upload timer so we know how long it took.
 					mNeedsUpload = FALSE;
 					mNeedsUploadTimer.pause();
@@ -565,7 +565,7 @@ void LLTexLayerSetBuffer::doUpload()
 				else
 				{
 					// Sending a lower level LOD for the baked texture.  Restart the upload timer.
-					mNumLowresUploads++;
+					++mNumLowresUploads;
 					mNeedsUploadTimer.unpause();
 					mNeedsUploadTimer.reset();
 				}
@@ -604,7 +604,7 @@ void LLTexLayerSetBuffer::doUpdate()
 	}
 	else
 	{
-		mNumLowresUpdates++;
+		++mNumLowresUpdates;
 	}
 
 	restartUpdateTimer();
@@ -769,8 +769,9 @@ BOOL LLTexLayerSetInfo::parseXml(LLXmlTreeNode* node)
 void LLTexLayerSetInfo::createVisualParams(LLVOAvatar* avatar)
 {
 	//layer_info_list_t		mLayerInfoList;
-	for (layer_info_list_t::iterator layer_iter = mLayerInfoList.begin();
-		 layer_iter != mLayerInfoList.end(); layer_iter++)
+	for (layer_info_list_t::iterator layer_iter = mLayerInfoList.begin(),
+									 end = mLayerInfoList.end();
+		 layer_iter != end; ++layer_iter)
 	{
 		LLTexLayerInfo* layer_info = *layer_iter;
 		layer_info->createVisualParams(avatar);
@@ -812,8 +813,10 @@ BOOL LLTexLayerSet::setInfo(const LLTexLayerSetInfo* info)
 	//mID = info->mID; // No ID
 
 	mLayerList.reserve(info->mLayerInfoList.size());
-	for (LLTexLayerSetInfo::layer_info_list_t::const_iterator iter = info->mLayerInfoList.begin(); 
-		 iter != info->mLayerInfoList.end(); iter++)
+	for (LLTexLayerSetInfo::layer_info_list_t::const_iterator
+			iter = info->mLayerInfoList.begin(),
+			end = info->mLayerInfoList.end();
+		 iter != end; ++iter)
 	{
 		LLTexLayerInterface* layer = NULL;
 		if ((*iter)->isUserSettable())
@@ -874,13 +877,13 @@ BOOL LLTexLayerSet::parseData(LLXmlTreeNode* node)
 void LLTexLayerSet::deleteCaches()
 {
 	for (layer_list_t::iterator iter = mLayerList.begin();
-		 iter != mLayerList.end(); iter++)
+		 iter != mLayerList.end(); ++iter)
 	{
 		LLTexLayerInterface* layer = *iter;
 		layer->deleteCaches();
 	}
 	for (layer_list_t::iterator iter = mMaskLayerList.begin();
-		 iter != mMaskLayerList.end(); iter++)
+		 iter != mMaskLayerList.end(); ++iter)
 	{
 		LLTexLayerInterface* layer = *iter;
 		layer->deleteCaches();
@@ -910,8 +913,9 @@ BOOL LLTexLayerSet::render(S32 x, S32 y, S32 width, S32 height)
 
 	if (mMaskLayerList.size() > 0)
 	{
-		for (layer_list_t::iterator iter = mMaskLayerList.begin();
-			 iter != mMaskLayerList.end(); iter++)
+		for (layer_list_t::iterator iter = mMaskLayerList.begin(),
+									end = mMaskLayerList.end();
+			 iter != end; ++iter)
 		{
 			LLTexLayerInterface* layer = *iter;
 			if (layer->isInvisibleAlphaMask())
@@ -940,8 +944,9 @@ BOOL LLTexLayerSet::render(S32 x, S32 y, S32 width, S32 height)
 	if (mIsVisible)
 	{
 		// composite color layers
-		for (layer_list_t::iterator iter = mLayerList.begin();
-			 iter != mLayerList.end(); iter++)
+		for (layer_list_t::iterator iter = mLayerList.begin(),
+									end = mLayerList.end();
+			 iter != end; ++iter)
 		{
 			LLTexLayerInterface* layer = *iter;
 			if (layer->getRenderPass() == LLTexLayer::RP_COLOR ||
@@ -975,14 +980,14 @@ BOOL LLTexLayerSet::render(S32 x, S32 y, S32 width, S32 height)
 	return success;
 }
 
-BOOL LLTexLayerSet::isBodyRegion(const std::string& region) const 
-{ 
-	return mInfo->mBodyRegion == region; 
+BOOL LLTexLayerSet::isBodyRegion(const std::string& region) const
+{
+	return mInfo->mBodyRegion == region;
 }
 
-const std::string LLTexLayerSet::getBodyRegionName() const 
-{ 
-	return mInfo->mBodyRegion; 
+const std::string LLTexLayerSet::getBodyRegionName() const
+{
+	return mInfo->mBodyRegion;
 }
 
 void LLTexLayerSet::requestUpdate()
@@ -990,7 +995,7 @@ void LLTexLayerSet::requestUpdate()
 	if (mUpdatesEnabled)
 	{
 		createComposite();
-		mComposite->requestUpdate(); 
+		mComposite->requestUpdate();
 	}
 }
 
@@ -1034,7 +1039,7 @@ void LLTexLayerSet::destroyComposite()
 
 void LLTexLayerSet::setUpdatesEnabled(BOOL b)
 {
-	mUpdatesEnabled = b; 
+	mUpdatesEnabled = b;
 }
 
 void LLTexLayerSet::updateComposite()
@@ -1061,8 +1066,9 @@ void LLTexLayerSet::gatherMorphMaskAlpha(U8* data, S32 width, S32 height)
 {
 	memset(data, 255, width * height);
 
-	for (layer_list_t::iterator iter = mLayerList.begin();
-		 iter != mLayerList.end(); iter++)
+	for (layer_list_t::iterator iter = mLayerList.begin(),
+								end = mLayerList.end();
+		 iter != end; ++iter)
 	{
 		LLTexLayerInterface* layer = *iter;
 		layer->gatherAlphaMasks(data, mComposite->getOriginX(),
@@ -1118,8 +1124,9 @@ void LLTexLayerSet::renderAlphaMaskTextures(S32 x, S32 y, S32 width, S32 height,
 	{
 		gGL.setSceneBlendType(LLRender::BT_MULT_ALPHA);
 		gGL.getTexUnit(0)->setTextureBlendType(LLTexUnit::TB_REPLACE);
-		for (layer_list_t::iterator iter = mMaskLayerList.begin();
-			 iter != mMaskLayerList.end(); iter++)
+		for (layer_list_t::iterator iter = mMaskLayerList.begin(),
+									end = mMaskLayerList.end();
+			 iter != end; ++iter)
 		{
 			LLTexLayerInterface* layer = *iter;
 			gGL.flush();
@@ -1142,8 +1149,9 @@ void LLTexLayerSet::applyMorphMask(U8* tex_data, S32 width, S32 height, S32 num_
 
 BOOL LLTexLayerSet::isMorphValid() const
 {
-	for (layer_list_t::const_iterator iter = mLayerList.begin();
-		 iter != mLayerList.end(); iter++)
+	for (layer_list_t::const_iterator iter = mLayerList.begin(),
+									  end = mLayerList.end();
+		 iter != end; ++iter)
 	{
 		const LLTexLayerInterface* layer = *iter;
 		if (layer && !layer->isMorphValid())
@@ -1156,8 +1164,9 @@ BOOL LLTexLayerSet::isMorphValid() const
 
 void LLTexLayerSet::invalidateMorphMasks()
 {
-	for (layer_list_t::iterator iter = mLayerList.begin();
-		 iter != mLayerList.end(); iter++)
+	for (layer_list_t::iterator iter = mLayerList.begin(),
+								end = mLayerList.end();
+		 iter != end; ++iter)
 	{
 		LLTexLayerInterface* layer = *iter;
 		if (layer)
@@ -1256,16 +1265,17 @@ BOOL LLTexLayerInfo::parseXml(LLXmlTreeNode* node)
 			/* if ("upper_shirt" == local_texture_name)
 				mLocalTexture = TEX_UPPER_SHIRT; */
 			mLocalTexture = TEX_NUM_INDICES;
-			for (LLVOAvatarDictionary::Textures::const_iterator iter = LLVOAvatarDictionary::getInstance()->getTextures().begin();
-				 iter != LLVOAvatarDictionary::getInstance()->getTextures().end();
-				 iter++)
+			for (LLVOAvatarDictionary::Textures::const_iterator
+					iter = LLVOAvatarDictionary::getInstance()->getTextures().begin(),
+					end = LLVOAvatarDictionary::getInstance()->getTextures().end();
+				 iter != end; ++iter)
 			{
 				const LLVOAvatarDictionary::TextureEntry* texture_dict = iter->second;
 				if (local_texture_name == texture_dict->mName)
-			{
+				{
 					mLocalTexture = iter->first;
 					break;
-			}
+				}
 			}
 			if (mLocalTexture == TEX_NUM_INDICES)
 			{
@@ -1332,9 +1342,10 @@ BOOL LLTexLayerInfo::parseXml(LLXmlTreeNode* node)
 BOOL LLTexLayerInfo::createVisualParams(LLVOAvatar* avatar)
 {
 	BOOL success = TRUE;
-	for (param_color_info_list_t::iterator color_info_iter = mParamColorInfoList.begin();
-		 color_info_iter != mParamColorInfoList.end();
-		 color_info_iter++)
+	for (param_color_info_list_t::iterator
+			color_info_iter = mParamColorInfoList.begin(),
+			end = mParamColorInfoList.end();
+		 color_info_iter != end; ++color_info_iter)
 	{
 		LLTexLayerParamColorInfo* color_info = *color_info_iter;
 		LLTexLayerParamColor* param_color = new LLTexLayerParamColor(avatar);
@@ -1347,9 +1358,10 @@ BOOL LLTexLayerInfo::createVisualParams(LLVOAvatar* avatar)
 		}
 	}
 
-	for (param_alpha_info_list_t::iterator alpha_info_iter = mParamAlphaInfoList.begin();
-		 alpha_info_iter != mParamAlphaInfoList.end();
-		 alpha_info_iter++)
+	for (param_alpha_info_list_t::iterator
+			alpha_info_iter = mParamAlphaInfoList.begin(),
+			end = mParamAlphaInfoList.end();
+		 alpha_info_iter != end; ++alpha_info_iter)
 	{
 		LLTexLayerParamAlphaInfo* alpha_info = *alpha_info_iter;
 		LLTexLayerParamAlpha* param_alpha = new LLTexLayerParamAlpha(avatar);
@@ -1390,7 +1402,7 @@ BOOL LLTexLayerInterface::setInfo(const LLTexLayerInfo* info,
 {
 	// setInfo should only be called once. Code is not robust enough to handle
 	// redefinition of a texlayer.
-	if (mInfo != NULL) 
+	if (mInfo != NULL)
 	{
 		// Not a critical warning, but could be useful for debugging later
 		// issues. -Nyx
@@ -1400,8 +1412,10 @@ BOOL LLTexLayerInterface::setInfo(const LLTexLayerInfo* info,
 	//mID = info->mID; // No ID
 
 	mParamColorList.reserve(mInfo->mParamColorInfoList.size());
-	for (param_color_info_list_t::const_iterator iter = mInfo->mParamColorInfoList.begin(); 
-		 iter != mInfo->mParamColorInfoList.end(); iter++)
+	for (param_color_info_list_t::const_iterator
+			iter = mInfo->mParamColorInfoList.begin(),
+			end = mInfo->mParamColorInfoList.end();
+		 iter != end; ++iter)
 	{
 		LLTexLayerParamColor* param_color;
 		if (!wearable)
@@ -1426,9 +1440,10 @@ BOOL LLTexLayerInterface::setInfo(const LLTexLayerInfo* info,
 	}
 
 	mParamAlphaList.reserve(mInfo->mParamAlphaInfoList.size());
-	for (param_alpha_info_list_t::const_iterator iter = mInfo->mParamAlphaInfoList.begin(); 
-		 iter != mInfo->mParamAlphaInfoList.end(); 
-		 iter++)
+	for (param_alpha_info_list_t::const_iterator
+			iter = mInfo->mParamAlphaInfoList.begin(),
+			end = mInfo->mParamAlphaInfoList.end();
+		 iter != end; ++iter)
 	{
 		LLTexLayerParamAlpha* param_alpha;
 		if (!wearable)
@@ -1463,17 +1478,17 @@ void LLTexLayerInterface::requestUpdate()
 
 const std::string& LLTexLayerInterface::getName() const
 {
-	return mInfo->mName; 
+	return mInfo->mName;
 }
 
 LLTexLayerInterface::ERenderPass LLTexLayerInterface::getRenderPass() const
 {
-	return mInfo->mRenderPass; 
+	return mInfo->mRenderPass;
 }
 
 const std::string& LLTexLayerInterface::getGlobalColor() const
 {
-	return mInfo->mGlobalColor; 
+	return mInfo->mGlobalColor;
 }
 
 BOOL LLTexLayerInterface::isVisibilityMask() const
@@ -1489,16 +1504,18 @@ void LLTexLayerInterface::invalidateMorphMasks()
 LLViewerVisualParam* LLTexLayerInterface::getVisualParamPtr(S32 index) const
 {
 	LLViewerVisualParam* result = NULL;
-	for (param_color_list_t::const_iterator color_iter = mParamColorList.begin();
-		 color_iter != mParamColorList.end() && !result; ++color_iter)
+	for (param_color_list_t::const_iterator color_iter = mParamColorList.begin(),
+											end = mParamColorList.end();
+		 color_iter != end && !result; ++color_iter)
 	{
 		if ((*color_iter)->getID() == index)
 		{
 			result = *color_iter;
 		}
 	}
-	for (param_alpha_list_t::const_iterator alpha_iter = mParamAlphaList.begin();
-		 alpha_iter != mParamAlphaList.end() && !result; ++alpha_iter)
+	for (param_alpha_list_t::const_iterator alpha_iter = mParamAlphaList.begin(),
+											end = mParamAlphaList.end();
+		 alpha_iter != end && !result; ++alpha_iter)
 	{
 		if ((*alpha_iter)->getID() == index)
 		{
@@ -1550,7 +1567,7 @@ LLTexLayer::~LLTexLayer()
 	//std::for_each(mParamColorList.begin(), mParamColorList.end(), DeletePointer());
 
 	for (alpha_cache_t::iterator iter = mAlphaCache.begin();
-		 iter != mAlphaCache.end(); iter++)
+		 iter != mAlphaCache.end(); ++iter)
 	{
 		U8* alpha_data = iter->second;
 		delete [] alpha_data;
@@ -1567,12 +1584,13 @@ BOOL LLTexLayer::setInfo(const LLTexLayerInfo* info, LLWearable* wearable)
 	return LLTexLayerInterface::setInfo(info, wearable);
 }
 
-//static 
+//static
 void LLTexLayer::calculateTexLayerColor(const param_color_list_t& param_list,
 										LLColor4& net_color)
 {
-	for (param_color_list_t::const_iterator iter = param_list.begin();
-		 iter != param_list.end(); iter++)
+	for (param_color_list_t::const_iterator iter = param_list.begin(),
+											end = param_list.end();
+		 iter != end; ++iter)
 	{
 		const LLTexLayerParamColor* param = *iter;
 		LLColor4 param_net = param->getNetColor();
@@ -1602,9 +1620,10 @@ void LLTexLayer::calculateTexLayerColor(const param_color_list_t& param_list,
 //virtual
 void LLTexLayer::deleteCaches()
 {
-	// Only need to delete caches for alpha params. Color params don't hold extra memory
+	// Only need to delete caches for alpha params. Color params don't hold
+	// extra memory
 	for (param_alpha_list_t::iterator iter = mParamAlphaList.begin();
-		 iter != mParamAlphaList.end(); iter++)
+		 iter != mParamAlphaList.end(); ++iter)
 	{
 		LLTexLayerParamAlpha* param = *iter;
 		param->deleteCaches();
@@ -1653,8 +1672,8 @@ BOOL LLTexLayer::render(S32 x, S32 y, S32 width, S32 height)
 					break;
 				}
 
-				iter++;
-			} 
+				++iter;
+			}
 
 			if (skip_layer)
 			{
@@ -1779,7 +1798,7 @@ const U8* LLTexLayer::getAlphaData() const
 	alpha_mask_crc.update((U8*)(&uuid.mData), UUID_BYTES);
 
 	for (param_alpha_list_t::const_iterator iter = mParamAlphaList.begin();
-		 iter != mParamAlphaList.end(); iter++)
+		 iter != mParamAlphaList.end(); ++iter)
 	{
 		const LLTexLayerParamAlpha* param = *iter;
 		// MULTI-WEARABLE: verify visual parameters used here
@@ -1913,7 +1932,7 @@ BOOL LLTexLayer::renderMorphMasks(S32 x, S32 y, S32 width, S32 height, const LLC
 	LLGLSNoAlphaTest gls_no_alpha_test;
 	gGL.color4f(1.f, 1.f, 1.f, 1.f);
 	for (param_alpha_list_t::iterator iter = mParamAlphaList.begin();
-		 iter != mParamAlphaList.end(); iter++)
+		 iter != mParamAlphaList.end(); ++iter)
 	{
 		LLTexLayerParamAlpha* param = *iter;
 		success &= param->render(x, y, width, height);
@@ -1981,7 +2000,7 @@ BOOL LLTexLayer::renderMorphMasks(S32 x, S32 y, S32 width, S32 height, const LLC
 		alpha_mask_crc.update((U8*)(&uuid.mData), UUID_BYTES);
 
 		for (param_alpha_list_t::const_iterator iter = mParamAlphaList.begin();
-			 iter != mParamAlphaList.end(); iter++)
+			 iter != mParamAlphaList.end(); ++iter)
 		{
 			const LLTexLayerParamAlpha* param = *iter;
 			F32 param_weight = param->getWeight();
@@ -2030,7 +2049,7 @@ void LLTexLayer::addAlphaMask(U8* data, S32 originX, S32 originY, S32 width, S32
 	}
 	if (alphaData)
 	{
-		for (S32 i = 0; i < size; i++)
+		for (S32 i = 0; i < size; ++i)
 		{
 			U8 curAlpha = data[i];
 			U16 resultAlpha = curAlpha;
@@ -2122,13 +2141,13 @@ U32 LLTexLayerTemplate::updateWearableCache() const
 	S32 te = mInfo->mLocalTexture;
 	if (te == -1)
 	{
-		//this isn't a cloneable layer 
+		//this isn't a cloneable layer
 		return 0;
 	}
 	LLWearableType::EType wearable_type = LLVOAvatarDictionary::getTEWearableType((ETextureIndex)te);
 	U32 num_wearables = gAgentWearables.getWearableCount(wearable_type);
 	U32 added = 0;
-	for (U32 i = 0; i < num_wearables; i++)
+	for (U32 i = 0; i < num_wearables; ++i)
 	{
 		LLWearable*  wearable = gAgentWearables.getWearable(wearable_type, i);
 		if (!wearable)
@@ -2136,7 +2155,7 @@ U32 LLTexLayerTemplate::updateWearableCache() const
 			continue;
 		}
 		mWearableCache.push_back(wearable);
-		added++;
+		++added;
 	}
 	return added;
 }
@@ -2172,7 +2191,7 @@ BOOL LLTexLayerTemplate::render(S32 x, S32 y, S32 width, S32 height)
 	BOOL success = TRUE;
 	updateWearableCache();
 	for (wearable_cache_t::const_iterator iter = mWearableCache.begin();
-		 iter!= mWearableCache.end(); iter++)
+		 iter!= mWearableCache.end(); ++iter)
 	{
 		LLWearable* wearable = *iter;
 		LLLocalTextureObject* lto = NULL;
@@ -2201,7 +2220,7 @@ BOOL LLTexLayerTemplate::blendAlphaTexture(S32 x, S32 y, S32 width, S32 height) 
 {
 	BOOL success = TRUE;
 	U32 num_wearables = updateWearableCache();
-	for (U32 i = 0; i < num_wearables; i++)
+	for (U32 i = 0; i < num_wearables; ++i)
 	{
 		LLTexLayer* layer = getLayer(i);
 		if (layer)
@@ -2217,7 +2236,7 @@ void LLTexLayerTemplate::gatherAlphaMasks(U8* data, S32 originX, S32 originY,
 										  S32 width, S32 height)
 {
 	U32 num_wearables = updateWearableCache();
-	for (U32 i = 0; i < num_wearables; i++)
+	for (U32 i = 0; i < num_wearables; ++i)
 	{
 		LLTexLayer* layer = getLayer(i);
 		if (layer)
@@ -2229,10 +2248,10 @@ void LLTexLayerTemplate::gatherAlphaMasks(U8* data, S32 originX, S32 originY,
 
 //virtual
 void LLTexLayerTemplate::setHasMorph(BOOL newval)
-{ 
+{
 	mHasMorph = newval;
 	U32 num_wearables = updateWearableCache();
-	for (U32 i = 0; i < num_wearables; i++)
+	for (U32 i = 0; i < num_wearables; ++i)
 	{
 		LLTexLayer* layer = getLayer(i);
 		if (layer)
@@ -2246,7 +2265,7 @@ void LLTexLayerTemplate::setHasMorph(BOOL newval)
 void LLTexLayerTemplate::deleteCaches()
 {
 	U32 num_wearables = updateWearableCache();
-	for (U32 i = 0; i < num_wearables; i++)
+	for (U32 i = 0; i < num_wearables; ++i)
 	{
 		LLTexLayer* layer = getLayer(i);
 		if (layer)
@@ -2260,7 +2279,7 @@ void LLTexLayerTemplate::deleteCaches()
 BOOL LLTexLayerTemplate::isInvisibleAlphaMask() const
 {
 	U32 num_wearables = updateWearableCache();
-	for (U32 i = 0; i < num_wearables; i++)
+	for (U32 i = 0; i < num_wearables; ++i)
 	{
 		LLTexLayer* layer = getLayer(i);
 		if (layer)
@@ -2280,8 +2299,9 @@ BOOL LLTexLayerTemplate::isInvisibleAlphaMask() const
 //-----------------------------------------------------------------------------
 LLTexLayerInterface* LLTexLayerSet::findLayerByName(const std::string& name)
 {
-	for (layer_list_t::iterator iter = mLayerList.begin();
-		 iter != mLayerList.end(); iter++)
+	for (layer_list_t::iterator iter = mLayerList.begin(),
+								end = mLayerList.end();
+		 iter != end; ++iter)
 	{
 		LLTexLayerInterface* layer = *iter;
 		if (layer->getName() == name)
@@ -2289,8 +2309,9 @@ LLTexLayerInterface* LLTexLayerSet::findLayerByName(const std::string& name)
 			return layer;
 		}
 	}
-	for (layer_list_t::iterator iter = mMaskLayerList.begin();
-		 iter != mMaskLayerList.end(); iter++)
+	for (layer_list_t::iterator iter = mMaskLayerList.begin(),
+								end = mMaskLayerList.end();
+		 iter != end; ++iter)
 	{
 		LLTexLayerInterface* layer = *iter;
 		if (layer->getName() == name)
@@ -2306,8 +2327,9 @@ void LLTexLayerSet::cloneTemplates(LLLocalTextureObject* lto,
 								   LLWearable* wearable)
 {
 	// initialize all texlayers with this texture type for this LTO
-	for (LLTexLayerSet::layer_list_t::iterator iter = mLayerList.begin();
-		 iter != mLayerList.end(); iter++)
+	for (LLTexLayerSet::layer_list_t::iterator iter = mLayerList.begin(),
+											   end = mLayerList.end();
+		 iter != end; ++iter)
 	{
 		LLTexLayerTemplate* layer = (LLTexLayerTemplate*)*iter;
 		if (layer->getInfo()->getLocalTexture() == (S32) tex_index)
@@ -2315,8 +2337,9 @@ void LLTexLayerSet::cloneTemplates(LLLocalTextureObject* lto,
 			lto->addTexLayer(layer, wearable);
 		}
 	}
-	for (LLTexLayerSet::layer_list_t::iterator iter = mMaskLayerList.begin();
-		 iter != mMaskLayerList.end(); iter++)
+	for (LLTexLayerSet::layer_list_t::iterator iter = mMaskLayerList.begin(),
+											   end = mMaskLayerList.end();
+		 iter != end; ++iter)
 	{
 		LLTexLayerTemplate* layer = (LLTexLayerTemplate*)*iter;
 		if (layer->getInfo()->getLocalTexture() == (S32) tex_index)
@@ -2476,7 +2499,7 @@ const std::string LLTexLayerSetBuffer::dumpTextureInfo() const
 	std::string text = llformat("[%s] [HiRes:%d LoRes:%d] [Elapsed:%d] %s",
 								status.c_str(),
 								is_high_res, num_low_res,
-								upload_time, 
+								upload_time,
 								local_texture_info.c_str());
 	return text;
 }

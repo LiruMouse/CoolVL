@@ -1,11 +1,11 @@
-/** 
+/**
  * @file llappviewer.h
  * @brief The LLAppViewer class declaration
  *
  * $LicenseInfo:firstyear=2007&license=viewergpl$
- * 
+ *
  * Copyright (c) 2007-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -49,11 +49,11 @@ public:
 
     /**
      * @brief Access to the LLAppViewer singleton.
-     * 
+     *
      * The LLAppViewer singleton is created in main()/WinMain().
      * So don't use it in pre-entry (static initialization) code.
      */
-    static LLAppViewer* instance() {return sInstance; } 
+    static LLAppViewer* instance()								{ return sInstance; }
 
 	//
 	// Main application logic
@@ -66,37 +66,45 @@ public:
 	void forceQuit();	// Puts the viewer into 'shutting down without error' mode.
 	void requestQuit();	// Request a quit. A kinder, gentler quit.
 	void userQuit();	// The users asks to quit. Confirm, then requestQuit()
-    void earlyExit(const std::string& name, 
+    void earlyExit(const std::string& name,
 				   const LLSD& substitutions = LLSD()); // Display an error dialog and forcibly quit.
     void forceExit(S32 arg); // exit() immediately (after some cleanup).
     void abortQuit();  // Called to abort a quit request.
 
-    bool quitRequested() { return mQuitRequested; }
-    bool logoutRequestSent() { return mLogoutRequestSent; }
+    bool quitRequested()										{ return mQuitRequested; }
+    bool logoutRequestSent()									{ return mLogoutRequestSent; }
 
 	void writeDebugInfo();
 
-	const LLOSInfo& getOSInfo() const { return mSysOSInfo; }
+	const LLOSInfo& getOSInfo() const							{ return mSysOSInfo; }
 
 	// Report true if under the control of a debugger. A null-op default.
-	virtual bool beingDebugged() { return false; } 
+	virtual bool beingDebugged()								{ return false; }
 
-	virtual bool restoreErrorTrap() = 0; // Require platform specific override to reset error handling mechanism.
-	                                     // return false if the error trap needed restoration.
-	virtual void handleCrashReporting(bool reportFreeze = false) = 0; // What to do with crash report?
-	virtual void handleSyncCrashTrace() = 0; // any low-level crash-prep that has to happen in the context of the crashing thread before the crash report is delivered.
-	static void handleViewerCrash(); // Hey! The viewer crashed. Do this, soon.
-	static void handleSyncViewerCrash(); // Hey! The viewer crashed. Do this right NOW in the context of the crashing thread.
+	// Require platform specific override to reset error handling mechanism.
+	// Returns false if the error trap needed restoration.
+	virtual bool restoreErrorTrap() = 0;
+
+	// What to do with crash report:
+	virtual void handleCrashReporting(bool reportFreeze = false) = 0;
+	// Any low-level crash-prep that has to happen in the context of the
+	// crashing thread before the crash report is delivered:
+	virtual void handleSyncCrashTrace() = 0;
+	// Hey !  The viewer crashed. Do this, soon:
+	static void handleViewerCrash();
+	// Hey !  The viewer crashed. Do this right NOW in the context of the
+	// crashing thread:
+	static void handleSyncViewerCrash();
     void checkForCrash();
-    
+
 	// Thread accessors
-	static LLTextureCache* getTextureCache() { return sTextureCache; }
-	static LLImageDecodeThread* getImageDecodeThread() { return sImageDecodeThread; }
-	static LLTextureFetch* getTextureFetch() { return sTextureFetch; }
+	static LLTextureCache* getTextureCache()					{ return sTextureCache; }
+	static LLImageDecodeThread* getImageDecodeThread()			{ return sImageDecodeThread; }
+	static LLTextureFetch* getTextureFetch()					{ return sTextureFetch; }
 
-	const std::string& getSerialNumber() { return mSerialNumber; }
+	const std::string& getSerialNumber()						{ return mSerialNumber; }
 
-	bool getPurgeCache() const { return mPurgeCache; }
+	bool getPurgeCache() const									{ return mPurgeCache; }
 
 	const std::string& getSecondLifeTitle() const; // The Second Life title.
 	const std::string& getWindowTitle() const; // The window display name.
@@ -104,18 +112,19 @@ public:
     void forceDisconnect(const std::string& msg); // Force disconnection, with a message to the user.
     void badNetworkHandler(); // Cause a crash state due to bad network packet.
 
-	bool hasSavedFinalSnapshot() { return mSavedFinalSnapshot; }
-	void saveFinalSnapshot(); 
+	bool hasSavedFinalSnapshot()								{ return mSavedFinalSnapshot; }
+	void saveFinalSnapshot();
 
     void loadNameCache();
     void saveNameCache();
 
-	// OGPX : rez_avatar/place cap is used on both initial login, and 
-	// ... then on teleports as well. The same cap should be good for the
-	// ... life of the connection to an agent domain. This cap is used by the viewer
-	// ... to request moving an agent between regions. 
-	void setPlaceAvatarCap(const std::string& uri);	// OGPX TODO: this should be refactored into own class that handles caps
-	const std::string& getPlaceAvatarCap() const;	// OGPX TODO: ...as above...
+	// OGPX: rez_avatar/place cap is used on both initial login, and then on
+	// teleports as well. The same cap should be good for the life of the
+	// connection to an agent domain. This cap is used by the viewer to request
+	// moving an agent between regions.
+	// OGPX TODO: these should be refactored into own class that handles caps:
+	void setPlaceAvatarCap(const std::string& uri);
+	const std::string& getPlaceAvatarCap() const;
 
 	void removeMarkerFile(bool leave_logout_marker = false);
 
@@ -128,53 +137,56 @@ public:
     virtual void forceErrorSoftwareException();
     virtual void forceErrorDriverCrash();
 
-	// *NOTE: There are currently 3 settings files: 
+	// *NOTE: There are currently 3 settings files:
 	// "Global", "PerAccount" and "CrashSettings"
 	// The list is found in app_settings/settings_files.xml
 	// but since they are used explicitly in code,
 	// the follow consts should also do the trick.
-	static const std::string sGlobalSettingsName; 
-	static const std::string sPerAccountSettingsName; 
-	static const std::string sCrashSettingsName; 
+	static const std::string sGlobalSettingsName;
+	static const std::string sPerAccountSettingsName;
+	static const std::string sCrashSettingsName;
 
 	// Load settings from the location specified by loction_key.
-	// Key availale and rules for loading, are specified in 
+	// Key availale and rules for loading, are specified in
 	// 'app_settings/settings_files.xml'
-	bool loadSettingsFromDirectory(const std::string& location_key, 
-				       bool set_defaults = false);
+	bool loadSettingsFromDirectory(const std::string& location_key,
+								   bool set_defaults = false);
 
 	std::string getSettingsFilename(const std::string& location_key,
-					const std::string& file);
+									const std::string& file);
 
-	// For thread debugging. 
-	// llstartup needs to control init.
+	void setYieldTime(S32 value)								{ mYieldTime = value; }
+
+	// For thread debugging. llstartup needs to control init.
 	// llworld, send_agent_pause() also controls pause/resume.
 	void initMainloopTimeout(const std::string& state, F32 secs = -1.0f);
 	void destroyMainloopTimeout();
 	void pauseMainloopTimeout();
 	void resumeMainloopTimeout(const std::string& state = "", F32 secs = -1.0f);
 	void pingMainloopTimeout(const std::string& state, F32 secs = -1.0f);
+	void setMainloopTimeoutDefault(F32 value)					{ mMainloopTimeoutDefault = llmax(value, 10.f); }
 
 	// Handle the 'login completed' event.
-	// *NOTE:Mani Fix this for login abstraction!!
+	// *NOTE: Mani Fix this for login abstraction !
 	void handleLoginComplete();
 
-	void addOnIdleCallback(const boost::function<void()>& cb); // add a callback to fire (once) when idle
+	// Adds a callback to fire (once) when idle:
+	void addOnIdleCallback(const boost::function<void()>& cb);
 
 protected:
 	virtual bool initWindow(); // Initialize the viewer's window.
 	virtual bool initLogging(); // Initialize log files, logging system, return false on failure.
-	virtual void initConsole() {}; // Initialize OS level debugging console.
-	virtual bool initHardwareTest() { return true; } // A false result indicates the app should quit.
+	// Initialize OS level debugging console:
+	virtual void initConsole()									{}
+	virtual bool initHardwareTest()								{ return true; } // A false result indicates the app should quit.
 	virtual bool initSLURLHandler();
 	virtual bool sendURLToOtherInstance(const std::string& url);
 #if LL_DBUS_ENABLED
-	virtual std::string getReceivedSLURL()	{ return ""; }
-	virtual void clearReceivedSLURL()		{}
+	virtual std::string getReceivedSLURL()						{ return ""; }
+	virtual void clearReceivedSLURL()							{}
 #endif
 
-	virtual bool initParseCommandLine(LLCommandLineParser& clp) 
-        { return true; } // Allow platforms to specify the command line args.
+	virtual bool initParseCommandLine(LLCommandLineParser& clp)	{ return true; } // Allow platforms to specify the command line args.
 
 	virtual std::string generateSerialNumber() = 0; // Platforms specific classes generate this.
 
@@ -185,21 +197,24 @@ private:
 	void initGridChoice();
 
 	bool initCache(); // Initialize local client cache.
-	void purgeCache(); // Clear the local cache. 
+	void purgeCache(); // Clear the local cache.
 
 	// We have switched locations of both Mac and Windows cache, make sure
 	// files migrate and old cache is cleared out.
 	void migrateCacheDirectory();
 
-	void cleanupSavedSettings(); // Sets some config data to current or default values during cleanup.
-	void removeCacheFiles(const std::string& filemask); // Deletes cached files the match the given wildcard.
+	// Sets some config data to current or default values during cleanup:
+	void cleanupSavedSettings();
+	// Deletes cached files the match the given wildcard:
+	void removeCacheFiles(const std::string& filemask);
 
-	void writeSystemInfo(); // Write system info to "debug_info.log"
+	// Writes system info to "debug_info.log":
+	void writeSystemInfo();
 
-	bool anotherInstanceRunning(); 
-	void initMarkerFile(); 
-    
-    void idle(); 
+	bool anotherInstanceRunning();
+	void initMarkerFile();
+
+    void idle();
     void idleShutdown();
     void idleNameCache();
     void idleNetwork();
@@ -209,24 +224,24 @@ private:
 
 	// *FIX: the app viewer class should be some sort of singleton, no?
 	// Perhaps its child class is the singleton and this should be an abstract base.
-	static LLAppViewer* sInstance; 
+	static LLAppViewer* sInstance;
 
-    bool mSecondInstance;	// Is this another instance of a SL viewer ?
-    bool mIsOurViewer;		// Is this a second instance of our viewer ?
+    bool mSecondInstance;			// Is this another instance of a SL viewer ?
+    bool mIsOurViewer;				// Is this a second instance of our viewer ?
 
 	std::string mMarkerFileName;
-	LLAPRFile mMarkerFile; // A file created to indicate the app is running.
+	LLAPRFile mMarkerFile;			// A file created to indicate the app is running.
 
 	std::string mLogoutMarkerFileName;
-	apr_file_t* mLogoutMarkerFile; // A file created to indicate the app is running.
+	apr_file_t* mLogoutMarkerFile;	// A file created to indicate the app is running.
 
 
-	LLOSInfo mSysOSInfo; 
+	LLOSInfo mSysOSInfo;
 	bool mReportedCrash;
 
 	// Thread objects.
-	static LLTextureCache* sTextureCache; 
-	static LLImageDecodeThread* sImageDecodeThread; 
+	static LLTextureCache* sTextureCache;
+	static LLImageDecodeThread* sImageDecodeThread;
 	static LLTextureFetch* sTextureFetch;
 
 	S32 mNumSessions;
@@ -236,11 +251,12 @@ private:
     bool mPurgeOnExit;
 
 	bool mSavedFinalSnapshot;
-	bool mSavePerAccountSettings;		// only save per account settings if login succeeded
+	bool mSavePerAccountSettings;	// only save per account settings if login succeeded
 
-    bool mQuitRequested;				// User wants to quit, may have modified documents open.
-    bool mLogoutRequestSent;			// Disconnect message sent to simulator, no longer safe to send messages to the sim.
+    bool mQuitRequested;			// User wants to quit, may have modified documents open.
+    bool mLogoutRequestSent;		// Disconnect message sent to simulator, no longer safe to send messages to the sim.
     S32 mYieldTime;
+	F32 mMainloopTimeoutDefault;
 	LLSD mSettingsLocationList;
 
 	LLWatchdogTimeout* mMainloopTimeout;
@@ -254,7 +270,6 @@ private:
 const S32 AGENT_UPDATES_PER_SECOND  = 10;
 
 // Globals with external linkage. From viewer.h
-// *NOTE:Mani - These will be removed as the Viewer App Cleanup project continues.
 //
 // "// llstartup" indicates that llstartup is the only client for this global.
 
@@ -266,7 +281,7 @@ extern BOOL	gShowObjectUpdates;
 extern BOOL gAcceptTOS;
 extern BOOL gAcceptCriticalMessage;
 
-typedef enum 
+typedef enum
 {
 	LAST_EXEC_NORMAL = 0,
 	LAST_EXEC_FROZE,
@@ -301,7 +316,7 @@ extern LLFrameTimer gForegroundTime;
 extern F32 gLogoutMaxTime;
 extern LLTimer gLogoutTimer;
 
-extern F32 gSimLastTime; 
+extern F32 gSimLastTime;
 extern F32 gSimFrames;
 
 extern BOOL gDisconnected;
@@ -312,9 +327,8 @@ extern LLFrameTimer	gRestoreGLTimer;
 extern BOOL			gRestoreGL;
 extern BOOL			gUseWireframe;
 
-// VFS globals - gVFS is for general use
-// gStaticVFS is read-only and is shipped w/ the viewer
-// it has pre-cache data like the UI .TGAs
+// VFS globals: gVFS is for general use. gStaticVFS is read-only and is shipped
+// w/ the viewer. It has pre-cache data like the UI *.TGAs
 extern LLVFS* gStaticVFS;
 
 extern LLMemoryInfo gSysMemory;

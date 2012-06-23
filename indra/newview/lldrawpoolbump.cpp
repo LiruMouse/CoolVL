@@ -1,11 +1,11 @@
-/** 
+/**
  * @file lldrawpoolbump.cpp
  * @brief LLDrawPoolBump class implementation
  *
  * $LicenseInfo:firstyear=2003&license=viewergpl$
- * 
+ *
  * Copyright (c) 2003-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -58,7 +58,7 @@
 //#include "../tools/imdebug/imdebug.h"
 
 // static
-LLStandardBumpmap gStandardBumpmapList[TEM_BUMPMAP_COUNT]; 
+LLStandardBumpmap gStandardBumpmapList[TEM_BUMPMAP_COUNT];
 
 // static
 U32 LLStandardBumpmap::sStandardBumpmapCount = 0;
@@ -78,19 +78,19 @@ static S32 cube_channel = -1;
 static S32 diffuse_channel = -1;
 static S32 bump_channel = -1;
 
-// static 
+// static
 void LLStandardBumpmap::init()
 {
 	LLStandardBumpmap::restoreGL();
 }
 
-// static 
+// static
 void LLStandardBumpmap::shutdown()
 {
 	LLStandardBumpmap::destroyGL();
 }
 
-// static 
+// static
 void LLStandardBumpmap::restoreGL()
 {
 	addstandard();
@@ -159,7 +159,7 @@ void LLStandardBumpmap::addstandard()
 		}
 // 		llinfos << "Loading bumpmap: " << bump_image_id << " from viewerart" << llendl;
 		gStandardBumpmapList[LLStandardBumpmap::sStandardBumpmapCount].mLabel = label;
-		gStandardBumpmapList[LLStandardBumpmap::sStandardBumpmapCount].mImage = 
+		gStandardBumpmapList[LLStandardBumpmap::sStandardBumpmapCount].mImage =
 			LLViewerTextureManager::getFetchedTexture(LLUUID(bump_image_id));
 		gStandardBumpmapList[LLStandardBumpmap::sStandardBumpmapCount].mImage->setBoostLevel(LLViewerTexture::BOOST_BUMP) ;
 		gStandardBumpmapList[LLStandardBumpmap::sStandardBumpmapCount].mImage->setLoadedCallback(LLBumpImageList::onSourceStandardLoaded, 0, TRUE, FALSE, NULL, NULL);
@@ -174,7 +174,7 @@ void LLStandardBumpmap::addstandard()
 void LLStandardBumpmap::clear()
 {
 	llinfos << "Clearing standard bumpmaps." << llendl;
-	for (U32 i = 0; i < LLStandardBumpmap::sStandardBumpmapCount; i++)
+	for (U32 i = 0; i < LLStandardBumpmap::sStandardBumpmapCount; ++i)
 	{
 		gStandardBumpmapList[i].mLabel.assign("");
 		gStandardBumpmapList[i].mImage = NULL;
@@ -188,16 +188,13 @@ void LLStandardBumpmap::destroyGL()
 	clear();
 }
 
-
-
 ////////////////////////////////////////////////////////////////
 
-LLDrawPoolBump::LLDrawPoolBump() 
+LLDrawPoolBump::LLDrawPoolBump()
 :  LLRenderPass(LLDrawPool::POOL_BUMP)
 {
 	mShiny = FALSE;
 }
-
 
 void LLDrawPoolBump::prerender()
 {
@@ -254,7 +251,7 @@ void LLDrawPoolBump::beginRenderPass(S32 pass)
 			{
 				beginFullbrightShiny();
 			}
-			else 
+			else
 			{
 				beginBump();
 			}
@@ -287,9 +284,9 @@ void LLDrawPoolBump::render(S32 pass)
 			{
 				renderFullbrightShiny();
 			}
-			else 
+			else
 			{
-				renderBump(); 
+				renderBump();
 			}
 			break;
 		case 2:
@@ -314,7 +311,7 @@ void LLDrawPoolBump::endRenderPass(S32 pass)
 			{
 				endFullbrightShiny();
 			}
-			else 
+			else
 			{
 				endBump();
 			}
@@ -332,7 +329,7 @@ void LLDrawPoolBump::endRenderPass(S32 pass)
 void LLDrawPoolBump::beginShiny(bool invisible)
 {
 	LLFastTimer t(LLFastTimer::FTM_RENDER_SHINY);
-	if ((!invisible && !gPipeline.hasRenderBatches(LLRenderPass::PASS_SHINY))|| 
+	if ((!invisible && !gPipeline.hasRenderBatches(LLRenderPass::PASS_SHINY))||
 		(invisible && !gPipeline.hasRenderBatches(LLRenderPass::PASS_INVISI_SHINY)))
 	{
 		return;
@@ -385,7 +382,7 @@ void LLDrawPoolBump::bindCubeMap(LLGLSLShader* shader, S32 shader_level, S32& di
 			if (shader_level > 1)
 			{
 				cube_map->setMatrix(1);
-				// Make sure that texture coord generation happens for tex unit 1, as that's the one we use for 
+				// Make sure that texture coord generation happens for tex unit 1, as that's the one we use for
 				// the cube map in the one pass shiny shaders
 				cube_channel = shader->enableTexture(LLViewerShaderMgr::ENVIRONMENT_MAP, LLTexUnit::TT_CUBE_MAP);
 				cube_map->enableTexture(cube_channel);
@@ -420,7 +417,7 @@ void LLDrawPoolBump::bindCubeMap(LLGLSLShader* shader, S32 shader_level, S32& di
 void LLDrawPoolBump::renderShiny(bool invisible)
 {
 	LLFastTimer t(LLFastTimer::FTM_RENDER_SHINY);
-	if ((!invisible && !gPipeline.hasRenderBatches(LLRenderPass::PASS_SHINY))|| 
+	if ((!invisible && !gPipeline.hasRenderBatches(LLRenderPass::PASS_SHINY))||
 		(invisible && !gPipeline.hasRenderBatches(LLRenderPass::PASS_INVISI_SHINY)))
 	{
 		return;
@@ -476,7 +473,7 @@ void LLDrawPoolBump::unbindCubeMap(LLGLSLShader* shader, S32 shader_level, S32& 
 void LLDrawPoolBump::endShiny(bool invisible)
 {
 	LLFastTimer t(LLFastTimer::FTM_RENDER_SHINY);
-	if ((!invisible && !gPipeline.hasRenderBatches(LLRenderPass::PASS_SHINY)) || 
+	if ((!invisible && !gPipeline.hasRenderBatches(LLRenderPass::PASS_SHINY)) ||
 		(invisible && !gPipeline.hasRenderBatches(LLRenderPass::PASS_INVISI_SHINY)))
 	{
 		return;
@@ -528,7 +525,7 @@ void LLDrawPoolBump::beginFullbrightShiny()
 		shader->uniform4fv(LLViewerShaderMgr::SHINY_ORIGIN, 1, vec4.mV);
 
 		cube_map->setMatrix(1);
-		// Make sure that texture coord generation happens for tex unit 1, as that's the one we use for 
+		// Make sure that texture coord generation happens for tex unit 1, as that's the one we use for
 		// the cube map in the one pass shiny shaders
 		gGL.getTexUnit(1)->disable();
 		cube_channel = shader->enableTexture(LLViewerShaderMgr::ENVIRONMENT_MAP, LLTexUnit::TT_CUBE_MAP);
@@ -594,7 +591,9 @@ void LLDrawPoolBump::renderGroup(LLSpatialGroup* group, U32 type, U32 mask, BOOL
 {
 	LLSpatialGroup::drawmap_elem_t& draw_info = group->mDrawMap[type];
 
-	for (LLSpatialGroup::drawmap_elem_t::iterator k = draw_info.begin(); k != draw_info.end(); ++k) 
+	for (LLSpatialGroup::drawmap_elem_t::iterator k = draw_info.begin(),
+												  end = draw_info.end();
+		 k != end; ++k)
 	{
 		LLDrawInfo& params = **k;
 
@@ -649,7 +648,7 @@ BOOL LLDrawPoolBump::bindBumpMap(U8 bump_code, LLViewerTexture* texture, F32 vsi
 	{
 		case BE_NO_BUMP:
 			break;
-		case BE_BRIGHTNESS: 
+		case BE_BRIGHTNESS:
 		case BE_DARKNESS:
 			bump = gBumpImageList.getBrightnessDarknessImage(tex, bump_code);
 			break;
@@ -703,7 +702,7 @@ void LLDrawPoolBump::beginBump(U32 pass)
 
 	// TEXTURE UNIT 1
 	gGL.getTexUnit(1)->activate();
- 
+
 	gGL.getTexUnit(1)->enable(LLTexUnit::TT_TEXTURE);
 
 	gGL.getTexUnit(1)->setTextureColorBlend(LLTexUnit::TBO_ADD_SIGNED, LLTexUnit::TBS_PREV_COLOR, LLTexUnit::TBS_ONE_MINUS_TEX_ALPHA);
@@ -712,7 +711,6 @@ void LLDrawPoolBump::beginBump(U32 pass)
 	// src	= tex0 + (1 - tex1) - 0.5
 	//		= (bump0/2 + 0.5) + (1 - (bump1/2 + 0.5)) - 0.5
 	//		= (1 + bump0 - bump1) / 2
-
 
 	// Blend: src * dst + dst * src
 	//		= 2 * src * dst
@@ -812,7 +810,9 @@ void LLDrawPoolBump::renderDeferred(S32 pass)
 	LLCullResult::drawinfo_list_t::iterator begin = gPipeline.beginRenderMap(type);
 	LLCullResult::drawinfo_list_t::iterator end = gPipeline.endRenderMap(type);
 
-	U32 mask = LLVertexBuffer::MAP_VERTEX | LLVertexBuffer::MAP_TEXCOORD0 | LLVertexBuffer::MAP_BINORMAL | LLVertexBuffer::MAP_NORMAL | LLVertexBuffer::MAP_COLOR;
+	U32 mask = LLVertexBuffer::MAP_VERTEX | LLVertexBuffer::MAP_TEXCOORD0 |
+			   LLVertexBuffer::MAP_BINORMAL | LLVertexBuffer::MAP_NORMAL |
+			   LLVertexBuffer::MAP_COLOR;
 
 	for (LLCullResult::drawinfo_list_t::iterator i = begin; i != end; ++i)
 	{
@@ -909,14 +909,12 @@ void LLBumpImageList::restoreGL()
 	// Images will be recreated as they are needed.
 }
 
-
 LLBumpImageList::~LLBumpImageList()
 {
 	// Shutdown should have already been called.
 	llassert(mBrightnessEntries.size() == 0);
 	llassert(mDarknessEntries.size() == 0);
 }
-
 
 // Note: Does nothing for entries in gStandardBumpmapList that are not actually standard bump images (e.g. none, brightness, and darkness)
 void LLBumpImageList::addTextureStats(U8 bump, const LLUUID& base_image_id, F32 virtual_size)
@@ -929,10 +927,10 @@ void LLBumpImageList::addTextureStats(U8 bump, const LLUUID& base_image_id, F32 
 	}
 }
 
-
 void LLBumpImageList::updateImages()
 {
-	for (bump_image_map_t::iterator iter = mBrightnessEntries.begin(); iter != mBrightnessEntries.end(); )
+	for (bump_image_map_t::iterator iter = mBrightnessEntries.begin();
+		 iter != mBrightnessEntries.end(); )
 	{
 		bump_image_map_t::iterator curiter = iter++;
 		LLViewerTexture* image = curiter->second;
@@ -959,7 +957,8 @@ void LLBumpImageList::updateImages()
 		}
 	}
 
-	for (bump_image_map_t::iterator iter = mDarknessEntries.begin(); iter != mDarknessEntries.end(); )
+	for (bump_image_map_t::iterator iter = mDarknessEntries.begin();
+		 iter != mDarknessEntries.end(); )
 	{
 		bump_image_map_t::iterator curiter = iter++;
 		LLViewerTexture* image = curiter->second;
@@ -987,9 +986,10 @@ void LLBumpImageList::updateImages()
 	}
 }
 
-
-// Note: the caller SHOULD NOT keep the pointer that this function returns.  It may be updated as more data arrives.
-LLViewerTexture* LLBumpImageList::getBrightnessDarknessImage(LLViewerFetchedTexture* src_image, U8 bump_code)
+// Note: the caller SHOULD NOT keep the pointer that this function returns.
+// It may be updated as more data arrives.
+LLViewerTexture* LLBumpImageList::getBrightnessDarknessImage(LLViewerFetchedTexture* src_image,
+															 U8 bump_code)
 {
 	llassert(bump_code == BE_BRIGHTNESS || bump_code == BE_DARKNESS);
 
@@ -998,7 +998,10 @@ LLViewerTexture* LLBumpImageList::getBrightnessDarknessImage(LLViewerFetchedText
 	if (src_image->getMaxVirtualSize() > BRIGHTNESS_DARKNESS_PIXEL_AREA_THRESHOLD)
 	{
 		bump_image_map_t* entries_list = NULL;
-		void (*callback_func)(BOOL success, LLViewerFetchedTexture *src_vi, LLImageRaw* src, LLImageRaw* aux_src, S32 discard_level, BOOL final, void* userdata) = NULL;
+		void (*callback_func)(BOOL success, LLViewerFetchedTexture* src_vi,
+							  LLImageRaw* src, LLImageRaw* aux_src,
+							  S32 discard_level, BOOL final,
+							  void* userdata) = NULL;
 
 		switch (bump_code)
 		{
@@ -1026,11 +1029,13 @@ LLViewerTexture* LLBumpImageList::getBrightnessDarknessImage(LLViewerFetchedText
 			raw->clear(0x77, 0x77, 0xFF, 0xFF);
 
 			(*entries_list)[src_image->getID()] = LLViewerTextureManager::getLocalTexture(raw.get(), TRUE);
-			bump = (*entries_list)[src_image->getID()]; // In case callback was called immediately and replaced the image
+			// In case callback was called immediately and replaced the image:
+			bump = (*entries_list)[src_image->getID()];
 		}
 
 		if (!src_image->hasCallbacks())
-		{ //if image has no callbacks but resolutions don't match, trigger raw image loaded callback again
+		{	// if image has no callbacks but resolutions don't match, trigger
+			// raw image loaded callback again
 			if (src_image->getWidth() != bump->getWidth() ||
 				src_image->getHeight() != bump->getHeight() ||
 				(LLPipeline::sRenderDeferred && bump->getComponents() != 4))
@@ -1045,12 +1050,18 @@ LLViewerTexture* LLBumpImageList::getBrightnessDarknessImage(LLViewerFetchedText
 	return bump;
 }
 
-
 // static
-void LLBumpImageList::onSourceBrightnessLoaded(BOOL success, LLViewerFetchedTexture *src_vi, LLImageRaw* src, LLImageRaw* aux_src, S32 discard_level, BOOL final, void* userdata)
+void LLBumpImageList::onSourceBrightnessLoaded(BOOL success,
+											   LLViewerFetchedTexture* src_vi,
+											   LLImageRaw* src,
+											   LLImageRaw* aux_src,
+											   S32 discard_level,
+											   BOOL final,
+											   void* userdata)
 {
 	LLUUID* source_asset_id = (LLUUID*)userdata;
-	LLBumpImageList::onSourceLoaded(success, src_vi, src, *source_asset_id, BE_BRIGHTNESS);
+	LLBumpImageList::onSourceLoaded(success, src_vi, src, *source_asset_id,
+									BE_BRIGHTNESS);
 	if (final)
 	{
 		delete source_asset_id;
@@ -1058,28 +1069,43 @@ void LLBumpImageList::onSourceBrightnessLoaded(BOOL success, LLViewerFetchedText
 }
 
 // static
-void LLBumpImageList::onSourceDarknessLoaded(BOOL success, LLViewerFetchedTexture *src_vi, LLImageRaw* src, LLImageRaw* aux_src, S32 discard_level, BOOL final, void* userdata)
+void LLBumpImageList::onSourceDarknessLoaded(BOOL success,
+											 LLViewerFetchedTexture* src_vi,
+											 LLImageRaw* src,
+											 LLImageRaw* aux_src,
+											 S32 discard_level,
+											 BOOL final,
+											 void* userdata)
 {
 	LLUUID* source_asset_id = (LLUUID*)userdata;
-	LLBumpImageList::onSourceLoaded(success, src_vi, src, *source_asset_id, BE_DARKNESS);
+	LLBumpImageList::onSourceLoaded(success, src_vi, src, *source_asset_id,
+									BE_DARKNESS);
 	if (final)
 	{
 		delete source_asset_id;
 	}
 }
 
-void LLBumpImageList::onSourceStandardLoaded(BOOL success, LLViewerFetchedTexture* src_vi, LLImageRaw* src, LLImageRaw* aux_src, S32 discard_level, BOOL final, void* userdata)
+void LLBumpImageList::onSourceStandardLoaded(BOOL success,
+											 LLViewerFetchedTexture* src_vi,
+											 LLImageRaw* src,
+											 LLImageRaw* aux_src,
+											 S32 discard_level,
+											 BOOL final,
+											 void* userdata)
 {
 	if (success && LLPipeline::sRenderDeferred)
 	{
-		LLPointer<LLImageRaw> nrm_image = new LLImageRaw(src->getWidth(), src->getHeight(), 4);
+		LLPointer<LLImageRaw> nrm_image = new LLImageRaw(src->getWidth(),
+														 src->getHeight(), 4);
 		generateNormalMapFromAlpha(src, nrm_image);
 		src_vi->setExplicitFormat(GL_RGBA, GL_RGBA);
 		src_vi->createGLTexture(src_vi->getDiscardLevel(), nrm_image);
 	}
 }
 
-void LLBumpImageList::generateNormalMapFromAlpha(LLImageRaw* src, LLImageRaw* nrm_image)
+void LLBumpImageList::generateNormalMapFromAlpha(LLImageRaw* src,
+												 LLImageRaw* nrm_image)
 {
 	U8* nrm_data = nrm_image->getData();
 	S32 resX = src->getWidth();
@@ -1089,7 +1115,8 @@ void LLBumpImageList::generateNormalMapFromAlpha(LLImageRaw* src, LLImageRaw* nr
 
 	S32 src_cmp = src->getComponents();
 
-	static LLCachedControl<F32> norm_scale(gSavedSettings, "RenderNormalMapScale");
+	static LLCachedControl<F32> norm_scale(gSavedSettings,
+										   "RenderNormalMapScale");
 
 	U32 idx = 0;
 	//generate normal map from pseudo-heightfield
@@ -1097,10 +1124,10 @@ void LLBumpImageList::generateNormalMapFromAlpha(LLImageRaw* src, LLImageRaw* nr
 	{
 		for (S32 i = 0; i < resX; ++i)
 		{
-			S32 rX = (i+1)%resX;
-			S32 rY = (j+1)%resY;
-			S32 lX = (i-1)%resX;
-			S32 lY = (j-1)%resY;
+			S32 rX = (i + 1) % resX;
+			S32 rY = (j + 1) % resY;
+			S32 lX = (i - 1) % resX;
+			S32 lY = (j - 1) % resY;
 
 			if (lX < 0)
 			{
@@ -1111,41 +1138,44 @@ void LLBumpImageList::generateNormalMapFromAlpha(LLImageRaw* src, LLImageRaw* nr
 				lY += resY;
 			}
 
-			F32 cH = (F32) src_data[(j*resX+i)*src_cmp+src_cmp-1];
+			F32 cH = (F32) src_data[(j * resX + i) * src_cmp + src_cmp - 1];
 
-			LLVector3 right = LLVector3(norm_scale, 0, (F32) src_data[(j*resX+rX)*src_cmp+src_cmp-1]-cH);
-			LLVector3 left = LLVector3(-norm_scale, 0, (F32) src_data[(j*resX+lX)*src_cmp+src_cmp-1]-cH);
-			LLVector3 up = LLVector3(0, -norm_scale, (F32) src_data[(lY*resX+i)*src_cmp+src_cmp-1]-cH);
-			LLVector3 down = LLVector3(0, norm_scale, (F32) src_data[(rY*resX+i)*src_cmp+src_cmp-1]-cH);
+			LLVector3 right = LLVector3(norm_scale, 0, (F32)src_data[(j * resX + rX) * src_cmp + src_cmp - 1] - cH);
+			LLVector3 left = LLVector3(-norm_scale, 0, (F32)src_data[(j * resX + lX) * src_cmp+src_cmp - 1] - cH);
+			LLVector3 up = LLVector3(0, -norm_scale, (F32)src_data[(lY * resX + i) * src_cmp+src_cmp - 1] - cH);
+			LLVector3 down = LLVector3(0, norm_scale, (F32)src_data[(rY * resX + i) * src_cmp+src_cmp - 1] - cH);
 
-			LLVector3 norm = right%down + down%left + left%up + up%right;
+			LLVector3 norm = right % down + down % left + left % up + up % right;
 
 			norm.normVec();
 
 			norm *= 0.5f;
-			norm += LLVector3(0.5f,0.5f,0.5f);
+			norm += LLVector3(0.5f, 0.5f ,0.5f);
 
-			idx = (j*resX+i)*4;
-			nrm_data[idx+0]= (U8) (norm.mV[0]*255);
-			nrm_data[idx+1]= (U8) (norm.mV[1]*255);
-			nrm_data[idx+2]= (U8) (norm.mV[2]*255);
-			nrm_data[idx+3]= src_data[(j*resX+i)*src_cmp+src_cmp-1];
+			idx = (j * resX + i )* 4;
+			nrm_data[idx] = (U8)(norm.mV[0] * 255);
+			nrm_data[idx + 1] = (U8)(norm.mV[1] * 255);
+			nrm_data[idx + 2] = (U8)(norm.mV[2] * 255);
+			nrm_data[idx +3 ] = src_data[(j * resX + i) * src_cmp + src_cmp - 1];
 		}
 	}
 }
 
 // static
-void LLBumpImageList::onSourceLoaded(BOOL success, LLViewerTexture *src_vi, LLImageRaw* src, LLUUID& source_asset_id, EBumpEffect bump_code)
+void LLBumpImageList::onSourceLoaded(BOOL success, LLViewerTexture* src_vi,
+									 LLImageRaw* src, LLUUID& source_asset_id,
+									 EBumpEffect bump_code)
 {
 	if (success)
 	{
-		bump_image_map_t& entries_list(bump_code == BE_BRIGHTNESS ? gBumpImageList.mBrightnessEntries : gBumpImageList.mDarknessEntries);
+		bump_image_map_t& entries_list(bump_code == BE_BRIGHTNESS ? gBumpImageList.mBrightnessEntries
+																  : gBumpImageList.mDarknessEntries);
 		bump_image_map_t::iterator iter = entries_list.find(source_asset_id);
 
 		if (iter == entries_list.end() || iter->second.isNull() ||
 			iter->second->getWidth() != src->getWidth() ||
 			iter->second->getHeight() != src->getHeight()) // bump not cached yet or has changed resolution
-		{ //make sure an entry exists for this image
+		{	// make sure an entry exists for this image
 			LLPointer<LLImageRaw> raw = new LLImageRaw(1, 1, 1);
 			raw->clear(0x77, 0x77, 0xFF, 0xFF);
 
@@ -1170,7 +1200,7 @@ void LLBumpImageList::onSourceLoaded(BOOL success, LLViewerTexture *src_vi, LLIm
 
 			// Convert to fixed point so we don't have to worry about precision/clamping.
 			const S32 FIXED_PT = 8;
-			const S32 R_WEIGHT = S32(0.2995f * (1<<FIXED_PT));
+			const S32 R_WEIGHT = S32(0.2995f*  (1<<FIXED_PT));
 			const S32 G_WEIGHT = S32(0.5875f * (1<<FIXED_PT));
 			const S32 B_WEIGHT = S32(0.1145f * (1<<FIXED_PT));
 
@@ -1209,7 +1239,7 @@ void LLBumpImageList::onSourceLoaded(BOOL success, LLViewerTexture *src_vi, LLIm
 					for (S32 i = 0, j=0; i < dst_data_size; i++, j+= src_components)
 					{
 						// RGB to luminance
-						dst_data[i] = (R_WEIGHT * src_data[j] + G_WEIGHT * src_data[j+1] + B_WEIGHT * src_data[j+2]) >> FIXED_PT;
+						dst_data[i] = (R_WEIGHT * src_data[j] + G_WEIGHT * src_data[j + 1] + B_WEIGHT * src_data[j + 2]) >> FIXED_PT;
 						//llassert(dst_data[i] <= 255);true because it's 8bit
 						if (dst_data[i] < minimum)
 						{
@@ -1239,10 +1269,10 @@ void LLBumpImageList::onSourceLoaded(BOOL success, LLViewerTexture *src_vi, LLIm
 				F32 twice_one_over_range = 2.f / (maximum - minimum);
 				S32 i;
 
-				const F32 ARTIFICIAL_SCALE = 2.f;  // Advantage: exaggerates the effect in midrange.  Disadvantage: clamps at the extremes.
+				const F32 ARTIFICIAL_SCALE = 2.f;  // Advantage: exaggerates the effect in midrange. Disadvantage: clamps at the extremes.
 				if (BE_DARKNESS == bump_code)
 				{
-					for (i = minimum; i <= maximum; i++)
+					for (i = minimum; i <= maximum; ++i)
 					{
 						F32 minus_one_to_one = F32(maximum - i) * twice_one_over_range - 1.f;
 						bias_and_scale_lut[i] = llclampb(llround(127 * minus_one_to_one * ARTIFICIAL_SCALE + 128));
@@ -1250,14 +1280,14 @@ void LLBumpImageList::onSourceLoaded(BOOL success, LLViewerTexture *src_vi, LLIm
 				}
 				else
 				{
-					for (i = minimum; i <= maximum; i++)
+					for (i = minimum; i <= maximum; ++i)
 					{
 						F32 minus_one_to_one = F32(i - minimum) * twice_one_over_range - 1.f;
 						bias_and_scale_lut[i] = llclampb(llround(127 * minus_one_to_one * ARTIFICIAL_SCALE + 128));
 					}
 				}
 
-				for (i = 0; i < dst_data_size; i++)
+				for (i = 0; i < dst_data_size; ++i)
 				{
 					dst_data[i] = bias_and_scale_lut[dst_data[i]];
 				}
@@ -1345,7 +1375,9 @@ void LLDrawPoolBump::pushBatch(LLDrawInfo& params, U32 mask, BOOL texture)
 		params.mGroup->rebuildMesh();
 	}
 	params.mVertexBuffer->setBuffer(mask);
-	params.mVertexBuffer->drawRange(params.mDrawMode, params.mStart, params.mEnd, params.mCount, params.mOffset);
+	params.mVertexBuffer->drawRange(params.mDrawMode, params.mStart,
+									params.mEnd, params.mCount,
+									params.mOffset);
 	gPipeline.addTrianglesDrawn(params.mCount, params.mDrawMode);
 	if (params.mTextureMatrix)
 	{
@@ -1367,7 +1399,7 @@ void LLDrawPoolBump::pushBatch(LLDrawInfo& params, U32 mask, BOOL texture)
 void LLDrawPoolInvisible::render(S32 pass)
 { //render invisiprims
 	LLFastTimer t(LLFastTimer::FTM_RENDER_INVISIBLE);
-  
+
 	U32 invisi_mask = LLVertexBuffer::MAP_VERTEX;
 	glStencilMask(0);
 	gGL.setColorMask(false, false);
@@ -1394,7 +1426,8 @@ void LLDrawPoolInvisible::endDeferredPass(S32 pass)
 }
 
 void LLDrawPoolInvisible::renderDeferred(S32 pass)
-{ //render invisiprims; this doesn't work becaue it also blocks all the post-deferred stuff
+{	//render invisiprims; this doesn't work becaue it also blocks all
+	// the post-deferred stuff
 	LLFastTimer t(LLFastTimer::FTM_RENDER_INVISIBLE);
 
 	U32 invisi_mask = LLVertexBuffer::MAP_VERTEX;

@@ -129,9 +129,9 @@ bool LLDeformerWorker::alreadyQueued(LLPointer<Request> request)
 		return false;
 	}
 
-	for (request_queue::iterator iterator = gDeformerWorker->mRequestQ.begin();
-		 iterator != gDeformerWorker->mRequestQ.end();
-		 iterator++)
+	for (request_queue::iterator iterator = gDeformerWorker->mRequestQ.begin(),
+								 end = gDeformerWorker->mRequestQ.end();
+		 iterator != end; ++iterator)
 	{
 		// the request is already here if we match MeshID, VertexCount and Face
 

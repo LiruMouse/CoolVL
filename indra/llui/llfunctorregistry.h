@@ -82,7 +82,8 @@ public:
 		}
 		else
 		{
-			llerrs << "attempt to store duplicate name '" << name << "' in LLFunctorRegistry. NOT ADDED." << llendl;
+			llerrs << "attempt to store duplicate name '" << name
+				   << "' in LLFunctorRegistry. NOT ADDED." << llendl;
 			retval = false;
 		}
 
@@ -93,7 +94,9 @@ public:
 	{
 		if (mMap.count(name) == 0)
 		{
-			llwarns << "trying to remove '" << name << "' from LLFunctorRegistry but it's not there." << llendl;
+			llwarns << "trying to remove '" << name
+					<< "' from LLFunctorRegistry but it's not there."
+					<< llendl;
 			return false;
 		}
 		mMap.erase(name);

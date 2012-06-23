@@ -1,11 +1,11 @@
-/** 
+/**
  * @file llface.inl
  * @brief Inline functions for LLFace
  *
  * $LicenseInfo:firstyear=2001&license=viewergpl$
- * 
+ *
  * Copyright (c) 2001-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -37,8 +37,8 @@
 #include "llrender.h"
 
 inline BOOL LLFace::getDirty() const
-{ 
-	return (mGeneration != mDrawPoolp->mGeneration); 
+{
+	return mGeneration != mDrawPoolp->mGeneration;
 }
 
 inline void LLFace::clearDirty()
@@ -46,17 +46,17 @@ inline void LLFace::clearDirty()
 	mGeneration = mDrawPoolp->mGeneration;
 }
 
-inline const LLTextureEntry* LLFace::getTextureEntry()   const
+inline const LLTextureEntry* LLFace::getTextureEntry() const
 {
 	return mVObjp->getTE(mTEOffset);
 }
 
-inline LLDrawPool* LLFace::getPool()     const
+inline LLDrawPool* LLFace::getPool() const
 {
 	return mDrawPoolp;
 }
 
-inline S32 LLFace::getStride()   const
+inline S32 LLFace::getStride() const
 {
 	return mDrawPoolp->getStride();
 }
@@ -71,13 +71,13 @@ inline LLViewerObject* LLFace::getViewerObject() const
 	return mVObjp;
 }
 
-inline S32	LLFace::getColors     (LLStrider<LLColor4U> &colors)
+inline S32 LLFace::getColors(LLStrider<LLColor4U> &colors)
 {
 	if (!mGeomCount)
 	{
 		return -1;
 	}
-	LLColor4U *colorp = NULL;
+	LLColor4U* colorp = NULL;
 	if (isState(BACKLIST))
 	{
 		if (!mBackupMem)
@@ -85,7 +85,7 @@ inline S32	LLFace::getColors     (LLStrider<LLColor4U> &colors)
 			printDebugInfo();
 			llerrs << "No backup memory for face" << llendl;
 		}
-		colorp = (LLColor4U*)(mBackupMem + (4 * mIndicesCount) + (mGeomCount * mDrawPoolp->getStride()));
+		colorp = (LLColor4U*)(mBackupMem + 4 * mIndicesCount + mGeomCount * mDrawPoolp->getStride());
 		colors = colorp;
 		return 0;
 	}
@@ -102,7 +102,7 @@ inline S32	LLFace::getColors     (LLStrider<LLColor4U> &colors)
 	}
 }
 
-inline S32	LLFace::getTexCoords  (LLStrider<LLVector2> &texCoords, S32 pass)
+inline S32 LLFace::getTexCoords  (LLStrider<LLVector2> &texCoords, S32 pass)
 {
 	if (!mGeomCount)
 	{
@@ -115,7 +115,7 @@ inline S32	LLFace::getTexCoords  (LLStrider<LLVector2> &texCoords, S32 pass)
 			printDebugInfo();
 			llerrs << "No backup memory for face" << llendl;
 		}
-		texCoords = (LLVector2*)(mBackupMem + (4 * mIndicesCount) + mDrawPoolp->mDataOffsets[LLDrawPool::DATA_TEX_COORDS0 + pass]);
+		texCoords = (LLVector2*)(mBackupMem + 4 * mIndicesCount + mDrawPoolp->mDataOffsets[LLDrawPool::DATA_TEX_COORDS0 + pass]);
 		texCoords.setStride(mDrawPoolp->getStride());
 		return 0;
 	}
@@ -128,7 +128,7 @@ inline S32	LLFace::getTexCoords  (LLStrider<LLVector2> &texCoords, S32 pass)
 	}
 }
 
-inline S32	LLFace::getIndices    (U32*  &indicesp)
+inline S32 LLFace::getIndices(U32*  &indicesp)
 {
 	if (isState(BACKLIST))
 	{

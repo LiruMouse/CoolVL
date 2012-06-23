@@ -10,15 +10,17 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 //
-#include "llfloater.h"
-#include "llfloaterreporter.h"
-#include "lluuid.h"
-#include "lltimer.h"
-#include "llscrolllistctrl.h"
 
 #include <time.h>
 #include <map>
 #include <set>
+
+#include "llfloater.h"
+#include "llfloaterreporter.h"
+#include "llframetimer.h"
+#include "lluuid.h"
+#include "llscrolllistctrl.h"
+#include "lltimer.h"
 
 class LLFloaterAvatarList;
 
@@ -38,15 +40,18 @@ public:
 	 * @param name Avatar's name
 	 * @param position Avatar's current position
 	 */
-	LLAvatarListEntry(const LLUUID& id = LLUUID::null, const std::string &name = "", const LLVector3d &position = LLVector3d::zero);
+	LLAvatarListEntry(const LLUUID& id = LLUUID::null,
+					  const std::string& name = "",
+					  const LLVector3d& position = LLVector3d::zero);
 
 	/**
 	 * Update world position.
 	 * Affects age.
 	 */	
-	void setPosition(LLVector3d position, bool this_sim, bool drawn, bool chatrange, bool shoutrange);
+	void setPosition(LLVector3d position, bool this_sim, bool drawn, bool chatrange,
+					 bool shoutrange);
 
-	LLVector3d getPosition() { return mPosition; }
+	LLVector3d getPosition()				{ return mPosition; }
 
 	/**
 	 * @brief Returns the age of this entry in frames
@@ -64,35 +69,35 @@ public:
 	/**
 	 * @brief Returns the name of the avatar
 	 */
-	std::string getName() { return mName; }
+	std::string getName()					{ return mName; }
 
 	/**
 	 * @brief Sets the display name of the avatar
 	 */
-	void setDisplayName(std::string name) { mDisplayName = name; }
+	void setDisplayName(std::string name)	{ mDisplayName = name; }
 
 	/**
 	 * @brief Returns the display name of the avatar
 	 */
-	std::string getDisplayName() { return mDisplayName; }
+	std::string getDisplayName()			{ return mDisplayName; }
 
 	/**
 	 * @brief Returns the ID of the avatar
 	 */
-	LLUUID getID() { return mID; }
+	LLUUID getID()							{ return mID; }
 
 	/**
 	 * @brief Sets the 'focus' status on this entry (camera focused on this avatar)
 	 */
-	void setFocus(BOOL value) { mFocused = value; }
+	void setFocus(BOOL value)				{ mFocused = value; }
 
-	BOOL isFocused() { return mFocused; }
+	BOOL isFocused()						{ return mFocused; }
 
-	BOOL isMarked() { return mMarked; }
+	BOOL isMarked()							{ return mMarked; }
 
-	BOOL isDrawn() { return (mInDrawFrame != U32_MAX); }
+	BOOL isDrawn()							{ return (mInDrawFrame != U32_MAX); }
 
-	BOOL isInSim() { return (mInSimFrame != U32_MAX); }
+	BOOL isInSim()							{ return (mInSimFrame != U32_MAX); }
 
 	/**
 	 * @brief Returns whether the item is dead and shouldn't appear in the list
@@ -100,7 +105,7 @@ public:
 	 */
 	BOOL isDead();
 
-	void toggleMark() { mMarked = !mMarked; }
+	void toggleMark()						{ mMarked = !mMarked; }
 
 private:
 	friend class LLFloaterAvatarList;
@@ -132,7 +137,6 @@ private:
 	U32 mInChatFrame;
 };
 
-
 /**
  * @brief Avatar List
  * Implements an avatar scanner in the client.
@@ -147,15 +151,16 @@ private:
  */
 class LLFloaterAvatarList : public LLFloater
 {
+private:
 	/**
 	 * @brief Creates and initializes the LLFloaterAvatarList
 	 * Here the interface is created, and callbacks are initialized.
 	 */
-private:
 	LLFloaterAvatarList();
-public:
+
 	~LLFloaterAvatarList();
 
+public:
 	/*virtual*/ void onClose(bool app_quitting);
 	/*virtual*/ void onOpen();
 	/*virtual*/ BOOL postBuild();
@@ -167,16 +172,6 @@ public:
 	static void toggle(void*);
 
 	static void showInstance();
-
-	/**
-	 * @brief Updates the internal avatar list with the currently present avatars.
-	 */
-	void updateAvatarList();
-
-	/**
-	 * @brief Refresh avatar list (display)
-	 */
-	void refreshAvatarList();
 
 	/**
 	 * @brief Returns the entry for an avatar, if preset
@@ -195,13 +190,22 @@ private:
 	static LLFloaterAvatarList* sInstance;
 
 public:
-	static LLFloaterAvatarList* getInstance() { return sInstance; }
+	static LLFloaterAvatarList* getInstance()	{ return sInstance; }
 
 private:
-	// when a line editor loses keyboard focus, it is committed.
-	// commit callbacks are named onCommitWidgetName by convention.
-	//void onCommitBaz(LLUICtrl* ctrl, void *userdata);
-	
+	/**
+	 * @brief Updates the internal avatar list with the currently present avatars.
+	 */
+	void updateAvatarList();
+
+	/**
+	 * @brief Cleanup avatar list, removing dead entries from it.
+	 * This lets dead entries remain for some time. This makes it possible
+	 * to keep people passing by in the list long enough that it's possible
+	 * to do something to them.
+	 */
+	void expireAvatarList();
+
 	enum AVATARS_COLUMN_ORDER
 	{
 		LIST_MARK,
@@ -211,7 +215,10 @@ private:
 		LIST_ALTITUDE
 	};
 
-	typedef void (*avlist_command_t)(const LLUUID &avatar, const std::string &name);
+	/**
+	 * @brief Refresh avatar list (display)
+	 */
+	void refreshAvatarList();
 
 	/**
 	 * @brief Removes focus status from all avatars in list
@@ -243,66 +250,59 @@ private:
 	 * @param userdata Pointer to user data (LLFloaterAvatarList instance)
 	 */
 
-	static void onClickProfile(void *userdata);
-	static void onClickIM(void *userdata);
-	static void onClickTeleportOffer(void *userdata);
-	static void onClickTrack(void *userdata);
-	static void onClickMark(void *userdata);
-	static void onClickFocus(void *userdata);
+	static void onClickProfile(void* userdata);
+	static void onClickIM(void* userdata);
+	static void onClickTeleportOffer(void* userdata);
+	static void onClickTrack(void* userdata);
+	static void onClickMark(void* userdata);
+	static void onClickFocus(void* userdata);
 
-	static void onClickPrevInList(void *userdata);
-	static void onClickNextInList(void *userdata);
-	static void onClickPrevMarked(void *userdata);
-	static void onClickNextMarked(void *userdata);
-	static void onClickGetKey(void *userdata);
+	static void onClickPrevInList(void* userdata);
+	static void onClickNextInList(void* userdata);
+	static void onClickPrevMarked(void* userdata);
+	static void onClickNextMarked(void* userdata);
+	static void onClickGetKey(void* userdata);
 
-	static void onClickFreeze(void *userdata);
-	static void onClickEject(void *userdata);
-	static void onClickMute(void *userdata);
-	static void onClickAR(void *userdata);
-	static void onClickTeleport(void *userdata);
-	static void onClickEjectFromEstate(void *userdata);
+	static void onClickFreeze(void* userdata);
+	static void onClickEject(void* userdata);
+	static void onClickMute(void* userdata);
+	static void onClickAR(void* userdata);
+	static void onClickTeleport(void* userdata);
+	static void onClickEjectFromEstate(void* userdata);
 
 	static void callbackFreeze(const LLSD& notification, const LLSD& response);
 	static void callbackEject(const LLSD& notification, const LLSD& response);
-	static void callbackAR(void *userdata);
+	static void callbackAR(void* userdata);
 	static void callbackEjectFromEstate(const LLSD& notification, const LLSD& response);
 
-	static void onSelectName(LLUICtrl*, void *userdata);
+	static void onSelectName(LLUICtrl*, void* userdata);
 
-	static void onCommitUpdateRate(LLUICtrl*, void *userdata);
-	static void onCommitUpdate(LLUICtrl* ctrl, void* userdata);
+	static void onClickSendKeys(void* userdata);
 
-	static void onClickSendKeys(void *userdata);
+	static void callbackIdle(void* userdata);
 
-	static void callbackIdle(void *userdata);
-
+	typedef void (*avlist_command_t)(const LLUUID& avatar,
+									 const std::string& name);
 	void doCommand(avlist_command_t cmd);
-
-	/**
-	 * @brief Cleanup avatar list, removing dead entries from it.
-	 * This lets dead entries remain for some time. This makes it possible
-	 * to keep people passing by in the list long enough that it's possible
-	 * to do something to them.
-	 */
-	void expireAvatarList();
 
 private:
 	/**
 	 * @brief Pointer to the avatar scroll list
 	 */
-	LLScrollListCtrl*			mAvatarList;
+	LLScrollListCtrl* mAvatarList;
+
 	std::map<LLUUID, LLAvatarListEntry>	mAvatars;
+	typedef std::map<LLUUID, LLAvatarListEntry>::iterator avatar_list_iterator_t;
 
 	/**
-	 * @brief TRUE when Updating
+	 * @brief Update rate (updates per second)
 	 */
-	BOOL mUpdate;
+	LLCachedControl<U32> mUpdatesPerSecond;
 
 	/**
-	 * @brief Update rate (if min frames per update)
+	 * @brief Update timer
 	 */
-	U32 mUpdateRate;
+	static LLFrameTimer sUpdateTimer;
 	
 	void stopTracker();
 	void refreshTracker();

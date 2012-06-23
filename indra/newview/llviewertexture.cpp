@@ -1,11 +1,11 @@
-/** 
+/**
  * @file llviewertexture.cpp
  * @brief Object which handles a received image (and associated texture(s))
  *
  * $LicenseInfo:firstyear=2000&license=viewergpl$
- * 
+ *
  * Copyright (c) 2000-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -118,7 +118,7 @@ LLLoadedCallbackEntry::LLLoadedCallbackEntry(loaded_callback_func cb,
 					  void* userdata,
 					  LLLoadedCallbackEntry::source_callback_list_t* src_callback_list,
 					  LLViewerFetchedTexture* target,
-					  BOOL pause) 
+					  BOOL pause)
 	: mCallback(cb),
 	  mLastUsedDiscard(MAX_DISCARD_LEVEL+1),
 	  mDesiredDiscard(discard_level),
@@ -145,7 +145,7 @@ void LLLoadedCallbackEntry::removeTexture(LLViewerFetchedTexture* tex)
 	}
 }
 
-//static 
+//static
 void LLLoadedCallbackEntry::cleanUpCallbackList(LLLoadedCallbackEntry::source_callback_list_t* callback_list)
 {
 	//clear texture callbacks.
@@ -170,8 +170,8 @@ LLViewerMediaTexture* LLViewerTextureManager::createMediaTexture(const LLUUID &m
 	return new LLViewerMediaTexture(media_id, usemipmaps, gl_image);
 }
 #endif
- 
-LLViewerTexture*  LLViewerTextureManager::findTexture(const LLUUID& id) 
+
+LLViewerTexture*  LLViewerTextureManager::findTexture(const LLUUID& id)
 {
 	LLViewerTexture* tex;
 	//search fetched texture list
@@ -193,7 +193,7 @@ LLViewerMediaTexture* LLViewerTextureManager::findMediaTexture(const LLUUID &med
 	return LLViewerMediaTexture::findMediaTexture(media_id);
 }
 
-LLViewerMediaTexture*  LLViewerTextureManager::getMediaTexture(const LLUUID& id, BOOL usemipmaps, LLImageGL* gl_image) 
+LLViewerMediaTexture*  LLViewerTextureManager::getMediaTexture(const LLUUID& id, BOOL usemipmaps, LLImageGL* gl_image)
 {
 	LLViewerMediaTexture* tex = LLViewerMediaTexture::findMediaTexture(id);
 	if (!tex)
@@ -257,7 +257,7 @@ LLPointer<LLViewerTexture> LLViewerTextureManager::getLocalTexture(const LLImage
 	return tex;
 }
 
-LLPointer<LLViewerTexture> LLViewerTextureManager::getLocalTexture(const U32 width, const U32 height, const U8 components, BOOL usemipmaps, BOOL generate_gl_tex) 
+LLPointer<LLViewerTexture> LLViewerTextureManager::getLocalTexture(const U32 width, const U32 height, const U8 components, BOOL usemipmaps, BOOL generate_gl_tex)
 {
 	LLPointer<LLViewerTexture> tex = new LLViewerTexture(width, height, components, usemipmaps);
 	if (generate_gl_tex)
@@ -269,7 +269,7 @@ LLPointer<LLViewerTexture> LLViewerTextureManager::getLocalTexture(const U32 wid
 }
 
 LLViewerFetchedTexture* LLViewerTextureManager::getFetchedTexture(
-	                                               const LLUUID &image_id,											       
+	                                               const LLUUID &image_id,
 												   BOOL usemipmaps,
 												   LLViewerTexture::EBoostLevel boost_priority,
 												   S8 texture_type,
@@ -281,18 +281,18 @@ LLViewerFetchedTexture* LLViewerTextureManager::getFetchedTexture(
 }
 
 LLViewerFetchedTexture* LLViewerTextureManager::getFetchedTextureFromFile(
-	                                               const std::string& filename,												   
+	                                               const std::string& filename,
 												   BOOL usemipmaps,
 												   LLViewerTexture::EBoostLevel boost_priority,
 												   S8 texture_type,
 												   LLGLint internal_format,
-												   LLGLenum primary_format, 
+												   LLGLenum primary_format,
 												   const LLUUID& force_id)
 {
 	return gTextureList.getImageFromFile(filename, usemipmaps, boost_priority, texture_type, internal_format, primary_format, force_id);
 }
 
-//static 
+//static
 LLViewerFetchedTexture* LLViewerTextureManager::getFetchedTextureFromUrl(
 													const std::string& url,
 													BOOL usemipmaps,
@@ -323,9 +323,9 @@ void LLViewerTextureManager::init()
 	const S32 dim = 128;
 	LLPointer<LLImageRaw> image_raw = new LLImageRaw(dim,dim,3);
 	U8* data = image_raw->getData();
-	for (S32 i = 0; i < dim; i++)
+	for (S32 i = 0; i < dim; ++i)
 	{
-		for (S32 j = 0; j < dim; j++)
+		for (S32 j = 0; j < dim; ++j)
 		{
 #if 0
 			const S32 border = 2;
@@ -392,19 +392,19 @@ void LLViewerTexture::initClass()
 }
 
 // static
-S32 LLViewerTexture::getTotalNumOfCategories() 
+S32 LLViewerTexture::getTotalNumOfCategories()
 {
 	return MAX_GL_IMAGE_CATEGORY - (BOOST_HIGH - BOOST_SCULPTED) + 2;
 }
 
 // static
 //index starts from zero.
-S32 LLViewerTexture::getIndexFromCategory(S32 category) 
+S32 LLViewerTexture::getIndexFromCategory(S32 category)
 {
 	return (category < BOOST_HIGH) ? category : category - (BOOST_HIGH - BOOST_SCULPTED) + 1;
 }
 
-//static 
+//static
 S32 LLViewerTexture::getCategoryFromIndex(S32 index)
 {
 	return (index < BOOST_HIGH) ? index : index + (BOOST_HIGH - BOOST_SCULPTED) - 1;
@@ -418,7 +418,7 @@ const S32 min_non_tex_system_mem = (128<<20); // 128 MB
 F32 texmem_lower_bound_scale = 0.85f;
 F32 texmem_middle_bound_scale = 0.925f;
 
-//static 
+//static
 bool LLViewerTexture::isMemoryForTextureLow()
 {
 	const static S32 MIN_FREE_TEXTURE_MEMORY = 5 * 1024;	//KB
@@ -563,7 +563,7 @@ void LLViewerTexture::updateClass(const F32 velocity, const F32 angular_velocity
 	else if (sDesiredDiscardBias > 0.0f &&
 			 BYTES_TO_MEGA_BYTES(sBoundTextureMemoryInBytes) < sMaxBoundTextureMemInMegaBytes * texmem_lower_bound_scale &&
 			 BYTES_TO_MEGA_BYTES(sTotalTextureMemoryInBytes) < sMaxTotalTextureMemInMegaBytes * texmem_lower_bound_scale)
-	{			 
+	{
 		// If we are using less texture memory than we should,
 		// scale down the desired discard level
 		if (sEvaluationTimer.getElapsedTimeF32() > discard_delta_time)
@@ -594,7 +594,7 @@ LLViewerTexture::LLViewerTexture(BOOL usemipmaps)
 	mUseMipMaps = usemipmaps;
 
 	mID.generate();
-	sImageCount++;
+	++sImageCount;
 }
 
 LLViewerTexture::LLViewerTexture(const LLUUID& id, BOOL usemipmaps)
@@ -603,7 +603,7 @@ LLViewerTexture::LLViewerTexture(const LLUUID& id, BOOL usemipmaps)
 	init(true);
 	mUseMipMaps = usemipmaps;
 
-	sImageCount++;
+	++sImageCount;
 }
 
 LLViewerTexture::LLViewerTexture(const U32 width, const U32 height, const U8 components, BOOL usemipmaps)
@@ -617,7 +617,7 @@ LLViewerTexture::LLViewerTexture(const U32 width, const U32 height, const U8 com
 	setTexelsPerImage();
 
 	mID.generate();
-	sImageCount++;
+	++sImageCount;
 }
 
 LLViewerTexture::LLViewerTexture(const LLImageRaw* raw, BOOL usemipmaps)
@@ -628,13 +628,13 @@ LLViewerTexture::LLViewerTexture(const LLImageRaw* raw, BOOL usemipmaps)
 
 	// Create an empty image of the specified size and width
 	mID.generate();
-	sImageCount++;
+	++sImageCount;
 }
 
 LLViewerTexture::~LLViewerTexture()
 {
 	cleanup();
-	sImageCount--;
+	--sImageCount;
 }
 
 void LLViewerTexture::init(bool firstinit)
@@ -664,7 +664,7 @@ void LLViewerTexture::init(bool firstinit)
 #endif
 }
 
-//virtual 
+//virtual
 S8 LLViewerTexture::getType() const
 {
 	return LLViewerTexture::LOCAL_TEXTURE;
@@ -733,13 +733,13 @@ bool LLViewerTexture::bindDefaultImage(S32 stage)
 	return res;
 }
 
-//virtual 
+//virtual
 BOOL LLViewerTexture::isMissingAsset() const
-{ 
-	return FALSE; 
+{
+	return FALSE;
 }
 
-//virtual 
+//virtual
 void LLViewerTexture::forceImmediateUpdate()
 {
 }
@@ -772,13 +772,13 @@ void LLViewerTexture::resetTextureStats()
 	mMaxVirtualSizeResetCounter = 0;
 }
 
-//virtual 
+//virtual
 F32 LLViewerTexture::getMaxVirtualSize()
 {
 	return mMaxVirtualSize;
 }
 
-//virtual 
+//virtual
 void LLViewerTexture::setKnownDrawSize(S32 width, S32 height)
 {
 	//nothing here.
@@ -793,7 +793,7 @@ void LLViewerTexture::addFace(LLFace* facep)
 	}
 	mFaceList[mNumFaces] = facep;
 	facep->setIndexInTex(mNumFaces);
-	mNumFaces++;
+	++mNumFaces;
 	mLastFaceListUpdateTimer.reset();
 }
 
@@ -847,7 +847,7 @@ void LLViewerTexture::addVolume(LLVOVolume* volumep)
 	}
 	mVolumeList[mNumVolumes] = volumep;
 	volumep->setIndexInTex(mNumVolumes);
-	mNumVolumes++;
+	++mNumVolumes;
 	mLastVolumeListUpdateTimer.reset();
 }
 
@@ -856,11 +856,11 @@ void LLViewerTexture::removeVolume(LLVOVolume* volumep)
 {
 	if (mNumVolumes > 1)
 	{
-		S32 index = volumep->getIndexInTex(); 
+		S32 index = volumep->getIndexInTex();
 		mVolumeList[index] = mVolumeList[--mNumVolumes];
 		mVolumeList[index]->setIndexInTex(index);
 	}
-	else 
+	else
 	{
 		mVolumeList.clear();
 		mNumVolumes = 0;
@@ -900,20 +900,20 @@ void LLViewerTexture::switchToCachedImage()
 
 void LLViewerTexture::forceActive()
 {
-	mTextureState = ACTIVE; 
+	mTextureState = ACTIVE;
 }
 
 void LLViewerTexture::setActive()
-{ 
+{
 	if (mTextureState != NO_DELETE)
 	{
-		mTextureState = ACTIVE; 
+		mTextureState = ACTIVE;
 	}
 }
 
 //set the texture to stay in memory
 void LLViewerTexture::setNoDelete()
-{ 
+{
 	mTextureState = NO_DELETE;
 }
 
@@ -931,7 +931,7 @@ LLImageGL* LLViewerTexture::getGLTexture() const
 	return mGLTexturep;
 }
 
-BOOL LLViewerTexture::createGLTexture() 
+BOOL LLViewerTexture::createGLTexture()
 {
 	if (mGLTexturep.isNull())
 	{
@@ -950,7 +950,7 @@ BOOL LLViewerTexture::createGLTexture(S32 discard_level, const LLImageRaw* image
 	if (ret)
 	{
 		mFullWidth = mGLTexturep->getCurrentWidth();
-		mFullHeight = mGLTexturep->getCurrentHeight(); 
+		mFullHeight = mGLTexturep->getCurrentHeight();
 		mComponents = mGLTexturep->getComponents();
 		setTexelsPerImage();
 	}
@@ -1006,19 +1006,19 @@ S32 LLViewerTexture::getDiscardLevel() const
 	return mGLTexturep->getDiscardLevel();
 }
 
-S8  LLViewerTexture::getComponents() const 
-{ 
+S8  LLViewerTexture::getComponents() const
+{
 	llassert(mGLTexturep.notNull());
 	return mGLTexturep->getComponents();
 }
 
-LLGLuint LLViewerTexture::getTexName() const 
-{ 
+LLGLuint LLViewerTexture::getTexName() const
+{
 	llassert(mGLTexturep.notNull());
-	return mGLTexturep->getTexName(); 
+	return mGLTexturep->getTexName();
 }
 
-BOOL LLViewerTexture::hasGLTexture() const 
+BOOL LLViewerTexture::hasGLTexture() const
 {
 	if (mGLTexturep.notNull())
 	{
@@ -1060,7 +1060,7 @@ void LLViewerTexture::setGLTextureCreated (bool initialized)
 	mGLTexturep->setGLTextureCreated (initialized);
 }
 
-void  LLViewerTexture::setCategory(S32 category) 
+void  LLViewerTexture::setCategory(S32 category)
 {
 	llassert(mGLTexturep.notNull());
 	mGLTexturep->setCategory(category);
@@ -1102,7 +1102,7 @@ F32 LLViewerTexture::getTimePassedSinceLastBound()
 	return mGLTexturep->getTimePassedSinceLastBound();
 }
 
-BOOL LLViewerTexture::getMissed() const 
+BOOL LLViewerTexture::getMissed() const
 {
 	llassert(mGLTexturep.notNull());
 	return mGLTexturep->getMissed();
@@ -1120,7 +1120,7 @@ void LLViewerTexture::forceUpdateBindStats(void) const
 	return mGLTexturep->forceUpdateBindStats();
 }
 
-void LLViewerTexture::destroyGLTexture() 
+void LLViewerTexture::destroyGLTexture()
 {
 	if (mGLTexturep.notNull() && mGLTexturep->getHasGLTexture())
 	{
@@ -1238,7 +1238,7 @@ void LLViewerFetchedTexture::init(bool firstinit)
 LLViewerFetchedTexture::~LLViewerFetchedTexture()
 {
 	//*NOTE getTextureFetch can return NULL when Viewer is shutting down.
-	// This is due to LLWearableList is singleton and is destroyed after 
+	// This is due to LLWearableList is singleton and is destroyed after
 	// LLAppViewer::cleanup() was called. (see ticket EXT-177)
 	if (mHasFetcher && LLAppViewer::getTextureFetch())
 	{
@@ -1247,7 +1247,7 @@ LLViewerFetchedTexture::~LLViewerFetchedTexture()
 	cleanup();
 }
 
-//virtual 
+//virtual
 S8 LLViewerFetchedTexture::getType() const
 {
 	return LLViewerTexture::FETCHED_TEXTURE;
@@ -1294,23 +1294,23 @@ BOOL LLViewerFetchedTexture::isForSculptOnly() const
 	return mForSculpt && !mNeedsGLTexture;
 }
 
-BOOL LLViewerFetchedTexture::isDeleted()  
-{ 
+BOOL LLViewerFetchedTexture::isDeleted()
+{
 	return mTextureState == DELETED;
 }
 
-BOOL LLViewerFetchedTexture::isInactive()  
-{ 
+BOOL LLViewerFetchedTexture::isInactive()
+{
 	return mTextureState == INACTIVE;
 }
 
-BOOL LLViewerFetchedTexture::isDeletionCandidate()  
-{ 
+BOOL LLViewerFetchedTexture::isDeletionCandidate()
+{
 	return mTextureState == DELETION_CANDIDATE;
 }
 
-void LLViewerFetchedTexture::setDeletionCandidate()  
-{ 
+void LLViewerFetchedTexture::setDeletionCandidate()
+{
 	if (mGLTexturep.notNull() && mGLTexturep->getTexName() && mTextureState == INACTIVE)
 	{
 		mTextureState = DELETION_CANDIDATE;
@@ -1339,20 +1339,20 @@ void LLViewerFetchedTexture::dump()
 {
 	LLViewerTexture::dump();
 
-	llinfos << "Dump : " << mID 
+	llinfos << "Dump : " << mID
 			<< ", mIsMissingAsset = " << (S32)mIsMissingAsset
 			<< ", mFullWidth = " << (S32)mFullWidth
 			<< ", mFullHeight = " << (S32)mFullHeight
 			<< ", mOrigWidth = " << (S32)mOrigWidth
 			<< ", mOrigHeight = " << (S32)mOrigHeight
 			<< llendl;
-	llinfos << "     : " 
+	llinfos << "     : "
 			<< " mFullyLoaded = " << (S32)mFullyLoaded
 			<< ", mFetchState = " << (S32)mFetchState
 			<< ", mFetchPriority = " << (S32)mFetchPriority
 			<< ", mDownloadProgress = " << (F32)mDownloadProgress
 			<< llendl;
-	llinfos << "     : " 
+	llinfos << "     : "
 			<< " mHasFetcher = " << (S32)mHasFetcher
 			<< ", mIsFetching = " << (S32)mIsFetching
 			<< ", mIsFetched = " << (S32)mIsFetched
@@ -1362,7 +1362,7 @@ void LLViewerFetchedTexture::dump()
 
 ///////////////////////////////////////////////////////////////////////////////
 // ONLY called from LLViewerFetchedTextureList
-void LLViewerFetchedTexture::destroyTexture() 
+void LLViewerFetchedTexture::destroyTexture()
 {
 	if (LLImageGL::sGlobalTextureMemoryInBytes < sMaxDesiredTextureMemInBytes)	//not ready to release unused memory.
 	{
@@ -1387,7 +1387,7 @@ void LLViewerFetchedTexture::addToCreateTexture()
 		mComponents = mRawImage->getComponents();
 		mGLTexturep->setComponents(mComponents);
 		force_update = true;
-		for (U32 i = 0; i < mNumFaces; i++)
+		for (U32 i = 0; i < mNumFaces; ++i)
 		{
 			mFaceList[i]->dirtyTexture();
 		}
@@ -1435,8 +1435,8 @@ void LLViewerFetchedTexture::addToCreateTexture()
 					S32 i = 0;
 					while (d_level > 0 && (w >> i) * (h >> i) > LLViewerTexture::sMinLargeImageSize)
 					{
-						i++;
-						d_level--;
+						++i;
+						--d_level;
 					}
 					if (i > 0)
 					{
@@ -1473,7 +1473,7 @@ BOOL LLViewerFetchedTexture::createTexture(S32 usename/*= 0*/)
 		llerrs << "LLViewerTexture trying to create texture with no Raw Image" << llendl;
 	}
 // 	llinfos << llformat("IMAGE Creating (%d) [%d x %d] Bytes: %d ",
-// 						mRawDiscardLevel, 
+// 						mRawDiscardLevel,
 // 						mRawImage->getWidth(), mRawImage->getHeight(),mRawImage->getDataSize())
 // 			<< mID.getString() << llendl;
 	BOOL res = TRUE;
@@ -1599,7 +1599,7 @@ void LLViewerFetchedTexture::processTextureStats()
 			}
 			else if (mKnownDrawSizeChanged)	//known draw size is set
 			{
-				mDesiredDiscardLevel = (S8)llmin(log((F32)mFullWidth / mKnownDrawWidth) / log_2, 
+				mDesiredDiscardLevel = (S8)llmin(log((F32)mFullWidth / mKnownDrawWidth) / log_2,
 													 log((F32)mFullHeight / mKnownDrawHeight) / log_2);
 				mDesiredDiscardLevel = 	llclamp(mDesiredDiscardLevel, (S8)0, (S8)getMaxDiscardLevel());
 				mDesiredDiscardLevel = llmin(mDesiredDiscardLevel, mMinDesiredDiscardLevel);
@@ -1627,7 +1627,7 @@ const F32 MAX_PRIORITY_PIXEL                         = 999.f;     //pixel area
 const F32 PRIORITY_BOOST_LEVEL_FACTOR                = 1000.f;    //boost level
 const F32 PRIORITY_DELTA_DISCARD_LEVEL_FACTOR        = 100000.f;  //delta discard
 const S32 MAX_DELTA_DISCARD_LEVEL_FOR_PRIORITY       = 4;
-const F32 PRIORITY_ADDITIONAL_FACTOR                 = 1000000.f; //additional 
+const F32 PRIORITY_ADDITIONAL_FACTOR                 = 1000000.f; //additional
 const S32 MAX_ADDITIONAL_LEVEL_FOR_PRIORITY          = 8;
 const F32 PRIORITY_BOOST_HIGH_FACTOR                 = 10000000.f;//boost high
 F32 LLViewerFetchedTexture::calcDecodePriority()
@@ -1735,13 +1735,13 @@ F32 LLViewerFetchedTexture::calcDecodePriority()
 		bool large_enough = mCachedRawImageReady && (S32)mTexelsPerImage > sMinLargeImageSize;
 		if (large_enough)
 		{
-			//Note: 
-			//to give small, low-priority textures some chance to be fetched, 
+			//Note:
+			//to give small, low-priority textures some chance to be fetched,
 			//cut the priority in half if the texture size is larger than 256 * 256 and has a 64*64 ready.
-			priority *= 0.5f; 
+			priority *= 0.5f;
 		}
 
-		pixel_priority = llclamp(pixel_priority, 0.0f, MAX_PRIORITY_PIXEL); 
+		pixel_priority = llclamp(pixel_priority, 0.0f, MAX_PRIORITY_PIXEL);
 
 		priority += pixel_priority + PRIORITY_BOOST_LEVEL_FACTOR * mBoostLevel;
 
@@ -1754,8 +1754,8 @@ F32 LLViewerFetchedTexture::calcDecodePriority()
 			}
 			else if (mCachedRawImageReady)
 			{
-				//Note: 
-				//to give small, low-priority textures some chance to be fetched, 
+				//Note:
+				//to give small, low-priority textures some chance to be fetched,
 				//if high priority texture has a 64*64 ready, lower its fetching priority.
 				setAdditionalDecodePriority(0.5f);
 			}
@@ -1771,8 +1771,8 @@ F32 LLViewerFetchedTexture::calcDecodePriority()
 			F32 additional = PRIORITY_ADDITIONAL_FACTOR * (1.0 + mAdditionalDecodePriority * MAX_ADDITIONAL_LEVEL_FOR_PRIORITY);
 			if(large_enough)
 			{
-				//Note: 
-				//to give small, low-priority textures some chance to be fetched, 
+				//Note:
+				//to give small, low-priority textures some chance to be fetched,
 				//cut the additional priority to a quarter if the texture size is larger than 256 * 256 and has a 64*64 ready.
 				additional *= 0.25f;
 			}
@@ -1798,7 +1798,7 @@ F32 LLViewerFetchedTexture::maxDecodePriority()
 
 void LLViewerFetchedTexture::setDecodePriority(F32 priority)
 {
-	llassert(!mInImageList); 
+	llassert(!mInImageList);
 
 	mDecodePriority = priority;
 
@@ -1817,14 +1817,14 @@ void LLViewerFetchedTexture::setAdditionalDecodePriority(F32 priority)
 	}
 }
 
-void LLViewerFetchedTexture::updateVirtualSize() 
+void LLViewerFetchedTexture::updateVirtualSize()
 {
 	if (!mMaxVirtualSizeResetCounter)
 	{
 		addTextureStats(0.f, FALSE);//reset
 	}
 
-	for (U32 i = 0; i < mNumFaces; i++)
+	for (U32 i = 0; i < mNumFaces; ++i)
 	{
 		LLFace* facep = mFaceList[i];
 		if(facep->getDrawable()->isRecentlyVisible())
@@ -1903,8 +1903,8 @@ bool LLViewerFetchedTexture::updateFetch()
 		if (mRawImage.notNull()) sRawCount--;
 		if (mAuxRawImage.notNull()) sAuxCount--;
 		bool finished = LLAppViewer::getTextureFetch()->getRequestFinished(getID(), fetch_discard, mRawImage, mAuxRawImage);
-		if (mRawImage.notNull()) sRawCount++;
-		if (mAuxRawImage.notNull()) sAuxCount++;
+		if (mRawImage.notNull()) ++sRawCount;
+		if (mAuxRawImage.notNull()) ++sAuxCount;
 		if (finished)
 		{
 			mIsFetching = FALSE;
@@ -1928,7 +1928,7 @@ bool LLViewerFetchedTexture::updateFetch()
 				setTexelsPerImage();
 
 				if (mFullWidth > MAX_IMAGE_SIZE || mFullHeight > MAX_IMAGE_SIZE)
-				{ 
+				{
 					//discard all oversized textures.
 					destroyRawImage();
 					setIsMissingAsset();
@@ -2019,7 +2019,7 @@ bool LLViewerFetchedTexture::updateFetch()
 		if (texture_progressive_load)
 		{
 			// Load the texture progressively.
-			S32 delta_level = (mBoostLevel > LLViewerTexture::BOOST_NONE) ? 2 : 1; 
+			S32 delta_level = (mBoostLevel > LLViewerTexture::BOOST_NONE) ? 2 : 1;
 			if (current_discard < 0)
 			{
 				desired_discard = llmax(desired_discard, getMaxDiscardLevel() - delta_level);
@@ -2121,7 +2121,7 @@ void LLViewerFetchedTexture::setLoadedCallback(loaded_callback_func loaded_callb
 											   S32 discard_level,
 											   BOOL keep_imageraw,
 											   BOOL needs_aux,
-											   void* userdata, 
+											   void* userdata,
 											   LLLoadedCallbackEntry::source_callback_list_t* src_callback_list,
 											   BOOL pause)
 {
@@ -2268,10 +2268,11 @@ void LLViewerFetchedTexture::unpauseLoadedCallbacks(const LLLoadedCallbackEntry:
 	}
 
 	BOOL need_raw = FALSE;
-	for (callback_list_t::iterator iter = mLoadedCallbackList.begin();
-		 iter != mLoadedCallbackList.end(); )
+	for (callback_list_t::iterator iter = mLoadedCallbackList.begin(),
+								   end = mLoadedCallbackList.end();
+		 iter != end; ++iter)
 	{
-		LLLoadedCallbackEntry *entryp = *iter++;
+		LLLoadedCallbackEntry* entryp = *iter;
 		if (entryp->mSourceCallbackList == callback_list)
 		{
 			entryp->mPaused = FALSE;
@@ -2297,10 +2298,11 @@ void LLViewerFetchedTexture::pauseLoadedCallbacks(const LLLoadedCallbackEntry::s
 
 	bool paused = true;
 
-	for (callback_list_t::iterator iter = mLoadedCallbackList.begin();
-		 iter != mLoadedCallbackList.end(); )
+	for (callback_list_t::iterator iter = mLoadedCallbackList.begin(),
+								   end = mLoadedCallbackList.end();
+		 iter != end; ++iter)
 	{
-		LLLoadedCallbackEntry *entryp = *iter++;
+		LLLoadedCallbackEntry* entryp = *iter;
 		if (entryp->mSourceCallbackList == callback_list)
 		{
 			entryp->mPaused = TRUE;
@@ -2347,7 +2349,7 @@ bool LLViewerFetchedTexture::doLoadedCallbacks()
 		for (callback_list_t::iterator iter = mLoadedCallbackList.begin();
 			 iter != mLoadedCallbackList.end(); )
 		{
-			LLLoadedCallbackEntry *entryp = *iter++;
+			LLLoadedCallbackEntry* entryp = *iter++;
 			// We never finished loading the image.  Indicate failure.
 			// Note: this allows mLoadedCallbackUserData to be cleaned up.
 			entryp->mCallback(FALSE, this, NULL, NULL, 0, TRUE, entryp->mUserData);
@@ -2362,7 +2364,8 @@ bool LLViewerFetchedTexture::doLoadedCallbacks()
 
 	S32 gl_discard = getDiscardLevel();
 
-	// If we don't have a legit GL image, set it to be lower than the worst discard level
+	// If we don't have a legit GL image, set it to be lower than the worst
+	// discard level
 	if (gl_discard == -1)
 	{
 		gl_discard = MAX_DISCARD_LEVEL + 1;
@@ -2618,7 +2621,7 @@ LLImageRaw* LLViewerFetchedTexture::reloadRawImage(S8 discard_level)
 		}
 	}
 	mIsRawImageValid = TRUE;
-	sRawCount++;
+	++sRawCount;
 
 	return mRawImage;
 }
@@ -2632,7 +2635,7 @@ void LLViewerFetchedTexture::destroyRawImage()
 {
 	if (mAuxRawImage.notNull()) sAuxCount--;
 
-	if (mRawImage.notNull()) 
+	if (mRawImage.notNull())
 	{
 		sRawCount--;
 
@@ -2677,8 +2680,8 @@ void LLViewerFetchedTexture::switchToCachedImage()
 }
 
 //cache the imageraw forcefully.
-//virtual 
-void LLViewerFetchedTexture::setCachedRawImage(S32 discard_level, LLImageRaw* imageraw) 
+//virtual
+void LLViewerFetchedTexture::setCachedRawImage(S32 discard_level, LLImageRaw* imageraw)
 {
 	if (imageraw != mRawImage.get())
 	{
@@ -2765,7 +2768,7 @@ void LLViewerFetchedTexture::checkCachedRawSculptImage()
 	}
 }
 
-void LLViewerFetchedTexture::saveRawImage() 
+void LLViewerFetchedTexture::saveRawImage()
 {
 	if (mRawImage.isNull() || mRawImage == mSavedRawImage || (mSavedRawDiscardLevel >= 0 && mSavedRawDiscardLevel <= mRawDiscardLevel))
 	{
@@ -2790,8 +2793,8 @@ void LLViewerFetchedTexture::saveRawImage()
 	mLastReferencedSavedRawImageTime = sCurrentTime;
 }
 
-void LLViewerFetchedTexture::forceToSaveRawImage(S32 desired_discard, F32 kept_time) 
-{ 
+void LLViewerFetchedTexture::forceToSaveRawImage(S32 desired_discard, F32 kept_time)
+{
 	mKeptSavedRawImageTime = kept_time;
 	mLastReferencedSavedRawImageTime = sCurrentTime;
 
@@ -2840,7 +2843,7 @@ void LLViewerFetchedTexture::destroySavedRawImage()
 	mKeptSavedRawImageTime = 0.f;
 }
 
-LLImageRaw* LLViewerFetchedTexture::getSavedRawImage() 
+LLImageRaw* LLViewerFetchedTexture::getSavedRawImage()
 {
 	mLastReferencedSavedRawImageTime = sCurrentTime;
 
@@ -2853,7 +2856,7 @@ BOOL LLViewerFetchedTexture::hasSavedRawImage() const
 }
 
 F32 LLViewerFetchedTexture::getElapsedLastReferencedSavedRawImageTime() const
-{ 
+{
 	return sCurrentTime - mLastReferencedSavedRawImageTime;
 }
 
@@ -2927,7 +2930,7 @@ void LLViewerLODTexture::init(bool firstinit)
 	mCalculatedDiscardLevel = -1.f;
 }
 
-//virtual 
+//virtual
 S8 LLViewerLODTexture::getType() const
 {
 	return LLViewerTexture::LOD_TEXTURE;
@@ -2997,7 +3000,7 @@ void LLViewerLODTexture::processTextureStats()
 				llabs(mMaxVirtualSize - mDiscardVirtualSize) < mMaxVirtualSize * .20f)
 			{
 				// < 20% change in virtual size = no change in desired discard
-				discard_level = mCalculatedDiscardLevel; 
+				discard_level = mCalculatedDiscardLevel;
 			}
 			else
 			{
@@ -3112,8 +3115,8 @@ void LLViewerMediaTexture::updateClass()
 	}
 }
 
-//static 
-void LLViewerMediaTexture::removeMediaImplFromTexture(const LLUUID& media_id) 
+//static
+void LLViewerMediaTexture::removeMediaImplFromTexture(const LLUUID& media_id)
 {
 	LLViewerMediaTexture* media_tex = findMediaTexture(media_id);
 	if (media_tex)
@@ -3144,7 +3147,7 @@ LLViewerMediaTexture* LLViewerMediaTexture::findMediaTexture(const LLUUID& media
 	return media_tex;
 }
 
-LLViewerMediaTexture::LLViewerMediaTexture(const LLUUID& id, BOOL usemipmaps, LLImageGL* gl_image) 
+LLViewerMediaTexture::LLViewerMediaTexture(const LLUUID& id, BOOL usemipmaps, LLImageGL* gl_image)
 :	LLViewerTexture(id, usemipmaps),
 	mMediaImplp(NULL),
 	mUpdateVirtualSizeTime(0)
@@ -3172,7 +3175,7 @@ LLViewerMediaTexture::LLViewerMediaTexture(const LLUUID& id, BOOL usemipmaps, LL
 }
 
 //virtual
-LLViewerMediaTexture::~LLViewerMediaTexture() 
+LLViewerMediaTexture::~LLViewerMediaTexture()
 {
 	LLViewerTexture* tex = gTextureList.findImage(mID);
 	if (tex) //this media is a parcel media for tex.
@@ -3192,7 +3195,7 @@ void LLViewerMediaTexture::reinit(BOOL usemipmaps /* = TRUE */)
 	mGLTexturep->setNeedsAlphaAndPickMask(FALSE);
 }
 
-void LLViewerMediaTexture::setUseMipMaps(BOOL mipmap) 
+void LLViewerMediaTexture::setUseMipMaps(BOOL mipmap)
 {
 	mUseMipMaps = mipmap;
 
@@ -3203,13 +3206,13 @@ void LLViewerMediaTexture::setUseMipMaps(BOOL mipmap)
 }
 
 #ifdef MEDIA_ON_PRIM
-//virtual 
+//virtual
 S8 LLViewerMediaTexture::getType() const
 {
 	return LLViewerTexture::MEDIA_TEXTURE;
 }
 
-void LLViewerMediaTexture::invalidateMediaImpl() 
+void LLViewerMediaTexture::invalidateMediaImpl()
 {
 	mMediaImplp = NULL;
 }
@@ -3223,7 +3226,7 @@ void LLViewerMediaTexture::setMediaImpl()
 }
 
 //return true if all faces to reference to this media texture are found
-//Note: mMediaFaceList is valid only for the current instant 
+//Note: mMediaFaceList is valid only for the current instant
 //      because it does not check the face validity after the current frame.
 BOOL LLViewerMediaTexture::findFaces()
 {
@@ -3236,7 +3239,7 @@ BOOL LLViewerMediaTexture::findFaces()
 	{
 		const ll_face_list_t* face_list = tex->getFaceList();
 		U32 end = tex->getNumFaces();
-		for (U32 i = 0; i < end; i++)
+		for (U32 i = 0; i < end; ++i)
 		{
 			mMediaFaceList.push_back((*face_list)[i]);
 		}
@@ -3244,7 +3247,7 @@ BOOL LLViewerMediaTexture::findFaces()
 
 	if (!mMediaImplp)
 	{
-		return TRUE; 
+		return TRUE;
 	}
 
 	//for media on a face.
@@ -3286,13 +3289,14 @@ void LLViewerMediaTexture::initVirtualSize()
 	}
 
 	findFaces();
-	for (std::list< LLFace* >::iterator iter = mMediaFaceList.begin(); iter!= mMediaFaceList.end(); ++iter)
+	for (std::list< LLFace* >::iterator iter = mMediaFaceList.begin();
+		 iter != mMediaFaceList.end(); ++iter)
 	{
 		addTextureStats((*iter)->getVirtualSize());
 	}
 }
 
-void LLViewerMediaTexture::addMediaToFace(LLFace* facep) 
+void LLViewerMediaTexture::addMediaToFace(LLFace* facep)
 {
 	if (facep)
 	{
@@ -3306,7 +3310,7 @@ void LLViewerMediaTexture::addMediaToFace(LLFace* facep)
 	switchTexture(facep);
 }
 
-void LLViewerMediaTexture::removeMediaFromFace(LLFace* facep) 
+void LLViewerMediaTexture::removeMediaFromFace(LLFace* facep)
 {
 	if (!facep)
 	{
@@ -3329,8 +3333,8 @@ void LLViewerMediaTexture::removeMediaFromFace(LLFace* facep)
 	}
 }
 
-//virtual 
-void LLViewerMediaTexture::addFace(LLFace* facep) 
+//virtual
+void LLViewerMediaTexture::addFace(LLFace* facep)
 {
 	LLViewerTexture::addFace(facep);
 
@@ -3358,8 +3362,8 @@ void LLViewerMediaTexture::addFace(LLFace* facep)
 	}
 }
 
-//virtual 
-void LLViewerMediaTexture::removeFace(LLFace* facep) 
+//virtual
+void LLViewerMediaTexture::removeFace(LLFace* facep)
 {
 	LLViewerTexture::removeFace(facep);
 
@@ -3380,8 +3384,9 @@ void LLViewerMediaTexture::removeFace(LLFace* facep)
 			}
 
 			//
-			//we have some trouble here: the texture of the face is changed.
-			//we need to find the former texture, and remove it from the list to avoid memory leaking.
+			// We have some trouble here: the texture of the face is changed.
+			// We need to find the former texture, and remove it from the list
+			// to avoid memory leaking.
 			if (!mNumFaces)
 			{
 				mTextureList.clear();
@@ -3390,14 +3395,14 @@ void LLViewerMediaTexture::removeFace(LLFace* facep)
 			S32 end = getNumFaces();
 			std::vector<const LLTextureEntry*> te_list(end);
 			S32 i = 0;
-			for (U32 j = 0; j < mNumFaces; j++)
+			for (U32 j = 0; j < mNumFaces; ++j)
 			{
 				te_list[i++] = mFaceList[j]->getTextureEntry();	//all textures are in use.
 			}
 			for (std::list< LLPointer<LLViewerTexture> >::iterator iter = mTextureList.begin();
 				 iter != mTextureList.end(); ++iter)
 			{
-				for (i = 0; i < end; i++)
+				for (i = 0; i < end; ++i)
 				{
 					if (te_list[i] && te_list[i]->getID() == (*iter)->getID())	//the texture is in use.
 					{
@@ -3433,7 +3438,8 @@ void LLViewerMediaTexture::removeFace(LLFace* facep)
 
 void LLViewerMediaTexture::stopPlaying()
 {
-	// Don't stop the media impl playing here -- this breaks non-inworld media (login screen, search, and media browser).
+	// Don't stop the media impl playing here -- this breaks non-inworld media
+	// (login screen, search, and media browser).
 //	if(mMediaImplp)
 //	{
 //		mMediaImplp->stop();
@@ -3446,7 +3452,7 @@ void LLViewerMediaTexture::switchTexture(LLFace* facep)
 	if (facep)
 	{
 		//check if another media is playing on this face.
-		if (facep->getTexture() && facep->getTexture() != this 
+		if (facep->getTexture() && facep->getTexture() != this
 			&& facep->getTexture()->getType() == LLViewerTexture::MEDIA_TEXTURE)
 		{
 			if (mID == facep->getTexture()->getID()) //this is a parcel media
@@ -3479,11 +3485,11 @@ void LLViewerMediaTexture::switchTexture(LLFace* facep)
 	}
 }
 
-void LLViewerMediaTexture::setPlaying(BOOL playing) 
+void LLViewerMediaTexture::setPlaying(BOOL playing)
 {
 	if (!mMediaImplp)
 	{
-		return; 
+		return;
 	}
 	if (!playing && !mIsPlaying)
 	{
@@ -3510,7 +3516,8 @@ void LLViewerMediaTexture::setPlaying(BOOL playing)
 			return;
 		}
 
-		for (std::list< LLFace* >::iterator iter = mMediaFaceList.begin(); iter!= mMediaFaceList.end(); ++iter)
+		for (std::list< LLFace* >::iterator iter = mMediaFaceList.begin();
+			 iter!= mMediaFaceList.end(); ++iter)
 		{
 			switchTexture(*iter);
 		}
@@ -3525,8 +3532,8 @@ void LLViewerMediaTexture::setPlaying(BOOL playing)
 	return;
 }
 
-//virtual 
-F32 LLViewerMediaTexture::getMaxVirtualSize() 
+//virtual
+F32 LLViewerMediaTexture::getMaxVirtualSize()
 {
 	if (LLFrameTimer::getFrameCount() == mUpdateVirtualSizeTime)
 	{
@@ -3541,7 +3548,7 @@ F32 LLViewerMediaTexture::getMaxVirtualSize()
 
 	if (mIsPlaying) //media is playing
 	{
-		for (U32 i = 0; i < mNumFaces; i++)
+		for (U32 i = 0; i < mNumFaces; ++i)
 		{
 			LLFace* facep = mFaceList[i];
 			if (facep->getDrawable()->isRecentlyVisible())
@@ -3556,7 +3563,8 @@ F32 LLViewerMediaTexture::getMaxVirtualSize()
 
 		if (!mMediaFaceList.empty())
 		{
-			for (std::list< LLFace* >::iterator iter = mMediaFaceList.begin(); iter!= mMediaFaceList.end(); ++iter)
+			for (std::list< LLFace* >::iterator iter = mMediaFaceList.begin();
+				 iter!= mMediaFaceList.end(); ++iter)
 			{
 				LLFace* facep = *iter;
 				if (facep->getDrawable()->isRecentlyVisible())

@@ -1,11 +1,11 @@
-/** 
+/**
  * @file lldrawpoolwater.cpp
  * @brief LLDrawPoolWater class implementation
  *
  * $LicenseInfo:firstyear=2002&license=viewergpl$
- * 
+ *
  * Copyright (c) 2002-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -99,7 +99,7 @@ void LLDrawPoolWater::restoreGL()
 
 }
 
-LLDrawPool *LLDrawPoolWater::instancePool()
+LLDrawPool* LLDrawPoolWater::instancePool()
 {
 	llerrs << "Should never be calling instancePool on a water pool!" << llendl;
 	return NULL;
@@ -161,9 +161,10 @@ void LLDrawPoolWater::render(S32 pass)
 		return;
 	}
 
-	//do a quick 'n dirty depth sort
-	for (std::vector<LLFace*>::iterator iter = mDrawFace.begin();
-			 iter != mDrawFace.end(); iter++)
+	// do a quick'n dirty depth sort
+	for (std::vector<LLFace*>::iterator iter = mDrawFace.begin(),
+										end = mDrawFace.end();
+		 iter != end; ++iter)
 	{
 		LLFace* facep = *iter;
 		facep->mDistance = -facep->mCenterLocal.mV[2];
@@ -172,7 +173,8 @@ void LLDrawPoolWater::render(S32 pass)
 	std::sort(mDrawFace.begin(), mDrawFace.end(), LLFace::CompareDistanceGreater());
 
 	// See if we are rendering water as opaque or not
-	static LLCachedControl<bool> render_transparent_water(gSavedSettings, "RenderTransparentWater");
+	static LLCachedControl<bool> render_transparent_water(gSavedSettings,
+														  "RenderTransparentWater");
 	if (!render_transparent_water)
 	{
 		// render water for low end hardware
@@ -182,13 +184,13 @@ void LLDrawPoolWater::render(S32 pass)
 
 	LLGLEnable blend(GL_BLEND);
 
-	if ((mVertexShaderLevel > 0) && !sSkipScreenCopy)
+	if (mVertexShaderLevel > 0 && !sSkipScreenCopy)
 	{
 		shade();
 		return;
 	}
 
-	LLVOSky *voskyp = gSky.mVOSkyp;
+	LLVOSky* voskyp = gSky.mVOSkyp;
 
 	stop_glerror();
 
@@ -207,7 +209,7 @@ void LLDrawPoolWater::render(S32 pass)
 	LLGLDisable cullFace(GL_CULL_FACE);
 
 	// Set up second pass first
-	mWaterImagep->addTextureStats(1024.f*1024.f);
+	mWaterImagep->addTextureStats(1024.f * 1024.f);
 	gGL.getTexUnit(1)->activate();
 	gGL.getTexUnit(1)->enable(LLTexUnit::TT_TEXTURE);
 	gGL.getTexUnit(1)->bind(mWaterImagep);
@@ -222,7 +224,7 @@ void LLDrawPoolWater::render(S32 pass)
 	}
 	else
 	{
-		water_color.setVec(1.f, 1.f, 1.f, 0.5f*(1.f + up_dot));
+		water_color.setVec(1.f, 1.f, 1.f, 0.5f * (1.f + up_dot));
 	}
 
 	glColor4fv(water_color.mV);
@@ -235,13 +237,16 @@ void LLDrawPoolWater::render(S32 pass)
 
 	// Slowly move over time.
 	F32 offset = fmod(gFrameTimeSeconds*2.f, 100.f);
-	F32 tp0[4] = {16.f/256.f, 0.0f, 0.0f, offset*0.01f};
-	F32 tp1[4] = {0.0f, 16.f/256.f, 0.0f, offset*0.01f};
+	F32 tp0[4] = { 16.f / 256.f, 0.0f, 0.0f, offset * 0.01f };
+	F32 tp1[4] = { 0.0f, 16.f / 256.f, 0.0f, offset * 0.01f };
 	glTexGenfv(GL_S, GL_OBJECT_PLANE, tp0);
 	glTexGenfv(GL_T, GL_OBJECT_PLANE, tp1);
 
-	gGL.getTexUnit(1)->setTextureColorBlend(LLTexUnit::TBO_MULT, LLTexUnit::TBS_TEX_COLOR, LLTexUnit::TBS_PREV_COLOR);
-	gGL.getTexUnit(1)->setTextureAlphaBlend(LLTexUnit::TBO_REPLACE, LLTexUnit::TBS_PREV_ALPHA);
+	gGL.getTexUnit(1)->setTextureColorBlend(LLTexUnit::TBO_MULT,
+											LLTexUnit::TBS_TEX_COLOR,
+											LLTexUnit::TBS_PREV_COLOR);
+	gGL.getTexUnit(1)->setTextureAlphaBlend(LLTexUnit::TBO_REPLACE,
+											LLTexUnit::TBS_PREV_ALPHA);
 
 	gGL.getTexUnit(0)->activate();
 
@@ -251,10 +256,11 @@ void LLDrawPoolWater::render(S32 pass)
 	glStencilOp(GL_KEEP, GL_REPLACE, GL_KEEP);
 	glStencilFunc(GL_ALWAYS, 0, 0xFFFFFFFF);
 
-	for (std::vector<LLFace*>::iterator iter = mDrawFace.begin();
-		 iter != mDrawFace.end(); iter++)
+	for (std::vector<LLFace*>::iterator iter = mDrawFace.begin(),
+										end = mDrawFace.end();
+		 iter != end; ++iter)
 	{
-		LLFace *face = *iter;
+		LLFace* face = *iter;
 		if (voskyp->isReflFace(face))
 		{
 			continue;
@@ -287,17 +293,18 @@ void LLDrawPoolWater::render(S32 pass)
 		LLMatrix4 camera_rot(camera_mat.getMat3());
 		camera_rot.invert();
 
-		glLoadMatrixf((F32 *)camera_rot.mMatrix);
+		glLoadMatrixf((F32*)camera_rot.mMatrix);
 
 		glMatrixMode(GL_MODELVIEW);
 		LLOverrideFaceColor overrid(this, 1.f, 1.f, 1.f,  0.5f*up_dot);
 
 		gGL.getTexUnit(0)->setTextureBlendType(LLTexUnit::TB_MULT);
 
-		for (std::vector<LLFace*>::iterator iter = mDrawFace.begin();
-			 iter != mDrawFace.end(); iter++)
+		for (std::vector<LLFace*>::iterator iter = mDrawFace.begin(),
+											end = mDrawFace.end();
+			 iter != end; ++iter)
 		{
-			LLFace *face = *iter;
+			LLFace* face = *iter;
 			if (voskyp->isReflFace(face))
 			{
 				//refl_face = face;
@@ -336,7 +343,7 @@ void LLDrawPoolWater::render(S32 pass)
 // for low end hardware
 void LLDrawPoolWater::renderOpaqueLegacyWater()
 {
-	LLVOSky *voskyp = gSky.mVOSkyp;
+	LLVOSky* voskyp = gSky.mVOSkyp;
 
 	stop_glerror();
 
@@ -391,10 +398,11 @@ void LLDrawPoolWater::renderOpaqueLegacyWater()
 
 	glColor3f(1.f, 1.f, 1.f);
 
-	for (std::vector<LLFace*>::iterator iter = mDrawFace.begin();
-		 iter != mDrawFace.end(); iter++)
+	for (std::vector<LLFace*>::iterator iter = mDrawFace.begin(),
+										end = mDrawFace.end();
+		 iter != end; ++iter)
 	{
-		LLFace *face = *iter;
+		LLFace* face = *iter;
 		if (voskyp->isReflFace(face))
 		{
 			continue;
@@ -415,7 +423,7 @@ void LLDrawPoolWater::renderOpaqueLegacyWater()
 
 void LLDrawPoolWater::renderReflection(LLFace* face)
 {
-	LLVOSky *voskyp = gSky.mVOSkyp;
+	LLVOSky* voskyp = gSky.mVOSkyp;
 
 	if (!voskyp)
 	{
@@ -448,9 +456,9 @@ void LLDrawPoolWater::shade()
 		gGL.setColorMask(true, true);
 	}
 
-	LLVOSky *voskyp = gSky.mVOSkyp;
+	LLVOSky* voskyp = gSky.mVOSkyp;
 
-	if (voskyp == NULL) 
+	if (voskyp == NULL)
 	{
 		return;
 	}
@@ -462,27 +470,27 @@ void LLDrawPoolWater::shade()
 	LLVector3 light_dir;
 	LLColor3 light_color;
 
-	if (gSky.getSunDirection().mV[2] > LLSky::NIGHTTIME_ELEVATION_COS) 	 
-    { 	 
-        light_dir  = gSky.getSunDirection(); 	 
-        light_dir.normVec(); 
+	if (gSky.getSunDirection().mV[2] > LLSky::NIGHTTIME_ELEVATION_COS) 	
+    { 	
+        light_dir  = gSky.getSunDirection(); 	
+        light_dir.normVec();
 		light_color = gSky.getSunDiffuseColor();
 		if(gSky.mVOSkyp) {
-	        light_diffuse = gSky.mVOSkyp->getSun().getColorCached(); 	 
-			light_diffuse.normVec(); 	 
+	        light_diffuse = gSky.mVOSkyp->getSun().getColorCached(); 	
+			light_diffuse.normVec(); 	
 		}
-        light_exp = light_dir * LLVector3(light_dir.mV[0], light_dir.mV[1], 0); 	 
-        light_diffuse *= light_exp + 0.25f; 	 
-    } 	 
-    else  	 
-    { 	 
-        light_dir       = gSky.getMoonDirection(); 	 
-        light_dir.normVec(); 	 
+        light_exp = light_dir * LLVector3(light_dir.mV[0], light_dir.mV[1], 0); 	
+        light_diffuse *= light_exp + 0.25f; 	
+    } 	
+    else  	
+    { 	
+        light_dir       = gSky.getMoonDirection(); 	
+        light_dir.normVec(); 	
 		light_color = gSky.getMoonDiffuseColor();
-        light_diffuse   = gSky.mVOSkyp->getMoon().getColorCached(); 	 
-        light_diffuse.normVec(); 	 
-        light_diffuse *= 0.5f; 	 
-        light_exp = light_dir * LLVector3(light_dir.mV[0], light_dir.mV[1], 0); 	 
+        light_diffuse   = gSky.mVOSkyp->getMoon().getColorCached(); 	
+        light_diffuse.normVec(); 	
+        light_diffuse *= 0.5f; 	
+        light_exp = light_dir * LLVector3(light_dir.mV[0], light_dir.mV[1], 0); 	
     }
 
 	light_exp *= light_exp;
@@ -532,7 +540,7 @@ void LLDrawPoolWater::shade()
 	//bind normal map
 	S32 bumpTex = shader->enableTexture(LLViewerShaderMgr::BUMP_MAP);
 
-	LLWaterParamManager * param_mgr = LLWaterParamManager::instance();
+	LLWaterParamManager* param_mgr = LLWaterParamManager::instance();
 
 	// change mWaterNormp if needed
 	if (mWaterNormp->getID() != param_mgr->getNormalMapID())
@@ -548,7 +556,7 @@ void LLDrawPoolWater::shade()
 	{
 		mWaterNormp->setFilteringOption(LLTexUnit::TFO_ANISOTROPIC);
 	}
-	else 
+	else
 	{
 		mWaterNormp->setFilteringOption(LLTexUnit::TFO_POINT);
 	}
@@ -558,7 +566,7 @@ void LLDrawPoolWater::shade()
 	if (screentex > -1)
 	{
 		shader->uniform4fv(LLViewerShaderMgr::WATER_FOGCOLOR, 1, sWaterFogColor.mV);
-		shader->uniform1f(LLViewerShaderMgr::WATER_FOGDENSITY, 
+		shader->uniform1f(LLViewerShaderMgr::WATER_FOGDENSITY,
 			param_mgr->getFogDensity());
 		gPipeline.mWaterDis.bindTexture(0, screentex);
 	}
@@ -573,7 +581,7 @@ void LLDrawPoolWater::shade()
 		shader->uniform4fv(LLViewerShaderMgr::WATER_FOGCOLOR, 1, sWaterFogColor.mV);
 	}
 
-	F32 screenRes[] = 
+	F32 screenRes[] =
 	{
 		1.f/gGLViewport[2],
 		1.f/gGLViewport[3]
@@ -635,10 +643,11 @@ void LLDrawPoolWater::shade()
 	{
 		LLGLEnable depth_clamp(gGLManager.mHasDepthClamp ? GL_DEPTH_CLAMP : 0);
 		LLGLDisable cullface(GL_CULL_FACE);
-		for (std::vector<LLFace*>::iterator iter = mDrawFace.begin();
-			iter != mDrawFace.end(); iter++)
+		for (std::vector<LLFace*>::iterator iter = mDrawFace.begin(),
+											end = mDrawFace.end();
+			iter != end; ++iter)
 		{
-			LLFace *face = *iter;
+			LLFace* face = *iter;
 
 			if (voskyp->isReflFace(face))
 			{
@@ -691,7 +700,7 @@ void LLDrawPoolWater::shade()
 	}
 }
 
-LLViewerTexture *LLDrawPoolWater::getDebugTexture()
+LLViewerTexture* LLDrawPoolWater::getDebugTexture()
 {
 	return LLViewerFetchedTexture::sSmokeImagep;
 }

@@ -1,11 +1,11 @@
-/** 
+/**
  * @file llstyle.cpp
  * @brief Text style class
  *
  * $LicenseInfo:firstyear=2001&license=viewergpl$
- * 
+ *
  * Copyright (c) 2001-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -33,21 +33,19 @@
 #include "linden_common.h"
 
 #include "llstyle.h"
-#include "llstring.h"
-#include "llui.h"
 
-//#include "llviewertexturelist.h"
+#include "llstring.h"
 
 LLStyle::LLStyle()
 {
-	init(TRUE, LLColor4(0,0,0,1),LLStringUtil::null);
+	init(TRUE, LLColor4(0, 0, 0, 1), LLStringUtil::null);
 }
 
 LLStyle::LLStyle(const LLStyle &style)
 {
 	if (this != &style)
 	{
-		init(style.isVisible(),style.getColor(),style.getFontString());
+		init(style.isVisible(), style.getColor(), style.getFontString());
 		if (style.isLink())
 		{
 			setLinkHREF(style.getLinkHREF());
@@ -63,16 +61,18 @@ LLStyle::LLStyle(const LLStyle &style)
 	}
 	else
 	{
-		init(TRUE, LLColor4(0,0,0,1),LLStringUtil::null);
+		init(TRUE, LLColor4(0, 0, 0, 1), LLStringUtil::null);
 	}
 }
 
-LLStyle::LLStyle(BOOL is_visible, const LLColor4 &color, const std::string& font_name)
+LLStyle::LLStyle(BOOL is_visible, const LLColor4 &color,
+				 const std::string& font_name)
 {
 	init(is_visible, color, font_name);
 }
 
-void LLStyle::init(BOOL is_visible, const LLColor4 &color, const std::string& font_name)
+void LLStyle::init(BOOL is_visible, const LLColor4 &color,
+				   const std::string& font_name)
 {
 	mVisible = is_visible;
 	mColor = color;
@@ -86,7 +86,6 @@ void LLStyle::init(BOOL is_visible, const LLColor4 &color, const std::string& fo
 	mImageWidth = 0;
 	mIsEmbeddedItem = FALSE;
 }
-
 
 // Copy assignment
 LLStyle &LLStyle::operator=(const LLStyle &rhs)
@@ -106,10 +105,9 @@ LLStyle &LLStyle::operator=(const LLStyle &rhs)
 		mDropShadow = rhs.mDropShadow;
 		mIsEmbeddedItem = rhs.mIsEmbeddedItem;
 	}
-	
+
 	return *this;
 }
-
 
 void LLStyle::setFontName(const std::string& fontname)
 {
@@ -117,18 +115,18 @@ void LLStyle::setFontName(const std::string& fontname)
 
 	std::string fontname_lc = fontname;
 	LLStringUtil::toLower(fontname_lc);
-	
+
 	mFontID = LLFONT_OCRA; // default
-	
-	if ((fontname_lc == "sansserif") || (fontname_lc == "sans-serif"))
+
+	if (fontname_lc == "sansserif" || fontname_lc == "sans-serif")
 	{
 		mFontID = LLFONT_SANSSERIF;
 	}
-	else if ((fontname_lc == "serif"))
+	else if (fontname_lc == "serif")
 	{
 		mFontID = LLFONT_SMALL;
 	}
-	else if ((fontname_lc == "sansserifbig"))
+	else if (fontname_lc == "sansserifbig")
 	{
 		mFontID = LLFONT_SANSSERIF_BIG;
 	}
@@ -137,7 +135,6 @@ void LLStyle::setFontName(const std::string& fontname)
 		mFontID = LLFONT_SANSSERIF_SMALL;
 	}
 }
-
 
 void LLStyle::setLinkHREF(const std::string& href)
 {
@@ -168,7 +165,6 @@ void LLStyle::setImage(const LLUUID& src)
 {
 	mImagep = LLUI::getUIImageByID(src);
 }
-
 
 void LLStyle::setImageSize(S32 width, S32 height)
 {

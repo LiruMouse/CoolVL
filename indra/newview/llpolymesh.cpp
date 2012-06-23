@@ -1,11 +1,11 @@
-/** 
+/**
  * @file llpolymesh.cpp
  * @brief Implementation of LLPolyMesh class
  *
  * $LicenseInfo:firstyear=2001&license=viewergpl$
- * 
+ *
  * Copyright (c) 2001-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -53,12 +53,12 @@
 
 extern LLControlGroup gSavedSettings;				// read only
 
-LLPolyMorphData *clone_morph_param_duplicate(const LLPolyMorphData *src_data,
+LLPolyMorphData* clone_morph_param_duplicate(const LLPolyMorphData* src_data,
 											 const std::string &name);
-LLPolyMorphData *clone_morph_param_direction(const LLPolyMorphData *src_data,
+LLPolyMorphData* clone_morph_param_direction(const LLPolyMorphData* src_data,
 											 const LLVector3 &direction,
 											 const std::string &name);
-LLPolyMorphData *clone_morph_param_cleavage(const LLPolyMorphData *src_data,
+LLPolyMorphData* clone_morph_param_cleavage(const LLPolyMorphData* src_data,
 											F32 scale,
 											const std::string &name);
 
@@ -169,7 +169,7 @@ void LLPolyMeshSharedData::freeMeshData()
 }
 
 // compate_int is used by the qsort function to sort the index array
-int compare_int(const void *a, const void *b);
+int compare_int(const void* a, const void* b);
 
 #if 0	// Dead code
 //-----------------------------------------------------------------------------
@@ -588,7 +588,7 @@ BOOL LLPolyMeshSharedData::loadMesh(const std::string& fileName)
 					return FALSE;
 				}
 
-				std::string *jn = &mJointNames[i];
+				std::string* jn = &mJointNames[i];
 				*jn = jointName;
 			}
 
@@ -711,7 +711,7 @@ BOOL LLPolyMeshSharedData::loadMesh(const std::string& fileName)
 //-----------------------------------------------------------------------------
 // getSharedVert()
 //-----------------------------------------------------------------------------
-const S32 *LLPolyMeshSharedData::getSharedVert(S32 vert)
+const S32* LLPolyMeshSharedData::getSharedVert(S32 vert)
 {
 	if (mSharedVerts.count(vert) > 0)
 	{
@@ -734,7 +734,7 @@ const LLVector2 &LLPolyMeshSharedData::getUVs(U32 index)
 //-----------------------------------------------------------------------------
 // LLPolyMesh()
 //-----------------------------------------------------------------------------
-LLPolyMesh::LLPolyMesh(LLPolyMeshSharedData *shared_data, LLPolyMesh *reference_mesh)
+LLPolyMesh::LLPolyMesh(LLPolyMeshSharedData* shared_data, LLPolyMesh* reference_mesh)
 {
 	LLMemType mt(LLMemType::MTYPE_AVATAR_MESH);
 
@@ -779,7 +779,7 @@ LLPolyMesh::LLPolyMesh(LLPolyMeshSharedData *shared_data, LLPolyMesh *reference_
 		// read during an aligned memcpy of mTexCoords
 		mScaledNormals			= (LLVector3*)(mVertexData + offset); offset += 3 * nverts;
 		mBinormals				= (LLVector3*)(mVertexData + offset); offset += 3 * nverts;
-		mScaledBinormals		= (LLVector3*)(mVertexData + offset); offset += 3 * nverts; 
+		mScaledBinormals		= (LLVector3*)(mVertexData + offset); offset += 3 * nverts;
 		initializeForMorph();
 	}
 }
@@ -802,16 +802,19 @@ LLPolyMesh::~LLPolyMesh()
 //-----------------------------------------------------------------------------
 // LLPolyMesh::getMesh()
 //-----------------------------------------------------------------------------
-LLPolyMesh *LLPolyMesh::getMesh(const std::string &name, LLPolyMesh* reference_mesh)
+LLPolyMesh* LLPolyMesh::getMesh(const std::string &name, LLPolyMesh* reference_mesh)
 {
 	//-------------------------------------------------------------------------
 	// search for an existing mesh by this name
 	//-------------------------------------------------------------------------
-	LLPolyMeshSharedData* meshSharedData = get_if_there(sGlobalSharedMeshList, name, (LLPolyMeshSharedData*)NULL);
+	LLPolyMeshSharedData* meshSharedData = get_if_there(sGlobalSharedMeshList,
+														name,
+														(LLPolyMeshSharedData*)NULL);
 	if (meshSharedData)
 	{
-//		llinfos << "Polymesh " << name << " found in global mesh table." << llendl;
-		LLPolyMesh *poly_mesh = new LLPolyMesh(meshSharedData, reference_mesh);
+		//llinfos << "Polymesh " << name << " found in global mesh table."
+		//		<< llendl;
+		LLPolyMesh* poly_mesh = new LLPolyMesh(meshSharedData, reference_mesh);
 		return poly_mesh;
 	}
 
@@ -821,7 +824,7 @@ LLPolyMesh *LLPolyMesh::getMesh(const std::string &name, LLPolyMesh* reference_m
 	std::string full_path;
 	full_path = gDirUtilp->getExpandedFilename(LL_PATH_CHARACTER,name);
 
-	LLPolyMeshSharedData *mesh_data = new LLPolyMeshSharedData();
+	LLPolyMeshSharedData* mesh_data = new LLPolyMeshSharedData();
 	if (reference_mesh)
 	{
 		mesh_data->setupLOD(reference_mesh->getSharedData());
@@ -832,9 +835,9 @@ LLPolyMesh *LLPolyMesh::getMesh(const std::string &name, LLPolyMesh* reference_m
 		return NULL;
 	}
 
-	LLPolyMesh *poly_mesh = new LLPolyMesh(mesh_data, reference_mesh);
+	LLPolyMesh* poly_mesh = new LLPolyMesh(mesh_data, reference_mesh);
 
-//	llinfos << "Polymesh " << name << " added to global mesh table." << llendl;
+	//llinfos << "Polymesh " << name << " added to global mesh table." << llendl;
 	sGlobalSharedMeshList[name] = poly_mesh->mSharedData;
 
 	return poly_mesh;
@@ -846,11 +849,12 @@ LLPolyMesh *LLPolyMesh::getMesh(const std::string &name, LLPolyMesh* reference_m
 void LLPolyMesh::freeAllMeshes()
 {
 	// delete each item in the global lists
-	for_each(sGlobalSharedMeshList.begin(), sGlobalSharedMeshList.end(), DeletePairedPointer());
+	for_each(sGlobalSharedMeshList.begin(), sGlobalSharedMeshList.end(),
+			 DeletePairedPointer());
 	sGlobalSharedMeshList.clear();
 }
 
-LLPolyMeshSharedData *LLPolyMesh::getSharedData() const
+LLPolyMeshSharedData* LLPolyMesh::getSharedData() const
 {
 	return mSharedData;
 }
@@ -867,14 +871,16 @@ void LLPolyMesh::dumpDiagInfo()
 
 	std::string buf;
 
-	llinfos << "-----------------------------------------------------" << llendl;
+	llinfos << "-----------------------------------------------------"
+			<< llendl;
 	llinfos << "       Global PolyMesh Table (DEBUG only)" << llendl;
 	llinfos << "   Verts    Faces  Mem(KB) Name" << llendl;
-	llinfos << "-----------------------------------------------------" << llendl;
+	llinfos << "-----------------------------------------------------"
+			<< llendl;
 
 	// print each loaded mesh, and it's memory usage
 	for (LLPolyMeshSharedDataTable::iterator iter = sGlobalSharedMeshList.begin();
-		iter != sGlobalSharedMeshList.end(); ++iter)
+		 iter != sGlobalSharedMeshList.end(); ++iter)
 	{
 		const std::string& mesh_name = iter->first;
 		LLPolyMeshSharedData* mesh = iter->second;
@@ -883,7 +889,8 @@ void LLPolyMesh::dumpDiagInfo()
 		S32 num_faces = mesh->mNumFaces;
 		U32 num_kb = mesh->getNumKB();
 
-		buf = llformat("%8d %8d %8d %s", num_verts, num_faces, num_kb, mesh_name.c_str());
+		buf = llformat("%8d %8d %8d %s", num_verts, num_faces, num_kb,
+					   mesh_name.c_str());
 		llinfos << buf << llendl;
 
 		total_verts += num_verts;
@@ -891,16 +898,18 @@ void LLPolyMesh::dumpDiagInfo()
 		total_kb += num_kb;
 	}
 
-	llinfos << "-----------------------------------------------------" << llendl;
+	llinfos << "-----------------------------------------------------"
+			<< llendl;
 	buf = llformat("%8d %8d %8d TOTAL", total_verts, total_faces, total_kb);
 	llinfos << buf << llendl;
-	llinfos << "-----------------------------------------------------" << llendl;
+	llinfos << "-----------------------------------------------------"
+			<< llendl;
 }
 
 //-----------------------------------------------------------------------------
 // getWritableCoords()
 //-----------------------------------------------------------------------------
-LLVector4 *LLPolyMesh::getWritableCoords()
+LLVector4* LLPolyMesh::getWritableCoords()
 {
 	return mCoords;
 }
@@ -908,7 +917,7 @@ LLVector4 *LLPolyMesh::getWritableCoords()
 //-----------------------------------------------------------------------------
 // getWritableNormals()
 //-----------------------------------------------------------------------------
-LLVector4 *LLPolyMesh::getWritableNormals()
+LLVector4* LLPolyMesh::getWritableNormals()
 {
 	return mNormals;
 }
@@ -916,7 +925,7 @@ LLVector4 *LLPolyMesh::getWritableNormals()
 //-----------------------------------------------------------------------------
 // getWritableBinormals()
 //-----------------------------------------------------------------------------
-LLVector3 *LLPolyMesh::getWritableBinormals()
+LLVector3* LLPolyMesh::getWritableBinormals()
 {
 	return mBinormals;
 }
@@ -924,7 +933,7 @@ LLVector3 *LLPolyMesh::getWritableBinormals()
 //-----------------------------------------------------------------------------
 // getWritableClothingWeights()
 //-----------------------------------------------------------------------------
-LLVector4	*LLPolyMesh::getWritableClothingWeights()
+LLVector4* LLPolyMesh::getWritableClothingWeights()
 {
 	return mClothingWeights;
 }
@@ -932,7 +941,7 @@ LLVector4	*LLPolyMesh::getWritableClothingWeights()
 //-----------------------------------------------------------------------------
 // getWritableTexCoords()
 //-----------------------------------------------------------------------------
-LLVector2	*LLPolyMesh::getWritableTexCoords()
+LLVector2* LLPolyMesh::getWritableTexCoords()
 {
 	return mTexCoords;
 }
@@ -940,7 +949,7 @@ LLVector2	*LLPolyMesh::getWritableTexCoords()
 //-----------------------------------------------------------------------------
 // getScaledNormals()
 //-----------------------------------------------------------------------------
-LLVector3 *LLPolyMesh::getScaledNormals()
+LLVector3* LLPolyMesh::getScaledNormals()
 {
 	return mScaledNormals;
 }
@@ -948,7 +957,7 @@ LLVector3 *LLPolyMesh::getScaledNormals()
 //-----------------------------------------------------------------------------
 // getScaledBinormals()
 //-----------------------------------------------------------------------------
-LLVector3 *LLPolyMesh::getScaledBinormals()
+LLVector3* LLPolyMesh::getScaledBinormals()
 {
 	return mScaledBinormals;
 }
@@ -964,10 +973,14 @@ void LLPolyMesh::initializeForMorph()
 		mNormals[i] = LLVector4(mSharedData->mBaseNormals[i]);
 	}
 
-	memcpy(mScaledNormals, mSharedData->mBaseNormals, sizeof(LLVector3) * mSharedData->mNumVertices);	/*Flawfinder: ignore*/
-	memcpy(mBinormals, mSharedData->mBaseBinormals, sizeof(LLVector3) * mSharedData->mNumVertices);	/*Flawfinder: ignore*/
-	memcpy(mScaledBinormals, mSharedData->mBaseBinormals, sizeof(LLVector3) * mSharedData->mNumVertices);		/*Flawfinder: ignore*/
-	memcpy(mTexCoords, mSharedData->mTexCoords, sizeof(LLVector2) * mSharedData->mNumVertices);		/*Flawfinder: ignore*/
+	memcpy(mScaledNormals, mSharedData->mBaseNormals,
+		   sizeof(LLVector3) * mSharedData->mNumVertices);	/*Flawfinder: ignore*/
+	memcpy(mBinormals, mSharedData->mBaseBinormals,
+		   sizeof(LLVector3) * mSharedData->mNumVertices);	/*Flawfinder: ignore*/
+	memcpy(mScaledBinormals, mSharedData->mBaseBinormals,
+		   sizeof(LLVector3) * mSharedData->mNumVertices);		/*Flawfinder: ignore*/
+	memcpy(mTexCoords, mSharedData->mTexCoords,
+		   sizeof(LLVector2) * mSharedData->mNumVertices);		/*Flawfinder: ignore*/
 	memset(mClothingWeights, 0, sizeof(LLVector4) * mSharedData->mNumVertices);
 }
 
@@ -976,15 +989,18 @@ void LLPolyMesh::initializeForMorph()
 //-----------------------------------------------------------------------------
 LLPolyMorphData* LLPolyMesh::getMorphData(const std::string& morph_name)
 {
-	if (!mSharedData)
-		return NULL;
-	for (LLPolyMeshSharedData::morphdata_list_t::iterator iter = mSharedData->mMorphData.begin();
-		 iter != mSharedData->mMorphData.end(); ++iter)
+	if (mSharedData)
 	{
-		LLPolyMorphData *morph_data = *iter;
-		if (morph_data->getName() == morph_name)
+		for (LLPolyMeshSharedData::morphdata_list_t::iterator
+				iter = mSharedData->mMorphData.begin(),
+				end = mSharedData->mMorphData.end();
+			 iter != end; ++iter)
 		{
-			return morph_data;
+			LLPolyMorphData* morph_data = *iter;
+			if (morph_data->getName() == morph_name)
+			{
+				return morph_data;
+			}
 		}
 	}
 	return NULL;
@@ -993,8 +1009,9 @@ LLPolyMorphData* LLPolyMesh::getMorphData(const std::string& morph_name)
 //-----------------------------------------------------------------------------
 // removeMorphData()
 //-----------------------------------------------------------------------------
-// // erasing but not deleting seems bad, but fortunately we don't actually use this...
-// void	LLPolyMesh::removeMorphData(LLPolyMorphData *morph_target)
+// // erasing but not deleting seems bad, but fortunately we don't actually
+// // use this...
+// void	LLPolyMesh::removeMorphData(LLPolyMorphData* morph_target)
 // {
 // 	if (!mSharedData)
 // 		return;
@@ -1009,7 +1026,8 @@ LLPolyMorphData* LLPolyMesh::getMorphData(const std::string& morph_name)
 // 	if (!mSharedData)
 // 		return;
 
-// 	for_each(mSharedData->mMorphData.begin(), mSharedData->mMorphData.end(), DeletePointer());
+// 	for_each(mSharedData->mMorphData.begin(), mSharedData->mMorphData.end(),
+//			 DeletePointer());
 // 	mSharedData->mMorphData.clear();
 // }
 
@@ -1033,14 +1051,14 @@ BOOL LLPolySkeletalDistortionInfo::parseXml(LLXmlTreeNode* node)
 	llassert(node->hasName("param") && node->getChildByName("param_skeleton"));
 
 	if (!LLViewerVisualParamInfo::parseXml(node))
+	{
 		return FALSE;
+	}
 
 	LLXmlTreeNode* skeletalParam = node->getChildByName("param_skeleton");
-
 	if (NULL == skeletalParam)
 	{
-		llwarns << "Failed to getChildByName(\"param_skeleton\")"
-			<< llendl;
+		llwarns << "Failed to getChildByName(\"param_skeleton\")" << llendl;
 		return FALSE;
 	}
 
@@ -1057,14 +1075,16 @@ BOOL LLPolySkeletalDistortionInfo::parseXml(LLXmlTreeNode* node)
 			static LLStdStringHandle name_string = LLXmlTree::addAttributeString("name");
 			if (!bone->getFastAttributeString(name_string, name))
 			{
-				llwarns << "No bone name specified for skeletal param." << llendl;
+				llwarns << "No bone name specified for skeletal param."
+						<< llendl;
 				continue;
 			}
 
 			static LLStdStringHandle scale_string = LLXmlTree::addAttributeString("scale");
 			if (!bone->getFastAttributeVector3(scale_string, scale))
 			{
-				llwarns << "No scale specified for bone " << name << "." << llendl;
+				llwarns << "No scale specified for bone " << name << "."
+						<< llendl;
 				continue;
 			}
 
@@ -1078,7 +1098,8 @@ BOOL LLPolySkeletalDistortionInfo::parseXml(LLXmlTreeNode* node)
 		}
 		else
 		{
-			llwarns << "Unrecognized element " << bone->getName() << " in skeletal distortion" << llendl;
+			llwarns << "Unrecognized element " << bone->getName()
+					<< " in skeletal distortion" << llendl;
 			continue;
 		}
 	}
@@ -1088,7 +1109,7 @@ BOOL LLPolySkeletalDistortionInfo::parseXml(LLXmlTreeNode* node)
 //-----------------------------------------------------------------------------
 // LLPolySkeletalDistortion()
 //-----------------------------------------------------------------------------
-LLPolySkeletalDistortion::LLPolySkeletalDistortion(LLVOAvatar *avatarp)
+LLPolySkeletalDistortion::LLPolySkeletalDistortion(LLVOAvatar* avatarp)
 {
 	mAvatar = avatarp;
 	mDefaultVec.setVec(0.001f, 0.001f, 0.001f);
@@ -1101,7 +1122,7 @@ LLPolySkeletalDistortion::~LLPolySkeletalDistortion()
 {
 }
 
-BOOL LLPolySkeletalDistortion::setInfo(LLPolySkeletalDistortionInfo *info)
+BOOL LLPolySkeletalDistortion::setInfo(LLPolySkeletalDistortionInfo* info)
 {
 	llassert(mInfo == NULL);
 	if (info->mID < 0)
@@ -1110,28 +1131,33 @@ BOOL LLPolySkeletalDistortion::setInfo(LLPolySkeletalDistortionInfo *info)
 	mID = info->mID;
 	setWeight(getDefaultWeight(), FALSE);
 
-	LLPolySkeletalDistortionInfo::bone_info_list_t::iterator iter;
-	for (iter = getInfo()->mBoneInfoList.begin(); iter != getInfo()->mBoneInfoList.end(); iter++)
+	for (LLPolySkeletalDistortionInfo::bone_info_list_t::iterator
+			iter = getInfo()->mBoneInfoList.begin(),
+			end = getInfo()->mBoneInfoList.end();
+		 iter != end; ++iter)
 	{
-		LLPolySkeletalBoneInfo *bone_info = &(*iter);
+		LLPolySkeletalBoneInfo* bone_info = &(*iter);
 		LLJoint* joint = mAvatar->getJoint(bone_info->mBoneName);
 		if (!joint)
 		{
-			llwarns << "Joint " << bone_info->mBoneName << " not found." << llendl;
+			llwarns << "Joint " << bone_info->mBoneName << " not found."
+					<< llendl;
 			continue;
 		}
 
 		if (mJointScales.find(joint) != mJointScales.end())
 		{
-			llwarns << "Scale deformation already supplied for joint " << joint->getName() << "." << llendl;
+			llwarns << "Scale deformation already supplied for joint "
+					<< joint->getName() << "." << llendl;
 		}
 
 		// store it
 		mJointScales[joint] = bone_info->mScaleDeformation;
 
 		// apply to children that need to inherit it
-		for (LLJoint::child_list_t::iterator iter = joint->mChildren.begin();
-			 iter != joint->mChildren.end(); ++iter)
+		for (LLJoint::child_list_t::iterator iter = joint->mChildren.begin(),
+											 end = joint->mChildren.end();
+			 iter != end; ++iter)
 		{
 			LLViewerJoint* child_joint = (LLViewerJoint*)(*iter);
 			if (child_joint->inheritScale())
@@ -1146,7 +1172,8 @@ BOOL LLPolySkeletalDistortion::setInfo(LLPolySkeletalDistortionInfo *info)
 		{
 			if (mJointOffsets.find(joint) != mJointOffsets.end())
 			{
-				llwarns << "Offset deformation already supplied for joint " << joint->getName() << "." << llendl;
+				llwarns << "Offset deformation already supplied for joint "
+						<< joint->getName() << "." << llendl;
 			}
 			mJointOffsets[joint] = bone_info->mPositionDeformation;
 		}
@@ -1157,7 +1184,7 @@ BOOL LLPolySkeletalDistortion::setInfo(LLPolySkeletalDistortionInfo *info)
 //virtual
 LLViewerVisualParam* LLPolySkeletalDistortion::cloneParam(LLWearable* wearable) const
 {
-	LLPolySkeletalDistortion *new_param = new LLPolySkeletalDistortion(mAvatar);
+	LLPolySkeletalDistortion* new_param = new LLPolySkeletalDistortion(mAvatar);
 	*new_param = *this;
 	return new_param;
 }
@@ -1167,30 +1194,32 @@ LLViewerVisualParam* LLPolySkeletalDistortion::cloneParam(LLWearable* wearable) 
 //-----------------------------------------------------------------------------
 void LLPolySkeletalDistortion::apply(ESex avatar_sex)
 {
-	F32 effective_weight = (getSex() & avatar_sex) ? mCurWeight : getDefaultWeight();
+	F32 effective_weight = (getSex() & avatar_sex) ? mCurWeight
+												   : getDefaultWeight();
 
 	LLJoint* joint;
-	joint_vec_map_t::iterator iter;
 
-	for (iter = mJointScales.begin();
-		 iter != mJointScales.end();
-		 iter++)
+	for (joint_vec_map_t::iterator iter = mJointScales.begin(),
+								   end = mJointScales.end();
+		 iter != end; ++iter)
 	{
 		joint = iter->first;
 		LLVector3 newScale = joint->getScale();
 		LLVector3 scaleDelta = iter->second;
-		newScale = newScale + (effective_weight * scaleDelta) - (mLastWeight * scaleDelta);
+		newScale = newScale + effective_weight * scaleDelta -
+				   mLastWeight * scaleDelta;
 		joint->setScale(newScale);
 	}
 
-	for (iter = mJointOffsets.begin();
-		 iter != mJointOffsets.end();
-		 iter++)
+	for (joint_vec_map_t::iterator iter = mJointOffsets.begin(),
+								   end = mJointOffsets.end();
+		 iter != end; ++iter)
 	{
 		joint = iter->first;
 		LLVector3 newPosition = joint->getPosition();
 		LLVector3 positionDelta = iter->second;
-		newPosition = newPosition + (effective_weight * positionDelta) - (mLastWeight * positionDelta);
+		newPosition = newPosition + effective_weight * positionDelta -
+					  mLastWeight * positionDelta;
 		joint->setPosition(newPosition);
 	}
 
@@ -1201,12 +1230,12 @@ void LLPolySkeletalDistortion::apply(ESex avatar_sex)
 	mLastWeight = mCurWeight;
 }
 
-LLPolyMorphData *clone_morph_param_duplicate(const LLPolyMorphData *src_data,
-											 const std::string &name)
+LLPolyMorphData* clone_morph_param_duplicate(const LLPolyMorphData* src_data,
+											 const std::string& name)
 {
 	LLPolyMorphData* cloned_morph_data = new LLPolyMorphData(*src_data);
 	cloned_morph_data->mName = name;
-	for (U32 v=0; v < cloned_morph_data->mNumIndices; v++)
+	for (U32 v = 0; v < cloned_morph_data->mNumIndices; ++v)
 	{
 		cloned_morph_data->mCoords[v] = src_data->mCoords[v];
 		cloned_morph_data->mNormals[v] = src_data->mNormals[v];
@@ -1215,32 +1244,32 @@ LLPolyMorphData *clone_morph_param_duplicate(const LLPolyMorphData *src_data,
 	return cloned_morph_data;
 }
 
-LLPolyMorphData *clone_morph_param_direction(const LLPolyMorphData *src_data,
-											 const LLVector3 &direction,
-											 const std::string &name)
+LLPolyMorphData* clone_morph_param_direction(const LLPolyMorphData* src_data,
+											 const LLVector3& direction,
+											 const std::string& name)
 {
 	LLPolyMorphData* cloned_morph_data = new LLPolyMorphData(*src_data);
 	cloned_morph_data->mName = name;
-	for (U32 v=0; v < cloned_morph_data->mNumIndices; v++)
+	for (U32 v = 0; v < cloned_morph_data->mNumIndices; ++v)
 	{
 		cloned_morph_data->mCoords[v] = direction;
-		cloned_morph_data->mNormals[v] = LLVector3(0,0,0);
-		cloned_morph_data->mBinormals[v] = LLVector3(0,0,0);
+		cloned_morph_data->mNormals[v] = LLVector3(0, 0, 0);
+		cloned_morph_data->mBinormals[v] = LLVector3(0, 0, 0);
 	}
 	return cloned_morph_data;
 }
 
-LLPolyMorphData *clone_morph_param_cleavage(const LLPolyMorphData *src_data,
+LLPolyMorphData* clone_morph_param_cleavage(const LLPolyMorphData* src_data,
 											F32 scale,
-											const std::string &name)
+											const std::string& name)
 {
 	LLPolyMorphData* cloned_morph_data = new LLPolyMorphData(*src_data);
 	cloned_morph_data->mName = name;
-	for (U32 v=0; v < cloned_morph_data->mNumIndices; v++)
+	for (U32 v = 0; v < cloned_morph_data->mNumIndices; ++v)
 	{
-		cloned_morph_data->mCoords[v] = src_data->mCoords[v]*scale;
-		cloned_morph_data->mNormals[v] = src_data->mNormals[v]*scale;
-		cloned_morph_data->mBinormals[v] = src_data->mBinormals[v]*scale;
+		cloned_morph_data->mCoords[v] = src_data->mCoords[v] * scale;
+		cloned_morph_data->mNormals[v] = src_data->mNormals[v] * scale;
+		cloned_morph_data->mBinormals[v] = src_data->mBinormals[v] * scale;
 		if (cloned_morph_data->mCoords[v][1] < 0)
 		{
 			cloned_morph_data->mCoords[v][1] *= -1;

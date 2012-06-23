@@ -108,6 +108,10 @@ public:
 	// true to prevent the displaying of "Resident" as a last name
 	// in legacy names
 	static bool sOmitResidentAsLastName;
+
+	// true to force the use of legacy names for friends (only used in newview/
+	// but kept here for consistency with the above flag).
+	static bool sLegacyNamesForFriends;
 };
 
 #endif

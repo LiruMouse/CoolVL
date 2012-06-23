@@ -234,7 +234,8 @@ void LLMotionController::purgeExcessMotions()
 
 	if (mLoadedMotions.size() > 2 * MAX_MOTION_INSTANCES)
 	{
-		llwarns << "> " << 2 * MAX_MOTION_INSTANCES << " Loaded Motions" << llendl;
+		llwarns << "> " << 2 * MAX_MOTION_INSTANCES << " Loaded Motions"
+				<< llendl;
 	}
 }
 

@@ -1,11 +1,11 @@
-/** 
+/**
  * @file llhudicon.cpp
  * @brief LLHUDIcon class implementation
  *
  * $LicenseInfo:firstyear=2006&license=viewergpl$
- * 
+ *
  * Copyright (c) 2006-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -36,11 +36,11 @@
 
 #include "llgl.h"
 #include "llrender.h"
-
-#include "llviewerobject.h"
-#include "lldrawable.h"
 #include "llvector4a.h"
+
+#include "lldrawable.h"
 #include "llviewercamera.h"
+#include "llviewerobject.h"
 #include "llviewertexture.h"
 #include "llviewerwindow.h"
 
@@ -61,18 +61,17 @@ static F32 calc_bouncy_animation(F32 x)
 	return -(cosf(x * F_PI * 2.5f - F_PI_BY_TWO))*(0.4f + x * -0.1f) + x * 1.3f;
 }
 
-
 //-----------------------------------------------------------------------------
 // static declarations
 //-----------------------------------------------------------------------------
 LLHUDIcon::icon_instance_t LLHUDIcon::sIconInstances;
 
-LLHUDIcon::LLHUDIcon(const U8 type) :
-			LLHUDObject(type),
-			mImagep(NULL),
-			mPickID(0),
-			mScale(0.1f),
-			mHidden(FALSE)
+LLHUDIcon::LLHUDIcon(const U8 type)
+:	LLHUDObject(type),
+	mImagep(NULL),
+	mPickID(0),
+	mScale(0.1f),
+	mHidden(FALSE)
 {
 	sIconInstances.push_back(this);
 }
@@ -90,7 +89,7 @@ void LLHUDIcon::renderIcon(BOOL for_select)
 	{
 		gGL.getTexUnit(0)->unbind(LLTexUnit::TT_TEXTURE);
 	}
-	
+
 	if (mHidden)
 		return;
 
@@ -102,35 +101,40 @@ void LLHUDIcon::renderIcon(BOOL for_select)
 
 	LLVector3 obj_position = mSourceObject->getRenderPosition();
 
+	LLViewerCamera* camera = LLViewerCamera::getInstance();
+
 	// put icon above object, and in front
 	// RN: don't use drawable radius, it's fricking HUGE
-	LLVector3 icon_relative_pos = (LLViewerCamera::getInstance()->getUpAxis() * ~mSourceObject->getRenderRotation());
+	LLVector3 icon_relative_pos = camera->getUpAxis() * ~mSourceObject->getRenderRotation();
 	icon_relative_pos.abs();
 
-	F32 distance_scale = llmin(mSourceObject->getScale().mV[VX] / icon_relative_pos.mV[VX], 
-		mSourceObject->getScale().mV[VY] / icon_relative_pos.mV[VY], 
-		mSourceObject->getScale().mV[VZ] / icon_relative_pos.mV[VZ]);
+	F32 distance_scale = llmin(mSourceObject->getScale().mV[VX] / icon_relative_pos.mV[VX],
+							   mSourceObject->getScale().mV[VY] / icon_relative_pos.mV[VY],
+							   mSourceObject->getScale().mV[VZ] / icon_relative_pos.mV[VZ]);
 	F32 up_distance = 0.5f * distance_scale;
-	LLVector3 icon_position = obj_position + (up_distance * LLViewerCamera::getInstance()->getUpAxis()) * 1.2f;
+	LLVector3 icon_position = obj_position + (up_distance * camera->getUpAxis()) * 1.2f;
 
-	LLVector3 icon_to_cam = LLViewerCamera::getInstance()->getOrigin() - icon_position;
+	LLVector3 icon_to_cam = camera->getOrigin() - icon_position;
 	icon_to_cam.normVec();
 
 	icon_position += icon_to_cam * mSourceObject->mDrawable->getRadius() * 1.1f;
 
-	mDistance = dist_vec(icon_position, LLViewerCamera::getInstance()->getOrigin());
+	mDistance = dist_vec(icon_position, camera->getOrigin());
 
-	F32 alpha_factor = for_select ? 1.f : clamp_rescale(mDistance, DIST_START_FADE, DIST_END_FADE, 1.f, 0.f);
+	F32 alpha_factor = for_select ? 1.f
+								  : clamp_rescale(mDistance, DIST_START_FADE,
+												  DIST_END_FADE, 1.f, 0.f);
 
 	LLVector3 x_pixel_vec;
 	LLVector3 y_pixel_vec;
-	
-	LLViewerCamera::getInstance()->getPixelVectors(icon_position, y_pixel_vec, x_pixel_vec);
+
+	camera->getPixelVectors(icon_position, y_pixel_vec, x_pixel_vec);
 
 	F32 scale_factor = 1.f;
 	if (mAnimTimer.getElapsedTimeF32() < ANIM_TIME)
 	{
-		scale_factor = llmax(0.f, calc_bouncy_animation(mAnimTimer.getElapsedTimeF32() / ANIM_TIME));
+		scale_factor = llmax(0.f,
+							 calc_bouncy_animation(mAnimTimer.getElapsedTimeF32() / ANIM_TIME));
 	}
 
 	F32 time_elapsed = mLifeTimer.getElapsedTimeF32();
@@ -139,20 +143,22 @@ void LLHUDIcon::renderIcon(BOOL for_select)
 		markDead();
 		return;
 	}
-	
+
 	if (time_elapsed > MAX_VISIBLE_TIME - FADE_OUT_TIME)
 	{
-		alpha_factor *= clamp_rescale(time_elapsed, MAX_VISIBLE_TIME - FADE_OUT_TIME, MAX_VISIBLE_TIME, 1.f, 0.f);
+		alpha_factor *= clamp_rescale(time_elapsed,
+									  MAX_VISIBLE_TIME - FADE_OUT_TIME,
+									  MAX_VISIBLE_TIME, 1.f, 0.f);
 	}
 
 	F32 image_aspect = (F32)mImagep->getFullWidth() / (F32)mImagep->getFullHeight();
 	LLVector3 x_scale = image_aspect * (F32)gViewerWindow->getWindowHeight() * mScale * scale_factor * x_pixel_vec;
 	LLVector3 y_scale = (F32)gViewerWindow->getWindowHeight() * mScale * scale_factor * y_pixel_vec;
 
-	LLVector3 lower_left = icon_position - (x_scale * 0.5f);
-	LLVector3 lower_right = icon_position + (x_scale * 0.5f);
-	LLVector3 upper_left = icon_position - (x_scale * 0.5f) + y_scale;
-	LLVector3 upper_right = icon_position + (x_scale * 0.5f) + y_scale;
+	LLVector3 lower_left = icon_position - x_scale * 0.5f;
+	LLVector3 lower_right = icon_position + x_scale * 0.5f;
+	LLVector3 upper_left = icon_position - x_scale * 0.5f + y_scale;
+	LLVector3 upper_right = icon_position + x_scale * 0.5f + y_scale;
 
 	if (for_select)
 	{
@@ -207,10 +213,14 @@ void LLHUDIcon::render()
 	renderIcon(FALSE);
 }
 
-BOOL LLHUDIcon::lineSegmentIntersect(const LLVector3& start, const LLVector3& end, LLVector3* intersection)
+BOOL LLHUDIcon::lineSegmentIntersect(const LLVector3& start,
+									 const LLVector3& end,
+									 LLVector3* intersection)
 {
 	if (mHidden)
+	{
 		return FALSE;
+	}
 
 	if (mSourceObject.isNull() || mImagep.isNull())
 	{
@@ -226,9 +236,9 @@ BOOL LLHUDIcon::lineSegmentIntersect(const LLVector3& start, const LLVector3& en
 	LLVector3 icon_relative_pos = (camera->getUpAxis() * ~mSourceObject->getRenderRotation());
 	icon_relative_pos.abs();
 
-	F32 distance_scale = llmin(mSourceObject->getScale().mV[VX] / icon_relative_pos.mV[VX], 
-		mSourceObject->getScale().mV[VY] / icon_relative_pos.mV[VY], 
-		mSourceObject->getScale().mV[VZ] / icon_relative_pos.mV[VZ]);
+	F32 distance_scale = llmin(mSourceObject->getScale().mV[VX] / icon_relative_pos.mV[VX],
+							   mSourceObject->getScale().mV[VY] / icon_relative_pos.mV[VY],
+							   mSourceObject->getScale().mV[VZ] / icon_relative_pos.mV[VZ]);
 	F32 up_distance = 0.5f * distance_scale;
 	LLVector3 icon_position = obj_position + (up_distance * camera->getUpAxis()) * 1.2f;
 
@@ -241,13 +251,14 @@ BOOL LLHUDIcon::lineSegmentIntersect(const LLVector3& start, const LLVector3& en
 
 	LLVector3 x_pixel_vec;
 	LLVector3 y_pixel_vec;
-	
+
 	camera->getPixelVectors(icon_position, y_pixel_vec, x_pixel_vec);
 
 	F32 scale_factor = 1.f;
 	if (mAnimTimer.getElapsedTimeF32() < ANIM_TIME)
 	{
-		scale_factor = llmax(0.f, calc_bouncy_animation(mAnimTimer.getElapsedTimeF32() / ANIM_TIME));
+		scale_factor = llmax(0.f,
+							 calc_bouncy_animation(mAnimTimer.getElapsedTimeF32() / ANIM_TIME));
 	}
 
 	F32 time_elapsed = mLifeTimer.getElapsedTimeF32();
@@ -256,7 +267,7 @@ BOOL LLHUDIcon::lineSegmentIntersect(const LLVector3& start, const LLVector3& en
 		markDead();
 		return FALSE;
 	}
-	
+
 	F32 image_aspect = (F32)mImagep->getFullWidth() / (F32)mImagep->getFullHeight();
 	LLVector3 x_scale = image_aspect * (F32)gViewerWindow->getWindowHeight() * mScale * scale_factor * x_pixel_vec;
 	LLVector3 y_scale = (F32)gViewerWindow->getWindowHeight() * mScale * scale_factor * y_pixel_vec;
@@ -289,8 +300,10 @@ BOOL LLHUDIcon::lineSegmentIntersect(const LLVector3& start, const LLVector3& en
 
 	F32 a,b,t;
 
-	if (LLTriangleRayIntersect(upper_right, upper_left, lower_right, starta, dir, a,b,t) ||
-		LLTriangleRayIntersect(upper_left, lower_left, lower_right, starta, dir, a,b,t))
+	if (LLTriangleRayIntersect(upper_right, upper_left,
+							   lower_right, starta, dir, a,b,t) ||
+		LLTriangleRayIntersect(upper_left, lower_left,
+							   lower_right, starta, dir, a,b,t))
 	{
 		if (intersection)
 		{
@@ -309,8 +322,9 @@ S32 LLHUDIcon::generatePickIDs(S32 start_id, S32 step_size)
 {
 	S32 cur_id = start_id;
 	icon_instance_t::iterator icon_it;
+	icon_instance_t::iterator end = sIconInstances.end();
 
-	for(icon_it = sIconInstances.begin(); icon_it != sIconInstances.end(); ++icon_it)
+	for (icon_it = sIconInstances.begin(); icon_it != end; ++icon_it)
 	{
 		(*icon_it)->mPickID = cur_id;
 		cur_id += step_size;
@@ -323,8 +337,9 @@ S32 LLHUDIcon::generatePickIDs(S32 start_id, S32 step_size)
 LLHUDIcon* LLHUDIcon::handlePick(S32 pick_id)
 {
 	icon_instance_t::iterator icon_it;
+	icon_instance_t::iterator end = sIconInstances.end();
 
-	for(icon_it = sIconInstances.begin(); icon_it != sIconInstances.end(); ++icon_it)
+	for (icon_it = sIconInstances.begin(); icon_it != end; ++icon_it)
 	{
 		if (pick_id == (*icon_it)->mPickID)
 		{
@@ -336,15 +351,18 @@ LLHUDIcon* LLHUDIcon::handlePick(S32 pick_id)
 }
 
 //static
-LLHUDIcon* LLHUDIcon::lineSegmentIntersectAll(const LLVector3& start, const LLVector3& end, LLVector3* intersection)
+LLHUDIcon* LLHUDIcon::lineSegmentIntersectAll(const LLVector3& start,
+											  const LLVector3& end,
+											  LLVector3* intersection)
 {
 	icon_instance_t::iterator icon_it;
+	icon_instance_t::iterator icons_end = sIconInstances.end();
 
 	LLVector3 local_end = end;
 	LLVector3 position;
 
 	LLHUDIcon* ret = NULL;
-	for(icon_it = sIconInstances.begin(); icon_it != sIconInstances.end(); ++icon_it)
+	for (icon_it = sIconInstances.begin(); icon_it != icons_end; ++icon_it)
 	{
 		LLHUDIcon* icon = *icon_it;
 		if (icon->lineSegmentIntersect(start, local_end, &position))
@@ -360,7 +378,6 @@ LLHUDIcon* LLHUDIcon::lineSegmentIntersectAll(const LLVector3& start, const LLVe
 
 	return ret;
 }
-
 
  //static
 void LLHUDIcon::updateAll()
@@ -378,9 +395,10 @@ BOOL LLHUDIcon::iconsNearby()
 void LLHUDIcon::cleanupDeadIcons()
 {
 	icon_instance_t::iterator icon_it;
+	icon_instance_t::iterator end = sIconInstances.end();
 
 	icon_instance_t icons_to_erase;
-	for(icon_it = sIconInstances.begin(); icon_it != sIconInstances.end(); ++icon_it)
+	for (icon_it = sIconInstances.begin(); icon_it != end; ++icon_it)
 	{
 		if ((*icon_it)->mDead)
 		{
@@ -388,9 +406,12 @@ void LLHUDIcon::cleanupDeadIcons()
 		}
 	}
 
-	for(icon_it = icons_to_erase.begin(); icon_it != icons_to_erase.end(); ++icon_it)
+	end = icons_to_erase.end();
+	for (icon_it = icons_to_erase.begin(); icon_it != end; ++icon_it)
 	{
-		icon_instance_t::iterator found_it = std::find(sIconInstances.begin(), sIconInstances.end(), *icon_it);
+		icon_instance_t::iterator found_it = std::find(sIconInstances.begin(),
+													   sIconInstances.end(),
+													   *icon_it);
 		if (found_it != sIconInstances.end())
 		{
 			sIconInstances.erase(found_it);

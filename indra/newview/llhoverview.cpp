@@ -1,11 +1,11 @@
-/** 
+/**
  * @file llhoverview.cpp
  * @brief LLHoverView class implementation
  *
  * $LicenseInfo:firstyear=2001&license=viewergpl$
- * 
+ *
  * Copyright (c) 2001-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -43,7 +43,6 @@
 #include "llpermissions.h"
 #include "llrender.h"
 #include "llresmgr.h"
-#include "llui.h"
 
 // Viewer includes
 #include "llagent.h"
@@ -87,7 +86,9 @@ LLHoverView::LLHoverView(const std::string& name, const LLRect& rect)
 	mStartHoverPickTimer(FALSE),
 	mHoverActive(FALSE),
 	mUseHover(FALSE),
-	mTyping(FALSE)
+	mTyping(FALSE),
+	mBoxImage(LLUI::getUIImage("rounded_square.tga")),
+	mShadowImage(LLUI::getUIImage("rounded_square_soft.tga"))
 {
 	mHoverOffset.clearVec();
 }
@@ -145,7 +146,8 @@ void LLHoverView::pickCallback(const LLPickInfo& pick_info)
 	if (hit_obj)
 	{
 		gHoverView->setHoverActive(TRUE);
-		LLSelectMgr::getInstance()->setHoverObject(hit_obj, pick_info.mObjectFace);
+		LLSelectMgr::getInstance()->setHoverObject(hit_obj,
+												   pick_info.mObjectFace);
 		gHoverView->mLastHoverObject = hit_obj;
 		gHoverView->mHoverOffset = pick_info.mObjectOffset;
 	}
@@ -181,9 +183,9 @@ void LLHoverView::cancelHover()
 	mStartHoverPickTimer = FALSE;
 
 	LLSelectMgr::getInstance()->setHoverObject(NULL);
-	// Can't do this, some code relies on hover object still being
-	// set after the hover is cancelled!  Dammit.  JC
-	// mLastHoverObject = NULL;
+	// Can't do this, some code relies on hover object still being set after
+	// the hover is cancelled !  Dammit. JC
+	//mLastHoverObject = NULL;
 
 	setHoverActive(FALSE);
 }
@@ -284,12 +286,11 @@ void LLHoverView::updateText()
 		else
 		{
 			//
-			//  We have hit a regular object (not an avatar or attachment)
-			// 
+			// We have hit a regular object (not an avatar or attachment)
+			//
 
-			//
-			//  Default prefs will suppress display unless the object is interactive
-			//
+			// Default prefs will suppress display unless the object is
+			// interactive
 			static LLCachedControl<bool> show_all_object_hover_tip(gSavedSettings,
 																   "ShowAllObjectHoverTip");
 			bool suppressObjectHoverDisplay = !show_all_object_hover_tip;
@@ -391,14 +392,16 @@ void LLHoverView::updateText()
 						line.append(LLTrans::getString("TooltipFlagPhysics"));
 					}
 
-					if (object->flagHandleTouch() || (parent && parent->flagHandleTouch()))
+					if (object->flagHandleTouch() ||
+						(parent && parent->flagHandleTouch()))
 					{
 						if (!line.empty()) line.append(" ");
 						line.append(LLTrans::getString("TooltipFlagTouch"));
 						suppressObjectHoverDisplay = false;		//  Show tip
 					}
 
-					if (object->flagTakesMoney() || (parent && parent->flagTakesMoney()))
+					if (object->flagTakesMoney() ||
+						(parent && parent->flagTakesMoney()))
 					{
 						if (!line.empty()) line.append(" ");
 						line.append(LLTrans::getString("TooltipFlagL$"));
@@ -455,7 +458,8 @@ void LLHoverView::updateText()
 					else if (for_sale)
 					{
 						LLStringUtil::format_map_t args;
-						args["[AMOUNT]"] = llformat("%d", nodep->mSaleInfo.getSalePrice());
+						args["[AMOUNT]"] = llformat("%d",
+													nodep->mSaleInfo.getSalePrice());
 						line.append(LLTrans::getString("TooltipForSaleL$", args));
 						suppressObjectHoverDisplay = false;		//  Show tip
 					}
@@ -486,13 +490,13 @@ void LLHoverView::updateText()
 	}
 	else if (mHoverLandGlobal != LLVector3d::zero)
 	{
-		// 
+		//
 		//  Do not show hover for land unless prefs are set to allow it.
-		// 
+		//
 
 		static LLCachedControl<bool> show_land_hover_tip(gSavedSettings,
 														 "ShowLandHoverTip");
-		if (!show_land_hover_tip) return; 
+		if (!show_land_hover_tip) return;
 
 		// Didn't hit an object, but since we have a land point we
 		// must be hovering over land.
@@ -561,9 +565,9 @@ void LLHoverView::updateText()
 
 		// Line: "no fly, not safe, no build"
 
-		// Don't display properties for your land.  This is just
-		// confusing, because you can do anything on your own land.
-		if (hover_parcel && owner != gAgent.getID())
+		// Don't display properties for your land. This is just confusing,
+		// because you can do anything on your own land.
+		if (hover_parcel && owner != gAgentID)
 		{
 			S32 words = 0;
 
@@ -598,7 +602,7 @@ void LLHoverView::updateText()
 			}
 
 			// Maybe we should reflect the estate's block fly bit here as well?
-			//  DK 12/1/04
+			// DK 12/1/04
 			if (!hover_parcel->getAllowFly())
 			{
 				if (words) line.append(", ");
@@ -621,7 +625,7 @@ void LLHoverView::updateText()
 				words++;
 			}
 
-			if (words) 
+			if (words)
 			{
 				mText.push_back(line);
 			}
@@ -655,9 +659,9 @@ void LLHoverView::draw()
 	}
 
 	// To toggle off hover tips, you have to just suppress the draw.
-	// The picking is still needed to do cursor changes over physical
-	// and scripted objects.  JC
-	if (!sShowHoverTips) 
+	// The picking is still needed to do cursor changes over physical and
+	// scripted objects. JC
+	if (!sShowHoverTips)
 	{
 		return;
 	}
@@ -708,16 +712,23 @@ void LLHoverView::draw()
 		return;
 	}
 
-	LLUIImagePtr box_imagep = LLUI::getUIImage("rounded_square.tga");
-	LLUIImagePtr shadow_imagep = LLUI::getUIImage("rounded_square_soft.tga");
-
 	const LLFontGL* fontp = LLResMgr::getInstance()->getRes(LLFONT_SANSSERIF_SMALL);
 
 	// Render text.
-	LLColor4 text_color = gColors.getColor("ToolTipTextColor");
+
+	static LLCachedControl<LLColor4U> tool_tip_text_color(gColors,
+														  "ToolTipTextColor");
+	LLColor4 text_color = LLColor4(tool_tip_text_color);
+	static LLCachedControl<LLColor4U> tool_tip_bg_color(gColors,
+														"ToolTipBgColor");
+	LLColor4 bg_color = LLColor4(tool_tip_bg_color);
+	static LLCachedControl<LLColor4U> color_drop_shadow(gColors,
+														"ColorDropShadow");
+	LLColor4 shadow_color = LLColor4(color_drop_shadow);
 	//LLColor4 border_color = gColors.getColor("ToolTipBorderColor");
-	LLColor4 bg_color = gColors.getColor("ToolTipBgColor");
-	LLColor4 shadow_color = gColors.getColor("ColorDropShadow");
+
+	static LLCachedControl<S32> shadow_offset(gSavedSettings,
+											  "DropShadowTooltip");
 
 	// Could decrease the alpha here. JC
 	//text_color.mV[VALPHA] = alpha;
@@ -726,8 +737,8 @@ void LLHoverView::draw()
 
 	S32 max_width = 0;
 	S32 num_lines = mText.size();
-	for (text_list_t::iterator iter = mText.begin(); iter != mText.end();
-		 ++iter)
+	text_list_t::iterator text_end = mText.end();
+	for (text_list_t::iterator iter = mText.begin(); iter != text_end; ++iter)
 	{
 		max_width = llmax(max_width, (S32)fontp->getWidth(*iter));
 	}
@@ -759,17 +770,15 @@ void LLHoverView::draw()
 	LLGLSUIDefault gls_ui;
 
 	shadow_color.mV[VALPHA] = 0.7f * alpha;
-	static LLCachedControl<S32> shadow_offset(gSavedSettings, "DropShadowTooltip");
-	shadow_imagep->draw(LLRect(left + shadow_offset, top - shadow_offset,
-							   right + shadow_offset, bottom - shadow_offset),
-						shadow_color);
+	mShadowImage->draw(LLRect(left + shadow_offset, top - shadow_offset,
+							  right + shadow_offset, bottom - shadow_offset),
+					   shadow_color);
 
 	bg_color.mV[VALPHA] = alpha;
-	box_imagep->draw(LLRect(left, top, right, bottom), bg_color);
+	mBoxImage->draw(LLRect(left, top, right, bottom), bg_color);
 
 	S32 cur_offset = top - 4;
-	for (text_list_t::iterator iter = mText.begin(); iter != mText.end();
-		 ++iter)
+	for (text_list_t::iterator iter = mText.begin(); iter != text_end; ++iter)
 	{
 		fontp->renderUTF8(*iter, 0, left + 10, cur_offset,
 						  text_color, LLFontGL::LEFT, LLFontGL::TOP);

@@ -1,11 +1,11 @@
-/** 
+/**
  * @file lldrawpoolsimple.cpp
  * @brief LLDrawPoolSimple class implementation
  *
  * $LicenseInfo:firstyear=2002&license=viewergpl$
- * 
+ *
  * Copyright (c) 2002-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -42,7 +42,6 @@
 #include "llspatialpartition.h"
 #include "llviewershadermgr.h"
 #include "llrender.h"
-
 
 static LLGLSLShader* simple_shader = NULL;
 static LLGLSLShader* fullbright_shader = NULL;
@@ -66,7 +65,7 @@ void LLDrawPoolGlow::render(S32 pass)
 	}
 	else
 	{
-		gPipeline.enableLightsFullbright(LLColor4(1,1,1,1));
+		gPipeline.enableLightsFullbright(LLColor4(1, 1, 1, 1));
 	}
 
 	LLGLDepthTest depth(GL_TRUE, GL_FALSE);
@@ -88,9 +87,8 @@ void LLDrawPoolGlow::pushBatch(LLDrawInfo& params, U32 mask, BOOL texture)
 	LLRenderPass::pushBatch(params, mask, texture);
 }
 
-
-LLDrawPoolSimple::LLDrawPoolSimple() :
-	LLRenderPass(POOL_SIMPLE)
+LLDrawPoolSimple::LLDrawPoolSimple()
+:	LLRenderPass(POOL_SIMPLE)
 {
 }
 
@@ -116,7 +114,7 @@ void LLDrawPoolSimple::beginRenderPass(S32 pass)
 	{
 		simple_shader->bind();
 	}
-	else 
+	else
 	{
 		// don't use shaders!
 		if (gGLManager.mHasShaderObjects)
@@ -131,8 +129,8 @@ void LLDrawPoolSimple::endRenderPass(S32 pass)
 	LLFastTimer t(LLFastTimer::FTM_RENDER_SIMPLE);
 	LLRenderPass::endRenderPass(pass);
 
-	if (mVertexShaderLevel > 0){
-
+	if (mVertexShaderLevel > 0)
+	{
 		simple_shader->unbind();
 	}
 }
@@ -187,17 +185,15 @@ void LLDrawPoolSimple::renderDeferred(S32 pass)
 }
 
 // grass drawpool
-LLDrawPoolGrass::LLDrawPoolGrass() :
- LLRenderPass(POOL_GRASS)
+LLDrawPoolGrass::LLDrawPoolGrass()
+:	LLRenderPass(POOL_GRASS)
 {
-
 }
 
 void LLDrawPoolGrass::prerender()
 {
 	mVertexShaderLevel = LLViewerShaderMgr::instance()->getVertexShaderLevel(LLViewerShaderMgr::SHADER_OBJECT);
 }
-
 
 void LLDrawPoolGrass::beginRenderPass(S32 pass)
 {
@@ -216,7 +212,7 @@ void LLDrawPoolGrass::beginRenderPass(S32 pass)
 	{
 		simple_shader->bind();
 	}
-	else 
+	else
 	{
 		// don't use shaders!
 		if (gGLManager.mHasShaderObjects)
@@ -255,12 +251,10 @@ void LLDrawPoolGrass::render(S32 pass)
 
 void LLDrawPoolGrass::beginDeferredPass(S32 pass)
 {
-
 }
 
 void LLDrawPoolGrass::endDeferredPass(S32 pass)
 {
-
 }
 
 void LLDrawPoolGrass::renderDeferred(S32 pass)
@@ -278,10 +272,9 @@ void LLDrawPoolGrass::renderDeferred(S32 pass)
 	gGL.setAlphaRejectSettings(LLRender::CF_DEFAULT);
 }
 
-
 // Fullbright drawpool
-LLDrawPoolFullbright::LLDrawPoolFullbright() :
-	LLRenderPass(POOL_FULLBRIGHT)
+LLDrawPoolFullbright::LLDrawPoolFullbright()
+:	LLRenderPass(POOL_FULLBRIGHT)
 {
 }
 
@@ -316,7 +309,7 @@ void LLDrawPoolFullbright::endRenderPass(S32 pass)
 }
 
 void LLDrawPoolFullbright::render(S32 pass)
-{ //render fullbright
+{	// render fullbright
 	LLFastTimer t(LLFastTimer::FTM_RENDER_FULLBRIGHT);
 	if (mVertexShaderLevel > 0)
 	{
@@ -340,6 +333,6 @@ void LLDrawPoolFullbright::render(S32 pass)
 }
 
 S32 LLDrawPoolFullbright::getNumPasses()
-{ 
+{
 	return 1;
 }

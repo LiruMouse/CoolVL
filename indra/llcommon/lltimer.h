@@ -44,7 +44,7 @@
 #include <list>
 // units conversions
 #ifndef USEC_PER_SEC
-    const U32	USEC_PER_SEC	= 1000000;
+const U32	USEC_PER_SEC	= 1000000;
 #endif
 const U32	SEC_PER_MIN		= 60;
 const U32	MIN_PER_HOUR	= 60;
@@ -67,8 +67,8 @@ public:
 	LLTimer();
 	~LLTimer();
 
-	static void initClass() { if (!sTimer) sTimer = new LLTimer; }
-	static void cleanupClass() { delete sTimer; sTimer = NULL; }
+	static void initClass()		{ if (!sTimer) sTimer = new LLTimer; }
+	static void cleanupClass()	{ delete sTimer; sTimer = NULL; }
 
 	// Return a high precision number of seconds since the start of
 	// this application instance.
@@ -85,14 +85,14 @@ public:
 
 
 	// MANIPULATORS
-	void start() { reset(); mStarted = TRUE; }
-	void stop() { mStarted = FALSE; }
+	void start()				{ reset(); mStarted = TRUE; }
+	void stop()					{ mStarted = FALSE; }
 	void reset();								// Resets the timer
-	void setLastClockCount(U64 current_count);		// Sets the timer so that the next elapsed call will be relative to this time
+	void setLastClockCount(U64 current_count);	// Sets the timer so that the next elapsed call will be relative to this time
 	void setTimerExpirySec(F32 expiration);
 	BOOL checkExpirationAndReset(F32 expiration);
 	BOOL hasExpired() const;
-	F32 getElapsedTimeAndResetF32();	// Returns elapsed time in seconds with reset
+	F32 getElapsedTimeAndResetF32();		// Returns elapsed time in seconds with reset
 	F64 getElapsedTimeAndResetF64();
 
 	F32 getRemainingTimeF32() const;
@@ -103,7 +103,7 @@ public:
 	F32 getElapsedTimeF32() const;			// Returns elapsed time in seconds
 	F64 getElapsedTimeF64() const;			// Returns elapsed time in seconds
 
-	BOOL getStarted() const { return mStarted; }
+	BOOL getStarted() const		{ return mStarted; }
 
 
 	static U64 getCurrentClockCount();		// Returns the raw clockticks

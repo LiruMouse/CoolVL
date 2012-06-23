@@ -1,11 +1,11 @@
-/** 
+/**
  * @file llcallingcard.cpp
  * @brief Implementation of the LLPreviewCallingCard class
  *
  * $LicenseInfo:firstyear=2002&license=viewergpl$
- * 
+ *
  * Copyright (c) 2002-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -32,15 +32,14 @@
 
 #include "llviewerprecompiledheaders.h"
 
+#include <vector>
+#include <algorithm>
+
 #if LL_WINDOWS
-#pragma warning( disable : 4800 ) // performance warning in <functional>
+#pragma warning(disable : 4800) // performance warning in <functional>
 #endif
 
 #include "llcallingcard.h"
-
-#include <vector>
-#include <algorithm>
-//#include <iterator>
 
 #include "indra_constants.h"
 #include "llcachename.h"
@@ -75,7 +74,7 @@ public:
 	void setTrackedCoarseLocation(const LLVector3d& global_pos);
 	void agentFound(const LLUUID& prey,
 					const LLVector3d& estimated_global_pos);
-	
+
 public:
 	LLUUID mAvatarID;
 	std::string mName;
@@ -94,7 +93,7 @@ const F32 OFFLINE_SECONDS = FIND_FREQUENCY + 8.0f;
 // static
 LLAvatarTracker LLAvatarTracker::sInstance;
 
-/*
+#if 0
 class LLAvatarTrackerInventoryObserver : public LLInventoryObserver
 {
 public:
@@ -105,18 +104,16 @@ public:
 protected:
 	LLAvatarTracker* mAT;
 };
-*/
 
-/*
 void LLAvatarTrackerInventoryObserver::changed(U32 mask)
 {
 	// if there's a calling card change, just do it.
-	if((mask & LLInventoryObserver::CALLING_CARD) != 0)
+	if ((mask & LLInventoryObserver::CALLING_CARD) != 0)
 	{
 		mAT->inventoryChanged();
 	}
 }
-*/
+#endif
 
 ///----------------------------------------------------------------------------
 /// Class LLAvatarTracker
@@ -127,7 +124,7 @@ LLAvatarTracker::LLAvatarTracker() :
 	mTrackedAgentValid(false),
 	//mInventory(NULL),
 	//mInventoryObserver(NULL),
-	mModifyMask(0x0)	
+	mModifyMask(0x0)
 {
 }
 
@@ -146,7 +143,7 @@ void LLAvatarTracker::track(const LLUUID& avatar_id, const std::string& name)
 	findAgent();
 
 	// We track here because findAgent() is called on a timer (for now).
-	if(avatar_id.notNull())
+	if (avatar_id.notNull())
 	{
 		LLMessageSystem* msg = gMessageSystem;
 		msg->newMessageFast(_PREHASH_TrackAgent);
@@ -178,7 +175,7 @@ void LLAvatarTracker::untrack(const LLUUID& avatar_id)
 
 void LLAvatarTracker::setTrackedCoarseLocation(const LLVector3d& global_pos)
 {
-	if(mTrackingData)
+	if (mTrackingData)
 	{
 		mTrackingData->setTrackedCoarseLocation(global_pos);
 	}
@@ -186,7 +183,7 @@ void LLAvatarTracker::setTrackedCoarseLocation(const LLVector3d& global_pos)
 
 bool LLAvatarTracker::haveTrackingInfo()
 {
-	if(mTrackingData)
+	if (mTrackingData)
 	{
 		return mTrackingData->haveTrackingInfo();
 	}
@@ -197,7 +194,7 @@ LLVector3d LLAvatarTracker::getGlobalPos()
 {
 	if (!mTrackedAgentValid || !mTrackingData) return LLVector3d();
 	LLVector3d global_pos;
-	
+
 	LLVOAvatar* avatarp = gObjectList.findAvatar(mTrackingData->mAvatarID);
 	if (avatarp && !avatarp->isDead())
 	{
@@ -220,7 +217,7 @@ void LLAvatarTracker::getDegreesAndDist(F32& rot,
 										F64& horiz_dist,
 										F64& vert_dist)
 {
-	if(!mTrackingData) return;
+	if (!mTrackingData) return;
 
 	LLVector3d global_pos;
 
@@ -242,7 +239,7 @@ void LLAvatarTracker::getDegreesAndDist(F32& rot,
 
 const std::string& LLAvatarTracker::getName()
 {
-	if(mTrackingData)
+	if (mTrackingData)
 	{
 		return mTrackingData->mName;
 	}
@@ -254,7 +251,7 @@ const std::string& LLAvatarTracker::getName()
 
 const LLUUID& LLAvatarTracker::getAvatarID()
 {
-	if(mTrackingData)
+	if (mTrackingData)
 	{
 		return mTrackingData->mAvatarID;
 	}
@@ -271,18 +268,20 @@ S32 LLAvatarTracker::addBuddyList(const LLAvatarTracker::buddy_map_t& buds)
 	U32 new_buddy_count = 0;
 	std::string first,last;
 	LLUUID agent_id;
-	for(buddy_map_t::const_iterator itr = buds.begin(); itr != buds.end(); ++itr)
+	for (buddy_map_t::const_iterator itr = buds.begin(); itr != buds.end();
+		 ++itr)
 	{
 		agent_id = (*itr).first;
 		buddy_map_t::const_iterator existing_buddy = mBuddyInfo.find(agent_id);
-		if(existing_buddy == mBuddyInfo.end())
+		if (existing_buddy == mBuddyInfo.end())
 		{
 			++new_buddy_count;
 			mBuddyInfo[agent_id] = (*itr).second;
 			gCacheName->getName(agent_id, first, last);
 			mModifyMask |= LLFriendObserver::ADD;
 			LL_DEBUGS("AvatarTracker") << "Added buddy " << agent_id << ", "
-									   << (mBuddyInfo[agent_id]->isOnline() ? "Online" : "Offline")
+									   << (mBuddyInfo[agent_id]->isOnline() ? "Online"
+																			: "Offline")
 									   << ", TO: "
 									   << mBuddyInfo[agent_id]->getRightsGrantedTo()
 									   << ", FROM: "
@@ -293,24 +292,25 @@ S32 LLAvatarTracker::addBuddyList(const LLAvatarTracker::buddy_map_t& buds)
 		{
 			LLRelationship* e_r = (*existing_buddy).second;
 			LLRelationship* n_r = (*itr).second;
-			llwarns << "!! Add buddy for existing buddy: " << agent_id
-					<< " [" << (e_r->isOnline() ? "Online" : "Offline") << "->" << (n_r->isOnline() ? "Online" : "Offline")
-					<< ", " <<  e_r->getRightsGrantedTo() << "->" << n_r->getRightsGrantedTo()
-					<< ", " <<  e_r->getRightsGrantedTo() << "->" << n_r->getRightsGrantedTo()
-					<< "]" << llendl;
+			llwarns << "Add buddy for existing buddy: " << agent_id
+					<< " [" << (e_r->isOnline() ? "Online" : "Offline")
+					<< "->" << (n_r->isOnline() ? "Online" : "Offline")
+					<< ", " <<  e_r->getRightsGrantedTo()
+					<< "->" << n_r->getRightsGrantedTo()
+					<< ", " <<  e_r->getRightsGrantedTo()
+					<< "->" << n_r->getRightsGrantedTo() << "]" << llendl;
 		}
 	}
 	notifyObservers();
-	
+
 	return new_buddy_count;
 }
-
 
 void LLAvatarTracker::copyBuddyList(buddy_map_t& buddies) const
 {
 	buddy_map_t::const_iterator it = mBuddyInfo.begin();
 	buddy_map_t::const_iterator end = mBuddyInfo.end();
-	for(; it != end; ++it)
+	for ( ; it != end; ++it)
 	{
 		buddies[(*it).first] = (*it).second;
 	}
@@ -321,7 +321,7 @@ void LLAvatarTracker::terminateBuddy(const LLUUID& id)
 	LL_DEBUGS("AvatarTracker") << "LLAvatarTracker::terminateBuddy()"
 							   << LL_ENDL;
 	LLRelationship* buddy = get_ptr_in_map(mBuddyInfo, id);
-	if(!buddy) return;
+	if (!buddy) return;
 	mBuddyInfo.erase(id);
 	LLMessageSystem* msg = gMessageSystem;
 	msg->newMessage("TerminateFriendship");
@@ -338,7 +338,7 @@ void LLAvatarTracker::terminateBuddy(const LLUUID& id)
 // get all buddy info
 const LLRelationship* LLAvatarTracker::getBuddyInfo(const LLUUID& id) const
 {
-	if(id.isNull()) return NULL;
+	if (id.isNull()) return NULL;
 	return get_ptr_in_map(mBuddyInfo, id);
 }
 
@@ -346,7 +346,7 @@ const LLRelationship* LLAvatarTracker::getBuddyInfo(const LLUUID& id) const
 void LLAvatarTracker::setBuddyOnline(const LLUUID& id, bool is_online)
 {
 	LLRelationship* info = get_ptr_in_map(mBuddyInfo, id);
-	if(info)
+	if (info)
 	{
 		info->online(is_online);
 		mModifyMask |= LLFriendObserver::ONLINE;
@@ -356,26 +356,28 @@ void LLAvatarTracker::setBuddyOnline(const LLUUID& id, bool is_online)
 	}
 	else
 	{
-		llwarns << "!! No buddy info found for " << id 
-				<< ", setting to " << (is_online ? "Online" : "Offline") << llendl;
+		llwarns << "!! No buddy info found for " << id
+				<< ", setting to " << (is_online ? "Online" : "Offline")
+				<< llendl;
 	}
 }
 
 bool LLAvatarTracker::isBuddyOnline(const LLUUID& id) const
 {
 	LLRelationship* info = get_ptr_in_map(mBuddyInfo, id);
-	if(info)
+	if (info)
 	{
 		return info->isOnline();
 	}
 	return false;
 }
 
+#if TRACK_POWER
 // empowered status
 void LLAvatarTracker::setBuddyEmpowered(const LLUUID& id, bool is_empowered)
 {
 	LLRelationship* info = get_ptr_in_map(mBuddyInfo, id);
-	if(info)
+	if (info)
 	{
 		info->grantRights(LLRelationship::GRANT_MODIFY_OBJECTS, 0);
 		mModifyMask |= LLFriendObserver::POWERS;
@@ -385,7 +387,7 @@ void LLAvatarTracker::setBuddyEmpowered(const LLUUID& id, bool is_empowered)
 bool LLAvatarTracker::isBuddyEmpowered(const LLUUID& id) const
 {
 	LLRelationship* info = get_ptr_in_map(mBuddyInfo, id);
-	if(info)
+	if (info)
 	{
 		return info->isRightGrantedTo(LLRelationship::GRANT_MODIFY_OBJECTS);
 	}
@@ -396,21 +398,17 @@ void LLAvatarTracker::empower(const LLUUID& id, bool grant)
 {
 	// wrapper for ease of use in some situations.
 	buddy_map_t list;
-	/*
 	list.insert(id);
 	empowerList(list, grant);
-	*/
 }
 
 void LLAvatarTracker::empowerList(const buddy_map_t& list, bool grant)
 {
-	llwarns << "LLAvatarTracker::empowerList() not implemented." << llendl;
-/*
 	LLMessageSystem* msg = gMessageSystem;
 	const char* message_name;
 	const char* block_name;
 	const char* field_name;
-	if(grant)
+	if (grant)
 	{
 		message_name = _PREHASH_GrantModification;
 		block_name = _PREHASH_EmpoweredBlock;
@@ -429,11 +427,11 @@ void LLAvatarTracker::empowerList(const buddy_map_t& list, bool grant)
 	bool start_new_message = true;
 	buddy_list_t::const_iterator it = list.begin();
 	buddy_list_t::const_iterator end = list.end();
-	for(; it != end; ++it)
+	for ( ; it != end; ++it)
 	{
-		if(NULL == get_ptr_in_map(mBuddyInfo, (*it))) continue;
+		if (NULL == get_ptr_in_map(mBuddyInfo, (*it))) continue;
 		setBuddyEmpowered((*it), grant);
-		if(start_new_message)
+		if (start_new_message)
 		{
 			start_new_message = false;
 			msg->newMessageFast(message_name);
@@ -444,18 +442,18 @@ void LLAvatarTracker::empowerList(const buddy_map_t& list, bool grant)
 		}
 		msg->nextBlockFast(block_name);
 		msg->addUUIDFast(field_name, (*it));
-		if(msg->isSendFullFast(block_name))
+		if (msg->isSendFullFast(block_name))
 		{
 			start_new_message = true;
 			gAgent.sendReliableMessage();
 		}
 	}
-	if(!start_new_message)
+	if (!start_new_message)
 	{
 		gAgent.sendReliableMessage();
 	}
-*/
 }
+#endif
 
 void LLAvatarTracker::deleteTrackingData()
 {
@@ -484,7 +482,7 @@ void LLAvatarTracker::findAgent()
 
 void LLAvatarTracker::addObserver(LLFriendObserver* observer)
 {
-	if(observer)
+	if (observer)
 	{
 		mObservers.push_back(observer);
 	}
@@ -492,9 +490,9 @@ void LLAvatarTracker::addObserver(LLFriendObserver* observer)
 
 void LLAvatarTracker::removeObserver(LLFriendObserver* observer)
 {
-	mObservers.erase(
-		std::remove(mObservers.begin(), mObservers.end(), observer),
-		mObservers.end());
+	mObservers.erase(std::remove(mObservers.begin(), mObservers.end(),
+								 observer),
+					 mObservers.end());
 }
 
 void LLAvatarTracker::notifyObservers()
@@ -502,7 +500,7 @@ void LLAvatarTracker::notifyObservers()
 	observer_list_t observers(mObservers);
 	observer_list_t::iterator it = observers.begin();
 	observer_list_t::iterator end = observers.end();
-	for(; it != end; ++it)
+	for ( ; it != end; ++it)
 	{
 		(*it)->changed(mModifyMask);
 	}
@@ -513,7 +511,7 @@ void LLAvatarTracker::applyFunctor(LLRelationshipFunctor& f)
 {
 	buddy_map_t::iterator it = mBuddyInfo.begin();
 	buddy_map_t::iterator end = mBuddyInfo.end();
-	for(; it != end; ++it)
+	for ( ; it != end; ++it)
 	{
 		f((*it).first, (*it).second);
 	}
@@ -537,7 +535,6 @@ void LLAvatarTracker::processAgentFound(LLMessageSystem* msg, void**)
 {
 	LLUUID id;
 
-	
 	msg->getUUIDFast(_PREHASH_AgentBlock, _PREHASH_Hunter, id);
 	msg->getUUIDFast(_PREHASH_AgentBlock, _PREHASH_Prey, id);
 	// *FIX: should make sure prey id matches.
@@ -552,11 +549,13 @@ void LLAvatarTracker::processAgentFound(LLMessageSystem* msg, void**)
 void LLAvatarTracker::agentFound(const LLUUID& prey,
 								 const LLVector3d& estimated_global_pos)
 {
-	if(!mTrackingData) return;
-	//if we get a valid reply from the server, that means the agent
-	//is our friend and mappable, so enable interest list based updates
-	LLAvatarTracker::instance().setTrackedAgentValid(true);
-	mTrackingData->agentFound(prey, estimated_global_pos);
+	// If we get a valid reply from the server, that means the agent is our
+	// friend and mappable, so enable interest list based updates
+	if (mTrackingData)
+	{
+		LLAvatarTracker::instance().setTrackedAgentValid(true);
+		mTrackingData->agentFound(prey, estimated_global_pos);
+	}
 }
 
 // 	static
@@ -581,33 +580,37 @@ void LLAvatarTracker::processChange(LLMessageSystem* msg)
 	LLUUID agent_id, agent_related;
 	S32 new_rights;
 	msg->getUUIDFast(_PREHASH_AgentData, _PREHASH_AgentID, agent_id);
-	for(int i = 0; i < count; ++i)
+	for (S32 i = 0; i < count; ++i)
 	{
-		msg->getUUIDFast(_PREHASH_Rights, _PREHASH_AgentRelated, agent_related, i);
+		msg->getUUIDFast(_PREHASH_Rights, _PREHASH_AgentRelated, agent_related,
+						 i);
 		msg->getS32Fast(_PREHASH_Rights,_PREHASH_RelatedRights, new_rights, i);
-		if(agent_id == gAgent.getID())
+		if (agent_id == gAgent.getID())
 		{
-			if(mBuddyInfo.find(agent_related) != mBuddyInfo.end())
+			if (mBuddyInfo.find(agent_related) != mBuddyInfo.end())
 			{
 				(mBuddyInfo[agent_related])->setRightsTo(new_rights);
 			}
 		}
 		else
 		{
-			if(mBuddyInfo.find(agent_id) != mBuddyInfo.end())
+			if (mBuddyInfo.find(agent_id) != mBuddyInfo.end())
 			{
-				if((mBuddyInfo[agent_id]->getRightsGrantedFrom() ^  new_rights) & LLRelationship::GRANT_MODIFY_OBJECTS)
+				if ((mBuddyInfo[agent_id]->getRightsGrantedFrom() ^ new_rights) &
+					LLRelationship::GRANT_MODIFY_OBJECTS)
 				{
 					std::string name;
 					LLSD args;
 					if (gCacheName->getFullName(agent_id, name))
 					{
-						if (LLAvatarNameCache::useDisplayNames() && !gSavedSettings.getBOOL("LegacyNamesForFriends"))
+						if (!LLAvatarName::sLegacyNamesForFriends &&
+							LLAvatarNameCache::useDisplayNames())
 						{
 							LLAvatarName avatar_name;
 							if (LLAvatarNameCache::get(agent_id, &avatar_name))
 							{
-								// Always show "Display Name [Legacy Name]" for security reasons
+								// Always show "Display Name [Legacy Name]"
+								// for security reasons
 								name = avatar_name.getNames();
 							}
 						}
@@ -645,30 +648,32 @@ void LLAvatarTracker::processNotify(LLMessageSystem* msg, bool online)
 
 	LL_DEBUGS("AvatarTracker") << "Received " << count
 							   << " online notifications **** " << LL_ENDL;
-	if(count > 0)
+	if (count > 0)
 	{
 		LLUUID agent_id;
 		const LLRelationship* info = NULL;
 		LLUUID tracking_id;
-		if(mTrackingData)
+		if (mTrackingData)
 		{
 			tracking_id = mTrackingData->mAvatarID;
 		}
 		BOOL notify = FALSE;
 		LLSD args;
-		for(S32 i = 0; i < count; ++i)
+		for (S32 i = 0; i < count; ++i)
 		{
-			msg->getUUIDFast(_PREHASH_AgentBlock, _PREHASH_AgentID, agent_id, i);
+			msg->getUUIDFast(_PREHASH_AgentBlock, _PREHASH_AgentID, agent_id,
+							 i);
 			info = getBuddyInfo(agent_id);
-			if(info)
+			if (info)
 			{
 				setBuddyOnline(agent_id,online);
-				if(chat_notify)
+				if (chat_notify)
 				{
 					std::string name;
 					if (gCacheName->getFullName(agent_id, name))
 					{
-						if (LLAvatarNameCache::useDisplayNames() && !gSavedSettings.getBOOL("LegacyNamesForFriends"))
+						if (!LLAvatarName::sLegacyNamesForFriends &&
+							LLAvatarNameCache::useDisplayNames())
 						{
 							LLAvatarName avatar_name;
 							if (LLAvatarNameCache::get(agent_id, &avatar_name))
@@ -690,11 +695,12 @@ void LLAvatarTracker::processNotify(LLMessageSystem* msg, bool online)
 			}
 			else
 			{
-				llwarns << "Received online notification for unknown buddy: " 
-					<< agent_id << " is " << (online ? "ONLINE" : "OFFLINE") << llendl;
+				llwarns << "Received online notification for unknown buddy: "
+						<< agent_id << " is "
+						<< (online ? "ONLINE" : "OFFLINE") << llendl;
 			}
 
-			if(tracking_id == agent_id)
+			if (tracking_id == agent_id)
 			{
 				// we were tracking someone who went offline
 				deleteTrackingData();
@@ -705,9 +711,11 @@ void LLAvatarTracker::processNotify(LLMessageSystem* msg, bool online)
 		if (notify && gIMMgr)
 		{
 			// Popup a notify box with online status of this agent
-			LLNotificationPtr notification = LLNotifications::instance().add(online ? "FriendOnline" : "FriendOffline", args);
+			LLNotificationPtr notification = LLNotifications::instance().add(online ? "FriendOnline"
+																					: "FriendOffline", args);
 
-			// If there's an open IM session with this agent, send a notification there too.
+			// If there's an open IM session with this agent, send a
+			// notification there too.
 			LLUUID session_id = LLIMMgr::computeSessionID(IM_NOTHING_SPECIAL, agent_id);
 			LLFloaterIMPanel *floater = gIMMgr->findFloaterBySession(session_id);
 			if (floater)
@@ -715,7 +723,8 @@ void LLAvatarTracker::processNotify(LLMessageSystem* msg, bool online)
 				std::string notifyMsg = notification->getMessage();
 				if (!notifyMsg.empty())
 				{
-					floater->addHistoryLine(notifyMsg,gSavedSettings.getColor4("SystemChatColor"));
+					floater->addHistoryLine(notifyMsg,
+											gSavedSettings.getColor4("SystemChatColor"));
 				}
 			}
 		}
@@ -728,10 +737,10 @@ void LLAvatarTracker::processNotify(LLMessageSystem* msg, bool online)
 
 void LLAvatarTracker::formFriendship(const LLUUID& id)
 {
-	if(id.notNull())
+	if (id.notNull())
 	{
 		LLRelationship* buddy_info = get_ptr_in_map(instance().mBuddyInfo, id);
-		if(!buddy_info)
+		if (!buddy_info)
 		{
 			LLAvatarTracker& at = LLAvatarTracker::instance();
 			//The default for relationship establishment is to have both parties
@@ -748,11 +757,11 @@ void LLAvatarTracker::processTerminateFriendship(LLMessageSystem* msg, void**)
 {
 	LLUUID id;
 	msg->getUUID("ExBlock", "OtherID", id);
-	if(id.notNull())
+	if (id.notNull())
 	{
 		LLAvatarTracker& at = LLAvatarTracker::instance();
 		LLRelationship* buddy = get_ptr_in_map(at.mBuddyInfo, id);
-		if(!buddy) return;
+		if (!buddy) return;
 		at.mBuddyInfo.erase(id);
 		at.mModifyMask |= LLFriendObserver::REMOVE;
 		delete buddy;
@@ -770,7 +779,8 @@ void LLAvatarTracker::dirtyBuddies()
 /// Tracking Data
 ///----------------------------------------------------------------------------
 
-LLTrackingData::LLTrackingData(const LLUUID& avatar_id, const std::string& name)
+LLTrackingData::LLTrackingData(const LLUUID& avatar_id,
+							   const std::string& name)
 :	mAvatarID(avatar_id),
 	mHaveInfo(false),
 	mHaveCoarseInfo(false)
@@ -778,7 +788,7 @@ LLTrackingData::LLTrackingData(const LLUUID& avatar_id, const std::string& name)
 	mCoarseLocationTimer.setTimerExpirySec(COARSE_FREQUENCY);
 	mUpdateTimer.setTimerExpirySec(FIND_FREQUENCY);
 	mAgentGone.setTimerExpirySec(OFFLINE_SECONDS);
-	if(!name.empty())
+	if (!name.empty())
 	{
 		mName = name;
 	}
@@ -787,7 +797,7 @@ LLTrackingData::LLTrackingData(const LLUUID& avatar_id, const std::string& name)
 void LLTrackingData::agentFound(const LLUUID& prey,
 								const LLVector3d& estimated_global_pos)
 {
-	if(prey != mAvatarID)
+	if (prey != mAvatarID)
 	{
 		llwarns << "LLTrackingData::agentFound() - found " << prey
 				<< " but looking for " << mAvatarID << llendl;
@@ -841,48 +851,53 @@ void LLTrackingData::setTrackedCoarseLocation(const LLVector3d& global_pos)
 // various buddy functors
 ///----------------------------------------------------------------------------
 
-bool LLCollectProxyBuddies::operator()(const LLUUID& buddy_id, LLRelationship* buddy)
+bool LLCollectProxyBuddies::operator()(const LLUUID& buddy_id,
+									   LLRelationship* buddy)
 {
-	if(buddy->isRightGrantedFrom(LLRelationship::GRANT_MODIFY_OBJECTS))
+	if (buddy->isRightGrantedFrom(LLRelationship::GRANT_MODIFY_OBJECTS))
 	{
 		mProxy.insert(buddy_id);
 	}
 	return true;
 }
 
-bool LLCollectMappableBuddies::operator()(const LLUUID& buddy_id, LLRelationship* buddy)
+bool LLCollectMappableBuddies::operator()(const LLUUID& buddy_id,
+										  LLRelationship* buddy)
 {
 	gCacheName->getName(buddy_id, mFirst, mLast);
 	std::ostringstream fullname;
 	fullname << mFirst << " " << mLast;
 	buddy_map_t::value_type value(fullname.str(), buddy_id);
-	if(buddy->isOnline() && buddy->isRightGrantedFrom(LLRelationship::GRANT_MAP_LOCATION))
+	if (buddy->isOnline() &&
+		buddy->isRightGrantedFrom(LLRelationship::GRANT_MAP_LOCATION))
 	{
 		mMappable.insert(value);
 	}
 	return true;
 }
 
-bool LLCollectOnlineBuddies::operator()(const LLUUID& buddy_id, LLRelationship* buddy)
+bool LLCollectOnlineBuddies::operator()(const LLUUID& buddy_id,
+										LLRelationship* buddy)
 {
 	gCacheName->getName(buddy_id, mFirst, mLast);
 	std::ostringstream fullname;
 	fullname << mFirst << " " << mLast;
 	buddy_map_t::value_type value(fullname.str(), buddy_id);
-	if(buddy->isOnline())
+	if (buddy->isOnline())
 	{
 		mOnline.insert(value);
 	}
 	return true;
 }
 
-bool LLCollectAllBuddies::operator()(const LLUUID& buddy_id, LLRelationship* buddy)
+bool LLCollectAllBuddies::operator()(const LLUUID& buddy_id,
+									 LLRelationship* buddy)
 {
 	gCacheName->getName(buddy_id, mFirst, mLast);
 	std::ostringstream fullname;
 	fullname << mFirst << " " << mLast;
 	buddy_map_t::value_type value(fullname.str(), buddy_id);
-	if(buddy->isOnline())
+	if (buddy->isOnline())
 	{
 		mOnline.insert(value);
 	}
@@ -892,5 +907,3 @@ bool LLCollectAllBuddies::operator()(const LLUUID& buddy_id, LLRelationship* bud
 	}
 	return true;
 }
-
-

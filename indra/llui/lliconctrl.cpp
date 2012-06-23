@@ -34,9 +34,6 @@
 
 #include "lliconctrl.h"
 
-// Linden library includes 
-
-// Project includes
 #include "llcontrol.h"
 #include "llui.h"
 #include "lluictrlfactory.h"
@@ -45,45 +42,40 @@ const F32 RESOLUTION_BUMP = 1.f;
 
 static LLRegisterWidget<LLIconCtrl> r("icon");
 
-LLIconCtrl::LLIconCtrl(const std::string& name, const LLRect &rect, const LLUUID &image_id)
-:	LLUICtrl(name, 
-			 rect, 
-			 FALSE, // mouse opaque
-			 NULL, NULL, 
-			 FOLLOWS_LEFT | FOLLOWS_TOP),
-	mColor( LLColor4::white )
+LLIconCtrl::LLIconCtrl(const std::string& name,
+					   const LLRect& rect,
+					   const LLUUID& image_id)
+:	LLUICtrl(name, rect, FALSE, // mouse opaque
+			 NULL, NULL, FOLLOWS_LEFT | FOLLOWS_TOP),
+	mColor(LLColor4::white)
 {
-	setImage( image_id );
+	setImage(image_id);
 	setTabStop(FALSE);
 }
 
-LLIconCtrl::LLIconCtrl(const std::string& name, const LLRect &rect, const std::string &image_name)
-:	LLUICtrl(name, 
-			 rect, 
-			 FALSE, // mouse opaque
-			 NULL, NULL, 
-			 FOLLOWS_LEFT | FOLLOWS_TOP),
-	mColor( LLColor4::white ),
+LLIconCtrl::LLIconCtrl(const std::string& name,
+					   const LLRect& rect,
+					   const std::string& image_name)
+:	LLUICtrl(name, rect, FALSE, // mouse opaque
+			 NULL, NULL, FOLLOWS_LEFT | FOLLOWS_TOP),
+	mColor(LLColor4::white),
 	mImageName(image_name)
 {
-	setImage( image_name );
+	setImage(image_name);
 	setTabStop(FALSE);
 }
-
 
 LLIconCtrl::~LLIconCtrl()
 {
 	mImagep = NULL;
 }
 
-
 void LLIconCtrl::setImage(const std::string& image_name)
 {
-	//RN: support UUIDs masquerading as strings
+	// RN: support UUIDs masquerading as strings
 	if (LLUUID::validate(image_name))
 	{
 		mImageID = LLUUID(image_name);
-
 		setImage(mImageID);
 	}
 	else
@@ -101,12 +93,11 @@ void LLIconCtrl::setImage(const LLUUID& image_id)
 	mImageID = image_id;
 }
 
-
 void LLIconCtrl::draw()
 {
-	if( mImagep.notNull() )
+	if (mImagep.notNull())
 	{
-		mImagep->draw(getLocalRect(), mColor );
+		mImagep->draw(getLocalRect(), mColor);
 	}
 
 	LLUICtrl::draw();
@@ -119,7 +110,7 @@ void LLIconCtrl::setAlpha(F32 alpha)
 }
 
 // virtual
-void LLIconCtrl::setValue(const LLSD& value )
+void LLIconCtrl::setValue(const LLSD& value)
 {
 	if (value.isUUID())
 	{
@@ -155,7 +146,8 @@ LLXMLNodePtr LLIconCtrl::getXML(bool save_children) const
 	return node;
 }
 
-LLView* LLIconCtrl::fromXML(LLXMLNodePtr node, LLView *parent, LLUICtrlFactory *factory)
+LLView* LLIconCtrl::fromXML(LLXMLNodePtr node, LLView* parent,
+							LLUICtrlFactory* factory)
 {
 	std::string name("icon");
 	node->getAttributeString("name", name);
@@ -170,7 +162,7 @@ LLView* LLIconCtrl::fromXML(LLXMLNodePtr node, LLView *parent, LLUICtrlFactory *
 	}
 
 	LLColor4 color(LLColor4::white);
-	LLUICtrlFactory::getAttributeColor(node,"color", color);
+	LLUICtrlFactory::getAttributeColor(node, "color", color);
 
 	LLIconCtrl* icon = new LLIconCtrl(name, rect, image_name);
 

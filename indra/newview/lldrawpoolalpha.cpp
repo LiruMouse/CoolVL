@@ -1,11 +1,11 @@
-/** 
+/**
  * @file lldrawpoolalpha.cpp
  * @brief LLDrawPoolAlpha class implementation
  *
  * $LicenseInfo:firstyear=2002&license=viewergpl$
- * 
+ *
  * Copyright (c) 2002-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -58,13 +58,17 @@ BOOL LLDrawPoolAlpha::sShowDebugAlpha = FALSE;
 
 static BOOL deferred_render = FALSE;
 
-LLDrawPoolAlpha::LLDrawPoolAlpha(U32 type) :
-		LLRenderPass(type), current_shader(NULL), target_shader(NULL),
-		simple_shader(NULL), fullbright_shader(NULL),
-		mColorSFactor(LLRender::BF_UNDEF), mColorDFactor(LLRender::BF_UNDEF),
-		mAlphaSFactor(LLRender::BF_UNDEF), mAlphaDFactor(LLRender::BF_UNDEF)
+LLDrawPoolAlpha::LLDrawPoolAlpha(U32 type)
+:	LLRenderPass(type),
+	current_shader(NULL),
+	target_shader(NULL),
+	simple_shader(NULL),
+	fullbright_shader(NULL),
+	mColorSFactor(LLRender::BF_UNDEF),
+	mColorDFactor(LLRender::BF_UNDEF),
+	mAlphaSFactor(LLRender::BF_UNDEF),
+	mAlphaDFactor(LLRender::BF_UNDEF)
 {
-
 }
 
 LLDrawPoolAlpha::~LLDrawPoolAlpha()
@@ -83,7 +87,6 @@ S32 LLDrawPoolAlpha::getNumDeferredPasses()
 
 void LLDrawPoolAlpha::beginDeferredPass(S32 pass)
 {
-	
 }
 
 void LLDrawPoolAlpha::endDeferredPass(S32 pass)
@@ -98,22 +101,24 @@ void LLDrawPoolAlpha::renderDeferred(S32 pass)
 		gDeferredTreeProgram.bind();
 		LLGLEnable test(GL_ALPHA_TEST);
 		//render alpha masked objects
-		LLRenderPass::renderTexture(LLRenderPass::PASS_ALPHA_MASK, getVertexDataMask());
+		LLRenderPass::renderTexture(LLRenderPass::PASS_ALPHA_MASK,
+									getVertexDataMask());
 		gDeferredTreeProgram.unbind();
-	}			
+	}
 	gGL.setAlphaRejectSettings(LLRender::CF_DEFAULT);
 }
 
-S32 LLDrawPoolAlpha::getNumPostDeferredPasses() 
+S32 LLDrawPoolAlpha::getNumPostDeferredPasses()
 {
-	static LLCachedControl<bool> render_depth_of_field(gSavedSettings, "RenderDepthOfField");
+	static LLCachedControl<bool> render_depth_of_field(gSavedSettings,
+													   "RenderDepthOfField");
 	if (LLPipeline::sImpostorRender)
-	{ //skip depth buffer filling pass when rendering impostors
+	{	// skip depth buffer filling pass when rendering impostors
 		return 1;
 	}
 	else if (render_depth_of_field)
 	{
-		return 2; 
+		return 2;
 	}
 	else
 	{
@@ -121,8 +126,8 @@ S32 LLDrawPoolAlpha::getNumPostDeferredPasses()
 	}
 }
 
-void LLDrawPoolAlpha::beginPostDeferredPass(S32 pass) 
-{ 
+void LLDrawPoolAlpha::beginPostDeferredPass(S32 pass)
+{
 	LLFastTimer t(LLFastTimer::FTM_RENDER_ALPHA);
 
 	if (pass == 0)
@@ -134,8 +139,13 @@ void LLDrawPoolAlpha::beginPostDeferredPass(S32 pass)
 	{
 		//update depth buffer sampler
 		gPipeline.mScreen.flush();
-		gPipeline.mDeferredDepth.copyContents(gPipeline.mDeferredScreen, 0, 0, gPipeline.mDeferredScreen.getWidth(), gPipeline.mDeferredScreen.getHeight(),
-											  0, 0, gPipeline.mDeferredDepth.getWidth(), gPipeline.mDeferredDepth.getHeight(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+		gPipeline.mDeferredDepth.copyContents(gPipeline.mDeferredScreen, 0, 0,
+											  gPipeline.mDeferredScreen.getWidth(),
+											  gPipeline.mDeferredScreen.getHeight(),
+											  0, 0,
+											  gPipeline.mDeferredDepth.getWidth(),
+											  gPipeline.mDeferredDepth.getHeight(),
+											  GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 		gPipeline.mDeferredDepth.bindTarget();
 		simple_shader = NULL;
 		fullbright_shader = NULL;
@@ -150,8 +160,8 @@ void LLDrawPoolAlpha::beginPostDeferredPass(S32 pass)
 	gPipeline.enableLightsDynamic();
 }
 
-void LLDrawPoolAlpha::endPostDeferredPass(S32 pass) 
-{ 
+void LLDrawPoolAlpha::endPostDeferredPass(S32 pass)
+{
 	if (pass == 1)
 	{
 		gPipeline.mDeferredDepth.flush();
@@ -162,15 +172,15 @@ void LLDrawPoolAlpha::endPostDeferredPass(S32 pass)
 	endRenderPass(pass);
 }
 
-void LLDrawPoolAlpha::renderPostDeferred(S32 pass) 
-{ 
-	render(pass); 
+void LLDrawPoolAlpha::renderPostDeferred(S32 pass)
+{
+	render(pass);
 }
 
 void LLDrawPoolAlpha::beginRenderPass(S32 pass)
 {
 	LLFastTimer t(LLFastTimer::FTM_RENDER_ALPHA);
-	
+
 	if (LLPipeline::sUnderWaterRender)
 	{
 		simple_shader = &gObjectSimpleWaterProgram;
@@ -196,7 +206,7 @@ void LLDrawPoolAlpha::endRenderPass( S32 pass )
 	LLFastTimer t(LLFastTimer::FTM_RENDER_ALPHA);
 	LLRenderPass::endRenderPass(pass);
 
-	if(gPipeline.canUseWindLightShaders()) 
+	if(gPipeline.canUseWindLightShaders())
 	{
 		LLGLSLShader::bindNoShader();
 	}
@@ -250,8 +260,8 @@ void LLDrawPoolAlpha::render(S32 pass)
 		gGL.setAlphaRejectSettings(LLRender::CF_DEFAULT);
 	}
 
-	LLGLDepthTest depth(GL_TRUE, LLDrawPoolWater::sSkipScreenCopy || 
-				(deferred_render && pass == 1) ? GL_TRUE : GL_FALSE);
+	LLGLDepthTest depth(GL_TRUE, LLDrawPoolWater::sSkipScreenCopy ||
+						(deferred_render && pass == 1) ? GL_TRUE : GL_FALSE);
 
 	if (deferred_render && pass == 1)
 	{
@@ -293,13 +303,13 @@ void LLDrawPoolAlpha::render(S32 pass)
 
 	if (sShowDebugAlpha)
 	{
-		if (gPipeline.canUseWindLightShaders()) 
+		if (gPipeline.canUseWindLightShaders())
 		{
 			LLGLSLShader::bindNoShader();
 		}
 		gPipeline.enableLightsFullbright(LLColor4(1,1,1,1));
 		glColor4f(1,0,0,1);
-		LLViewerFetchedTexture::sSmokeImagep->addTextureStats(1024.f*1024.f);
+		LLViewerFetchedTexture::sSmokeImagep->addTextureStats(1024.f * 1024.f);
 		gGL.getTexUnit(0)->bind(LLViewerFetchedTexture::sSmokeImagep, TRUE);
 		renderAlphaHighlight(LLVertexBuffer::MAP_VERTEX |
 							LLVertexBuffer::MAP_TEXCOORD0);
@@ -308,18 +318,21 @@ void LLDrawPoolAlpha::render(S32 pass)
 
 void LLDrawPoolAlpha::renderAlphaHighlight(U32 mask)
 {
-	for (LLCullResult::sg_list_t::iterator i = gPipeline.beginAlphaGroups(); i != gPipeline.endAlphaGroups(); ++i)
+	for (LLCullResult::sg_list_t::iterator
+			i = gPipeline.beginAlphaGroups(), end = gPipeline.endAlphaGroups();
+		 i != end; ++i)
 	{
 		LLSpatialGroup* group = *i;
-		if (group->mSpatialPartition->mRenderByGroup &&
-			!group->isDead())
+		if (group->mSpatialPartition->mRenderByGroup && !group->isDead())
 		{
-			LLSpatialGroup::drawmap_elem_t& draw_info = group->mDrawMap[LLRenderPass::PASS_ALPHA];	
+			LLSpatialGroup::drawmap_elem_t& draw_info = group->mDrawMap[LLRenderPass::PASS_ALPHA];
 
-			for (LLSpatialGroup::drawmap_elem_t::iterator k = draw_info.begin(); k != draw_info.end(); ++k)	
+			for (LLSpatialGroup::drawmap_elem_t::iterator
+					k = draw_info.begin(), end2 = draw_info.end();
+				 k != end2; ++k)
 			{
 				LLDrawInfo& params = **k;
-				
+
 				if (params.mParticle)
 				{
 					continue;
@@ -331,7 +344,9 @@ void LLDrawPoolAlpha::renderAlphaHighlight(U32 mask)
 					params.mGroup->rebuildMesh();
 				}
 				params.mVertexBuffer->setBuffer(mask);
-				params.mVertexBuffer->drawRange(LLRender::TRIANGLES, params.mStart, params.mEnd, params.mCount, params.mOffset);
+				params.mVertexBuffer->drawRange(LLRender::TRIANGLES,
+												params.mStart, params.mEnd,
+												params.mCount, params.mOffset);
 				gPipeline.addTrianglesDrawn(params.mCount, params.mDrawMode);
 			}
 		}
@@ -346,12 +361,13 @@ void LLDrawPoolAlpha::renderAlpha(U32 mask)
 
 	BOOL use_shaders = (LLPipeline::sUnderWaterRender && gPipeline.canUseVertexShaders())
 						|| gPipeline.canUseWindLightShadersOnObjects();
-	
-	for (LLCullResult::sg_list_t::iterator i = gPipeline.beginAlphaGroups(); i != gPipeline.endAlphaGroups(); ++i)
+
+	for (LLCullResult::sg_list_t::iterator
+			i = gPipeline.beginAlphaGroups(), end = gPipeline.endAlphaGroups();
+		 i != end; ++i)
 	{
 		LLSpatialGroup* group = *i;
-		if (group->mSpatialPartition->mRenderByGroup &&
-			!group->isDead())
+		if (group->mSpatialPartition->mRenderByGroup && !group->isDead())
 		{
 			bool draw_glow_for_this_partition =
 				mVertexShaderLevel > 0 &&	// no shaders = no glow.
@@ -362,9 +378,11 @@ void LLDrawPoolAlpha::renderAlpha(U32 mask)
 				group->mSpatialPartition->mPartitionType != LLViewerRegion::PARTITION_CLOUD &&
 				group->mSpatialPartition->mPartitionType != LLViewerRegion::PARTITION_HUD_PARTICLE;
 
-			LLSpatialGroup::drawmap_elem_t& draw_info = group->mDrawMap[LLRenderPass::PASS_ALPHA];	
+			LLSpatialGroup::drawmap_elem_t& draw_info = group->mDrawMap[LLRenderPass::PASS_ALPHA];
 
-			for (LLSpatialGroup::drawmap_elem_t::iterator k = draw_info.begin(); k != draw_info.end(); ++k)	
+			for (LLSpatialGroup::drawmap_elem_t::iterator
+					k = draw_info.begin(), end2 = draw_info.end();
+				 k != end2; ++k)
 			{
 				LLDrawInfo& params = **k;
 
@@ -377,7 +395,7 @@ void LLDrawPoolAlpha::renderAlpha(U32 mask)
 						if (light_enabled || !initialized_lighting)
 						{
 							initialized_lighting = TRUE;
-							if (use_shaders) 
+							if (use_shaders)
 							{
 								target_shader = fullbright_shader;
 							}
@@ -392,7 +410,7 @@ void LLDrawPoolAlpha::renderAlpha(U32 mask)
 					else if (!light_enabled || !initialized_lighting)
 					{
 						initialized_lighting = TRUE;
-						if (use_shaders) 
+						if (use_shaders)
 						{
 							target_shader = simple_shader;
 						}
@@ -403,8 +421,9 @@ void LLDrawPoolAlpha::renderAlpha(U32 mask)
 						light_enabled = TRUE;
 					}
 
-					// If we need shaders, and we're not ALREADY using the proper shader, then bind it
-					// (this way we won't rebind shaders unnecessarily).
+					// If we need shaders, and we're not ALREADY using the
+					// proper shader, then bind it (this way we won't rebind
+					// shaders unnecessarily).
 					if (use_shaders && current_shader != target_shader)
 					{
 						llassert(target_shader != NULL);
@@ -458,7 +477,9 @@ void LLDrawPoolAlpha::renderAlpha(U32 mask)
 				}
 
 				params.mVertexBuffer->setBuffer(mask);
-				params.mVertexBuffer->drawRange(params.mDrawMode, params.mStart, params.mEnd, params.mCount, params.mOffset);
+				params.mVertexBuffer->drawRange(params.mDrawMode,
+												params.mStart, params.mEnd,
+												params.mCount, params.mOffset);
 				gPipeline.addTrianglesDrawn(params.mCount, params.mDrawMode);
 
 				// If this alpha mesh has glow, then draw it a second time to
@@ -476,11 +497,15 @@ void LLDrawPoolAlpha::renderAlpha(U32 mask)
 					glColor4ubv(params.mGlowColor.mV);
 
 					// do the actual drawing, again
-					params.mVertexBuffer->drawRange(params.mDrawMode, params.mStart, params.mEnd, params.mCount, params.mOffset);
+					params.mVertexBuffer->drawRange(params.mDrawMode,
+													params.mStart, params.mEnd,
+													params.mCount,
+													params.mOffset);
 					gPipeline.addTrianglesDrawn(params.mCount, params.mDrawMode);
 
 					// restore our alpha blend mode
-					gGL.blendFunc(mColorSFactor, mColorDFactor, mAlphaSFactor, mAlphaDFactor);
+					gGL.blendFunc(mColorSFactor, mColorDFactor, mAlphaSFactor,
+								  mAlphaDFactor);
 				}
 
 				if (params.mTextureMatrix && params.mTexture.notNull())
@@ -496,7 +521,7 @@ void LLDrawPoolAlpha::renderAlpha(U32 mask)
 	if (deferred_render && current_shader != NULL)
 	{
 		gPipeline.unbindDeferredShader(*current_shader);
-		LLVertexBuffer::unbind();	
+		LLVertexBuffer::unbind();
 		LLGLState::checkStates();
 		LLGLState::checkTextureChannels();
 		LLGLState::checkClientArrays();

@@ -48,6 +48,27 @@ LLFocusableElement::LLFocusableElement()
 {
 }
 
+void LLFocusableElement::setFocusLostCallback(void (*cb)(LLFocusableElement*, void*),
+											  void* user_data)
+{
+	mFocusLostCallback = cb;
+	mFocusCallbackUserData = user_data;
+}
+
+void LLFocusableElement::setFocusReceivedCallback(void (*cb)(LLFocusableElement*, void*),
+												  void* user_data)
+{
+	mFocusReceivedCallback = cb;
+	mFocusCallbackUserData = user_data;
+}
+
+void LLFocusableElement::setFocusChangedCallback(void (*cb)(LLFocusableElement*, void*),
+												 void* user_data)
+{
+	mFocusChangedCallback = cb;
+	mFocusCallbackUserData = user_data;
+}
+	
 // virtual
 BOOL LLFocusableElement::handleKey(KEY key, MASK mask, BOOL called_from_parent)
 {
@@ -110,6 +131,7 @@ LLFocusMgr::LLFocusMgr()
 	mKeystrokesOnly(FALSE),
 	mTopCtrl(NULL),
 	mFocusWeight(0.f),
+	mFocusColor(LLColor4::white),
 #ifdef _DEBUG
 	mMouseCaptorName("none"),
 	mKeyboardFocusName("none"),
@@ -382,8 +404,8 @@ F32 LLFocusMgr::getFocusFlashAmt() const
 
 LLColor4 LLFocusMgr::getFocusColor() const
 {
-	LLColor4 focus_color = lerp(LLUI::sColorsGroup->getColor("FocusColor"),
-								LLColor4::white, getFocusFlashAmt());
+	LLColor4 focus_color = lerp(mFocusColor, LLColor4::white,
+								getFocusFlashAmt());
 	// de-emphasize keyboard focus when app has lost focus (to avoid typing
 	// into wrong window problem)
 	if (!mAppHasFocus)

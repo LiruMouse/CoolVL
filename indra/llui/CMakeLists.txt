@@ -61,7 +61,6 @@ set(llui_SOURCE_FILES
     llspinctrl.cpp
     llstyle.cpp
     lltabcontainer.cpp
-    lltabcontainervertical.cpp
     lltextbox.cpp
     lltexteditor.cpp
     lltextparser.cpp
@@ -118,7 +117,6 @@ set(llui_HEADER_FILES
     llspinctrl.h
     llstyle.h
     lltabcontainer.h
-    lltabcontainervertical.h
     lltextbox.h
     lltexteditor.h
     lltextparser.h
