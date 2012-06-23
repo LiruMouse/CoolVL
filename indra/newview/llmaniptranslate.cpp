@@ -99,6 +99,16 @@ const U32 ARROW_TO_AXIS[4] =
 	VZ
 };
 
+// Sort manipulator handles by their screen-space projection
+struct ClosestToCamera
+{
+	bool operator()(const LLManipTranslate::ManipulatorHandle& a,
+					const LLManipTranslate::ManipulatorHandle& b) const
+	{
+		return a.mEndPosition.mV[VZ] < b.mEndPosition.mV[VZ];
+	}
+};
+
 LLManipTranslate::LLManipTranslate(LLToolComposite* composite)
 :	LLManip(std::string("Move"), composite),
 	mLastHoverMouseX(-1),
@@ -114,6 +124,8 @@ LLManipTranslate::LLManipTranslate(LLToolComposite* composite)
 	mPlaneManipOffsetMeters(0.f),
 	mUpdateTimer(),
 	mSnapOffsetMeters(0.f),
+	mSubdivisions(10.f),
+	mInSnapRegime(FALSE),
 	mArrowScales(1.f, 1.f, 1.f),
 	mPlaneScales(1.f, 1.f, 1.f),
 	mPlaneManipPositions(1.f, 1.f, 1.f, 1.f)
@@ -122,6 +134,28 @@ LLManipTranslate::LLManipTranslate(LLToolComposite* composite)
 	{ 
 		restoreGL();
 	}
+}
+
+// static
+bool LLManipTranslate::getSnapEnabled()
+{
+	static LLCachedControl<bool> snap_enabled(gSavedSettings, "SnapEnabled");
+	return snap_enabled;
+}
+
+// static
+bool LLManipTranslate::getSnapToMouseCursor()
+{
+	static LLCachedControl<bool> snap_to_mouse_cursor(gSavedSettings,
+													  "SnapToMouseCursor");
+	return snap_to_mouse_cursor;
+}
+
+// static
+F32 LLManipTranslate::getGridDrawSize()
+{
+	static LLCachedControl<F32> grid_draw_size(gSavedSettings, "GridDrawSize");
+	return grid_draw_size;
 }
 
 //static
@@ -161,19 +195,20 @@ void LLManipTranslate::restoreGL()
 
 	GLuint* d = new GLuint[rez*rez];
 
-	gGL.getTexUnit(0)->bindManual(LLTexUnit::TT_TEXTURE, sGridTex->getTexName(), true);
+	gGL.getTexUnit(0)->bindManual(LLTexUnit::TT_TEXTURE,
+								  sGridTex->getTexName(), true);
 	gGL.getTexUnit(0)->setTextureFilteringOption(LLTexUnit::TFO_TRILINEAR);
 
 	while (rez >= 1)
 	{
-		for (U32 i = 0; i < rez*rez; i++)
+		for (U32 i = 0; i < rez * rez; i++)
 		{
 			d[i] = 0x00FFFFFF;
 		}
 
 		U32 subcol = 0xFFFFFFFF;
 		if (rez >= 4)
-		{	//large grain grid
+		{	// large grain grid
 			for (U32 i = 0; i < rez; i++)
 			{
 				if (rez <= 16)
@@ -195,24 +230,24 @@ void LLManipTranslate::restoreGL()
 				{
 					subcol = 0xFFFFFFFF;
 				}
-				d[i			*rez+ 0		 ] = subcol;
-				d[0			*rez+ i		 ] = subcol;
+				d[i * rez] = subcol;
+				d[i] = subcol;
 				if (rez >= 32)
 				{
-					d[i			*rez+ (rez-1)] = subcol;
-					d[(rez-1)	*rez+ i		 ] = subcol;
+					d[i * rez + rez - 1] = subcol;
+					d[(rez - 1)	* rez + i] = subcol;
 				}
 
 				if (rez >= 64)
 				{
 					subcol = 0xFFFFFFFF;
 
-					if (i > 0 && i < (rez-1))
+					if (i > 0 && i < rez - 1)
 					{
-						d[i			*rez+ 1		 ] = subcol;
-						d[i			*rez+ (rez-2)] = subcol;
-						d[1			*rez+ i		 ] = subcol;
-						d[(rez-2)	*rez+ i		 ] = subcol;
+						d[i * rez + 1] = subcol;
+						d[i * rez + rez - 2] = subcol;
+						d[rez + i] = subcol;
+						d[(rez - 2)	* rez + i] = subcol;
 					}
 				}
 			}
@@ -220,18 +255,18 @@ void LLManipTranslate::restoreGL()
 
 		subcol = 0x50A0A0A0;
 		if (rez >= 128)
-		{ //small grain grid
-			for (U32 i = 8; i < rez; i+=8)
+		{ // small grain grid
+			for (U32 i = 8; i < rez; i += 8)
 			{
 				for (U32 j = 2; j < rez-2; j++)
 				{
-					d[i	*rez+ j] = subcol;
-					d[j	*rez+ i] = subcol;
+					d[i	* rez + j] = subcol;
+					d[j	* rez + i] = subcol;
 				}
 			}
 		}
 		if (rez >= 64)
-		{ //medium grain grid
+		{ // medium grain grid
 			if (rez == 64)
 			{
 				subcol = 0x50A0A0A0;
@@ -241,18 +276,18 @@ void LLManipTranslate::restoreGL()
 				subcol = 0xA0D0D0D0;
 			}
 
-			for (U32 i = 32; i < rez; i+=32)
+			for (U32 i = 32; i < rez; i += 32)
 			{
-				U32 pi = i-1;
-				for (U32 j = 2; j < rez-2; j++)
+				U32 pi = i - 1;
+				for (U32 j = 2; j < rez - 2; j++)
 				{
-					d[i		*rez+ j] = subcol;
-					d[j		*rez+ i] = subcol;
+					d[i * rez + j] = subcol;
+					d[j * rez + i] = subcol;
 
 					if (rez > 128)
 					{
-						d[pi	*rez+ j] = subcol;
-						d[j		*rez+ pi] = subcol;
+						d[pi * rez + j] = subcol;
+						d[j * rez + pi] = subcol;
 					}
 				}
 			}
@@ -270,7 +305,6 @@ void LLManipTranslate::restoreGL()
 
 LLManipTranslate::~LLManipTranslate()
 {
-	for_each(mProjectedManipulators.begin(), mProjectedManipulators.end(), DeletePointer());
 }
 
 void LLManipTranslate::handleSelect()
@@ -376,7 +410,7 @@ BOOL LLManipTranslate::handleMouseDownOnPart(S32 x, S32 y, MASK mask)
 			// mouse_pos may be nonsense
 			llwarns << "Failed to project object center to screen" << llendl;
 		}
-		else if (gSavedSettings.getBOOL("SnapToMouseCursor"))
+		else if (getSnapToMouseCursor())
 		{
 			LLUI::setCursorPositionScreen(mouse_pos.mX, mouse_pos.mY);
 			x = mouse_pos.mX;
@@ -520,13 +554,16 @@ BOOL LLManipTranslate::handleHover(S32 x, S32 y, MASK mask)
 	relative_move -= mDragCursorStartGlobal;
 
 	// You can't move more than some distance from your original mousedown point.
-	if (gSavedSettings.getBOOL("LimitDragDistance"))
+	static LLCachedControl<bool> limit_drag_distance(gSavedSettings,
+													 "LimitDragDistance");
+	static LLCachedControl<F32> max_drag_distance(gSavedSettings,
+												  "MaxDragDistance");
+	if (limit_drag_distance)
 	{
-		F32 max_drag_distance = gSavedSettings.getF32("MaxDragDistance");
-
 		if (relative_move.magVecSquared() > max_drag_distance * max_drag_distance)
 		{
-			lldebugst(LLERR_USER_INPUT) << "hover handled by LLManipTranslate (too far)" << llendl;
+			lldebugst(LLERR_USER_INPUT) << "hover handled by LLManipTranslate (too far)"
+										<< llendl;
 			gViewerWindow->setCursor(UI_CURSOR_NOLOCKED);
 			return TRUE;
 		}
@@ -540,14 +577,14 @@ BOOL LLManipTranslate::handleHover(S32 x, S32 y, MASK mask)
 	getMousePointOnPlaneGlobal(cursor_point_snap_line, x, y, current_pos_global, mSnapOffsetAxis % axis_f);
 	off_axis_magnitude = axis_exists ? llabs((cursor_point_snap_line - current_pos_global) * LLVector3d(mSnapOffsetAxis)) : 0.f;
 
-	if (gSavedSettings.getBOOL("SnapEnabled"))
+	if (getSnapEnabled())
 	{
 		if (off_axis_magnitude > mSnapOffsetMeters)
 		{
 			mInSnapRegime = TRUE;
 			LLVector3 mouse_down_offset(mDragCursorStartGlobal - mDragSelectionStartGlobal);
 			LLVector3 cursor_snap_agent = gAgent.getPosAgentFromGlobal(cursor_point_snap_line);
-			if (!gSavedSettings.getBOOL("SnapToMouseCursor"))
+			if (!getSnapToMouseCursor())
 			{
 				cursor_snap_agent -= mouse_down_offset;
 			}
@@ -820,9 +857,9 @@ void LLManipTranslate::highlightManipulators(S32 x, S32 y)
 		transform *= cfr;
 		LLMatrix4 window_scale;
 		F32 zoom_level = 2.f * gAgent.mHUDCurZoom;
-		window_scale.initAll(LLVector3(zoom_level / LLViewerCamera::getInstance()->getAspect(), zoom_level, 0.f),
-			LLQuaternion::DEFAULT,
-			LLVector3::zero);
+		window_scale.initAll(LLVector3(zoom_level / LLViewerCamera::getInstance()->getAspect(),
+									   zoom_level, 0.f),
+							 LLQuaternion::DEFAULT, LLVector3::zero);
 		transform *= window_scale;
 	}
 	else
@@ -838,23 +875,43 @@ void LLManipTranslate::highlightManipulators(S32 x, S32 y)
 	S32 numManips = 0;
 
 	// edges
-	mManipulatorVertices[numManips++] = LLVector4(mArrowLengthMeters * MANIPULATOR_HOTSPOT_START, 0.f, 0.f, 1.f);
-	mManipulatorVertices[numManips++] = LLVector4(mArrowLengthMeters * MANIPULATOR_HOTSPOT_END, 0.f, 0.f, 1.f);
+	mManipulatorVertices[numManips++] = LLVector4(mArrowLengthMeters * MANIPULATOR_HOTSPOT_START,
+												  0.f, 0.f, 1.f);
+	mManipulatorVertices[numManips++] = LLVector4(mArrowLengthMeters * MANIPULATOR_HOTSPOT_END,
+												  0.f, 0.f, 1.f);
 
-	mManipulatorVertices[numManips++] = LLVector4(0.f, mArrowLengthMeters * MANIPULATOR_HOTSPOT_START, 0.f, 1.f);
-	mManipulatorVertices[numManips++] = LLVector4(0.f, mArrowLengthMeters * MANIPULATOR_HOTSPOT_END, 0.f, 1.f);
+	mManipulatorVertices[numManips++] = LLVector4(0.f,
+												  mArrowLengthMeters * MANIPULATOR_HOTSPOT_START,
+												  0.f, 1.f);
+	mManipulatorVertices[numManips++] = LLVector4(0.f,
+												  mArrowLengthMeters * MANIPULATOR_HOTSPOT_END,
+												  0.f, 1.f);
 
-	mManipulatorVertices[numManips++] = LLVector4(0.f, 0.f, mArrowLengthMeters * MANIPULATOR_HOTSPOT_START, 1.f);
-	mManipulatorVertices[numManips++] = LLVector4(0.f, 0.f, mArrowLengthMeters * MANIPULATOR_HOTSPOT_END, 1.f);
+	mManipulatorVertices[numManips++] = LLVector4(0.f, 0.f,
+												  mArrowLengthMeters * MANIPULATOR_HOTSPOT_START,
+												  1.f);
+	mManipulatorVertices[numManips++] = LLVector4(0.f, 0.f,
+												  mArrowLengthMeters * MANIPULATOR_HOTSPOT_END,
+												  1.f);
 
-	mManipulatorVertices[numManips++] = LLVector4(mArrowLengthMeters * -MANIPULATOR_HOTSPOT_START, 0.f, 0.f, 1.f);
-	mManipulatorVertices[numManips++] = LLVector4(mArrowLengthMeters * -MANIPULATOR_HOTSPOT_END, 0.f, 0.f, 1.f);
+	mManipulatorVertices[numManips++] = LLVector4(mArrowLengthMeters * -MANIPULATOR_HOTSPOT_START,
+												  0.f, 0.f, 1.f);
+	mManipulatorVertices[numManips++] = LLVector4(mArrowLengthMeters * -MANIPULATOR_HOTSPOT_END,
+												  0.f, 0.f, 1.f);
 
-	mManipulatorVertices[numManips++] = LLVector4(0.f, mArrowLengthMeters * -MANIPULATOR_HOTSPOT_START, 0.f, 1.f);
-	mManipulatorVertices[numManips++] = LLVector4(0.f, mArrowLengthMeters * -MANIPULATOR_HOTSPOT_END, 0.f, 1.f);
+	mManipulatorVertices[numManips++] = LLVector4(0.f,
+												  mArrowLengthMeters * -MANIPULATOR_HOTSPOT_START,
+												  0.f, 1.f);
+	mManipulatorVertices[numManips++] = LLVector4(0.f,
+												  mArrowLengthMeters * -MANIPULATOR_HOTSPOT_END,
+												  0.f, 1.f);
 
-	mManipulatorVertices[numManips++] = LLVector4(0.f, 0.f, mArrowLengthMeters * -MANIPULATOR_HOTSPOT_START, 1.f);
-	mManipulatorVertices[numManips++] = LLVector4(0.f, 0.f, mArrowLengthMeters * -MANIPULATOR_HOTSPOT_END, 1.f);
+	mManipulatorVertices[numManips++] = LLVector4(0.f, 0.f,
+												  mArrowLengthMeters * -MANIPULATOR_HOTSPOT_START,
+												  1.f);
+	mManipulatorVertices[numManips++] = LLVector4(0.f, 0.f,
+												  mArrowLengthMeters * -MANIPULATOR_HOTSPOT_END,
+												  1.f);
 
 	S32 num_arrow_manips = numManips;
 
@@ -863,101 +920,130 @@ void LLManipTranslate::highlightManipulators(S32 x, S32 y)
 	BOOL planar_manip_xz_visible = FALSE;
 	BOOL planar_manip_xy_visible = FALSE;
 
-	mManipulatorVertices[numManips] = LLVector4(0.f, mPlaneManipOffsetMeters * (1.f - PLANE_TICK_SIZE * 0.5f), mPlaneManipOffsetMeters * (1.f - PLANE_TICK_SIZE * 0.5f), 1.f);
+	mManipulatorVertices[numManips] = LLVector4(0.f,
+												mPlaneManipOffsetMeters * (1.f - PLANE_TICK_SIZE * 0.5f),
+												mPlaneManipOffsetMeters * (1.f - PLANE_TICK_SIZE * 0.5f),
+												1.f);
 	mManipulatorVertices[numManips++].scaleVec(mPlaneManipPositions);
-	mManipulatorVertices[numManips] = LLVector4(0.f, mPlaneManipOffsetMeters * (1.f + PLANE_TICK_SIZE * 0.5f), mPlaneManipOffsetMeters * (1.f + PLANE_TICK_SIZE * 0.5f), 1.f);
+	mManipulatorVertices[numManips] = LLVector4(0.f,
+												mPlaneManipOffsetMeters * (1.f + PLANE_TICK_SIZE * 0.5f),
+												mPlaneManipOffsetMeters * (1.f + PLANE_TICK_SIZE * 0.5f),
+												1.f);
 	mManipulatorVertices[numManips++].scaleVec(mPlaneManipPositions);
 	if (llabs(relative_camera_dir.mV[VX]) > MIN_PLANE_MANIP_DOT_PRODUCT)
 	{
 		planar_manip_yz_visible = TRUE;
 	}
 
-	mManipulatorVertices[numManips] = LLVector4(mPlaneManipOffsetMeters * (1.f - PLANE_TICK_SIZE * 0.5f), 0.f, mPlaneManipOffsetMeters * (1.f - PLANE_TICK_SIZE * 0.5f), 1.f);
+	mManipulatorVertices[numManips] = LLVector4(mPlaneManipOffsetMeters * (1.f - PLANE_TICK_SIZE * 0.5f),
+												0.f,
+												mPlaneManipOffsetMeters * (1.f - PLANE_TICK_SIZE * 0.5f),
+												1.f);
 	mManipulatorVertices[numManips++].scaleVec(mPlaneManipPositions);
-	mManipulatorVertices[numManips] = LLVector4(mPlaneManipOffsetMeters * (1.f + PLANE_TICK_SIZE * 0.5f), 0.f, mPlaneManipOffsetMeters * (1.f + PLANE_TICK_SIZE * 0.5f), 1.f);
+	mManipulatorVertices[numManips] = LLVector4(mPlaneManipOffsetMeters * (1.f + PLANE_TICK_SIZE * 0.5f),
+												0.f,
+												mPlaneManipOffsetMeters * (1.f + PLANE_TICK_SIZE * 0.5f),
+												1.f);
 	mManipulatorVertices[numManips++].scaleVec(mPlaneManipPositions);
 	if (llabs(relative_camera_dir.mV[VY]) > MIN_PLANE_MANIP_DOT_PRODUCT)
 	{
 		planar_manip_xz_visible = TRUE;
 	}
 
-	mManipulatorVertices[numManips] = LLVector4(mPlaneManipOffsetMeters * (1.f - PLANE_TICK_SIZE * 0.5f), mPlaneManipOffsetMeters * (1.f - PLANE_TICK_SIZE * 0.5f), 0.f, 1.f);
+	mManipulatorVertices[numManips] = LLVector4(mPlaneManipOffsetMeters * (1.f - PLANE_TICK_SIZE * 0.5f),
+												mPlaneManipOffsetMeters * (1.f - PLANE_TICK_SIZE * 0.5f),
+												0.f, 1.f);
 	mManipulatorVertices[numManips++].scaleVec(mPlaneManipPositions);
-	mManipulatorVertices[numManips] = LLVector4(mPlaneManipOffsetMeters * (1.f + PLANE_TICK_SIZE * 0.5f), mPlaneManipOffsetMeters * (1.f + PLANE_TICK_SIZE * 0.5f), 0.f, 1.f);
+	mManipulatorVertices[numManips] = LLVector4(mPlaneManipOffsetMeters * (1.f + PLANE_TICK_SIZE * 0.5f),
+												mPlaneManipOffsetMeters * (1.f + PLANE_TICK_SIZE * 0.5f),
+												0.f, 1.f);
 	mManipulatorVertices[numManips++].scaleVec(mPlaneManipPositions);
 	if (llabs(relative_camera_dir.mV[VZ]) > MIN_PLANE_MANIP_DOT_PRODUCT)
 	{
 		planar_manip_xy_visible = TRUE;
 	}
 
-	for_each(mProjectedManipulators.begin(), mProjectedManipulators.end(), DeletePointer());
-	mProjectedManipulators.clear();
+	// Project up to 9 manipulators to screen space 2*X, 2*Y, 2*Z, 3*planes
+	std::vector<ManipulatorHandle> projected_manipulators;
+	projected_manipulators.reserve(9);
 
 	for (S32 i = 0; i < num_arrow_manips; i+= 2)
 	{
 		LLVector4 projected_start = mManipulatorVertices[i] * transform;
-		projected_start = projected_start * (1.f / projected_start.mV[VW]);
+		projected_start = projected_start / projected_start.mV[VW];
 
 		LLVector4 projected_end = mManipulatorVertices[i + 1] * transform;
-		projected_end = projected_end * (1.f / projected_end.mV[VW]);
+		projected_end = projected_end / projected_end.mV[VW];
 
-		ManipulatorHandle* projManipulator = 
-			new ManipulatorHandle(LLVector3(projected_start.mV[VX], projected_start.mV[VY], projected_start.mV[VZ]), 
-				LLVector3(projected_end.mV[VX], projected_end.mV[VY], projected_end.mV[VZ]), 
-				MANIPULATOR_IDS[i / 2],
-				10.f); // 10 pixel hotspot for arrows
-		mProjectedManipulators.insert(projManipulator);
+		ManipulatorHandle projected_manip(LLVector3(projected_start.mV[VX],
+													projected_start.mV[VY],
+													projected_start.mV[VZ]), 
+										  LLVector3(projected_end.mV[VX],
+													projected_end.mV[VY],
+													projected_end.mV[VZ]), 
+										  MANIPULATOR_IDS[i / 2],
+										  10.f); // 10 pixel hotspot for arrows
+		projected_manipulators.push_back(projected_manip);
 	}
 
 	if (planar_manip_yz_visible)
 	{
 		S32 i = num_arrow_manips;
 		LLVector4 projected_start = mManipulatorVertices[i] * transform;
-		projected_start = projected_start * (1.f / projected_start.mV[VW]);
+		projected_start = projected_start / projected_start.mV[VW];
 
 		LLVector4 projected_end = mManipulatorVertices[i + 1] * transform;
-		projected_end = projected_end * (1.f / projected_end.mV[VW]);
+		projected_end = projected_end / projected_end.mV[VW];
 
-		ManipulatorHandle* projManipulator = 
-			new ManipulatorHandle(LLVector3(projected_start.mV[VX], projected_start.mV[VY], projected_start.mV[VZ]), 
-				LLVector3(projected_end.mV[VX], projected_end.mV[VY], projected_end.mV[VZ]), 
-				MANIPULATOR_IDS[i / 2],
-				20.f); // 20 pixels for planar manipulators
-		mProjectedManipulators.insert(projManipulator);
+		ManipulatorHandle projected_manip(LLVector3(projected_start.mV[VX],
+													projected_start.mV[VY],
+													projected_start.mV[VZ]),
+										  LLVector3(projected_end.mV[VX],
+													projected_end.mV[VY],
+													projected_end.mV[VZ]),
+										  MANIPULATOR_IDS[i / 2],
+										  20.f); // 20 pixels for planar manipulators
+		projected_manipulators.push_back(projected_manip);
 	}
 
 	if (planar_manip_xz_visible)
 	{
 		S32 i = num_arrow_manips + 2;
 		LLVector4 projected_start = mManipulatorVertices[i] * transform;
-		projected_start = projected_start * (1.f / projected_start.mV[VW]);
+		projected_start = projected_start / projected_start.mV[VW];
 
 		LLVector4 projected_end = mManipulatorVertices[i + 1] * transform;
-		projected_end = projected_end * (1.f / projected_end.mV[VW]);
+		projected_end = projected_end / projected_end.mV[VW];
 
-		ManipulatorHandle* projManipulator = 
-			new ManipulatorHandle(LLVector3(projected_start.mV[VX], projected_start.mV[VY], projected_start.mV[VZ]), 
-				LLVector3(projected_end.mV[VX], projected_end.mV[VY], projected_end.mV[VZ]), 
-				MANIPULATOR_IDS[i / 2],
-				20.f); // 20 pixels for planar manipulators
-		mProjectedManipulators.insert(projManipulator);
+		ManipulatorHandle projected_manip(LLVector3(projected_start.mV[VX],
+													projected_start.mV[VY],
+													projected_start.mV[VZ]),
+										  LLVector3(projected_end.mV[VX],
+													projected_end.mV[VY],
+													projected_end.mV[VZ]),
+										  MANIPULATOR_IDS[i / 2],
+										  20.f); // 20 pixels for planar manipulators
+		projected_manipulators.push_back(projected_manip);
 	}
 
 	if (planar_manip_xy_visible)
 	{
 		S32 i = num_arrow_manips + 4;
 		LLVector4 projected_start = mManipulatorVertices[i] * transform;
-		projected_start = projected_start * (1.f / projected_start.mV[VW]);
+		projected_start = projected_start / projected_start.mV[VW];
 
 		LLVector4 projected_end = mManipulatorVertices[i + 1] * transform;
-		projected_end = projected_end * (1.f / projected_end.mV[VW]);
+		projected_end = projected_end / projected_end.mV[VW];
 
-		ManipulatorHandle* projManipulator = 
-			new ManipulatorHandle(LLVector3(projected_start.mV[VX], projected_start.mV[VY], projected_start.mV[VZ]), 
-				LLVector3(projected_end.mV[VX], projected_end.mV[VY], projected_end.mV[VZ]), 
-				MANIPULATOR_IDS[i / 2],
-				20.f); // 20 pixels for planar manipulators
-		mProjectedManipulators.insert(projManipulator);
+		ManipulatorHandle projected_manip(LLVector3(projected_start.mV[VX],
+													projected_start.mV[VY],
+													projected_start.mV[VZ]), 
+										  LLVector3(projected_end.mV[VX],
+													projected_end.mV[VY],
+													projected_end.mV[VZ]), 
+										  MANIPULATOR_IDS[i / 2],
+										  20.f); // 20 pixels for planar manipulators
+		projected_manipulators.push_back(projected_manip);
 	}
 
 	LLVector2 manip_start_2d;
@@ -968,13 +1054,19 @@ void LLManipTranslate::highlightManipulators(S32 x, S32 y)
 	LLVector2 mousePos((F32)x - half_width, (F32)y - half_height);
 	LLVector2 mouse_delta;
 
-	for (minpulator_list_t::iterator iter = mProjectedManipulators.begin();
-		 iter != mProjectedManipulators.end(); ++iter)
+	// Keep order consistent with insertion via stable_sort
+	std::stable_sort(projected_manipulators.begin(),
+					 projected_manipulators.end(), ClosestToCamera());
+
+	std::vector<ManipulatorHandle>::iterator it = projected_manipulators.begin();
+	for ( ; it != projected_manipulators.end(); ++it)
 	{
-		ManipulatorHandle* manipulator = *iter;
+		ManipulatorHandle& manipulator = *it;
 		{
-			manip_start_2d.setVec(manipulator->mStartPosition.mV[VX] * half_width, manipulator->mStartPosition.mV[VY] * half_height);
-			manip_end_2d.setVec(manipulator->mEndPosition.mV[VX] * half_width, manipulator->mEndPosition.mV[VY] * half_height);
+			manip_start_2d.setVec(manipulator.mStartPosition.mV[VX] * half_width,
+								  manipulator.mStartPosition.mV[VY] * half_height);
+			manip_end_2d.setVec(manipulator.mEndPosition.mV[VX] * half_width,
+								manipulator.mEndPosition.mV[VY] * half_height);
 			manip_dir = manip_end_2d - manip_start_2d;
 
 			mouse_delta = mousePos - manip_start_2d;
@@ -982,13 +1074,13 @@ void LLManipTranslate::highlightManipulators(S32 x, S32 y)
 			F32 manip_length = manip_dir.normVec();
 
 			F32 mouse_pos_manip = mouse_delta * manip_dir;
-			F32 mouse_dist_manip_squared = mouse_delta.magVecSquared() - (mouse_pos_manip * mouse_pos_manip);
+			F32 mouse_dist_manip_squared = mouse_delta.magVecSquared() - mouse_pos_manip * mouse_pos_manip;
 
 			if (mouse_pos_manip > 0.f &&
 				mouse_pos_manip < manip_length &&
-				mouse_dist_manip_squared < manipulator->mHotSpotRadius * manipulator->mHotSpotRadius)
+				mouse_dist_manip_squared < manipulator.mHotSpotRadius * manipulator.mHotSpotRadius)
 			{
-				mHighlightedPart = manipulator->mManipID;
+				mHighlightedPart = manipulator.mManipID;
 				break;
 			}
 		}
@@ -1073,13 +1165,14 @@ void LLManipTranslate::render()
 
 void LLManipTranslate::renderSnapGuides()
 {
-	if (!gSavedSettings.getBOOL("SnapEnabled"))
+	if (!getSnapEnabled())
 	{
 		return;
 	}
 
-	F32 max_subdivisions = sGridMaxSubdivisionLevel;//(F32)gSavedSettings.getS32("GridSubdivision");
-	F32 line_alpha = gSavedSettings.getF32("GridOpacity");
+	F32 max_subdivisions = sGridMaxSubdivisionLevel;	//(F32)gSavedSettings.getS32("GridSubdivision");
+	static LLCachedControl<F32> grid_opacity(gSavedSettings, "GridOpacity");
+	F32 line_alpha = grid_opacity;
 
 	gGL.getTexUnit(0)->unbind(LLTexUnit::TT_TEXTURE);
 	LLGLDepthTest gls_depth(GL_TRUE);
@@ -1108,7 +1201,7 @@ void LLManipTranslate::renderSnapGuides()
 	LLVector3 saved_selection_center = getSavedPivotPoint(); //LLSelectMgr::getInstance()->getSavedBBoxOfSelection().getCenterAgent();
 	LLVector3 selection_center = getPivotPoint();
 
-	LLViewerObject *first_object = first_node->getObject();
+	LLViewerObject* first_object = first_node->getObject();
 
 	//pick appropriate projection plane for snap rulers according to relative camera position
 	if (mManipPart >= LL_X_ARROW && mManipPart <= LL_Z_ARROW)
@@ -1361,7 +1454,8 @@ void LLManipTranslate::renderSnapGuides()
 
 		sub_div_offset = llround(fmod(dist_grid_axis - offset_nearest_grid_unit, getMinGridScale() * 32.f) / smallest_grid_unit_scale);
 
-		LLVector2 screen_translate_axis(llabs(translate_axis * LLViewerCamera::getInstance()->getLeftAxis()), llabs(translate_axis * LLViewerCamera::getInstance()->getUpAxis()));
+		LLVector2 screen_translate_axis(llabs(translate_axis * LLViewerCamera::getInstance()->getLeftAxis()),
+										llabs(translate_axis * LLViewerCamera::getInstance()->getUpAxis()));
 		screen_translate_axis.normVec();
 
 		S32 tick_label_spacing = llround(screen_translate_axis * sTickLabelSpacing);
@@ -1369,11 +1463,13 @@ void LLManipTranslate::renderSnapGuides()
 		// render tickmark values
 		for (S32 i = -num_ticks_per_side; i <= num_ticks_per_side; i++)
 		{
-			LLVector3 tick_pos = selection_center + (translate_axis * ((smallest_grid_unit_scale * (F32)i) - offset_nearest_grid_unit));
-			F32 alpha = line_alpha * (1.f - (0.5f *  ((F32)llabs(i) / (F32)num_ticks_per_side)));
+			LLVector3 tick_pos = selection_center + translate_axis * (smallest_grid_unit_scale * (F32)i - offset_nearest_grid_unit);
+			F32 alpha = line_alpha * (1.f - (F32)llabs(i) / (F32)num_ticks_per_side / 2.f);
 
 			F32 tick_scale = 1.f;
-			for (F32 division_level = max_subdivisions; division_level >= sGridMinSubdivisionLevel; division_level /= 2.f)
+			for (F32 division_level = max_subdivisions;
+				 division_level >= sGridMinSubdivisionLevel;
+				 division_level /= 2.f)
 			{
 				if (fmodf((F32)(i + sub_div_offset), division_level) == 0.f)
 				{
@@ -1382,7 +1478,12 @@ void LLManipTranslate::renderSnapGuides()
 				tick_scale *= 0.7f;
 			}
 
-			if (fmodf((F32)(i + sub_div_offset), (max_subdivisions / llmin(sGridMaxSubdivisionLevel, getSubdivisionLevel(tick_pos, translate_axis, getMinGridScale(), tick_label_spacing)))) == 0.f)
+			if (fmodf((F32)(i + sub_div_offset),
+					  max_subdivisions / llmin(sGridMaxSubdivisionLevel,
+											   getSubdivisionLevel(tick_pos,
+																   translate_axis,
+																   getMinGridScale(),
+																   tick_label_spacing))) == 0.f)
 			{
 				F32 snap_offset_meters;
 
@@ -1395,14 +1496,15 @@ void LLManipTranslate::renderSnapGuides()
 					snap_offset_meters = -mSnapOffsetMeters;
 				}
 				LLVector3 text_origin = selection_center + 
-						(translate_axis * ((smallest_grid_unit_scale * (F32)i) - offset_nearest_grid_unit)) + 
-							(mSnapOffsetAxis * snap_offset_meters * (1.f + tick_scale));
+										translate_axis * (smallest_grid_unit_scale * (F32)i - offset_nearest_grid_unit) + 
+										mSnapOffsetAxis * snap_offset_meters * (1.f + tick_scale);
 
 				LLVector3 tick_offset = (tick_pos - mGridOrigin) * ~mGridRotation;
 				F32 offset_val = 0.5f * tick_offset.mV[ARROW_TO_AXIS[mManipPart]] / getMinGridScale();
 				EGridMode grid_mode = LLSelectMgr::getInstance()->getGridMode();
 				F32 text_highlight = 0.8f;
-				if (i - llround(offset_nearest_grid_unit / smallest_grid_unit_scale) == 0 && mInSnapRegime)
+				if (mInSnapRegime &&
+					i - llround(offset_nearest_grid_unit / smallest_grid_unit_scale) == 0)
 				{
 					text_highlight = 1.f;
 				}
@@ -1411,18 +1513,23 @@ void LLManipTranslate::renderSnapGuides()
 				{
 					// rescale units to meters from multiple of grid scale
 					offset_val *= 2.f * grid_scale[ARROW_TO_AXIS[mManipPart]];
-					renderTickValue(text_origin, offset_val, std::string("m"), LLColor4(text_highlight, text_highlight, text_highlight, alpha));
+					renderTickValue(text_origin, offset_val, std::string("m"),
+									LLColor4(text_highlight, text_highlight,
+											 text_highlight, alpha));
 				}
 				else
 				{
-					renderTickValue(text_origin, offset_val, std::string("x"), LLColor4(text_highlight, text_highlight, text_highlight, alpha));
+					renderTickValue(text_origin, offset_val, std::string("x"),
+									LLColor4(text_highlight, text_highlight,
+											 text_highlight, alpha));
 				}
 			}
 		}
 		if (mObjectSelection->getSelectType() != SELECT_TYPE_HUD)
 		{
 			// render helpful text
-			if (mHelpTextTimer.getElapsedTimeF32() < sHelpTextVisibleTime + sHelpTextFadeTime && sNumTimesHelpTextShown < sMaxTimesShowHelpText)
+			if (sNumTimesHelpTextShown < sMaxTimesShowHelpText &&
+				mHelpTextTimer.getElapsedTimeF32() < sHelpTextVisibleTime + sHelpTextFadeTime)
 			{
 				F32 snap_offset_meters_up;
 				if (mSnapOffsetAxis * LLViewerCamera::getInstance()->getUpAxis() > 0.f)
@@ -1441,11 +1548,22 @@ void LLManipTranslate::renderSnapGuides()
 
 				std::string help_text = "Move mouse cursor over ruler to snap";
 				LLColor4 help_text_color = LLColor4::white;
-				help_text_color.mV[VALPHA] = clamp_rescale(mHelpTextTimer.getElapsedTimeF32(), sHelpTextVisibleTime, sHelpTextVisibleTime + sHelpTextFadeTime, line_alpha, 0.f);
-				hud_render_utf8text(help_text, help_text_pos, *big_fontp, LLFontGL::NORMAL, -0.5f * big_fontp->getWidthF32(help_text), 3.f, help_text_color, mObjectSelection->getSelectType() == SELECT_TYPE_HUD);
+				help_text_color.mV[VALPHA] = clamp_rescale(mHelpTextTimer.getElapsedTimeF32(),
+														   sHelpTextVisibleTime,
+														   sHelpTextVisibleTime + sHelpTextFadeTime,
+														   line_alpha, 0.f);
+				hud_render_utf8text(help_text, help_text_pos, *big_fontp,
+									LLFontGL::NORMAL,
+									-0.5f * big_fontp->getWidthF32(help_text),
+									3.f, help_text_color,
+									mObjectSelection->getSelectType() == SELECT_TYPE_HUD);
 				help_text = "to snap to grid";
 				help_text_pos -= LLViewerCamera::getInstance()->getUpAxis() * mSnapOffsetMeters * 0.2f;
-				hud_render_utf8text(help_text, help_text_pos, *big_fontp, LLFontGL::NORMAL, -0.5f * big_fontp->getWidthF32(help_text), 3.f, help_text_color, mObjectSelection->getSelectType() == SELECT_TYPE_HUD);
+				hud_render_utf8text(help_text, help_text_pos, *big_fontp,
+									LLFontGL::NORMAL,
+									-0.5f * big_fontp->getWidthF32(help_text),
+									3.f, help_text_color,
+									mObjectSelection->getSelectType() == SELECT_TYPE_HUD);
 			}
 		}
 	}
@@ -1502,14 +1620,14 @@ void LLManipTranslate::renderSnapGuides()
 		gGL.translatef(selection_center.mV[VX], selection_center.mV[VY], selection_center.mV[VZ]);
 		glRotatef(angle_radians * RAD_TO_DEG, x, y, z);
 
-		F32 sz = mGridSizeMeters;
+		F32 sz = getGridDrawSize();
 		F32 tiles = sz;
 		glMatrixMode(GL_TEXTURE);
 		gGL.pushMatrix();
 		usc = 1.0f/usc;
 		vsc = 1.0f/vsc;
 
-		while (usc > vsc*4.0f)
+		while (usc > vsc * 4.0f)
 		{
 			usc *= 0.5f;
 		}
@@ -1523,7 +1641,8 @@ void LLManipTranslate::renderSnapGuides()
 
 		float a = line_alpha;
 
-		LLColor4 col = gColors.getColor("SilhouetteChildColor");
+		static LLCachedControl<LLColor4U> silhouette_child_color(gColors, "SilhouetteChildColor");
+		LLColor4 col = LLColor4(silhouette_child_color);
 		{
 			//draw grid behind objects
 			LLGLDepthTest gls_depth(GL_TRUE, GL_FALSE);
@@ -1535,7 +1654,7 @@ void LLManipTranslate::renderSnapGuides()
 					gGL.getTexUnit(0)->bindManual(LLTexUnit::TT_TEXTURE, getGridTexName());
 					gGL.flush();
 					gGL.blendFunc(LLRender::BF_ZERO, LLRender::BF_ONE_MINUS_SOURCE_ALPHA);
-					renderGrid(u,v,tiles,0.9f, 0.9f, 0.9f,a*0.15f);
+					renderGrid(u, v, tiles,0.9f, 0.9f, 0.9f, a * 0.15f);
 					gGL.flush();
 					gGL.setSceneBlendType(LLRender::BT_ALPHA);
 				}
@@ -1544,11 +1663,11 @@ void LLManipTranslate::renderSnapGuides()
 					LLGLDisable alpha_test(GL_ALPHA_TEST);
 					//draw black overlay
 					gGL.getTexUnit(0)->unbind(LLTexUnit::TT_TEXTURE);
-					renderGrid(u,v,tiles,0.0f, 0.0f, 0.0f,a*0.16f);
+					renderGrid(u, v, tiles, 0.0f, 0.0f, 0.0f, a * 0.16f);
 
 					//draw grid top
 					gGL.getTexUnit(0)->bindManual(LLTexUnit::TT_TEXTURE, getGridTexName());
-					renderGrid(u,v,tiles,1,1,1,a);
+					renderGrid(u, v, tiles, 1, 1, 1, a);
 
 					gGL.popMatrix();
 					glMatrixMode(GL_MODELVIEW);
@@ -1587,36 +1706,40 @@ void LLManipTranslate::renderSnapGuides()
 	}
 }
 
-void LLManipTranslate::renderGrid(F32 x, F32 y, F32 size, F32 r, F32 g, F32 b, F32 a)
+void LLManipTranslate::renderGrid(F32 x, F32 y, F32 size, F32 r, F32 g, F32 b,
+								  F32 a)
 {
-	F32 d = size*0.5f;
+	float dx, dy, da;
+	F32 d = size * 0.5f;
 
-	for (F32 xx = -size-d; xx < size+d; xx += d)
+	for (F32 xx = -size-d; xx < size + d; xx += d)
 	{
 		gGL.begin(LLRender::TRIANGLE_STRIP);
-		for (F32 yy = -size-d; yy < size+d; yy += d)
+		for (F32 yy = -size-d; yy < size + d; yy += d)
 		{
-			float dx, dy, da;
-
-			dx = xx; dy = yy;
-			da = sqrtf(llmax(0.0f, 1.0f-sqrtf(dx*dx+dy*dy)/size))*a;
+			dx = xx;
+			dy = yy;
+			da = sqrtf(llmax(0.0f, 1.0f - sqrtf(dx * dx + dy * dy) / size)) * a;
 			gGL.texCoord2f(dx, dy);
-			renderGridVert(dx,dy,r,g,b,da);
+			renderGridVert(dx, dy, r, g, b, da);
 
-			dx = xx+d; dy = yy;
-			da = sqrtf(llmax(0.0f, 1.0f-sqrtf(dx*dx+dy*dy)/size))*a;
+			dx = xx + d;
+			dy = yy;
+			da = sqrtf(llmax(0.0f, 1.0f - sqrtf(dx * dx + dy * dy) / size)) * a;
 			gGL.texCoord2f(dx, dy);
-			renderGridVert(dx,dy,r,g,b,da);
+			renderGridVert(dx, dy, r, g, b, da);
 
-			dx = xx; dy = yy+d;
-			da = sqrtf(llmax(0.0f, 1.0f-sqrtf(dx*dx+dy*dy)/size))*a;
+			dx = xx;
+			dy = yy + d;
+			da = sqrtf(llmax(0.0f, 1.0f - sqrtf(dx * dx + dy * dy) / size)) * a;
 			gGL.texCoord2f(dx, dy);
-			renderGridVert(dx,dy,r,g,b,da);
+			renderGridVert(dx, dy, r, g, b, da);
 
-			dx = xx+d; dy = yy+d;
-			da = sqrtf(llmax(0.0f, 1.0f-sqrtf(dx*dx+dy*dy)/size))*a;
+			dx = xx + d;
+			dy = yy + d;
+			da = sqrtf(llmax(0.0f, 1.0f - sqrtf(dx * dx + dy * dy) / size)) * a;
 			gGL.texCoord2f(dx, dy);
-			renderGridVert(dx,dy,r,g,b,da);
+			renderGridVert(dx, dy, r, g, b, da);
 		}
 		gGL.end();
 	}
@@ -1627,12 +1750,19 @@ void LLManipTranslate::highlightIntersection(LLVector3 normal,
 											 LLQuaternion grid_rotation, 
 											 LLColor4 inner_color)
 {
-	if (!gSavedSettings.getBOOL("GridCrossSections"))
+	static LLCachedControl<bool> grid_cross_sections(gSavedSettings,
+													 "GridCrossSections");
+	if (!grid_cross_sections)
 	{
 		return;
 	}
 
-	U32 types[] = { LLRenderPass::PASS_SIMPLE, LLRenderPass::PASS_ALPHA, LLRenderPass::PASS_FULLBRIGHT, LLRenderPass::PASS_SHINY };
+	U32 types[] = {
+		LLRenderPass::PASS_SIMPLE,
+		LLRenderPass::PASS_ALPHA,
+		LLRenderPass::PASS_FULLBRIGHT,
+		LLRenderPass::PASS_SHINY
+	};
 	U32 num_types = LL_ARRAY_SIZE(types);
 
 	GLuint stencil_mask = 0xFFFFFFFF;
@@ -1648,11 +1778,11 @@ void LLManipTranslate::highlightIntersection(LLVector3 normal,
 		glStencilFunc(GL_ALWAYS, 0, stencil_mask);
 		gGL.setColorMask(false, false);
 		gGL.getTexUnit(0)->unbind(LLTexUnit::TT_TEXTURE);
-		glColor4f(1,1,1,1);
+		glColor4f(1, 1, 1, 1);
 
 		//setup clip plane
 		normal = normal * grid_rotation;
-		if (normal * (LLViewerCamera::getInstance()->getOrigin()-selection_center) < 0)
+		if (normal * (LLViewerCamera::getInstance()->getOrigin() - selection_center) < 0)
 		{
 			normal = -normal;
 		}
@@ -1703,12 +1833,12 @@ void LLManipTranslate::highlightIntersection(LLVector3 normal,
 
 	gGL.pushMatrix();
 
-	F32 x,y,z,angle_radians;
+	F32 x, y, z, angle_radians;
 	grid_rotation.getAngleAxis(&angle_radians, &x, &y, &z);
 	gGL.translatef(selection_center.mV[VX], selection_center.mV[VY], selection_center.mV[VZ]);
 	glRotatef(angle_radians * RAD_TO_DEG, x, y, z);
 
-	F32 sz = mGridSizeMeters;
+	F32 sz = getGridDrawSize();
 	F32 tiles = sz;
 
 	//draw volume/plane intersections
@@ -1718,7 +1848,8 @@ void LLManipTranslate::highlightIntersection(LLVector3 normal,
 		LLGLEnable stencil(GL_STENCIL_TEST);
 		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 		glStencilFunc(GL_EQUAL, 0, stencil_mask);
-		renderGrid(0,0,tiles,inner_color.mV[0], inner_color.mV[1], inner_color.mV[2], 0.25f);
+		renderGrid(0, 0, tiles,inner_color.mV[0], inner_color.mV[1],
+				   inner_color.mV[2], 0.25f);
 	}
 
 	glStencilFunc(GL_ALWAYS, 255, 0xFFFFFFFF);
@@ -1730,7 +1861,8 @@ void LLManipTranslate::highlightIntersection(LLVector3 normal,
 
 void LLManipTranslate::renderText()
 {
-	if (mObjectSelection->getRootObjectCount() && !mObjectSelection->isAttachment())
+	if (mObjectSelection->getRootObjectCount() &&
+		!mObjectSelection->isAttachment())
 	{
 		LLVector3 pos = getPivotPoint();
 		renderXYZ(pos);
@@ -1753,7 +1885,8 @@ void LLManipTranslate::renderTranslationHandles()
 	LLQuaternion grid_rotation;
 	LLGLDepthTest gls_depth(GL_FALSE);
 
-	LLSelectMgr::getInstance()->getGrid(grid_origin, grid_rotation, grid_scale);
+	LLSelectMgr::getInstance()->getGrid(grid_origin, grid_rotation,
+										grid_scale);
 	LLVector3 at_axis;
 	if (mObjectSelection->getSelectType() == SELECT_TYPE_HUD)
 	{
@@ -1809,9 +1942,13 @@ void LLManipTranslate::renderTranslationHandles()
 		F32 range_from_agent = dist_vec(gAgent.getPositionAgent(), selection_center);
 
 		// Don't draw handles if you're too far away
-		if (gSavedSettings.getBOOL("LimitSelectDistance"))
+		static LLCachedControl<bool> limit_select_distance(gSavedSettings,
+														   "LimitSelectDistance");
+		static LLCachedControl<F32> max_select_distance(gSavedSettings,
+														"MaxSelectDistance");
+		if (limit_select_distance)
 		{
-			if (range_from_agent > gSavedSettings.getF32("MaxSelectDistance"))
+			if (range_from_agent > max_select_distance)
 			{
 				return;
 			}
@@ -1832,7 +1969,6 @@ void LLManipTranslate::renderTranslationHandles()
 	}
 
 	mPlaneManipOffsetMeters = mArrowLengthMeters * 1.8f;
-	mGridSizeMeters = gSavedSettings.getF32("GridDrawSize");
 	mConeSize = mArrowLengthMeters / 4.f;
 
 	glMatrixMode(GL_MODELVIEW);
@@ -2102,7 +2238,7 @@ void LLManipTranslate::renderTranslationHandles()
 			// 2 & 4
 
 			// Table of order to draw faces, based on nearest vertex
-			static U32 face_list[8][NUM_AXES*2] = { 
+			static U32 face_list[8][NUM_AXES * 2] = { 
 				{ 2,0,1, 4,5,3 }, // v6  F201 F453
 				{ 2,0,3, 4,5,1 }, // v7  F203 F451
 				{ 4,0,1, 2,5,3 }, // v5  F401 F253
@@ -2150,7 +2286,9 @@ void LLManipTranslate::renderTranslationHandles()
 	gGL.popMatrix();
 }
 
-void LLManipTranslate::renderArrow(S32 which_arrow, S32 selected_arrow, F32 box_size, F32 arrow_size, F32 handle_size, BOOL reverse_direction)
+void LLManipTranslate::renderArrow(S32 which_arrow, S32 selected_arrow,
+								   F32 box_size, F32 arrow_size,
+								   F32 handle_size, BOOL reverse_direction)
 {
 	gGL.getTexUnit(0)->unbind(LLTexUnit::TT_TEXTURE);
 	LLGLEnable gls_blend(GL_BLEND);
@@ -2262,7 +2400,10 @@ BOOL LLManipTranslate::canAffectSelection()
 		{
 			virtual bool apply(LLViewerObject* objectp)
 			{
-				return objectp->permMove() && (objectp->permModify() || !gSavedSettings.getBOOL("EditLinkedParts"));
+				static LLCachedControl<bool> edit_linked_parts(gSavedSettings,
+															   "EditLinkedParts");
+				return objectp->permMove() && (objectp->permModify() ||
+											   !edit_linked_parts);
 			}
 		} func;
 		can_move = mObjectSelection->applyToObjects(&func);

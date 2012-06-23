@@ -1,12 +1,12 @@
-/** 
+/**
  * @file llview.cpp
  * @author James Cook
  * @brief Container for other views, anything that draws.
  *
  * $LicenseInfo:firstyear=2001&license=viewergpl$
- * 
+ *
  * Copyright (c) 2001-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -14,17 +14,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -84,7 +84,8 @@ LLView::LLView()
 	mUseBoundingRect(FALSE),
 	mVisible(TRUE),
 	mNextInsertionOrdinal(0),
-	mHoverCursor(UI_CURSOR_ARROW)
+	mHoverCursor(UI_CURSOR_ARROW),
+	mChildListSize(0)
 {
 }
 
@@ -102,7 +103,8 @@ LLView::LLView(const std::string& name, BOOL mouse_opaque)
 	mUseBoundingRect(FALSE),
 	mVisible(TRUE),
 	mNextInsertionOrdinal(0),
-	mHoverCursor(UI_CURSOR_ARROW)
+	mHoverCursor(UI_CURSOR_ARROW),
+	mChildListSize(0)
 {
 }
 
@@ -125,7 +127,8 @@ LLView::LLView(const std::string& name,
 	mUseBoundingRect(FALSE),
 	mVisible(TRUE),
 	mNextInsertionOrdinal(0),
-	mHoverCursor(UI_CURSOR_ARROW)
+	mHoverCursor(UI_CURSOR_ARROW),
+	mChildListSize(0)
 {
 }
 
@@ -203,11 +206,11 @@ void LLView::setRect(const LLRect& rect)
 	updateBoundingRect();
 }
 
-void LLView::setUseBoundingRect(BOOL use_bounding_rect) 
+void LLView::setUseBoundingRect(BOOL use_bounding_rect)
 {
 	if (mUseBoundingRect != use_bounding_rect)
 	{
-        mUseBoundingRect = use_bounding_rect; 
+        mUseBoundingRect = use_bounding_rect;
 		updateBoundingRect();
 	}
 }
@@ -225,19 +228,25 @@ std::string LLView::getName() const
 
 void LLView::sendChildToFront(LLView* child)
 {
-	if (child && child->getParent() == this) 
+	if (child && child->getParent() == this)
 	{
 		mChildList.remove(child);
 		mChildList.push_front(child);
+		// Paranoia: in case child was not in mChildList or was listed several
+		// times in it...
+		mChildListSize = mChildList.size();
 	}
 }
 
 void LLView::sendChildToBack(LLView* child)
 {
-	if (child && child->getParent() == this) 
+	if (child && child->getParent() == this)
 	{
 		mChildList.remove(child);
 		mChildList.push_back(child);
+		// Paranoia: in case child was not in mChildList or was listed several
+		// times in it...
+		mChildListSize = mChildList.size();
 	}
 }
 
@@ -265,19 +274,22 @@ void LLView::addChild(LLView* child, S32 tab_group)
 		return;
 	}
 
-	if (mParentView == child) 
+	if (mParentView == child)
 	{
 		llerrs << "Adding view " << child->getName() << " as child of itself"
 			   << llendl;
 	}
 	// remove from current parent
-	if (child->mParentView) 
+	if (child->mParentView)
 	{
 		child->mParentView->removeChild(child);
 	}
 
 	// add to front of child list, as normal
 	mChildList.push_front(child);
+	// Paranoia: use this instead of mChildListSize++ in case child was already
+	// parented to this view...
+	mChildListSize = mChildList.size();
 
 	// add to ctrl list if is LLUICtrl
 	if (child->isCtrl())
@@ -298,19 +310,22 @@ void LLView::addChildAtEnd(LLView* child, S32 tab_group)
 		return;
 	}
 
-	if (mParentView == child) 
+	if (mParentView == child)
 	{
 		llerrs << "Adding view " << child->getName() << " as child of itself"
 			   << llendl;
 	}
 	// remove from current parent
-	if (child->mParentView) 
+	if (child->mParentView)
 	{
 		child->mParentView->removeChild(child);
 	}
 
 	// add to back of child list
 	mChildList.push_back(child);
+	// Paranoia: use this instead of mChildListSize++ in case child was already
+	// parented to this view...
+	mChildListSize = mChildList.size();
 
 	// add to ctrl list if is LLUICtrl
 	if (child->isCtrl())
@@ -332,9 +347,12 @@ void LLView::removeChild(LLView* child, BOOL deleteIt)
 		return;
 	}
 
-	if (child->mParentView == this) 
+	if (child->mParentView == this)
 	{
 		mChildList.remove(child);
+		// Paranoia: use this instead of mChildListSize-- in case child was
+		// not in mChildList or was listed several times in it...
+		mChildListSize = mChildList.size();
 		child->mParentView = NULL;
 		if (child->isCtrl())
 		{
@@ -399,8 +417,7 @@ LLView::ctrl_list_t LLView::getCtrlList() const
 {
 	ctrl_list_t controls;
 	for (child_list_const_iter_t iter = mChildList.begin();
-		iter != mChildList.end();
-		iter++)
+		 iter != mChildList.end(); iter++)
 	{
 		if ((*iter)->isCtrl())
 		{
@@ -567,7 +584,7 @@ BOOL LLView::focusNext(LLView::child_list_t& result)
 		{
 			LLUICtrl * ctrl = static_cast<LLUICtrl*>(*next);
 			ctrl->setFocus(TRUE);
-			ctrl->onTabInto();  
+			ctrl->onTabInto();
 			gFocusMgr.triggerFocusFlash();
 			return TRUE;
 		}
@@ -604,7 +621,7 @@ BOOL LLView::focusPrev(LLView::child_list_t& result)
 			if (!ctrl->hasFocus())
 			{
 				ctrl->setFocus(TRUE);
-				ctrl->onTabInto();  
+				ctrl->onTabInto();
 				gFocusMgr.triggerFocusFlash();
 			}
 			return TRUE;
@@ -627,6 +644,7 @@ void LLView::deleteAllChildren()
 		LLView* viewp = mChildList.front();
 		delete viewp; // will remove the child from mChildList
 	}
+	mChildListSize = 0;
 }
 
 void LLView::setAllChildrenEnabled(BOOL b)
@@ -644,7 +662,7 @@ void LLView::setVisible(BOOL visible)
 {
 	if (mVisible != visible)
 	{
-		if (!visible && (gFocusMgr.getTopCtrl() == this))
+		if (!visible && gFocusMgr.getTopCtrl() == this)
 		{
 			gFocusMgr.setTopCtrl(NULL);
 		}
@@ -664,7 +682,7 @@ void LLView::setVisible(BOOL visible)
 }
 
 // virtual
-void LLView::onVisibilityChange (BOOL new_visibility)
+void LLView::onVisibilityChange(BOOL new_visibility)
 {
 	for (child_list_iter_t child_it = mChildList.begin();
 		 child_it != mChildList.end(); ++child_it)
@@ -700,7 +718,7 @@ void LLView::snappedTo(const LLView* snap_view)
 BOOL LLView::handleHover(S32 x, S32 y, MASK mask)
 {
 	BOOL handled = childrenHandleHover(x, y, mask) != NULL;
-	if (!handled 
+	if (!handled
 		&& blockMouseEvent(x, y))
 	{
 		LLUI::sWindow->setCursor(mHoverCursor);
@@ -938,8 +956,8 @@ void LLView::onMouseCaptureLost()
 }
 
 BOOL LLView::hasMouseCapture()
-{ 
-	return gFocusMgr.getMouseCapture() == this; 
+{
+	return gFocusMgr.getMouseCapture() == this;
 }
 
 BOOL LLView::handleMouseUp(S32 x, S32 y, MASK mask)
@@ -1023,7 +1041,7 @@ BOOL LLView::handleRightMouseUp(S32 x, S32 y, MASK mask)
 	}
 	return handled;
 }
- 
+
 BOOL LLView::handleMiddleMouseDown(S32 x, S32 y, MASK mask)
 {
 	LLView* handled_view = childrenHandleMiddleMouseDown(x, y, mask);
@@ -1325,7 +1343,8 @@ LLView* LLView::childrenHandleMiddleMouseUp(S32 x, S32 y, MASK mask)
 	LLView* handled_view = NULL;
 	if (getVisible() && getEnabled())
 	{
-		for (child_list_iter_t child_it = mChildList.begin(); child_it != mChildList.end(); ++child_it)
+		for (child_list_iter_t child_it = mChildList.begin();
+			 child_it != mChildList.end(); ++child_it)
 		{
 			LLView* viewp = *child_it;
 			S32 local_x = x - viewp->getRect().mLeft;
@@ -1381,7 +1400,7 @@ void LLView::draw()
 			viewp != focus_view && viewp->getRect().isValid())
 		{
 			// Only draw views that are within the root view
-			localRectToScreen(viewp->getRect(),&screenRect);
+			localRectToScreen(viewp->getRect(), &screenRect);
 			if (rootRect.overlaps(screenRect))
 			{
 				glMatrixMode(GL_MODELVIEW);
@@ -1455,7 +1474,7 @@ void LLView::drawDebugRect()
 		gGL.end();
 
 		// Draw the name if it's not a leaf node
-		if (mChildList.size() && !sEditingUI)
+		if (mChildListSize && !sEditingUI)
 		{
 			//char temp[256];
 			S32 x, y;
@@ -1485,7 +1504,7 @@ void LLView::drawChild(LLView* childp, S32 x_offset, S32 y_offset, BOOL force_dr
 	{
 		++sDepth;
 
-		if ((childp->getVisible() && childp->getRect().isValid()) 
+		if ((childp->getVisible() && childp->getRect().isValid())
 			|| force_draw)
 		{
 			glMatrixMode(GL_MODELVIEW);
@@ -1747,18 +1766,18 @@ LLView* LLView::getChildView(const std::string& name, BOOL recurse,
 	return NULL;
 }
 
-BOOL LLView::parentPointInView(S32 x, S32 y, EHitTestType type) const 
-{ 
+BOOL LLView::parentPointInView(S32 x, S32 y, EHitTestType type) const
+{
 	return (mUseBoundingRect && type == HIT_TEST_USE_BOUNDING_RECT
-				? mBoundingRect.pointInRect(x, y) 
-				: mRect.pointInRect(x, y)); 
+				? mBoundingRect.pointInRect(x, y)
+				: mRect.pointInRect(x, y));
 }
 
-BOOL LLView::pointInView(S32 x, S32 y, EHitTestType type) const 
-{ 
+BOOL LLView::pointInView(S32 x, S32 y, EHitTestType type) const
+{
 	return (mUseBoundingRect && type == HIT_TEST_USE_BOUNDING_RECT
 				? mBoundingRect.pointInRect(x + mRect.mLeft, y + mRect.mBottom)
-				: mRect.localPointInRect(x, y)); 
+				: mRect.localPointInRect(x, y));
 }
 
 BOOL LLView::blockMouseEvent(S32 x, S32 y) const
@@ -2092,7 +2111,7 @@ LLXMLNodePtr LLView::getXML(bool save_children) const
 	return node;
 }
 
-//static 
+//static
 LLView* LLView::fromXML(LLXMLNodePtr node, LLView* parent,
 						LLUICtrlFactory* factory)
 {
@@ -2111,7 +2130,7 @@ void LLView::addColorXML(LLXMLNodePtr node, const LLColor4& color,
 	}
 }
 
-//static 
+//static
 std::string LLView::escapeXML(const std::string& xml, std::string& indent)
 {
 	std::string ret = indent + "\"" + LLXMLNode::escapeXML(xml);
@@ -2166,11 +2185,11 @@ const LLCtrlQuery& LLView::getTabOrderQuery()
 	return query;
 }
 
-// This class is only used internally by getFocusRootsQuery below. 
+// This class is only used internally by getFocusRootsQuery below.
 class LLFocusRootsFilter : public LLQueryFilter, public LLSingleton<LLFocusRootsFilter>
 {
 	/*virtual*/ filterResult_t operator() (const LLView* const view,
-										   const viewList_t& children) const 
+										   const viewList_t& children) const
 	{
 		return filterResult_t(view->isCtrl() && view->isFocusRoot(),
 							  !view->isFocusRoot());
@@ -2966,13 +2985,13 @@ LLControlVariable *LLView::getControl(const std::string& name)
 	return NULL;
 }
 
-//virtual 
+//virtual
 void LLView::setValue(const LLSD& value)
 {
 }
 
-//virtual 
-LLSD LLView::getValue() const 
+//virtual
+LLSD LLView::getValue() const
 {
 	return LLSD();
 }
@@ -2988,12 +3007,12 @@ LLView* LLView::createWidget(LLXMLNodePtr xml_node) const
 //
 
 LLWidgetClassRegistry::LLWidgetClassRegistry()
-{ 
+{
 }
 
 void LLWidgetClassRegistry::registerCtrl(const std::string& tag,
 										 LLWidgetClassRegistry::factory_func_t function)
-{ 
+{
 	std::string lower_case_tag = tag;
 	LLStringUtil::toLower(lower_case_tag);
 
@@ -3001,12 +3020,12 @@ void LLWidgetClassRegistry::registerCtrl(const std::string& tag,
 }
 
 BOOL LLWidgetClassRegistry::isTagRegistered(const std::string &tag)
-{ 
+{
 	return mCreatorFunctions.find(tag) != mCreatorFunctions.end();
 }
 
 LLWidgetClassRegistry::factory_func_t LLWidgetClassRegistry::getCreatorFunc(const std::string& ctrl_type)
-{ 
+{
 	factory_map_t::const_iterator found_it = mCreatorFunctions.find(ctrl_type);
 	return (found_it == mCreatorFunctions.end() ? NULL : found_it->second);
 }

@@ -58,6 +58,7 @@ public:
 	void setDictionary(const std::string& dict_name);
 	void addToCustomDictionary(const std::string& word);
 	void addToIgnoreList(const std::string& word);
+	void addWordsToIgnoreList(const std::string& words);
 
 	const std::string& getCurrentDict()	{ return mCurrentDictName; }
 

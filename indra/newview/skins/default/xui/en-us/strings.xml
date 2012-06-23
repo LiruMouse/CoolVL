@@ -796,7 +796,7 @@ Stops taking inputs that were taken with llTakeControls
   </string>
   <string name="LSLTipText_llAttachToAvatar">
 llAttachToAvatar(integer attach_point)
-Attaches the object to the avatar who has granted permission to the script
+Attaches the object on attach_point to the avatar who has granted permission to the script.
   </string>
   <string name="LSLTipText_llDetachFromAvatar">
 llDetachFromAvatar()
@@ -1953,6 +1953,18 @@ list llGetAgentList(integer scope, list options)
 Returns a list of avatar keys for all agents in the region limited to the area(s) specified by scope, or a list containing an error message string.
 scope can be AGENT_LIST_PARCEL, AGENT_LIST_PARCEL_OWNER or AGENT_LIST_REGION.
 options is currently unused.
+  </string>
+  <string name="LSLTipText_llAttachToAvatarTemp">
+llAttachToAvatarTemp(integer attach_point)
+Attaches the object on attach_point to the avatar who has granted permission to the script. The object will not create new inventory for the user, and will disappear on detach or disconnect.
+  </string>
+  <string name="LSLTipText_llTeleportAgent">
+llTeleportAgent(key avatar, string landmark, vector position, vector look_at)
+Teleports avatar to a landmark stored in the object's inventory. If no landmark is provided (an empty string), the avatar is teleported to the location position in the current region. In either case, the avatar is turned to face the position given by look_at in local coordinates. To run this function the script must request and obtain the PERMISSION_TELEPORT permission.
+  </string>
+  <string name="LSLTipText_llTeleportAgentGlobalCoords">
+llTeleportAgent(key avatar, vector global_coordinates, vector region_coordinates, vector look_at)
+Teleports avatar to region_coordinates within a region at the specified global_coordinates. The agent lands facing the position defined by look_at local coordinates. To run this function the script must request and obtain the PERMISSION_TELEPORT permission.
   </string>
 
   <!-- OSSL functions

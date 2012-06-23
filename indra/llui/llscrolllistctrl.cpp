@@ -405,7 +405,7 @@ void LLScrollListItem::setNumColumns(S32 columns)
 	S32 prev_columns = mColumns.size();
 	if (columns < prev_columns)
 	{
-		std::for_each(mColumns.begin()+columns, mColumns.end(), DeletePointer());
+		std::for_each(mColumns.begin() + columns, mColumns.end(), DeletePointer());
 	}
 
 	mColumns.resize(columns);

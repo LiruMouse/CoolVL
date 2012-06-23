@@ -119,7 +119,7 @@ public:
 	void		setTopBorderHeight(S32 height);
 	S32			getTopBorderHeight() const;
 	
-	void 		setTabChangeCallback(LLPanel* tab, void (*on_tab_clicked)(void*,bool));
+	void 		setTabChangeCallback(LLPanel* tab, void (*on_tab_clicked)(void*, bool));
 	void		setTabPrecommitChangeCallback(LLPanel* tab, void (*on_precommit)(void*, bool));
 	void 		setTabUserData(LLPanel* tab, void* userdata);
 

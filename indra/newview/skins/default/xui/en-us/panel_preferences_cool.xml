@@ -205,15 +205,20 @@
 			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
 			 left="15" bottom_delta="-20" height="16" width="400" follows="left|top" />
 			<view_border name="border9" bevel_style="none" border_thickness="1"
-			 left="10" bottom_delta="-106" width="475" height="96" follows="left|top"/>
+			 left="10" bottom_delta="-126" width="475" height="116" follows="left|top"/>
 			<check_box name="spell_check_check" control_name="SpellCheck"
 			 label="Spell checking in text and line editors"
 			 tool_tip="When spell checking is enabled, right-clicking on a misspelled word presents you with a menu containing suggestions for a replacement. This is the global setting (each line and text editor may have spell checking disabled, thus overriding this setting)."
 			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
-			 left="15" bottom_delta="72" width="370" height="16" follows="left|top" />
+			 left="15" bottom_delta="92" width="370" height="16" follows="left|top" />
 			<check_box name="spell_check_show_check" control_name="SpellCheckShow"
 			 label="Highlight misspelled words in text"
 			 tool_tip="When this setting is enabled, the highligthing (underlining with a red wave-like line) of the misspelled words is enabled by default in spell-check enabled line and text editors. Note that you always can toggle on and off the highligthing for each line or text editor via their context menu."
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
+			<check_box name="add_avatar_names_to_ignore_check" control_name="AddAvatarNamesToIgnore"
+			 label="Add surrounding avatars' names to the Ignore list"
+			 tool_tip="When this setting is enabled, each time you attempt to auto-complete an avatar name by hitting the TAB key in the chat input (see the corresponding option in the Text Chat settings), the names of the surrounding avatars (avatars within chat range) are automatically added to the ignore list of the spell checker (keep in mind that this list not kept after logout, so it won't affect next sessions), thus avoiding getting the names wrongly flagged as mispelled by the spell checker."
 			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
 			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
 			<text name="language_label" font="SansSerifSmall"
@@ -249,6 +254,11 @@
 			 label="Allow multiple simultaneous viewer sessions"
 			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
 			 left="15" bottom_delta="-30" width="400" height="16" follows="left|top" />
+			<check_box name="fetch_inventory_on_login_check" control_name="FetchInventoryOnLogin"
+			 label="Automatically fetch the inventory in the background after login"
+			 tool_tip="This setting allows to transparently start caching the contents of your inventory after you log in, thus speeding up inventory operations later on. This setting is also automatically enabled when the RestrainedLove features are enabled."
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
 			<check_box name="speed_rez_check" control_name="SpeedRez"
 			 label="Enable speed-rezzing via draw distance stepping"
 			 tool_tip="When activated, this feature automatically reduces the draw distance to 32m before departure when you TP away (or when you log in) and increases it back progressively to its previous value on arrival. This allows the closest objects and avatars to get rezzed first and thus provides a (subjectively) speedier rezzing experience."
@@ -302,11 +312,6 @@
 			 tool_tip="Setting the proper land group on scripted objects is important since failing to do it might restrict the permissions of their scripts (for example, the rezzing permission if the parcel is set to allow only group members to rez). This setting automatically takes care of setting the rezzed objects group to the land group, provided you are a member of that land group."
 			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
 			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
-			<check_box name="fetch_inventory_on_login_check" control_name="FetchInventoryOnLogin"
-			 label="Automatically fetch the inventory in the background after login"
-			 tool_tip="This setting allows to transparently start caching the contents of your inventory after you log in, thus speeding up inventory operations later on. This setting is also automatically enabled when the RestrainedLove features are enabled."
-			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
-			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
 			<check_box name="no_multiple_shoes_check" control_name="NoMultipleShoes"
 			 label="Do not allow to wear more than one pair of shoes"
 			 tool_tip="While it is possible to wear more than one pair of shoes, it doesn't really make any sense and beside, only the last worn pair determines the shape of the shoes (heels height, platform height, toes width and thickness, etc...). With this setting checked, any 'Add' action on a shoes wearable will be interpreted as a 'Wear', thus replacing any already worn pair with the new one."
@@ -327,6 +332,11 @@
 			 tool_tip="This setting allows to turn Avatar Physics on (note that even when your avatar is wearing a Physics wearable, Avatar Physics stays off unless this setting is on). Beware: this feature requires a lot of viewer side calculations: it can cause a frame rate slow down, especially in crowded areas. Also, when on and using a Physics wearable on your avatar, the latter may fail to render properly for users of older viewers (v1.23, Snowglobe, etc)..."
 			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
 			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
+			<slider name="avatar_physics_lod" control_name="RenderAvatarPhysicsLODFactor"
+			 can_edit_text="false" min_val="0" max_val="1" increment="0.05" decimal_digits="2"
+			 show_text="true" label="Avatar Physics LOD factor" enabled="true" mouse_opaque="true"
+			 tool_tip="This is the 'Level Of Detail' for avatar physics, which governs how often physics parameters are updated each second (the higher, the CPU power hungrier)."
+			 left="35" bottom_delta="-20" height="16" width="300" follows="left|top"/>
 		</panel>
 		<panel name="RestrainedLove" label="RestrainedLove" border="true" mouse_opaque="true"
 		 left="1" bottom="-440" width="500" height="440" follows="left|top|right|bottom">
@@ -411,7 +421,7 @@
 			 tool_tip="When your avatar is deafened and can't hear chat, a '...' ellipsis is printed in chat instead. If you don't wish to see this ellipsis, you may un-check this setting."
 			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
 			 left="15" bottom_delta="42" width="400" height="16" follows="left|top" />
-			<check_box name="restrained_love_untruncated_emotes_check" control_name="RestrainedLoveUntruncatedEmotes"
+			<check_box name="restrained_love_emotes_check" control_name="RestrainedLoveUntruncatedEmotes"
 			 label="Untruncated emotes (requires a restart)"
 			 tool_tip="By default, and to prevent 'cheating' (by faking chat with emotes), RestrainedLove truncates emotes to a small amount of characters when your avatar is prevented from chatting. This is a huge impairement for true role-players who won't try and cheat but instead want to enjoy posing long emotes during their RP. While many RestrainedLove toys use '@emote=add' to lift such an annoying restriction, some don't. If you are a true role-player and don't want your emotes to be truncated when your avatar's chatting ability is restricted, you can check this setting."
 			 font="SansSerifSmall" enabled="true" mouse_opaque="true"

@@ -3819,7 +3819,16 @@ void LLRiggedVolume::update(const LLMeshSkinInfo* skin, LLVOAvatar* avatar, cons
 					scale += wght[k];
 				}
 
-				wght *= 1.f / scale;
+				if (scale != 0.f)
+				{
+					wght /= scale;
+				}
+				else
+				{
+					llwarns << "Null scale divisor !" << llendl;
+					// Use a max weight but let some headroom to avoid math overflows
+					wght = LLVector4(F32_MAX / 1024.f, F32_MAX / 1024.f, F32_MAX / 1024.f);
+				}
 
 				for (U32 k = 0; k < 4; k++)
 				{

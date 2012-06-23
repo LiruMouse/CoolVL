@@ -295,8 +295,8 @@ class DarwinManifest(ViewerManifest):
         if self.prefix(src="", dst="Contents"):  # everything goes in Contents
             self.path(self.info_plist_name(), dst="Info.plist")
 
-            # copy additional libs in <bundle>/Contents/MacOS/
-            self.path("../../libraries/universal-darwin/lib_release/libhunspell-1.3.0.dylib", dst="MacOS/libhunspell-1.2.dylib")
+            # copy additional libs in <bundle>/Contents/MacOS/ and <bundle>/Contents/Resources/ 
+            self.path("../../libraries/universal-darwin/lib_release/libhunspell-1.3.0.dylib", dst="Resources/libhunspell-1.3.0.dylib")
             self.path("../../libraries/universal-darwin/lib_release/libndofdev.dylib", dst="MacOS/libndofdev.dylib")
 
             # most everything goes in the Resources directory

@@ -220,6 +220,21 @@ Color:
 			Anyone's objects
 		</radio_item>
 	</radio_group>
+	<check_box name="tab_auto_complete_name_check" control_name="TabAutoCompleteName"
+	 radio_style="false" enabled="true" mouse_opaque="true"
+	 label="TAB auto-completes avatar names" font="SansSerifSmall"
+	 tool_tip="When this setting is enabled, hitting the TAB key after entering the first letters of the name of an avatar within chat range causes the viewer to attempt to auto-complete that name for you."
+	 bottom_delta="-24" left="100" height="16" width="200" follows="left|top" />
+	<check_box name="select_auto_completed_part_check" control_name="SelectAutoCompletedPart"
+	 radio_style="false" enabled="true" mouse_opaque="true"
+	 label="Auto-select completion" font="SansSerifSmall"
+	 tool_tip="When this setting is enabled, each time an avatar name is auto-completed the cursor stays in place and the added letters are auto-selected (letting you the choice between moving the cursor, thus keeping the auto-completed name as is, or to type new letters in place of the auto-completed part of the name). When this setting is disabled, the cursor is instead moved to the end of the auto-completed name."
+	 bottom_delta="0" left_delta="220" height="16" width="180" follows="left|top" />
+	<check_box name="swap_shout_whisper_shortcuts_check" control_name="SwapShoutWhisperShortcuts"
+	 radio_style="false" enabled="true" mouse_opaque="true"
+     label="Swap the shortcuts for Shout and Whisper actions" font="SansSerifSmall"
+	 tool_tip="The normal shortcut for Shouting is CTRL ENTER and the normal shortcut for Whispering is SHIFT ENTER, which is pretty unnatural and unintuitive (SHIFT is used to type capital letters and typing all caps is considered 'shouting', not to mention SHift and SHout start with the same letters, while CTRL is more in relation with the self-'control' you would use for whispering). With this setting checked, the shortcuts are swapped and you can use SHIFT ENTER to shout and CTRL ENTER to whisper."
+	 bottom_delta="-20" left="100" height="16" width="400" follows="left|top" />
 <!--
 	<text name="text_box10" type="string" length="1" enabled="true" mouse_opaque="true"
 	 bg_visible="false" border_drop_shadow_visible="false" border_visible="false" drop_shadow_visible="true"
@@ -288,11 +303,10 @@ Color:
 			한국어 (Korean)
 		</combo_item>
 	</combo_box>
--->
 	<text name="text_box12" type="string" length="1" enabled="true" mouse_opaque="true"
 	 bg_visible="false" border_drop_shadow_visible="false" border_visible="false" drop_shadow_visible="true"
 	 font="SansSerifSmall" v_pad="0" h_pad="0" halign="left"
-	 bottom_delta="-30" left="10" height="16" width="90" follows="left|top">
+	 bottom_delta="-20" left="10" height="16" width="90" follows="left|top">
 		Chat logging:
 	</text>	
 	<text name="text_box13" type="string" length="1" enabled="true" mouse_opaque="true"
@@ -301,4 +315,5 @@ Color:
 	 bottom_delta="0" left="104" height="16" width="300" follows="left|top">
 		Please see the "IM &amp; Logs" tab.
 	</text>	
+-->
 </panel>

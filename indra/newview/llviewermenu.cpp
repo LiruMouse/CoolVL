@@ -768,15 +768,33 @@ void init_client_menu(LLMenuGL* menu)
 										  debugview,
 										  '4', MASK_CONTROL|MASK_SHIFT));
 		sub->append(new LLMenuItemCallGL("Debug tags", &handle_debug_tags, NULL));
-		sub->append(new LLMenuItemCallGL("Region Info to Debug Console", 
-										 &handle_region_dump_settings, NULL, NULL));
-		sub->append(new LLMenuItemCallGL("Capabilities Info to Debug Console",
-										 &handle_dump_capabilities_info, NULL, NULL));
-		sub->append(new LLMenuItemCallGL("Group Info to Debug Console",
-										 &handle_dump_group_info, NULL, NULL));
-		sub->append(new LLMenuItemCallGL("Packets Lost to Debug Console",
-										 &print_packets_lost, NULL, NULL));
-		sub->createJumpKeys();
+		{
+			LLMenuGL* sub2 = new LLMenuGL("Info to Debug Console");
+			sub->appendMenu(sub2);
+			sub2->append(new LLMenuItemCallGL("Region Info", 
+											  &handle_region_dump_settings));
+			sub2->append(new LLMenuItemCallGL("Capabilities Info",
+											  &handle_dump_capabilities_info));
+			sub2->append(new LLMenuItemCallGL("Group Info",
+											  &handle_dump_group_info));
+			sub2->append(new LLMenuItemCallGL("Packets Lost Info",
+											  &print_packets_lost));
+			sub2->append(new LLMenuItemCallGL("Dump Inventory",
+											  &dump_inventory));
+			sub2->append(new LLMenuItemCallGL("Dump SelectMgr",
+											  &dump_select_mgr));
+			sub2->append(new LLMenuItemCallGL("Dump Focus Holder",
+											  &handle_dump_focus, NULL, NULL,
+											  'F', MASK_ALT | MASK_CONTROL));
+			sub2->append(new LLMenuItemCallGL("Selected Object Info",
+											  &print_object_info, NULL, NULL,
+											  'P', MASK_CONTROL | MASK_SHIFT));
+			sub2->append(new LLMenuItemCallGL("Agent Info",
+											  &print_agent_nvpairs, NULL, NULL,
+											  'P', MASK_SHIFT));
+			sub2->append(new LLMenuItemCallGL("Memory Stats", &output_statistics));
+			sub2->createJumpKeys();
+		}
 		sub->appendSeparator();
 
 		// Debugging view for unified notifications
@@ -785,6 +803,7 @@ void init_client_menu(LLMenuGL* menu)
 		sub->append(new LLMenuItemCallGL("Region Debug Console", 
 					&handle_region_debug_console, NULL, NULL, 'C', MASK_CONTROL|MASK_SHIFT));
 
+		sub->createJumpKeys();
 	}
 
 	sub_menu = new LLMenuGL("HUD Info");
@@ -1128,12 +1147,7 @@ void init_debug_ui_menu(LLMenuGL* menu)
 
 	menu->append(new LLMenuItemCallGL("Decode all UI sounds", &decode_ui_sounds));
 	menu->appendSeparator();
-	menu->append(new LLMenuItemCallGL("Dump SelectMgr", &dump_select_mgr));
-	menu->append(new LLMenuItemCallGL("Dump Inventory", &dump_inventory));
-	menu->append(new LLMenuItemCallGL("Dump Focus Holder", &handle_dump_focus, NULL, NULL, 'F', MASK_ALT | MASK_CONTROL));
-	menu->append(new LLMenuItemCallGL("Print Selected Object Info",	&print_object_info, NULL, NULL, 'P', MASK_CONTROL|MASK_SHIFT));
-	menu->append(new LLMenuItemCallGL("Print Agent Info",			&print_agent_nvpairs, NULL, NULL, 'P', MASK_SHIFT));
-	menu->append(new LLMenuItemCallGL("Memory Stats",  &output_statistics));
+	menu->append(new LLMenuItemCheckGL("Zoom Dependent Resize Handles", menu_toggle_control, NULL, menu_check_control, (void*)"ZoomDependentResizeHandles"));
 	menu->appendSeparator();
 	menu->append(new LLMenuItemCheckGL("Debug SelectMgr", menu_toggle_control, NULL, menu_check_control, (void*)"DebugSelectMgr"));
 	menu->append(new LLMenuItemToggleGL("Debug Clicks", &gDebugClicks));

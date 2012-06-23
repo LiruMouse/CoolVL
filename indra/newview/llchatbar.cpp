@@ -49,6 +49,7 @@
 #include "llmultigesture.h"
 #include "llparcel.h"
 #include "llrect.h"
+#include "llspellcheck.h"
 #include "llstring.h"
 #include "llui.h"
 #include "lluictrlfactory.h"
@@ -62,7 +63,6 @@
 #include "llinventorymodel.h"
 #include "lluiconstants.h"
 #include "llviewergesture.h"	// for triggering gestures
-#include "llviewercontrol.h"
 #include "llviewermenu.h"		// for deleting object with DEL key
 #include "llviewerstats.h"
 #include "llviewerwindow.h"
@@ -74,6 +74,10 @@
 const F32 AGENT_TYPING_TIMEOUT = 5.f;	// seconds
 
 LLChatBar* gChatBar = NULL;
+
+//static
+BOOL LLChatBar::sSwappedShortcuts = FALSE;
+std::set<std::string> LLChatBar::sIgnoredNames;
 
 // legacy calllback glue
 void toggleChatHistory(void* user_data);
@@ -108,6 +112,8 @@ LLChatBar::LLChatBar(const std::string& name)
 	mSecondary(true),
 	mObserver(NULL)
 {
+	sSwappedShortcuts = gSavedSettings.getBOOL("SwapShoutWhisperShortcuts");
+	mLastSwappedShortcuts = sSwappedShortcuts;
 }
 
 LLChatBar::LLChatBar(const std::string& name, const LLRect& rect) 
@@ -124,10 +130,12 @@ LLChatBar::LLChatBar(const std::string& name, const LLRect& rect)
 	mSecondary(false),
 	mObserver(NULL)
 {
-	setIsChrome(TRUE);
+	sSwappedShortcuts = gSavedSettings.getBOOL("SwapShoutWhisperShortcuts");
+	mLastSwappedShortcuts = sSwappedShortcuts;
 
 	LLUICtrlFactory::getInstance()->buildPanel(this, "panel_chat_bar.xml");
 
+	setIsChrome(TRUE);
 	setFocusRoot(TRUE);
 
 	setRect(rect); // override xml rect
@@ -164,6 +172,14 @@ BOOL LLChatBar::postBuild()
 	{
 		mSayFlyoutButton->setCommitCallback(onClickSay);
 		mSayFlyoutButton->setCallbackUserData(this);
+		if (sSwappedShortcuts)
+		{
+			mSayFlyoutButton->setToolTip(getString("swapped_shortcuts"));
+		}
+		else
+		{
+			mSayFlyoutButton->setToolTip(getString("normal_shortcuts"));
+		}
 	}
 
 	mOpenTextEditorButton = getChild<LLButton>("open_text_editor_btn", TRUE, FALSE);
@@ -220,13 +236,15 @@ BOOL LLChatBar::handleKeyHere(KEY key, MASK mask)
 	// ALT-RETURN is reserved for windowed/fullscreen toggle
 	if (KEY_RETURN == key)
 	{
-		if (mask == MASK_CONTROL)
+		if ((sSwappedShortcuts && mask == MASK_SHIFT) ||
+			(!sSwappedShortcuts && mask == MASK_CONTROL))
 		{
 			// shout
 			sendChat(CHAT_TYPE_SHOUT);
 			handled = TRUE;
 		}
-		else if (mask == MASK_SHIFT)
+		else if ((sSwappedShortcuts && mask == MASK_CONTROL) ||
+				 (!sSwappedShortcuts && mask == MASK_SHIFT))
 		{
 			// whisper
 			sendChat(CHAT_TYPE_WHISPER);
@@ -238,6 +256,54 @@ BOOL LLChatBar::handleKeyHere(KEY key, MASK mask)
 			sendChat(CHAT_TYPE_NORMAL);
 			handled = TRUE;
 		}
+		else if (mInputEditor && mask == (MASK_SHIFT | MASK_CONTROL))
+		{
+			S32 cursor = mInputEditor->getCursor();
+			std::string text = mInputEditor->getText();
+			// For some reason, the event is triggered twice: let's insert only
+			// one newline character.
+			if (cursor == 0 || text[cursor - 1] != '\n')
+			{
+				text = text.insert(cursor, "\n");
+				mInputEditor->setText(text);
+				mInputEditor->setCursor(cursor + 1);
+			}
+			handled = TRUE;
+		}
+	}
+	else if (mInputEditor && KEY_TAB == key && mask == MASK_NONE &&
+			 gSavedSettings.getBOOL("TabAutoCompleteName"))
+	{
+		std::string text = mInputEditor->getText();
+		S32 word_start = 0;
+		S32 word_len = 0;
+		S32 cursor = mInputEditor->getCursor();
+		S32 pos = cursor;
+		if (pos > 0 && pos != text.length() - 1)
+		{
+			// Make sure the word will be found if the cursor is at its end
+			pos--;
+		}
+		if (mInputEditor->getWordBoundriesAt(pos, &word_start, &word_len))
+		{
+			std::string word = text.substr(word_start, word_len);
+			std::string suggestion = getMatchingAvatarName(word);
+			if (suggestion != word)
+			{
+				text = text.replace(word_start, word_len, suggestion);
+				mInputEditor->setText(text);
+				if (gSavedSettings.getBOOL("SelectAutoCompletedPart"))
+				{
+					mInputEditor->setSelection(cursor,
+											   cursor + suggestion.length() - word.length());
+				}
+				else
+				{
+					mInputEditor->setCursor(cursor + suggestion.length() - word.length());
+				}
+			}
+		}
+		handled = TRUE;
 	}
 	// only do this in main chatbar
 	else if (KEY_ESCAPE == key && mask == MASK_NONE && gChatBar &&
@@ -408,6 +474,19 @@ void LLChatBar::refresh()
 		if (mGestureCombo)
 		{
 			mGestureCombo->setEnabled(!has_text_editor);
+		}
+	}
+
+	if (mSayFlyoutButton && sSwappedShortcuts != mLastSwappedShortcuts)
+	{
+		mLastSwappedShortcuts = sSwappedShortcuts;
+		if (sSwappedShortcuts)
+		{
+			mSayFlyoutButton->setToolTip(getString("swapped_shortcuts"));
+		}
+		else
+		{
+			mSayFlyoutButton->setToolTip(getString("normal_shortcuts"));
 		}
 	}
 }
@@ -999,9 +1078,10 @@ void send_chat_from_viewer(const std::string& utf8_out_text, EChatType type, S32
 
 	std::string crunchedText = utf8_out_text;
 
-	// There is a redirection in order but this particular message is an emote or an OOC text, so we didn't
-	// redirect it. However it has not gone through crunchEmote yet, so we need to do this here to prevent
-	// cheated, emote-like chat (true emotes must however go through untouched).
+	// There is a redirection in force but this particular message is an emote
+	// or an OOC text, so we didn't redirect it. However it has not gone
+	// through crunchEmote yet, so we need to do this here to prevent cheating
+	// with emote-like chat (true emotes must however go through untouched).
 	if (gRRenabled && channel == 0 && gAgent.mRRInterface.containsSubstr ("redirchat:"))
 	{
 		crunchedText = gAgent.mRRInterface.crunchEmote(crunchedText);
@@ -1014,7 +1094,7 @@ void send_chat_from_viewer(const std::string& utf8_out_text, EChatType type, S32
 	msg->addUUIDFast(_PREHASH_AgentID, gAgent.getID());
 	msg->addUUIDFast(_PREHASH_SessionID, gAgent.getSessionID());
 	msg->nextBlockFast(_PREHASH_ChatData);
-////	msg->addStringFast(_PREHASH_Message, utf8_out_text);
+////msg->addStringFast(_PREHASH_Message, utf8_out_text);
 //MK
 	msg->addStringFast(_PREHASH_Message, crunchedText);
 //mk
@@ -1067,6 +1147,150 @@ void LLChatBar::onCommitGesture(LLUICtrl* ctrl, void* data)
 		// free focus back to chat bar
 		self->mGestureCombo->setFocus(FALSE);
 	}
+}
+
+//static
+std::string LLChatBar::getMatchingAvatarName(const std::string& match)
+{
+	std::string suggestion = match;
+//MK
+	if (gRRenabled && gAgent.mRRInterface.mContainsShownames)
+	{
+		return suggestion;
+	}
+//mk
+	bool add_to_ignore = LLSpellCheck::instance().getSpellCheck() &&
+						 gSavedSettings.getBOOL("AddAvatarNamesToIgnore");
+	std::vector<LLUUID> avatars;
+	std::vector<LLVector3d> positions;
+	LLWorld::getInstance()->getAvatars(&avatars, &positions,
+									   gAgent.getPositionGlobal(),
+									   gSavedSettings.getF32("NearMeRange"));
+	std::set<std::string> matches;
+	std::string longest_match;
+	size_t len = 0;
+	std::string first_name, last_name, display_name, name;
+	std::string pattern = match;
+	LLStringUtil::toLower(pattern);
+	LLAvatarName avatar_name;
+	for (std::vector<LLUUID>::iterator it = avatars.begin();
+		 it != avatars.end(); it++)
+	{
+		const LLUUID id = *it;
+		if (gCacheName->getName(id, first_name, last_name))
+		{
+			name = first_name;
+			LLStringUtil::toLower(name);
+			if (name.length() && name.find(pattern) == 0)
+			{
+				LL_DEBUGS("NameAutoCompletion") << "Inserting matching first name: "
+												<< first_name << LL_ENDL;
+				matches.insert(first_name);
+				if (name.length() > len)
+				{
+					len = name.length();
+					longest_match = first_name;
+				}
+			}
+			if (last_name.length() && last_name != "Resident")
+			{
+				name = last_name;
+				LLStringUtil::toLower(name);
+				if (name.find(pattern) == 0)
+				{
+					LL_DEBUGS("NameAutoCompletion") << "Inserting matching last name: "
+													<< last_name << LL_ENDL;
+					matches.insert(last_name);
+					if (name.length() > len)
+					{
+						len = name.length();
+						longest_match = last_name;
+					}
+				}
+			}
+			else
+			{
+				last_name.clear();
+			}
+		}
+		else
+		{
+			first_name.clear();
+			last_name.clear();			
+		}
+		display_name.clear();
+		if (LLAvatarNameCache::useDisplayNames() &&
+			LLAvatarNameCache::get(id, &avatar_name))
+		{
+			display_name = avatar_name.mDisplayName;
+			if (display_name != first_name &&
+				display_name != first_name + " " + last_name)
+			{
+				name = display_name;
+				LLStringUtil::toLower(name);
+				if (name.length() && name.find(pattern) == 0)
+				{
+					LL_DEBUGS("NameAutoCompletion") << "Inserting matching display name: "
+													<< display_name << LL_ENDL;
+					matches.insert(display_name);
+					if (name.length() > len)
+					{
+						len = name.length();
+						longest_match = display_name;
+					}
+				}
+			}
+			else
+			{
+				display_name.clear();
+			}
+		}
+		if (add_to_ignore)
+		{
+			name = first_name + " " + last_name + " " + display_name;
+			// Display names can change, so don't rely on avatar UUIDs
+			if (!sIgnoredNames.count(name))
+			{
+				sIgnoredNames.insert(name);
+				LLSpellCheck::instance().addWordsToIgnoreList(name);
+			}
+		}
+	}
+	if (matches.size() == 1)
+	{
+		suggestion = *(matches.begin());
+		LL_DEBUGS("NameAutoCompletion") << "Only one match found: "
+										<< suggestion << LL_ENDL;
+	}
+	else if (matches.size() > 1)
+	{
+		// Find the first common letters for all matches.
+		for (size_t i = match.length(); i <= len; i++)
+		{
+			pattern = utf8str_truncate(longest_match, (S32)i);
+			LLStringUtil::toLower(pattern);
+			for (std::set<std::string>::iterator it = matches.begin();
+				 it != matches.end(); it++)
+			{
+				name = *it;
+				LLStringUtil::toLower(name);
+				if (name.find(pattern) != 0)
+				{
+					return suggestion;
+				}
+			}
+			suggestion = utf8str_truncate(longest_match, (S32)i);
+		}
+		LL_DEBUGS("NameAutoCompletion") << "Several matches found, returning the common letters: "
+										<< suggestion << LL_ENDL;
+	}
+	else
+	{
+		LL_DEBUGS("NameAutoCompletion") << "No match found, returning the search string: "
+										<< suggestion << LL_ENDL;
+	}
+
+	return suggestion;
 }
 
 void toggleChatHistory(void* user_data)

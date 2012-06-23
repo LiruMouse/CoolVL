@@ -58,6 +58,7 @@ private:
 	static void onCommitChatFullWidth(LLUICtrl* ctrl, void* user_data);
 	static void onCommitCheckBoxedMessages(LLUICtrl* ctrl, void* user_data);
 	static void onCommitCheckChatBubbles(LLUICtrl* ctrl, void* user_data);
+	static void onCommitTabAutoCompleteName(LLUICtrl* ctrl, void* user_data);
 	void refreshValues();
 
 	S32	mChatSize;
@@ -76,6 +77,8 @@ private:
 	BOOL mPlayTypingSound;
 	BOOL mShowTypingInfo;
 	BOOL mChatBubbles;
+	BOOL mTabAutoCompleteName;
+	BOOL mSelectAutoCompletedPart;
 	LLColor4 mSystemChatColor;
 	LLColor4 mUserChatColor;
 	LLColor4 mAgentChatColor;
@@ -100,9 +103,11 @@ LLPrefsChatImpl::LLPrefsChatImpl()
 	childSetCommitCallback("chat_full_width_check", onCommitChatFullWidth, this);
 	childSetCommitCallback("console_box_per_message_check", onCommitCheckBoxedMessages, this);
 	childSetCommitCallback("bubble_text_chat", onCommitCheckChatBubbles, this);
+	childSetCommitCallback("tab_auto_complete_name_check", onCommitTabAutoCompleteName, this);
 	refreshValues(); // initialize member data from saved settings
 	childSetEnabled("disable_messages_spacing_check", !mConsoleBoxPerMessage);
 	childSetEnabled("show_typing_info_check", !mChatBubbles);
+	childSetEnabled("select_auto_completed_part_check", mTabAutoCompleteName);
 #if TRANSLATE_CHAT
 	childSetValue("translate_language_combobox", mTranslateLanguage);
 #endif
@@ -142,6 +147,17 @@ void LLPrefsChatImpl::onCommitCheckChatBubbles(LLUICtrl* ctrl, void* user_data)
 	}
 }
 
+//static
+void LLPrefsChatImpl::onCommitTabAutoCompleteName(LLUICtrl* ctrl, void* user_data)
+{
+	LLPrefsChatImpl* self = (LLPrefsChatImpl*)user_data;
+	LLCheckBoxCtrl* check = (LLCheckBoxCtrl*)ctrl;
+	if (self && check)
+	{
+		self->childSetEnabled("select_auto_completed_part_check", check->get());
+	}
+}
+
 void LLPrefsChatImpl::refreshValues()
 {
 	//set values
@@ -161,6 +177,8 @@ void LLPrefsChatImpl::refreshValues()
 	mPlayTypingAnim				= gSavedSettings.getBOOL("PlayTypingAnim"); 
 	mPlayTypingSound			= gSavedSettings.getBOOL("PlayTypingSound"); 
 	mShowTypingInfo				= gSavedSettings.getBOOL("ShowTypingInfo"); 
+	mTabAutoCompleteName		= gSavedSettings.getBOOL("TabAutoCompleteName"); 
+	mSelectAutoCompletedPart	= gSavedSettings.getBOOL("SelectAutoCompletedPart"); 
 	mSystemChatColor			= gSavedSettings.getColor4("SystemChatColor");
 	mUserChatColor				= gSavedSettings.getColor4("UserChatColor");
 	mAgentChatColor				= gSavedSettings.getColor4("AgentChatColor");
@@ -195,6 +213,8 @@ void LLPrefsChatImpl::cancel()
 	gSavedSettings.setBOOL("PlayTypingAnim",			mPlayTypingAnim); 
 	gSavedSettings.setBOOL("PlayTypingSound",			mPlayTypingSound); 
 	gSavedSettings.setBOOL("ShowTypingInfo",			mShowTypingInfo); 
+	gSavedSettings.setBOOL("TabAutoCompleteName",		mTabAutoCompleteName); 
+	gSavedSettings.setBOOL("SelectAutoCompletedPart",	mSelectAutoCompletedPart); 
 	gSavedSettings.setColor4("SystemChatColor",			mSystemChatColor);
 	gSavedSettings.setColor4("UserChatColor",			mUserChatColor);
 	gSavedSettings.setColor4("AgentChatColor",			mAgentChatColor);

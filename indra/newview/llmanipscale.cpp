@@ -130,22 +130,36 @@ void LLManipScale::setStretchTextures(BOOL b)
 // static
 BOOL LLManipScale::getUniform()
 {
-	return gSavedSettings.getBOOL("ScaleUniform");
+	static LLCachedControl<bool> scale_uniform(gSavedSettings, "ScaleUniform");
+	return (BOOL)scale_uniform;
 }
 
 // static
 BOOL LLManipScale::getShowAxes()
 {
-	return gSavedSettings.getBOOL("ScaleShowAxes");
+	static LLCachedControl<bool> scale_show_axes(gSavedSettings,
+												 "ScaleShowAxes");
+	return (BOOL)scale_show_axes;
 }
 
 // static
 BOOL LLManipScale::getStretchTextures()
 {
-	return gSavedSettings.getBOOL("ScaleStretchTextures");
+	static LLCachedControl<bool> scale_stretch_textures(gSavedSettings,
+														"ScaleStretchTextures");
+	return (BOOL)scale_stretch_textures;
 }
 
-inline void LLManipScale::conditionalHighlight(U32 part, const LLColor4* highlight, const LLColor4* normal)
+// static
+bool LLManipScale::getSnapEnabled()
+{
+	static LLCachedControl<bool> snap_enabled(gSavedSettings, "SnapEnabled");
+	return snap_enabled;
+}
+
+inline void LLManipScale::conditionalHighlight(U32 part,
+											   const LLColor4* highlight,
+											   const LLColor4* normal)
 {
 	LLColor4 default_highlight(1.f, 1.f, 1.f, 1.f);
 	LLColor4 default_normal(0.7f, 0.7f, 0.7f, 0.6f);
@@ -211,7 +225,8 @@ LLManipScale::LLManipScale(LLToolComposite* composite)
 
 LLManipScale::~LLManipScale()
 {
-	for_each(mProjectedManipulators.begin(), mProjectedManipulators.end(), DeletePointer());
+	for_each(mProjectedManipulators.begin(), mProjectedManipulators.end(),
+			 DeletePointer());
 	delete[] mManipulatorScales;
 }
 
@@ -236,38 +251,46 @@ void LLManipScale::render()
 		////////////////////////////////////////////////////////////////////////
 		// Calculate size of drag handles 
 
-		const F32 BOX_HANDLE_BASE_SIZE		= 50.0f;   // box size in pixels = BOX_HANDLE_BASE_SIZE * BOX_HANDLE_BASE_FACTOR
-		const F32 BOX_HANDLE_BASE_FACTOR	= 0.2f;
+		const F32 BOX_HANDLE_BASE_SIZE = 50.0f;   // box size in pixels = BOX_HANDLE_BASE_SIZE * BOX_HANDLE_BASE_FACTOR
+		const F32 BOX_HANDLE_BASE_FACTOR = 0.2f;
 
-		LLVector3 center_agent = gAgent.getPosAgentFromGlobal(LLSelectMgr::getInstance()->getSelectionCenterGlobal());
-
-		F32 range;
-		F32 range_from_agent;
+		LLViewerCamera* camera = LLViewerCamera::getInstance();
 		if (mObjectSelection->getSelectType() == SELECT_TYPE_HUD)
 		{
-			mBoxHandleSize = BOX_HANDLE_BASE_SIZE * BOX_HANDLE_BASE_FACTOR / (F32) LLViewerCamera::getInstance()->getViewHeightInPixels();
+			mBoxHandleSize = BOX_HANDLE_BASE_SIZE * BOX_HANDLE_BASE_FACTOR / (F32)camera->getViewHeightInPixels();
 			mBoxHandleSize /= gAgent.mHUDCurZoom;
 		}
 		else
 		{
-			range = dist_vec(gAgent.getCameraPositionAgent(), center_agent);
-			range_from_agent = dist_vec(gAgent.getPositionAgent(), center_agent);
+			LLVector3 center_agent = gAgent.getPosAgentFromGlobal(LLSelectMgr::getInstance()->getSelectionCenterGlobal());
+			F32 range = dist_vec(gAgent.getCameraPositionAgent(), center_agent);
+			F32 range_from_agent = dist_vec(gAgent.getPositionAgent(), center_agent);
 
 			// Don't draw manip if object too far away
-			if (gSavedSettings.getBOOL("LimitSelectDistance"))
+			static LLCachedControl<bool> limit_select_distance(gSavedSettings,
+															   "LimitSelectDistance");
+			static LLCachedControl<F32> max_select_distance(gSavedSettings,
+															"MaxSelectDistance");
+			if (limit_select_distance)
 			{
-				F32 max_select_distance = gSavedSettings.getF32("MaxSelectDistance");
 				if (range_from_agent > max_select_distance)
 				{
 					return;
 				}
 			}
 
-			if (range > 0.001f)
+			static LLCachedControl<bool> zoom_dependent_handles(gSavedSettings,
+																"ZoomDependentResizeHandles");
+			if (zoom_dependent_handles)
+			{
+				mBoxHandleSize = BOX_HANDLE_BASE_FACTOR * BOX_HANDLE_BASE_SIZE *
+								 (1.005f - gAgent.getCameraZoomFraction()) / 20.f;
+			}
+			else if (range > 0.001f)
 			{
 				// range != zero
-				F32 fraction_of_fov = BOX_HANDLE_BASE_SIZE / (F32) LLViewerCamera::getInstance()->getViewHeightInPixels();
-				F32 apparent_angle = fraction_of_fov * LLViewerCamera::getInstance()->getView();  // radians
+				F32 fraction_of_fov = BOX_HANDLE_BASE_SIZE / (F32)camera->getViewHeightInPixels();
+				F32 apparent_angle = fraction_of_fov * camera->getView();  // radians
 				mBoxHandleSize = range * tan(apparent_angle) * BOX_HANDLE_BASE_FACTOR;
 			}
 			else
@@ -326,7 +349,7 @@ void LLManipScale::render()
 
 BOOL LLManipScale::handleMouseDown(S32 x, S32 y, MASK mask)
 {
-	BOOL	handled = FALSE;
+	BOOL handled = FALSE;
 
 	if (mHighlightedPart != LL_NO_PART)
 	{
@@ -380,20 +403,20 @@ BOOL LLManipScale::handleMouseUp(S32 x, S32 y, MASK mask)
 
 	if (hasMouseCapture())
 	{
-		if ((LL_FACE_MIN <= (S32)mManipPart) 
-			&& ((S32)mManipPart <= LL_FACE_MAX))
+		if (LL_FACE_MIN <= (S32)mManipPart &&
+			(S32)mManipPart <= LL_FACE_MAX)
 		{
 			sendUpdates(TRUE,TRUE,FALSE);
 		}
-		else
-		if ((LL_CORNER_MIN <= (S32)mManipPart) 
-			&& ((S32)mManipPart <= LL_CORNER_MAX))
+		else if (LL_CORNER_MIN <= (S32)mManipPart &&
+			(S32)mManipPart <= LL_CORNER_MAX)
 		{
 			sendUpdates(TRUE,TRUE,TRUE);
 		}
 
 		//send texture update
-		LLSelectMgr::getInstance()->adjustTexturesByScale(TRUE, getStretchTextures());
+		LLSelectMgr::getInstance()->adjustTexturesByScale(TRUE,
+														  getStretchTextures());
 
 		LLSelectMgr::getInstance()->enableSilhouette(TRUE);
 		mManipPart = LL_NO_PART;
@@ -420,7 +443,8 @@ BOOL LLManipScale::handleHover(S32 x, S32 y, MASK mask)
 		{
 			drag(x, y);
 		}
-		lldebugst(LLERR_USER_INPUT) << "hover handled by LLManipScale (active)" << llendl;
+		lldebugst(LLERR_USER_INPUT) << "hover handled by LLManipScale (active)"
+									<< llendl;
 	}
 	else
 	{
@@ -430,7 +454,8 @@ BOOL LLManipScale::handleHover(S32 x, S32 y, MASK mask)
 	}
 
 	// Patch up textures, if possible.
-	LLSelectMgr::getInstance()->adjustTexturesByScale(FALSE, getStretchTextures());
+	LLSelectMgr::getInstance()->adjustTexturesByScale(FALSE,
+													  getStretchTextures());
 
 	gViewerWindow->getWindow()->setCursor(UI_CURSOR_TOOLSCALE);
 	return TRUE;
@@ -455,16 +480,18 @@ void LLManipScale::highlightManipulators(S32 x, S32 y)
 			transform *= cfr;
 			LLMatrix4 window_scale;
 			F32 zoom_level = 2.f * gAgent.mHUDCurZoom;
-			window_scale.initAll(LLVector3(zoom_level / LLViewerCamera::getInstance()->getAspect(), zoom_level, 0.f),
-				LLQuaternion::DEFAULT,
-				LLVector3::zero);
+			window_scale.initAll(LLVector3(zoom_level / LLViewerCamera::getInstance()->getAspect(),
+										   zoom_level, 0.f),
+								 LLQuaternion::DEFAULT,
+								 LLVector3::zero);
 			transform *= window_scale;
 		}
 		else
 		{
 			LLMatrix4 projMatrix = LLViewerCamera::getInstance()->getProjection();
 			LLMatrix4 modelView = LLViewerCamera::getInstance()->getModelview();
-			transform.initAll(LLVector3(1.f, 1.f, 1.f), bbox.getRotation(), bbox.getPositionAgent());
+			transform.initAll(LLVector3(1.f, 1.f, 1.f), bbox.getRotation(),
+							  bbox.getPositionAgent());
 
 			transform *= modelView;
 			transform *= projMatrix;
@@ -541,15 +568,19 @@ void LLManipScale::highlightManipulators(S32 x, S32 y)
 	{
 		if (mHighlightedPart == MANIPULATOR_IDS[i])
 		{
-			mManipulatorScales[i] = lerp(mManipulatorScales[i], SELECTED_MANIPULATOR_SCALE, LLCriticalDamp::getInterpolant(MANIPULATOR_SCALE_HALF_LIFE));
+			mManipulatorScales[i] = lerp(mManipulatorScales[i],
+										 SELECTED_MANIPULATOR_SCALE,
+										 LLCriticalDamp::getInterpolant(MANIPULATOR_SCALE_HALF_LIFE));
 		}
 		else
 		{
-			mManipulatorScales[i] = lerp(mManipulatorScales[i], 1.f, LLCriticalDamp::getInterpolant(MANIPULATOR_SCALE_HALF_LIFE));
+			mManipulatorScales[i] = lerp(mManipulatorScales[i], 1.f,
+										 LLCriticalDamp::getInterpolant(MANIPULATOR_SCALE_HALF_LIFE));
 		}
 	}
 
-	lldebugst(LLERR_USER_INPUT) << "hover handled by LLManipScale (inactive)" << llendl;
+	lldebugst(LLERR_USER_INPUT) << "hover handled by LLManipScale (inactive)"
+								<< llendl;
 }
 
 void LLManipScale::renderFaces(const LLBBox& bbox)
@@ -586,16 +617,16 @@ void LLManipScale::renderFaces(const LLBBox& bbox)
     //              (-++)        (-+-)
 
 	LLColor4 highlight_color(1.f, 1.f, 1.f, 0.5f);
-	LLColor4 normal_color(	1.f, 1.f, 1.f, 0.3f);
+	LLColor4 normal_color(1.f, 1.f, 1.f, 0.3f);
 
 	LLColor4 x_highlight_color(1.f, 0.2f, 0.2f, 1.0f);
-	LLColor4 x_normal_color(	0.6f, 0.f, 0.f, 0.4f);
+	LLColor4 x_normal_color(0.6f, 0.f, 0.f, 0.4f);
 
 	LLColor4 y_highlight_color(0.2f, 1.f, 0.2f, 1.0f);
-	LLColor4 y_normal_color(	0.f, 0.6f, 0.f, 0.4f);
+	LLColor4 y_normal_color(0.f, 0.6f, 0.f, 0.4f);
 
 	LLColor4 z_highlight_color(0.2f, 0.2f, 1.f, 1.0f);
-	LLColor4 z_normal_color(	0.f, 0.f, 0.6f, 0.4f);
+	LLColor4 z_normal_color(0.f, 0.f, 0.6f, 0.4f);
 
 	LLColor4 default_normal_color(0.7f, 0.7f, 0.7f, 0.15f);
 
@@ -728,10 +759,9 @@ void LLManipScale::renderEdges(const LLBBox& bbox)
 		{
 			glTranslatef(center_to_edge.mV[0], center_to_edge.mV[1], center_to_edge.mV[2]);
 			conditionalHighlight(part);
-			glScalef(
-				direction.mV[0] ? edge_width : extent.mV[VX],
-				direction.mV[1] ? edge_width : extent.mV[VY],
-				direction.mV[2] ? edge_width : extent.mV[VZ]);
+			glScalef(direction.mV[0] ? edge_width : extent.mV[VX],
+					 direction.mV[1] ? edge_width : extent.mV[VY],
+					 direction.mV[2] ? edge_width : extent.mV[VZ]);
 			gBox.render();
 		}
 		glPopMatrix();
@@ -743,13 +773,13 @@ void LLManipScale::renderCorners(const LLBBox& bbox)
 	U32 part = LL_CORNER_NNN;
 
 	F32 x_offset = bbox.getMinLocal().mV[VX];
-	for (S32 i=0; i < 2; i++)
+	for (S32 i = 0; i < 2; i++)
 	{
 		F32 y_offset = bbox.getMinLocal().mV[VY];
-		for (S32 j=0; j < 2; j++)
+		for (S32 j = 0; j < 2; j++)
 		{
 			F32 z_offset = bbox.getMinLocal().mV[VZ];
-			for (S32 k=0; k < 2; k++)
+			for (S32 k = 0; k < 2; k++)
 			{
 				conditionalHighlight(part);
 				renderBoxHandle(x_offset, y_offset, z_offset);
@@ -793,10 +823,9 @@ void LLManipScale::renderAxisHandle(const LLVector3& start, const LLVector3& end
 		glPushMatrix();
 		{
 			glTranslatef(pos.mV[VX], pos.mV[VY], pos.mV[VZ]);
-			glScalef(
-				mBoxHandleSize + llabs(delta.mV[VX]),
-				mBoxHandleSize + llabs(delta.mV[VY]),
-				mBoxHandleSize + llabs(delta.mV[VZ]));
+			glScalef(mBoxHandleSize + llabs(delta.mV[VX]),
+					 mBoxHandleSize + llabs(delta.mV[VY]),
+					 mBoxHandleSize + llabs(delta.mV[VZ]));
 			gBox.render();
 		}
 		glPopMatrix();
@@ -809,14 +838,12 @@ void LLManipScale::renderAxisHandle(const LLVector3& start, const LLVector3& end
 
 void LLManipScale::drag(S32 x, S32 y)
 {
-	if ((LL_FACE_MIN <= (S32)mManipPart) 
-		&& ((S32)mManipPart <= LL_FACE_MAX))
+	if (LL_FACE_MIN <= (S32)mManipPart && (S32)mManipPart <= LL_FACE_MAX)
 	{
 		dragFace(x, y);
 	}
-	else
-	if ((LL_CORNER_MIN <= (S32)mManipPart) 
-		&& ((S32)mManipPart <= LL_CORNER_MAX))
+	else if (LL_CORNER_MIN <= (S32)mManipPart &&
+			 (S32)mManipPart <= LL_CORNER_MAX)
 	{
 		dragCorner(x, y);
 	}
@@ -866,12 +893,11 @@ void LLManipScale::dragCorner(S32 x, S32 y)
 	F32 s = 0;
 	F32 t = 0;
 
-	nearestPointOnLineFromMouse(x, y, 
-						drag_start_center_agent,
-						drag_start_point_agent,
-						s, t);
+	nearestPointOnLineFromMouse(x, y, drag_start_center_agent,
+								drag_start_point_agent, s, t);
 
-	F32 drag_start_dist = dist_vec(drag_start_point_agent, drag_start_center_agent);
+	F32 drag_start_dist = dist_vec(drag_start_point_agent,
+								   drag_start_center_agent);
 
 	if (s <= 0)  // we only care about intersections in front of the camera
 	{
@@ -883,7 +909,6 @@ void LLManipScale::dragCorner(S32 x, S32 y)
 	F32 scale_factor = t;
 
 	BOOL uniform = LLManipScale::getUniform();
-
 	if (!uniform)
 	{
 		scale_factor = 0.5f + (scale_factor * 0.5f);
@@ -923,8 +948,9 @@ void LLManipScale::dragCorner(S32 x, S32 y)
 	F32 max_scale = partToMaxScale(mManipPart, bbox);
 	F32 min_scale = partToMinScale(mManipPart, bbox);
 
-	BOOL snap_enabled = gSavedSettings.getBOOL("SnapEnabled");
-	if (snap_enabled && dist_from_scale_line_1 > mSnapRegimeOffset * snap_dir_dot_mouse_offset1)
+	bool snap_enabled = getSnapEnabled();
+	if (snap_enabled &&
+		dist_from_scale_line_1 > mSnapRegimeOffset * snap_dir_dot_mouse_offset1)
 	{
 		mInSnapRegime = TRUE;
 		LLVector3 projected_drag_pos = mouse_on_plane1 - (dist_from_scale_line_1 / snap_dir_dot_mouse_offset1) * mSnapGuideDir1;
@@ -942,7 +968,8 @@ void LLManipScale::dragCorner(S32 x, S32 y)
 			scale_factor *= 0.5f;
 		}
 	}
-	else if (snap_enabled && dist_from_scale_line_2 > mSnapRegimeOffset * snap_dir_dot_mouse_offset2)
+	else if (snap_enabled &&
+			 dist_from_scale_line_2 > mSnapRegimeOffset * snap_dir_dot_mouse_offset2)
 	{
 		mInSnapRegime = TRUE;
 		LLVector3 projected_drag_pos = mouse_on_plane2 - (dist_from_scale_line_2 / snap_dir_dot_mouse_offset2) * mSnapGuideDir2;
@@ -969,7 +996,8 @@ void LLManipScale::dragCorner(S32 x, S32 y)
 	F32 max_scale_factor = max_prim_scale / MIN_PRIM_SCALE;
 	F32 min_scale_factor = MIN_PRIM_SCALE / max_prim_scale;
 
-	// find max and min scale factors that will make biggest object hit max absolute scale and smallest object hit min absolute scale
+	// find max and min scale factors that will make biggest object hit max
+	// absolute scale and smallest object hit min absolute scale
 	for (LLObjectSelection::iterator iter = mObjectSelection->begin();
 		 iter != mObjectSelection->end(); iter++)
 	{
@@ -1089,11 +1117,8 @@ void LLManipScale::dragFace(S32 x, S32 y)
 	F32 s = 0;
 	F32 t = 0;
 
-	nearestPointOnLineFromMouse(x,
-						y,
-						drag_start_center_agent,
-						drag_start_point_agent,
-						s, t);
+	nearestPointOnLineFromMouse(x, y, drag_start_center_agent,
+								drag_start_point_agent, s, t);
 
 	if (s <= 0)  // we only care about intersections in front of the camera
 	{
@@ -1122,8 +1147,7 @@ void LLManipScale::dragFace(S32 x, S32 y)
 	F32 dist_from_scale_line = dist_vec(scale_center_to_mouse, (mouse_on_scale_line - mScaleCenter));
 	F32 dist_along_scale_line = scale_center_to_mouse * mScaleDir;
 
-	BOOL snap_enabled = gSavedSettings.getBOOL("SnapEnabled");
-
+	bool snap_enabled = getSnapEnabled();
 	if (snap_enabled && dist_from_scale_line > mSnapRegimeOffset)
 	{
 		mInSnapRegime = TRUE;
@@ -1203,12 +1227,13 @@ void LLManipScale::dragFace(S32 x, S32 y)
 	mDragPointGlobal = drag_point_global;
 }
 
-void LLManipScale::sendUpdates(BOOL send_position_update, BOOL send_scale_update, BOOL corner)
+void LLManipScale::sendUpdates(BOOL send_position_update,
+							   BOOL send_scale_update, BOOL corner)
 {
 	// Throttle updates to 10 per second.
 	static LLTimer	update_timer;
 	F32 elapsed_time = update_timer.getElapsedTimeF32();
-	const F32 UPDATE_DELAY = 0.1f;						//  min time between transmitted updates
+	const F32 UPDATE_DELAY = 0.1f;	//  min time between transmitted updates
 
 	if (send_scale_update || send_position_update)
 	{
@@ -1216,7 +1241,6 @@ void LLManipScale::sendUpdates(BOOL send_position_update, BOOL send_scale_update
 		if (send_position_update)	update_flags |= UPD_POSITION;
 		if (send_scale_update)		update_flags |= UPD_SCALE;
 
-// 		BOOL send_type = SEND_INDIVIDUALS;
 		if (corner)
 		{
 			update_flags |= UPD_UNIFORM;
@@ -1224,8 +1248,11 @@ void LLManipScale::sendUpdates(BOOL send_position_update, BOOL send_scale_update
 		// keep this up to date for sendonmouseup
 		mLastUpdateFlags = update_flags;
 
-		// enforce minimum update delay and don't stream updates on sub-object selections
-		if (elapsed_time > UPDATE_DELAY && !gSavedSettings.getBOOL("EditLinkedParts"))
+		// enforce minimum update delay and don't stream updates on sub-object
+		// selections
+		static LLCachedControl<bool> edit_linked_parts(gSavedSettings,
+													   "EditLinkedParts");
+		if (elapsed_time > UPDATE_DELAY && !edit_linked_parts)
 		{
 			LLSelectMgr::getInstance()->sendMultipleUpdate(update_flags);
 			update_timer.reset();
@@ -1369,6 +1396,8 @@ void LLManipScale::updateSnapGuides(const LLBBox& bbox)
 	mScaleDir = box_corner_agent - mScaleCenter;
 	mScaleDir.normVec();
 
+	LLViewerCamera* camera = LLViewerCamera::getInstance();
+
 	if (mObjectSelection->getSelectType() == SELECT_TYPE_HUD)
 	{
 		mSnapRegimeOffset = SNAP_GUIDE_SCREEN_OFFSET / gAgent.mHUDCurZoom;
@@ -1376,8 +1405,8 @@ void LLManipScale::updateSnapGuides(const LLBBox& bbox)
 	}
 	else
 	{
-		F32 object_distance = dist_vec(mScaleCenter, LLViewerCamera::getInstance()->getOrigin());
-		mSnapRegimeOffset = (SNAP_GUIDE_SCREEN_OFFSET * gViewerWindow->getWindowWidth() * object_distance) / LLViewerCamera::getInstance()->getPixelMeterRatio();
+		F32 object_distance = dist_vec(mScaleCenter, camera->getOrigin());
+		mSnapRegimeOffset = (SNAP_GUIDE_SCREEN_OFFSET * gViewerWindow->getWindowWidth() * object_distance) / camera->getPixelMeterRatio();
 	}
 	LLVector3 cam_at_axis;
 	F32 snap_guide_length;
@@ -1388,9 +1417,9 @@ void LLManipScale::updateSnapGuides(const LLBBox& bbox)
 	}
 	else
 	{
-		cam_at_axis = LLViewerCamera::getInstance()->getAtAxis();
-		F32 manipulator_distance = dist_vec(box_corner_agent, LLViewerCamera::getInstance()->getOrigin());
-		snap_guide_length = (SNAP_GUIDE_SCREEN_LENGTH * gViewerWindow->getWindowWidth() * manipulator_distance) / LLViewerCamera::getInstance()->getPixelMeterRatio();
+		cam_at_axis = camera->getAtAxis();
+		F32 manipulator_distance = dist_vec(box_corner_agent, camera->getOrigin());
+		snap_guide_length = (SNAP_GUIDE_SCREEN_LENGTH * gViewerWindow->getWindowWidth() * manipulator_distance) / camera->getPixelMeterRatio();
 	}
 
 	mSnapGuideLength = snap_guide_length / llmax(0.1f, (llmin(mSnapGuideDir1 * cam_at_axis, mSnapGuideDir2 * cam_at_axis)));
@@ -1419,7 +1448,7 @@ void LLManipScale::updateSnapGuides(const LLBBox& bbox)
 		LLVector3 scale_snap = grid_scale;
 		mScaleSnapUnit1 = scale_snap.scaleVec(partToUnitVector(mManipPart)).magVec();
 		mScaleSnapUnit2 = mScaleSnapUnit1;
-		mSnapGuideDir1 *= mSnapGuideDir1 * LLViewerCamera::getInstance()->getUpAxis() > 0.f ? 1.f : -1.f;
+		mSnapGuideDir1 *= mSnapGuideDir1 * camera->getUpAxis() > 0.f ? 1.f : -1.f;
 		mSnapGuideDir2 = mSnapGuideDir1 * -1.f;
 		mSnapDir1 = mScaleDir;
 		mSnapDir2 = mScaleDir;
@@ -1434,7 +1463,7 @@ void LLManipScale::updateSnapGuides(const LLBBox& bbox)
 		}
 		else
 		{
-			local_camera_dir = (LLViewerCamera::getInstance()->getOrigin() - bbox.getCenterAgent()) * ~bbox.getRotation();
+			local_camera_dir = (camera->getOrigin() - bbox.getCenterAgent()) * ~bbox.getRotation();
 			local_camera_dir.normVec();
 		}
 		local_scale_dir -= projected_vec(local_scale_dir, local_camera_dir);
@@ -1520,7 +1549,7 @@ void LLManipScale::updateSnapGuides(const LLBBox& bbox)
 
 void LLManipScale::renderSnapGuides(const LLBBox& bbox)
 {
-	if (!gSavedSettings.getBOOL("SnapEnabled"))
+	if (!getSnapEnabled())
 	{
 		return;
 	}
@@ -1626,7 +1655,8 @@ void LLManipScale::renderSnapGuides(const LLBBox& bbox)
 			gGL.end();
 		}
 
-		LLVector2 screen_translate_axis(llabs(mScaleDir * LLViewerCamera::getInstance()->getLeftAxis()), llabs(mScaleDir * LLViewerCamera::getInstance()->getUpAxis()));
+		LLVector2 screen_translate_axis(llabs(mScaleDir * LLViewerCamera::getInstance()->getLeftAxis()),
+										llabs(mScaleDir * LLViewerCamera::getInstance()->getUpAxis()));
 		screen_translate_axis.normVec();
 
 		S32 tick_label_spacing = llround(screen_translate_axis * sTickLabelSpacing);
@@ -1718,7 +1748,9 @@ void LLManipScale::renderSnapGuides(const LLBBox& bbox)
 			F32 alpha = grid_alpha * (1.f - (0.5f *  ((F32)llabs(i) / (F32)num_ticks_per_side1)));
 			LLVector3 tick_pos = drag_point + (mScaleDir * (mScaleSnapUnit1 / max_subdivisions * (F32)i - grid_offset1));
 
-			for (F32 division_level = max_subdivisions; division_level >= sGridMinSubdivisionLevel; division_level /= 2.f)
+			for (F32 division_level = max_subdivisions;
+				 division_level >= sGridMinSubdivisionLevel;
+				 division_level /= 2.f)
 			{
 				if (fmodf((F32)(i + label_sub_div_offset_1), division_level) == 0.f)
 				{
@@ -1727,7 +1759,12 @@ void LLManipScale::renderSnapGuides(const LLBBox& bbox)
 				tick_scale *= 0.7f;
 			}
 
-			if (fmodf((F32)(i + label_sub_div_offset_1), (max_subdivisions / llmin(sGridMaxSubdivisionLevel, getSubdivisionLevel(tick_pos, mScaleDir, mScaleSnapUnit1, tick_label_spacing)))) == 0.f)
+			if (fmodf((F32)(i + label_sub_div_offset_1),
+					  (max_subdivisions / llmin(sGridMaxSubdivisionLevel,
+												getSubdivisionLevel(tick_pos,
+																	mScaleDir,
+																	mScaleSnapUnit1,
+																	tick_label_spacing)))) == 0.f)
 			{
 				LLVector3 text_origin = tick_pos + 
 					(mSnapGuideDir1 * mSnapRegimeOffset * (1.f + tick_scale));
@@ -1819,8 +1856,9 @@ void LLManipScale::renderSnapGuides(const LLBBox& bbox)
 			{
 				LLVector3 selection_center_start = LLSelectMgr::getInstance()->getSavedBBoxOfSelection().getCenterAgent();
 
+				LLViewerCamera* camera = LLViewerCamera::getInstance();
 				LLVector3 offset_dir;
-				if (mSnapGuideDir1 * LLViewerCamera::getInstance()->getAtAxis() > mSnapGuideDir2 * LLViewerCamera::getInstance()->getAtAxis())
+				if (mSnapGuideDir1 * camera->getAtAxis() > mSnapGuideDir2 * camera->getAtAxis())
 				{
 					offset_dir = mSnapGuideDir2;
 				}
@@ -1837,7 +1875,7 @@ void LLManipScale::renderSnapGuides(const LLBBox& bbox)
 				help_text_color.mV[VALPHA] = clamp_rescale(mHelpTextTimer.getElapsedTimeF32(), sHelpTextVisibleTime, sHelpTextVisibleTime + sHelpTextFadeTime, grid_alpha, 0.f);
 				hud_render_utf8text(help_text, help_text_pos, *big_fontp, LLFontGL::NORMAL, -0.5f * big_fontp->getWidthF32(help_text), 3.f, help_text_color, mObjectSelection->getSelectType() == SELECT_TYPE_HUD);
 				help_text = "to snap to grid";
-				help_text_pos -= LLViewerCamera::getInstance()->getUpAxis() * mSnapRegimeOffset * 0.4f;
+				help_text_pos -= camera->getUpAxis() * mSnapRegimeOffset * 0.4f;
 				hud_render_utf8text(help_text, help_text_pos, *big_fontp, LLFontGL::NORMAL, -0.5f * big_fontp->getWidthF32(help_text), 3.f, help_text_color, mObjectSelection->getSelectType() == SELECT_TYPE_HUD);
 			}
 		}

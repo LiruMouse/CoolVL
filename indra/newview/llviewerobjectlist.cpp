@@ -1475,9 +1475,10 @@ void LLViewerObjectList::onPhysicsFlagsFetchFailure(const LLUUID& object_id)
 
 void LLViewerObjectList::shiftObjects(const LLVector3 &offset)
 {
-	// This is called when we shift our origin when we cross region boundaries...
-	// We need to update many object caches, I'll document this more as I dig through the code
-	// cleaning things out...
+	// This is called when we shift our origin when we cross region
+	// boundaries...
+	// We need to update many object caches, I'll document this more as I dig
+	// through the code cleaning things out...
 
 	if (gNoRender || 0 == offset.magVecSquared())
 	{
@@ -1502,6 +1503,25 @@ void LLViewerObjectList::shiftObjects(const LLVector3 &offset)
 
 	gPipeline.shiftObjects(offset);
 	LLWorld::getInstance()->shiftRegions(offset);
+}
+
+void LLViewerObjectList::repartitionObjects()
+{
+	for (vobj_list_t::iterator iter = mObjects.begin(); iter != mObjects.end();
+		 ++iter)
+	{
+		LLViewerObject* objectp = *iter;
+		if (!objectp->isDead())
+		{
+			LLDrawable* drawable = objectp->mDrawable;
+			if (drawable && !drawable->isDead())
+			{
+				drawable->updateBinRadius();
+				drawable->updateSpatialExtents();
+				drawable->movePartition();
+			}
+		}
+	}
 }
 
 void LLViewerObjectList::renderObjectsForMap(LLNetMap &netmap)

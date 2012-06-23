@@ -16,8 +16,7 @@
 	 left_delta="242" bottom="-24" height="20" width="20" follows="left|bottom" />
 	<flyout_button name="Say" label="Say" font="SansSerif"
 	 halign="center" list_position="above" enabled="true" hidden="false" mouse_opaque="true"
-	 left_delta="246" bottom="-24" height="20" width="68" follows="right|bottom"
-	 tool_tip="Press ENTER to say, CTRL ENTER to shout, SHIFT ENTER to whisper.">
+	 left_delta="246" bottom="-24" height="20" width="68" follows="right|bottom">
 		<flyout_button_item value="shout" name="shout_item">
 			Shout
 		</flyout_button_item>
@@ -33,4 +32,6 @@
 	 left_delta="72" bottom="-24" height="20" width="90" follows="right|bottom">
 	</combo_box>
 	<string name="gesture_label">Gestures</string>
+	<string name="normal_shortcuts">Press ENTER to say, CTRL ENTER to shout, SHIFT ENTER to whisper.</string>
+	<string name="swapped_shortcuts">Press ENTER to say, SHIFT ENTER to shout, CTRL ENTER to whisper.</string>
 </panel>

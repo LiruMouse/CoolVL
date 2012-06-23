@@ -50,6 +50,7 @@
 #include "llagent.h"
 #include "llappviewer.h"
 #include "llcallingcard.h"
+#include "llchatbar.h"
 #include "llconsole.h"
 #include "lldirpicker.h"
 #include "lldrawpoolbump.h"
@@ -68,6 +69,7 @@
 #include "llviewerjoystick.h"
 #include "llviewermenu.h"
 #include "llviewermenufile.h"
+#include "llviewerobjectlist.h"
 #include "llviewerparcelmedia.h"
 #include "llviewerparcelmgr.h"
 #include "llviewershadermgr.h"
@@ -455,6 +457,16 @@ static bool handleVelocityInterpolateChanged(const LLSD& newvalue)
 	return true;
 }
 
+static bool handleRepartition(const LLSD&)
+{
+	if (gPipeline.isInit())
+	{
+		gOctreeMaxCapacity = gSavedSettings.getU32("OctreeMaxNodeCapacity");
+		gObjectList.repartitionObjects();
+	}
+	return true;
+}
+
 static bool handleRenderDynamicLODChanged(const LLSD& newvalue)
 {
 	LLPipeline::sDynamicLOD = newvalue.asBoolean();
@@ -651,8 +663,14 @@ static bool handleNonBlockingFilePickerChanged(const LLSD& newvalue)
 static bool handleSpellCheckChanged(const LLSD& newvalue)
 {
 	LLSpellCheck::instance().setSpellCheck(gSavedSettings.getBOOL("SpellCheck"));
-		LLSpellCheck::instance().setShowMisspelled(gSavedSettings.getBOOL("SpellCheckShow"));
+	LLSpellCheck::instance().setShowMisspelled(gSavedSettings.getBOOL("SpellCheckShow"));
 	LLSpellCheck::instance().setDictionary(gSavedSettings.getString("SpellCheckLanguage"));
+	return true;
+}
+
+static bool handleSwapShoutWhisperShortcutsChanged(const LLSD& newvalue)
+{
+	LLChatBar::sSwappedShortcuts = newvalue.asBoolean();
 	return true;
 }
 
@@ -665,6 +683,11 @@ void settings_setup_listeners()
 	gSavedSettings.getControl("FirstPersonAvatarVisible")->getSignal()->connect(boost::bind(&handleRenderAvatarMouselookChanged, _2));
 	gSavedSettings.getControl("RenderFarClip")->getSignal()->connect(boost::bind(&handleRenderFarClipChanged, _2));
 	gSavedSettings.getControl("RenderTerrainDetail")->getSignal()->connect(boost::bind(&handleTerrainDetailChanged, _2));
+	gSavedSettings.getControl("OctreeStaticObjectSizeFactor")->getSignal()->connect(boost::bind(&handleRepartition, _2));
+	gSavedSettings.getControl("OctreeDistanceFactor")->getSignal()->connect(boost::bind(&handleRepartition, _2));
+	gSavedSettings.getControl("OctreeMaxNodeCapacity")->getSignal()->connect(boost::bind(&handleRepartition, _2));
+	gSavedSettings.getControl("OctreeAlphaDistanceFactor")->getSignal()->connect(boost::bind(&handleRepartition, _2));
+	gSavedSettings.getControl("OctreeAttachmentSizeFactor")->getSignal()->connect(boost::bind(&handleRepartition, _2));
 	gSavedSettings.getControl("RenderUseTriStrips")->getSignal()->connect(boost::bind(&handleResetVertexBuffersChanged, _2));
 	gSavedSettings.getControl("RenderAnimateTrees")->getSignal()->connect(boost::bind(&handleResetVertexBuffersChanged, _2));
 	gSavedSettings.getControl("RenderAvatarVP")->getSignal()->connect(boost::bind(&handleSetShaderChanged, _2));
@@ -791,6 +814,8 @@ void settings_setup_listeners()
 	gSavedSettings.getControl("AvatarAxisDeadZone3")->getSignal()->connect(boost::bind(&handleJoystickChanged, _2));
 	gSavedSettings.getControl("AvatarAxisDeadZone4")->getSignal()->connect(boost::bind(&handleJoystickChanged, _2));
 	gSavedSettings.getControl("AvatarAxisDeadZone5")->getSignal()->connect(boost::bind(&handleJoystickChanged, _2));
+	gSavedSettings.getControl("AvatarOffsetX")->getSignal()->connect(boost::bind(&handleAvatarOffsetChanged, _2));
+	gSavedSettings.getControl("AvatarOffsetY")->getSignal()->connect(boost::bind(&handleAvatarOffsetChanged, _2));
 	gSavedSettings.getControl("AvatarOffsetZ")->getSignal()->connect(boost::bind(&handleAvatarOffsetChanged, _2));
 	gSavedSettings.getControl("AvatarPhysics")->getSignal()->connect(boost::bind(&handleAvatarPhysicsChanged, _2));
 	gSavedSettings.getControl("BuildAxisScale0")->getSignal()->connect(boost::bind(&handleJoystickChanged, _2));
@@ -842,4 +867,5 @@ void settings_setup_listeners()
 	gSavedSettings.getControl("SpellCheck")->getSignal()->connect(boost::bind(&handleSpellCheckChanged, _2));
 	gSavedSettings.getControl("SpellCheckShow")->getSignal()->connect(boost::bind(&handleSpellCheckChanged, _2));
 	gSavedSettings.getControl("SpellCheckLanguage")->getSignal()->connect(boost::bind(&handleSpellCheckChanged, _2));
+	gSavedSettings.getControl("SwapShoutWhisperShortcuts")->getSignal()->connect(boost::bind(&handleSwapShoutWhisperShortcutsChanged, _2));
 }

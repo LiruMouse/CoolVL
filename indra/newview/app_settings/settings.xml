@@ -309,16 +309,49 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
+    <key>AvatarOffsetX</key>
+    <map>
+      <key>Comment</key>
+      <string>Avatar X offset to the bounding box size</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>F32</string>
+      <key>Value</key>
+      <real>0.0</real>
+    </map>
+    <key>AvatarOffsetY</key>
+    <map>
+      <key>Comment</key>
+      <string>Avatar Y offset to the bounding box size</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>F32</string>
+      <key>Value</key>
+      <real>0.0</real>
+    </map>
     <key>AvatarOffsetZ</key>
     <map>
       <key>Comment</key>
       <string>Avatar Z offset (used to adjust animation height)</string>
       <key>Persist</key>
-      <integer>0</integer>
+      <integer>1</integer>
       <key>Type</key>
       <string>F32</string>
       <key>Value</key>
       <real>0.0</real>
+    </map>
+    <key>AvatarOffsetPersist</key>
+    <map>
+      <key>Comment</key>
+      <string>Whether Avatar offsets must persist or not over sessions</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <real>0</real>
     </map>
     <key>PreviewAnimInWorld</key>
     <map>
@@ -1611,17 +1644,6 @@
       <key>Value</key>
       <integer>60</integer>
     </map>
-    <key>CameraMouseWheelZoom</key>
-    <map>
-      <key>Comment</key>
-      <string>Camera zooms in and out with mousewheel</string>
-      <key>Persist</key>
-      <integer>1</integer>
-      <key>Type</key>
-      <string>Boolean</string>
-      <key>Value</key>
-      <integer>1</integer>
-    </map>
     <key>CameraAngle</key>
     <map>
       <key>Comment</key>
@@ -1813,6 +1835,39 @@
         <string>Boolean</string>
         <key>Value</key>
         <integer>0</integer>
+      </map>
+    <key>TabAutoCompleteName</key>
+      <map>
+        <key>Comment</key>
+        <string>If TRUE, attempt to auto-complete on TAB the current word in the chat input line as a surrounding avatar's name</string>
+        <key>Persist</key>
+        <integer>1</integer>
+        <key>Type</key>
+        <string>Boolean</string>
+        <key>Value</key>
+        <integer>1</integer>
+      </map>
+    <key>SelectAutoCompletedPart</key>
+      <map>
+        <key>Comment</key>
+        <string>If TRUE, select the auto-completed part of a name and keep the cursor position, else don't select and move the cursor at the end</string>
+        <key>Persist</key>
+        <integer>1</integer>
+        <key>Type</key>
+        <string>Boolean</string>
+        <key>Value</key>
+        <integer>0</integer>
+      </map>
+    <key>AddAvatarNamesToIgnore</key>
+      <map>
+        <key>Comment</key>
+        <string>If TRUE, add surrounding avatars' name to the ignore list of the spell checker when a name is auto-completed with TAB in chat bar</string>
+        <key>Persist</key>
+        <integer>1</integer>
+        <key>Type</key>
+        <string>Boolean</string>
+        <key>Value</key>
+        <integer>1</integer>
       </map>
     <key>ChatBarStealsFocus</key>
       <map>
@@ -6634,7 +6689,18 @@
     <key>LastPrefTab</key>
     <map>
       <key>Comment</key>
-      <string>Last selected tab in preferences window</string>
+      <string>Last selected tab in the Preferences floater</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>S32</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
+    <key>LastCoolPrefTab</key>
+    <map>
+      <key>Comment</key>
+      <string>Last selected sub-tab in the Cool preferences panel of the Preferences floater</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
@@ -7082,6 +7148,17 @@
       <string>F32</string>
       <key>Value</key>
       <real>128.0</real>
+    </map>
+    <key>ZoomDependentResizeHandles</key>
+    <map>
+      <key>Comment</key>
+      <string>When TRUE the size of the resize handles depends only on the camera zoom factor</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>1</integer>
     </map>
     <key>MeanCollisionBump</key>
     <map>
@@ -8249,6 +8326,17 @@
       <key>Value</key>
       <integer>1</integer>
     </map>
+    <key>SwapShoutWhisperShortcuts</key>
+    <map>
+      <key>Comment</key>
+      <string>Set to TRUE to Shout with SHIFT ENTER and Whisper with CTRL ENTER instead of the other way around</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
     <key>PrecachingDelay</key>
     <map>
       <key>Comment</key>
@@ -8780,10 +8868,21 @@
       <key>Value</key>
       <integer>1</integer>
     </map>
+    <key>OctreeMaxNodeCapacity</key>
+    <map>
+      <key>Comment</key>
+      <string>Maximum number of elements to store in a single octree node</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
+      <key>Value</key>
+      <integer>128</integer>
+    </map>
     <key>OctreeStaticObjectSizeFactor</key>
     <map>
       <key>Comment</key>
-      <string>Multiplier on static object size for determining octree node size </string>
+      <string>Multiplier on static object size for determining octree node size</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>

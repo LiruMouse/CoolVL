@@ -111,6 +111,7 @@ public:
 									F32 gravity_multiplier);
 
 	void shiftObjects(const LLVector3 &offset);
+	void repartitionObjects();
 
 	void renderObjectsForMap(LLNetMap &netmap);
 	void renderObjectBounds(const LLVector3 &center);

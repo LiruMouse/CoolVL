@@ -74,9 +74,8 @@ public:
 	virtual void handleError(EStatusType status);
 	virtual void deactivate();
 	virtual void activate();
-	virtual void setChannelInfo(
-		const std::string& uri,
-		const std::string& credentials);
+	virtual void setChannelInfo(const std::string& uri,
+								const std::string& credentials);
 	virtual void getChannelInfo();
 	virtual BOOL isActive();
 	virtual BOOL callStarted();
@@ -248,8 +247,8 @@ public:
 	static void*	createSpeakersPanel(void* data);
 
 	//callbacks for P2P muting and volume control
-	static void onClickMuteVoice(void* user_data);
-	static void onVolumeChange(LLUICtrl* source, void* user_data);
+	static void		onClickMuteVoice(void* user_data);
+	static void		onVolumeChange(LLUICtrl* source, void* user_data);
 
 	const LLUUID& getSessionID() const { return mSessionUUID; }
 	const LLUUID& getOtherParticipantID() const { return mOtherParticipantUUID; }
@@ -293,6 +292,8 @@ private:
 	// Called whenever the user starts or stops typing.
 	// Sends the typing state to the other user if necessary.
 	void setTyping(BOOL typing);
+	// static, callback version
+	static void setIMTyping(void* caller, BOOL typing);
 
 	// Add the "User is typing..." indicator.
 	void addTypingIndicator(const std::string &name);

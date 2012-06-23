@@ -516,6 +516,11 @@ void LLScriptLibrary::init()
 	// Server RC Magnum v12.04.13.253827 new function:
 	addFunction(10.f, 0.f, dummy_func, "llGetAgentList", "l", "il");
 
+	// Server RC Magnum v12.05.25.258071 new functions:
+	addFunction(10.f, 0.f, dummy_func, "llAttachToAvatarTemp", NULL, "i");
+	addFunction(10.f, 0.f, dummy_func, "llTeleportAgent", NULL, "ksvv");
+	addFunction(10.f, 0.f, dummy_func, "llTeleportAgentGlobalCoords", NULL, "kvvv");
+
     // OpenSIM Functions to be added below
     // -----------------------------------
     // REGARDING NON SL-LSL FUNCTIONS (OSSL, aaFunctions, botFunctions)

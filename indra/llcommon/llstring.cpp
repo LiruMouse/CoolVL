@@ -562,10 +562,9 @@ std::string utf8str_truncate(const std::string& utf8str, const S32 max_len)
 	}
 }
 
-std::string utf8str_substChar(
-	const std::string& utf8str,
-	const llwchar target_char,
-	const llwchar replace_char)
+std::string utf8str_substChar(const std::string& utf8str,
+							  const llwchar target_char,
+							  const llwchar replace_char)
 {
 	LLWString wstr = utf8str_to_wstring(utf8str);
 	LLWStringUtil::replaceChar(wstr, target_char, replace_char);
@@ -740,7 +739,7 @@ S32	LLStringOps::collate(const llwchar* a, const llwchar* b)
 	#endif
 }
 
-void LLStringOps::setupDatetimeInfo (bool daylight)
+void LLStringOps::setupDatetimeInfo(bool daylight)
 {
 	time_t nowT, localT, gmtT;
 	struct tm * tmpT;
@@ -824,8 +823,7 @@ void LLStringOps::setupDayFormat(const std::string& data)
 	sDayFormat = data;
 }
 
-
-std::string LLStringOps::getDatetimeCode (std::string key)
+std::string LLStringOps::getDatetimeCode(std::string key)
 {
 	std::map<std::string, std::string>::iterator iter;
 

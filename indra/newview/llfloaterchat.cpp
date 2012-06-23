@@ -258,12 +258,13 @@ void add_timestamped_line(LLViewerTextEditor* edit, LLChat chat, const LLColor4&
 				chat.mFromName.find_first_not_of(' ') == std::string::npos)
 			{
 				// Name is empty... Set the link on the first word instead
-				// (skipping leading spaces)...
-				pos = line.find_first_not_of(' ');
+				// (skipping leading spaces and the ':' separator)...
+				pos = line.find_first_not_of(" :");
 				if (pos == std::string::npos)
 				{
-					// Only spaces !... Normally not possible, but...
-					pos = 1;
+					// No word found !
+					pos = line.length();
+					line += " ";
 				}
 				else
 				{

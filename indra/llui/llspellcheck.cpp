@@ -201,8 +201,8 @@ void LLSpellCheck::setDictionary(const std::string& dict_name)
 		return;
 	}
 
-	llinfos << "Setting new base dictionary to " << dicaffpath
-			<< " with additional dictionary " << dicdicpath << llendl;
+	llinfos << "Setting new base dictionary to " << dicdicpath
+			<< " with associated affix file " << dicaffpath << llendl;
 	mCurrentDictName = name;
 	if (mHunspell)
 	{
@@ -301,9 +301,39 @@ void LLSpellCheck::addToCustomDictionary(const std::string& word)
 
 void LLSpellCheck::addToIgnoreList(const std::string& word)
 {
-	std::string lc_word = word;
-	LLStringUtil::toLower(lc_word);
-	mIgnoreList.insert(lc_word);
+	if (word.length() > 2)
+	{
+		std::string lc_word = word;
+		LLStringUtil::toLower(lc_word);
+		mIgnoreList.insert(lc_word);
+	}
+}
+
+void LLSpellCheck::addWordsToIgnoreList(const std::string& words)
+{
+	// Add each lexical word in "words"
+	for (size_t i = 0; i < words.length(); i++)
+	{
+		std::string word;
+		while (i < words.length() &&
+			   LLStringUtil::isPartOfLexicalWord(words[i]))
+		{
+			if (words[i] != '\'' ||
+				(!word.empty() && i + 1 < words.length() &&
+				 words[i + 1] != '\'' &&
+				 LLStringUtil::isPartOfLexicalWord(words[i + 1])))
+			{
+				word += words[i];
+			}
+			i++;
+		}
+		if (word.length() > 2)
+		{
+			addToIgnoreList(word);
+			LL_DEBUGS("SpellCheck") << "Added \"" << word
+									<< "\" to the ignore list." << LL_ENDL;
+		}
+	}
 }
 
 bool LLSpellCheck::checkSpelling(const std::string& word)

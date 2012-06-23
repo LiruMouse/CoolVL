@@ -110,7 +110,7 @@ void session_starter_helper(const LLUUID& temp_session_id,
 
 	msg->newMessageFast(_PREHASH_ImprovedInstantMessage);
 	msg->nextBlockFast(_PREHASH_AgentData);
-	msg->addUUIDFast(_PREHASH_AgentID, gAgent.getID());
+	msg->addUUIDFast(_PREHASH_AgentID, gAgentID);
 	msg->addUUIDFast(_PREHASH_SessionID, gAgent.getSessionID());
 
 	msg->nextBlockFast(_PREHASH_MessageBlock);
@@ -241,14 +241,14 @@ bool send_start_session_messages(const LLUUID& temp_session_id,
 
 			LLHTTPClient::post(url, data,
 							   new LLStartConferenceChatResponder(temp_session_id,
-																  gAgent.getID(),
+																  gAgentID,
 																  other_participant_id,
 																  data["params"]));
 		}
 		else
 		{
 			start_deprecated_conference_chat(temp_session_id,
-											 gAgent.getID(),
+											 gAgentID,
 											 other_participant_id,
 											 agents);
 		}
@@ -330,8 +330,6 @@ LLVoiceChannel::LLVoiceChannel(const LLUUID& session_id,
 		llwarns << "Duplicate voice channels registered for session_id "
 				<< session_id << llendl;
 	}
-
-	LLVoiceClient::getInstance()->addObserver(this);
 }
 
 LLVoiceChannel::~LLVoiceChannel()
@@ -358,22 +356,26 @@ void LLVoiceChannel::setChannelInfo(const std::string& uri,
 	{
 		if (mURI.empty())
 		{
-			LLNotifications::instance().add("VoiceChannelJoinFailed", mNotifyArgs);
-			llwarns << "Received empty URI for channel " << mSessionName << llendl;
+			LLNotifications::instance().add("VoiceChannelJoinFailed",
+											mNotifyArgs);
+			llwarns << "Received empty URI for channel " << mSessionName
+					<< llendl;
 			deactivate();
 		}
 		else if (mCredentials.empty())
 		{
-			LLNotifications::instance().add("VoiceChannelJoinFailed", mNotifyArgs);
-			llwarns << "Received empty credentials for channel " << mSessionName << llendl;
+			LLNotifications::instance().add("VoiceChannelJoinFailed",
+											mNotifyArgs);
+			llwarns << "Received empty credentials for channel "
+					<< mSessionName << llendl;
 			deactivate();
 		}
 		else
 		{
 			setState(STATE_READY);
 
-			// if we are supposed to be active, reconnect
-			// this will happen on initial connect, as we request credentials on first use
+			// If we are supposed to be active, reconnect. This will happen on
+			// initial connect, as we request credentials on first use
 			if (sCurrentVoiceChannel == this)
 			{
 				// just in case we got new channel info while active
@@ -447,8 +449,10 @@ void LLVoiceChannel::handleError(EStatusType type)
 
 BOOL LLVoiceChannel::isActive()
 {
-	// only considered active when currently bound channel matches what our channel
-	return callStarted() && LLVoiceClient::getInstance()->getCurrentChannel() == mURI;
+	// only considered active when currently bound channel matches what our
+	// channel
+	return callStarted() &&
+		   LLVoiceClient::getInstance()->getCurrentChannel() == mURI;
 }
 
 BOOL LLVoiceChannel::callStarted()
@@ -467,12 +471,15 @@ void LLVoiceChannel::deactivate()
 	if (callStarted())
 	{
 		setState(STATE_HUNG_UP);
-		// mute the microphone if required when returning to the proximal channel
-		if (gSavedSettings.getBOOL("AutoDisengageMic") && sCurrentVoiceChannel == this)
+		// mute the microphone if required when returning to the proximal
+		// channel
+		if (sCurrentVoiceChannel == this &&
+			gSavedSettings.getBOOL("AutoDisengageMic"))
 		{
 			gSavedSettings.setBOOL("PTTCurrentlyEnabled", true);
 		}
 	}
+	LLVoiceClient::getInstance()->removeObserver(this);
 
 	if (sCurrentVoiceChannel == this)
 	{
@@ -511,6 +518,8 @@ void LLVoiceChannel::activate()
 	{
 		setState(STATE_CALL_STARTED);
 	}
+
+	LLVoiceClient::getInstance()->addObserver(this);
 }
 
 void LLVoiceChannel::getChannelInfo()
@@ -592,7 +601,6 @@ void LLVoiceChannel::initClass()
 	sCurrentVoiceChannel = LLVoiceChannelProximal::getInstance();
 }
 
-
 //static
 void LLVoiceChannel::suspend()
 {
@@ -627,8 +635,9 @@ void LLVoiceChannel::resume()
 // LLVoiceChannelGroup
 //
 
-LLVoiceChannelGroup::LLVoiceChannelGroup(const LLUUID& session_id, const std::string& session_name) :
-	LLVoiceChannel(session_id, session_name)
+LLVoiceChannelGroup::LLVoiceChannelGroup(const LLUUID& session_id,
+										 const std::string& session_name)
+:	LLVoiceChannel(session_id, session_name)
 {
 	mRetries = DEFAULT_RETRIES_COUNT;
 	mIsRetrying = FALSE;
@@ -682,8 +691,8 @@ void LLVoiceChannelGroup::setChannelInfo(const std::string& uri,
 		{
 			setState(STATE_READY);
 
-			// if we are supposed to be active, reconnect
-			// this will happen on initial connect, as we request credentials on first use
+			// If we are supposed to be active, reconnect. This will happen on
+			// initial connect, as we request credentials on first use
 			if (sCurrentVoiceChannel == this)
 			{
 				// just in case we got new channel info while active
@@ -694,7 +703,8 @@ void LLVoiceChannelGroup::setChannelInfo(const std::string& uri,
 		else
 		{
 			//*TODO: notify user
-			llwarns << "Received invalid credentials for channel " << mSessionName << llendl;
+			llwarns << "Received invalid credentials for channel "
+					<< mSessionName << llendl;
 			deactivate();
 		}
 	}
@@ -727,15 +737,13 @@ void LLVoiceChannelGroup::handleError(EStatusType status)
 			notify = "VoiceChannelFull";
 			break;
 		case ERROR_NOT_AVAILABLE:
-			//clear URI and credentials
-			//set the state to be no info
-			//and activate
+			// clear URI and credentials, set the state to be no info and
+			// activate
 			if (mRetries > 0)
 			{
 				mRetries--;
 				mIsRetrying = TRUE;
 				mIgnoreNextSessionLeave = TRUE;
-
 				getChannelInfo();
 				return;
 			}
@@ -754,7 +762,8 @@ void LLVoiceChannelGroup::handleError(EStatusType status)
 	// notification
 	if (!notify.empty())
 	{
-		LLNotificationPtr notification = LLNotifications::instance().add(notify, mNotifyArgs);
+		LLNotificationPtr notification;
+		notification = LLNotifications::instance().add(notify, mNotifyArgs);
 		// echo to im window
 		if (gIMMgr)
 		{
@@ -853,7 +862,8 @@ void LLVoiceChannelProximal::handleError(EStatusType status)
 {
 	if (status == ERROR_CHANNEL_LOCKED || status == ERROR_CHANNEL_FULL)
 	{
-		LLNotifications::instance().add("ProximalVoiceChannelFull", mNotifyArgs);
+		LLNotifications::instance().add("ProximalVoiceChannelFull",
+										mNotifyArgs);
 	}
 
 	LLVoiceChannel::handleError(status);
@@ -962,9 +972,10 @@ void LLVoiceChannelP2P::setSessionHandle(const std::string& handle,
 	if (callStarted())
 	{
 		// defer to lower agent id when already active
-		if (mOtherUserID < gAgent.getID())
+		if (mOtherUserID < gAgentID)
 		{
-			// pretend we haven't started the call yet, so we can connect to this session instead
+			// pretend we haven't started the call yet, so we can connect to
+			// this session instead
 			deactivate();
 			needs_activate = TRUE;
 		}
@@ -1442,7 +1453,7 @@ void LLFloaterIMPanel::draw()
 			mSendButton->setEnabled(!empty && !has_text_editor);
 		}
 
-		LLPointer<LLSpeaker> self_speaker = mSpeakers->findSpeaker(gAgent.getID());
+		LLPointer<LLSpeaker> self_speaker = mSpeakers->findSpeaker(gAgentID);
 		if (!mTextIMPossible)
 		{
 			if (sUnavailableTextString.empty())
@@ -1591,7 +1602,7 @@ void LLFloaterIMPanel::addHistoryLine(const std::string &utf8msg,
 	if (source != LLUUID::null)
 	{
 		LLMultiFloater* hostp = getHost();
-		if (!isInVisibleChain() && hostp && source != gAgent.getID())
+		if (!isInVisibleChain() && hostp && source != gAgentID)
 		{
 			hostp->setFloaterFlashing(this, TRUE);
 		}
@@ -1628,7 +1639,7 @@ void LLFloaterIMPanel::addHistoryLine(const std::string &utf8msg,
 				gAgent.buildFullname(self_name);
 				if (name == self_name)
 				{
-					av_id = gAgent.getID();
+					av_id = gAgentID;
 				}
 			}
 			else if (LLAvatarNameCache::useDisplayNames())
@@ -1713,17 +1724,34 @@ void LLFloaterIMPanel::selectNone()
 BOOL LLFloaterIMPanel::handleKeyHere(KEY key, MASK mask)
 {
 	BOOL handled = FALSE;
-	if (KEY_RETURN == key && mask == MASK_NONE)
+	if (KEY_RETURN == key)
 	{
-		sendMsg();
-		handled = TRUE;
-
-		// Close talk panels on hitting return but not shift-return or
-		// control-return
-		if (gIMMgr && !gSavedSettings.getBOOL("PinTalkViewOpen") &&
-			!(mask & MASK_CONTROL) && !(mask & MASK_SHIFT))
+		if (mask == MASK_NONE || mask == MASK_CONTROL || mask == MASK_SHIFT)
 		{
-			gIMMgr->toggle(NULL);
+			sendMsg();
+			handled = TRUE;
+
+			// Close talk panels on hitting return but not shift-return or
+			// control-return
+			if (gIMMgr && !gSavedSettings.getBOOL("PinTalkViewOpen") &&
+				!(mask & MASK_CONTROL) && !(mask & MASK_SHIFT))
+			{
+				gIMMgr->toggle(NULL);
+			}
+		}
+		else if (mask == (MASK_SHIFT | MASK_CONTROL))
+		{
+			S32 cursor = mInputEditor->getCursor();
+			std::string text = mInputEditor->getText();
+			// For some reason, the event is triggered twice: let's insert only
+			// one newline character.
+			if (cursor == 0 || text[cursor - 1] != '\n')
+			{
+				text = text.insert(cursor, "\n");
+				mInputEditor->setText(text);
+				mInputEditor->setCursor(cursor + 1);
+			}
+			handled = TRUE;
 		}
 	}
 	else if (KEY_ESCAPE == key && mask == MASK_NONE)
@@ -1902,7 +1930,8 @@ void LLFloaterIMPanel::onClickOpenTextEditor(void* userdata)
 	if (self && self->mInputEditor && !self->mSessionLabel.empty())
 	{
 		self->mHasScrolledOnce = true;
-		HBFloaterTextInput::show(self->mInputEditor, self->mSessionLabel);
+		HBFloaterTextInput::show(self->mInputEditor, self->mSessionLabel,
+								 &setIMTyping, self);
 	}
 }
 
@@ -1963,7 +1992,8 @@ void LLFloaterIMPanel::onInputEditorScrolled(LLLineEditor* caller, void* userdat
 		gSavedSettings.getBOOL("AutoOpenTextInput"))
 	{
 		self->mHasScrolledOnce = true;
-		HBFloaterTextInput::show(caller, self->mSessionLabel);
+		HBFloaterTextInput::show(caller, self->mSessionLabel,
+								 &setIMTyping, self);
 	}
 }
 
@@ -1978,7 +2008,7 @@ void LLFloaterIMPanel::onClose(bool app_quitting)
 		std::string name;
 		gAgent.buildFullname(name);
 		pack_instant_message(gMessageSystem,
-							 gAgent.getID(),
+							 gAgentID,
 							 FALSE,
 							 gAgent.getSessionID(),
 							 mOtherParticipantUUID,
@@ -2041,7 +2071,7 @@ void deliver_message(const std::string& utf8_text,
 			new_dialog = IM_SESSION_SEND;
 		}
 		pack_instant_message(gMessageSystem,
-							 gAgent.getID(),
+							 gAgentID,
 							 FALSE,
 							 gAgent.getSessionID(),
 							 other_participant_id,
@@ -2156,7 +2186,7 @@ void LLFloaterIMPanel::sendMsg()
 					if (LLAvatarNameCache::useDisplayNames())
 					{
 						LLAvatarName avatar_name;
-						if (LLAvatarNameCache::get(gAgent.getID(), &avatar_name))
+						if (LLAvatarNameCache::get(gAgentID, &avatar_name))
 						{
 							if (LLAvatarNameCache::useDisplayNames() == 2)
 							{
@@ -2185,7 +2215,7 @@ void LLFloaterIMPanel::sendMsg()
 
 					addHistoryLine(history_echo,
 								   gSavedSettings.getColor("IMChatColor"),
-								   true, gAgent.getID());
+								   true, gAgentID);
 
 					if (other_was_typing)
 					{
@@ -2285,7 +2315,7 @@ void LLFloaterIMPanel::setTyping(BOOL typing)
 			mSentTypingState = FALSE;
 		}
 
-		mSpeakers->setSpeakerTyping(gAgent.getID(), TRUE);
+		mSpeakers->setSpeakerTyping(gAgentID, TRUE);
 	}
 	else
 	{
@@ -2295,7 +2325,7 @@ void LLFloaterIMPanel::setTyping(BOOL typing)
 			sendTypingState(FALSE);
 			mSentTypingState = TRUE;
 		}
-		mSpeakers->setSpeakerTyping(gAgent.getID(), FALSE);
+		mSpeakers->setSpeakerTyping(gAgentID, FALSE);
 	}
 
 	mTyping = typing;
@@ -2311,7 +2341,7 @@ void LLFloaterIMPanel::sendTypingState(BOOL typing)
 	gAgent.buildFullname(name);
 
 	pack_instant_message(gMessageSystem,
-						 gAgent.getID(),
+						 gAgentID,
 						 FALSE,
 						 gAgent.getSessionID(),
 						 mOtherParticipantUUID,
@@ -2368,6 +2398,16 @@ void LLFloaterIMPanel::removeTypingIndicator(const LLIMInfo* im_info)
 		{
 			mSpeakers->setSpeakerTyping(im_info->mFromID, FALSE);
 		}
+	}
+}
+
+//static
+void LLFloaterIMPanel::setIMTyping(void* caller, BOOL typing)
+{
+	LLFloaterIMPanel* self = (LLFloaterIMPanel*)caller;
+	if (self)
+	{
+		self->setTyping(typing);
 	}
 }
 

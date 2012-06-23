@@ -2852,45 +2852,43 @@ void LLInventoryModel::processMoveInventoryItem(LLMessageSystem* msg, void**)
 // *NOTE: DEBUG functionality
 void LLInventoryModel::dumpInventory()
 {
-	LL_DEBUGS("Inventory") << "\nBegin Inventory Dump\n**********************:"
-						   << LL_ENDL;
-	LL_DEBUGS("Inventory") << "mCategroy[] contains " << mCategoryMap.size()
-						   << " items." << LL_ENDL;
+	llinfos << "\nBegin Inventory Dump\n**********************:" << llendl;
+	llinfos << "mCategroy[] contains " << mCategoryMap.size() << " items."
+			<< llendl;
 	for (cat_map_t::iterator cit = mCategoryMap.begin();
 		 cit != mCategoryMap.end(); ++cit)
 	{
 		LLViewerInventoryCategory* cat = cit->second;
 		if (cat)
 		{
-			LL_DEBUGS("Inventory") << "  " <<  cat->getUUID() << " '"
-								   << cat->getName() << "' "
-								   << cat->getVersion() << " "
-								   << cat->getDescendentCount() << " parent: "
-								   << cat->getParentUUID() << LL_ENDL;
+			llinfos << "  " <<  cat->getUUID() << " '"
+					<< cat->getName() << "' "
+					<< cat->getVersion() << " "
+					<< cat->getDescendentCount() << " parent: "
+					<< cat->getParentUUID() << llendl;
 		}
 		else
 		{
-			LL_DEBUGS("Inventory") << "  NULL!" << LL_ENDL;
+			llinfos << "  NULL category !" << llendl;
 		}
 	}
-	LL_DEBUGS("Inventory") << "mItemMap[] contains " << mItemMap.size()
-						   << " items." << LL_ENDL;
+	llinfos << "mItemMap[] contains " << mItemMap.size() << " items."
+			<< llendl;
 	for (item_map_t::iterator iit = mItemMap.begin(); iit != mItemMap.end();
 		 ++iit)
 	{
 		LLViewerInventoryItem* item = iit->second;
 		if (item)
 		{
-			LL_DEBUGS("Inventory") << "  " << item->getUUID() << " "
-								   << item->getName() << LL_ENDL;
+			llinfos << "  " << item->getUUID() << " " << item->getName()
+					<< llendl;
 		}
 		else
 		{
-			LL_DEBUGS("Inventory") << "  NULL!" << LL_ENDL;
+			llinfos << "  NULL item !" << llendl;
 		}
 	}
-	LL_DEBUGS("Inventory") << "\n**********************\nEnd Inventory Dump"
-						   << LL_ENDL;
+	llinfos << "\n**********************\nEnd Inventory Dump" << llendl;
 }
 
 //----------------------------------------------------------------------------

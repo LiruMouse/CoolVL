@@ -1,11 +1,11 @@
-/** 
+/**
  * @file llmaniprotate.cpp
  * @brief LLManipRotate class implementation
  *
  * $LicenseInfo:firstyear=2002&license=viewergpl$
- * 
+ *
  * Copyright (c) 2002-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -102,6 +102,13 @@ LLManipRotate::LLManipRotate(LLToolComposite* composite)
 	mCamEdgeOn(FALSE),
 	mManipulatorScales(1.f, 1.f, 1.f, 1.f)
 { }
+
+// static
+bool LLManipRotate::getSnapEnabled()
+{
+	static LLCachedControl<bool> snap_enabled(gSavedSettings, "SnapEnabled");
+	return snap_enabled;
+}
 
 void LLManipRotate::handleSelect()
 {
@@ -406,7 +413,7 @@ BOOL LLManipRotate::handleMouseDownOnPart(S32 x, S32 y, MASK mask)
 			F32 mouse_dist_sqrd = mMouseDown.magVecSquared();
 			if (mouse_dist_sqrd > 0.0001f)
 			{
-				mouse_depth = sqrtf((SNAP_GUIDE_INNER_RADIUS * mRadiusMeters) * (SNAP_GUIDE_INNER_RADIUS * mRadiusMeters) - 
+				mouse_depth = sqrtf((SNAP_GUIDE_INNER_RADIUS * mRadiusMeters) * (SNAP_GUIDE_INNER_RADIUS * mRadiusMeters) -
 									mouse_dist_sqrd);
 			}
 			LLVector3 projected_center_to_cam = mCenterToCamNorm - projected_vec(mCenterToCamNorm, axis);
@@ -499,14 +506,14 @@ BOOL LLManipRotate::handleHover(S32 x, S32 y, MASK mask)
 	return TRUE;
 }
 
-LLVector3 LLManipRotate::projectToSphere(F32 x, F32 y, BOOL* on_sphere) 
+LLVector3 LLManipRotate::projectToSphere(F32 x, F32 y, BOOL* on_sphere)
 {
 	F32 z = 0.f;
 	F32 dist_squared = x*x + y*y;
 
 	*on_sphere = dist_squared <= SQ_RADIUS;
     if (*on_sphere)
-	{    
+	{
         z = sqrt(SQ_RADIUS - dist_squared);
     }
 	return LLVector3(x, y, z);
@@ -601,8 +608,8 @@ void LLManipRotate::drag(S32 x, S32 y)
 			LLVector3 new_position;
 
 			if (object->isAttachment() && object->mDrawable.notNull())
-			{ 
-				// need to work in drawable space to handle selected items from multiple attachments 
+			{
+				// need to work in drawable space to handle selected items from multiple attachments
 				// (which have no shared frame of reference other than their render positions)
 				LLXform* parent_xform = object->mDrawable->getXform()->getParent();
 				new_position = (selectNode->mSavedPositionLocal * parent_xform->getWorldRotation()) + parent_xform->getWorldPosition();
@@ -711,7 +718,7 @@ void LLManipRotate::renderSnapGuides()
 
 	LLSelectMgr::getInstance()->getGrid(grid_origin, grid_rotation, grid_scale);
 
-	if (!gSavedSettings.getBOOL("SnapEnabled"))
+	if (!getSnapEnabled())
 	{
 		return;
 	}
@@ -1077,18 +1084,18 @@ void LLManipRotate::renderSnapGuides()
 BOOL LLManipRotate::updateVisiblity()
 {
 	// Don't want to recalculate the center of the selection during a drag.
-	// Due to packet delays, sometimes half the objects in the selection have their
-	// new position and half have their old one.  This creates subtle errors in the
-	// computed center position for that frame.  Unfortunately, these errors
-	// accumulate.  The result is objects seem to "fly apart" during rotations.
-	// JC - 03.26.2002
+	// Due to packet delays, sometimes half the objects in the selection have
+	// their new position and half have their old one. This creates subtle
+	// errors in the computed center position for that frame. Unfortunately,
+	// these errors accumulate.  The result is objects seem to "fly apart"
+	// during rotations. JC - 03.26.2002
 	if (!hasMouseCapture())
 	{
-		mRotationCenter = gAgent.getPosGlobalFromAgent(getPivotPoint());//LLSelectMgr::getInstance()->getSelectionCenterGlobal();
+		mRotationCenter = gAgent.getPosGlobalFromAgent(getPivotPoint()); //LLSelectMgr::getInstance()->getSelectionCenterGlobal();
 	}
 
 	BOOL visible = FALSE;
-
+	LLViewerCamera* camera = LLViewerCamera::getInstance();
 	LLVector3 center = gAgent.getPosAgentFromGlobal(mRotationCenter);
 	if (mObjectSelection->getSelectType() == SELECT_TYPE_HUD)
 	{
@@ -1096,7 +1103,7 @@ BOOL LLManipRotate::updateVisiblity()
 		mCenterToCamNorm = mCenterToCam;
 		mCenterToCamMag = mCenterToCamNorm.normVec();
 
-		mRadiusMeters = RADIUS_PIXELS / (F32) LLViewerCamera::getInstance()->getViewHeightInPixels();
+		mRadiusMeters = RADIUS_PIXELS / (F32)camera->getViewHeightInPixels();
 		mRadiusMeters /= gAgent.mHUDCurZoom;
 
 		mCenterToProfilePlaneMag = mRadiusMeters * mRadiusMeters / mCenterToCamMag;
@@ -1108,21 +1115,24 @@ BOOL LLManipRotate::updateVisiblity()
 	}
 	else
 	{
-		visible = LLViewerCamera::getInstance()->projectPosAgentToScreen(center, mCenterScreen);
+		visible = camera->projectPosAgentToScreen(center, mCenterScreen);
 		if (visible)
 		{
 			mCenterToCam = gAgent.getCameraPositionAgent() - center;
 			mCenterToCamNorm = mCenterToCam;
 			mCenterToCamMag = mCenterToCamNorm.normVec();
-			LLVector3 cameraAtAxis = LLViewerCamera::getInstance()->getAtAxis();
+			LLVector3 cameraAtAxis = camera->getAtAxis();
 			cameraAtAxis.normVec();
 
 			F32 z_dist = -1.f * (mCenterToCam * cameraAtAxis);
 
 			// Don't drag manip if object too far away
-			if (gSavedSettings.getBOOL("LimitSelectDistance"))
+			static LLCachedControl<bool> limit_select_distance(gSavedSettings,
+															   "LimitSelectDistance");
+			static LLCachedControl<F32> max_select_distance(gSavedSettings,
+															"MaxSelectDistance");
+			if (limit_select_distance)
 			{
-				F32 max_select_distance = gSavedSettings.getF32("MaxSelectDistance");
 				if (dist_vec(gAgent.getPositionAgent(), center) > max_select_distance)
 				{
 					visible = FALSE;
@@ -1131,8 +1141,8 @@ BOOL LLManipRotate::updateVisiblity()
 
 			if (mCenterToCamMag > 0.001f)
 			{
-				F32 fraction_of_fov = RADIUS_PIXELS / (F32) LLViewerCamera::getInstance()->getViewHeightInPixels();
-				F32 apparent_angle = fraction_of_fov * LLViewerCamera::getInstance()->getView();  // radians
+				F32 fraction_of_fov = RADIUS_PIXELS / (F32)camera->getViewHeightInPixels();
+				F32 apparent_angle = fraction_of_fov * camera->getView();  // radians
 				mRadiusMeters = z_dist * tan(apparent_angle);
 
 				mCenterToProfilePlaneMag = mRadiusMeters * mRadiusMeters / mCenterToCamMag;
@@ -1146,7 +1156,8 @@ BOOL LLManipRotate::updateVisiblity()
 	}
 
 	mCamEdgeOn = FALSE;
-	F32 axis_onto_cam = mManipPart >= LL_ROT_X ? llabs(getConstraintAxis() * mCenterToCamNorm) : 0.f;
+	F32 axis_onto_cam = mManipPart >= LL_ROT_X ? llabs(getConstraintAxis() * mCenterToCamNorm)
+											   : 0.f;
 	if (axis_onto_cam < AXIS_ONTO_CAM_TOLERANCE)
 	{
 		mCamEdgeOn = TRUE;
@@ -1426,7 +1437,7 @@ LLQuaternion LLManipRotate::dragConstrained(S32 x, S32 y)
 				cam_at_axis.normVec();
 			}
 
-			// first, project mouse onto screen plane at point tangent to rotation radius. 
+			// first, project mouse onto screen plane at point tangent to rotation radius.
 			getMousePointOnPlaneAgent(projected_mouse, x, y, snap_plane_center, cam_at_axis);
 			// project that point onto rotation plane
 			projected_mouse -= snap_plane_center;
@@ -1436,7 +1447,7 @@ LLQuaternion LLManipRotate::dragConstrained(S32 x, S32 y)
 			F32 mouse_depth = SNAP_GUIDE_INNER_RADIUS * mRadiusMeters;
 			if (llabs(mouse_lateral_dist) > 0.01f)
 			{
-				mouse_depth = sqrtf((SNAP_GUIDE_INNER_RADIUS * mRadiusMeters) * (SNAP_GUIDE_INNER_RADIUS * mRadiusMeters) - 
+				mouse_depth = sqrtf((SNAP_GUIDE_INNER_RADIUS * mRadiusMeters) * (SNAP_GUIDE_INNER_RADIUS * mRadiusMeters) -
 									(mouse_lateral_dist * mouse_lateral_dist));
 			}
 			LLVector3 projected_camera_at = cam_at_axis - projected_vec(cam_at_axis, constraint_axis);
@@ -1490,7 +1501,7 @@ LLQuaternion LLManipRotate::dragConstrained(S32 x, S32 y)
 			F32 mouse_dist_sqrd = mMouseCur.magVecSquared();
 			if (mouse_dist_sqrd > 0.0001f)
 			{
-				mouse_depth = sqrtf((SNAP_GUIDE_INNER_RADIUS * mRadiusMeters) * (SNAP_GUIDE_INNER_RADIUS * mRadiusMeters) - 
+				mouse_depth = sqrtf((SNAP_GUIDE_INNER_RADIUS * mRadiusMeters) * (SNAP_GUIDE_INNER_RADIUS * mRadiusMeters) -
 									mouse_dist_sqrd);
 			}
 			LLVector3 projected_center_to_cam = mCenterToCamNorm - projected_vec(mCenterToCamNorm, constraint_axis);
@@ -1513,7 +1524,7 @@ LLQuaternion LLManipRotate::dragConstrained(S32 x, S32 y)
 			return LLQuaternion::DEFAULT;
 		}
 
-		if (gSavedSettings.getBOOL("SnapEnabled") &&
+		if (getSnapEnabled() &&
 			projected_mouse.magVec() > SNAP_GUIDE_INNER_RADIUS * mRadiusMeters)
 		{
 			if (!mInSnapRegime)
@@ -1564,8 +1575,8 @@ LLQuaternion LLManipRotate::dragConstrained(S32 x, S32 y)
 		}
 	}
 
-	F32 rot_step = gSavedSettings.getF32("RotationStep");
-	F32 step_size = DEG_TO_RAD * rot_step;
+	static LLCachedControl<F32> rotation_step(gSavedSettings, "RotationStep");
+	F32 step_size = DEG_TO_RAD * rotation_step;
 	angle -= fmod(angle, step_size);
 
 	return LLQuaternion(angle, constraint_axis);
@@ -1592,7 +1603,7 @@ LLVector3 LLManipRotate::intersectRayWithSphere(const LLVector3& ray_pt, const L
 	}
 
 	// point which ray hits plane centered on sphere origin, facing ray origin
-	LLVector3 intersection_sphere_plane = ray_pt + (ray_dir * center_distance / dot); 
+	LLVector3 intersection_sphere_plane = ray_pt + (ray_dir * center_distance / dot);
 	// vector from sphere origin to the point, normalized to sphere radius
 	LLVector3 sphere_center_to_intersection = (intersection_sphere_plane - sphere_center) / sphere_radius;
 
@@ -1838,7 +1849,10 @@ BOOL LLManipRotate::canAffectSelection()
 		{
 			virtual bool apply(LLViewerObject* objectp)
 			{
-				return objectp->permMove() && (objectp->permModify() || !gSavedSettings.getBOOL("EditLinkedParts"));
+				static LLCachedControl<bool> edit_linked_parts(gSavedSettings,
+															   "EditLinkedParts");
+				return objectp->permMove() &&
+					   (objectp->permModify() || !edit_linked_parts);
 			}
 		} func;
 		can_rotate = mObjectSelection->applyToObjects(&func);

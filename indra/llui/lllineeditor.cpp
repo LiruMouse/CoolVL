@@ -579,7 +579,7 @@ void LLLineEditor::spell_correct(void* data)
 	}
 }
 
-void LLLineEditor::spell_show(void * data)
+void LLLineEditor::spell_show(void* data)
 {
 	SpellMenuBind* menu_bind = (SpellMenuBind*)data;
 	LLLineEditor* line = menu_bind->mOrigin;
@@ -1099,14 +1099,12 @@ void LLLineEditor::extendSelection(S32 new_cursor_pos)
 
 void LLLineEditor::setSelection(S32 start, S32 end)
 {
-	S32 len = mText.length();
-
-	mIsSelecting = TRUE;
-
 	// JC, yes, this seems odd, but I think you have to presume a
 	// selection dragged from the end towards the start.
+	S32 len = mText.length();
 	mSelectionStart = llclamp(end, 0, len);
 	mSelectionEnd = llclamp(start, 0, len);
+	mIsSelecting = TRUE;
 	setCursor(start);
 }
 
@@ -2737,7 +2735,8 @@ LLXMLNodePtr LLLineEditor::getXML(bool save_children) const
 }
 
 // static
-LLView* LLLineEditor::fromXML(LLXMLNodePtr node, LLView *parent, LLUICtrlFactory *factory)
+LLView* LLLineEditor::fromXML(LLXMLNodePtr node, LLView* parent,
+							  LLUICtrlFactory* factory)
 {
 	std::string name("line_editor");
 	node->getAttributeString("name", name);
@@ -2770,19 +2769,12 @@ LLView* LLLineEditor::fromXML(LLXMLNodePtr node, LLView *parent, LLUICtrlFactory
 
 	LLUICtrlCallback commit_callback = NULL;
 
-	LLLineEditor* line_editor = new LLLineEditor(name,
-								rect,
-								text,
-								font,
-								max_text_length,
-								commit_callback,
-								NULL,
-								NULL,
-								NULL,
-								NULL,
-								bevel_style,
-								border_style,
-								border_thickness);
+	LLLineEditor* line_editor = new LLLineEditor(name, rect, text, font,
+												 max_text_length,
+												 commit_callback,
+												 NULL, NULL, NULL, NULL,
+												 bevel_style, border_style,
+												 border_thickness);
 
 	std::string label;
 	if (node->getAttributeString("label", label))
@@ -2790,17 +2782,20 @@ LLView* LLLineEditor::fromXML(LLXMLNodePtr node, LLView *parent, LLUICtrlFactory
 		line_editor->setLabel(label);
 	}
 	BOOL select_all_on_focus_received = FALSE;
-	if (node->getAttributeBOOL("select_all_on_focus_received", select_all_on_focus_received))
+	if (node->getAttributeBOOL("select_all_on_focus_received",
+							   select_all_on_focus_received))
 	{
 		line_editor->setSelectAllonFocusReceived(select_all_on_focus_received);
 	}
 	BOOL handle_edit_keys_directly = FALSE;
-	if (node->getAttributeBOOL("handle_edit_keys_directly", handle_edit_keys_directly))
+	if (node->getAttributeBOOL("handle_edit_keys_directly",
+							   handle_edit_keys_directly))
 	{
 		line_editor->setHandleEditKeysDirectly(handle_edit_keys_directly);
 	}
 	BOOL commit_on_focus_lost = TRUE;
-	if (node->getAttributeBOOL("commit_on_focus_lost", commit_on_focus_lost))
+	if (node->getAttributeBOOL("commit_on_focus_lost",
+							   commit_on_focus_lost))
 	{
 		line_editor->setCommitOnFocusLost(commit_on_focus_lost);
 	}
@@ -2874,10 +2869,13 @@ void LLLineEditor::cleanupLineEditor()
 }
 
 /* static */
-LLPointer<LLUIImage> LLLineEditor::parseImage(std::string name, LLXMLNodePtr from, LLPointer<LLUIImage> def)
+LLPointer<LLUIImage> LLLineEditor::parseImage(std::string name,
+											  LLXMLNodePtr from,
+											  LLPointer<LLUIImage> def)
 {
 	std::string xml_name;
-	if (from->hasAttribute(name.c_str())) from->getAttributeString(name.c_str(), xml_name);
+	if (from->hasAttribute(name.c_str())) from->getAttributeString(name.c_str(),
+																   xml_name);
 	if (xml_name == LLStringUtil::null) return def;
 	LLPointer<LLUIImage> image = LLUI::getUIImage(xml_name);
 	return image.isNull() ? def : image;
@@ -2980,9 +2978,9 @@ void LLLineEditor::resetPreedit()
 	}
 }
 
-void LLLineEditor::updatePreedit(const LLWString &preedit_string,
-								 const segment_lengths_t &preedit_segment_lengths,
-								 const standouts_t &preedit_standouts,
+void LLLineEditor::updatePreedit(const LLWString& preedit_string,
+								 const segment_lengths_t& preedit_segment_lengths,
+								 const standouts_t& preedit_standouts,
 								 S32 caret_position)
 {
 	// Just in case.
@@ -3031,8 +3029,8 @@ void LLLineEditor::updatePreedit(const LLWString &preedit_string,
 	}
 }
 
-BOOL LLLineEditor::getPreeditLocation(S32 query_offset, LLCoordGL *coord,
-									  LLRect *bounds, LLRect *control) const
+BOOL LLLineEditor::getPreeditLocation(S32 query_offset, LLCoordGL* coord,
+									  LLRect* bounds, LLRect* control) const
 {
 	if (control)
 	{
@@ -3094,7 +3092,7 @@ BOOL LLLineEditor::getPreeditLocation(S32 query_offset, LLCoordGL *coord,
 	return TRUE;
 }
 
-void LLLineEditor::getPreeditRange(S32 *position, S32 *length) const
+void LLLineEditor::getPreeditRange(S32* position, S32* length) const
 {
 	if (hasPreeditString())
 	{
@@ -3108,7 +3106,7 @@ void LLLineEditor::getPreeditRange(S32 *position, S32 *length) const
 	}
 }
 
-void LLLineEditor::getSelectionRange(S32 *position, S32 *length) const
+void LLLineEditor::getSelectionRange(S32* position, S32* length) const
 {
 	if (hasSelection())
 	{
@@ -3128,7 +3126,8 @@ void LLLineEditor::markAsPreedit(S32 position, S32 length)
 	setCursor(position);
 	if (hasPreeditString())
 	{
-		llwarns << "markAsPreedit invoked when hasPreeditString is true." << llendl;
+		llwarns << "markAsPreedit invoked when hasPreeditString is true."
+				<< llendl;
 	}
 	mPreeditWString.assign(LLWString(mText.getWString(), position, length));
 	if (length > 0)
@@ -3199,7 +3198,8 @@ LLSearchEditor::LLSearchEditor(const std::string& name,
 	addChild(mSearchEdit);
 
 	S32 btn_width = rect.getHeight(); // button is square, and as tall as search editor
-	LLRect clear_btn_rect(rect.getWidth() - btn_width, rect.getHeight(), rect.getWidth(), 0);
+	LLRect clear_btn_rect(rect.getWidth() - btn_width, rect.getHeight(),
+						  rect.getWidth(), 0);
 	mClearSearchButton = new LLButton(std::string("clear search"),
 									  clear_btn_rect,
 									  std::string("icn_clear_lineeditor.tga"),
@@ -3288,7 +3288,8 @@ LLXMLNodePtr LLSearchEditor::getXML(bool save_children) const
 }
 
 // static
-LLView* LLSearchEditor::fromXML(LLXMLNodePtr node, LLView *parent, LLUICtrlFactory *factory)
+LLView* LLSearchEditor::fromXML(LLXMLNodePtr node, LLView* parent,
+								LLUICtrlFactory* factory)
 {
 	std::string name("search_editor");
 	node->getAttributeString("name", name);

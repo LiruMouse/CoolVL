@@ -367,6 +367,7 @@ void LLPipeline::init()
 {
 	LLMemType mt(LLMemType::MTYPE_PIPELINE);
 
+	gOctreeMaxCapacity = gSavedSettings.getU32("OctreeMaxNodeCapacity");
 	sDynamicLOD = gSavedSettings.getBOOL("RenderDynamicLOD");
 	sRenderBump = gSavedSettings.getBOOL("RenderObjectBump");
 	sUseTriStrips = gSavedSettings.getBOOL("RenderUseTriStrips");
@@ -5687,14 +5688,14 @@ BOOL LLPipeline::getRenderAttachments(void*)
 	return sRenderAttachments;
 }
 
-LLViewerObject* LLPipeline::lineSegmentIntersectInWorld(const LLVector3& start, const LLVector3& end,
+LLViewerObject* LLPipeline::lineSegmentIntersectInWorld(const LLVector3& start,
+														const LLVector3& end,
 														BOOL pick_transparent,
 														S32* face_hit,
-														LLVector3* intersection,         // return the intersection point
-														LLVector2* tex_coord,            // return the texture coordinates of the intersection point
-														LLVector3* normal,               // return the surface normal at the intersection point
-														LLVector3* bi_normal             // return the surface bi-normal at the intersection point
-	)
+														LLVector3* intersection,	// return the intersection point
+														LLVector2* tex_coord,		// return the texture coordinates of the intersection point
+														LLVector3* normal,			// return the surface normal at the intersection point
+														LLVector3* bi_normal)		// return the surface bi-normal at the intersection point
 {
 	LLDrawable* drawable = NULL;
 
@@ -5712,16 +5713,24 @@ LLViewerObject* LLPipeline::lineSegmentIntersectInWorld(const LLVector3& start, 
 
 		for (U32 j = 0; j < LLViewerRegion::NUM_PARTITIONS; j++)
 		{
-			if ((j == LLViewerRegion::PARTITION_VOLUME) || 
-				(j == LLViewerRegion::PARTITION_BRIDGE) || 
-				(j == LLViewerRegion::PARTITION_TERRAIN) ||
-				(j == LLViewerRegion::PARTITION_TREE) ||
-				(j == LLViewerRegion::PARTITION_GRASS))  // only check these partitions for now
+			// only check these partitions for now
+			if (j == LLViewerRegion::PARTITION_VOLUME || 
+				j == LLViewerRegion::PARTITION_BRIDGE || 
+				j == LLViewerRegion::PARTITION_TERRAIN ||
+				j == LLViewerRegion::PARTITION_TREE ||
+				j == LLViewerRegion::PARTITION_GRASS)
 			{
 				LLSpatialPartition* part = region->getSpatialPartition(j);
 				if (part && hasRenderType(part->mDrawableType))
 				{
-					LLDrawable* hit = part->lineSegmentIntersect(start, local_end, pick_transparent, face_hit, &position, tex_coord, normal, bi_normal);
+					LLDrawable* hit = part->lineSegmentIntersect(start,
+																 local_end,
+																 pick_transparent,
+																 face_hit,
+																 &position,
+																 tex_coord,
+																 normal,
+																 bi_normal);
 					if (hit)
 					{
 						drawable = hit;
@@ -5734,8 +5743,7 @@ LLViewerObject* LLPipeline::lineSegmentIntersectInWorld(const LLVector3& start, 
 
 	if (!sPickAvatar)
 	{
-		//save hit info in case we need to restore
-		//due to attachment override
+		// save hit info in case we need to restore due to attachment override
 		LLVector3 local_normal;
 		LLVector3 local_binormal;
 		LLVector2 local_texcoord;
@@ -5760,7 +5768,7 @@ LLViewerObject* LLPipeline::lineSegmentIntersectInWorld(const LLVector3& start, 
 
 		const F32 ATTACHMENT_OVERRIDE_DIST = 0.1f;
 
-		//check against avatars
+		// check against avatars
 		sPickAvatar = TRUE;
 		for (LLWorld::region_list_t::const_iterator iter = world->getRegionList().begin(); 
 			 iter != world->getRegionList().end(); ++iter)
@@ -5770,19 +5778,24 @@ LLViewerObject* LLPipeline::lineSegmentIntersectInWorld(const LLVector3& start, 
 			LLSpatialPartition* part = region->getSpatialPartition(LLViewerRegion::PARTITION_BRIDGE);
 			if (part && hasRenderType(part->mDrawableType))
 			{
-				LLDrawable* hit = part->lineSegmentIntersect(start, local_end, pick_transparent, face_hit, &position, tex_coord, normal, bi_normal);
+				LLDrawable* hit = part->lineSegmentIntersect(start, local_end,
+															 pick_transparent,
+															 face_hit,
+															 &position,
+															 tex_coord, normal,
+															 bi_normal);
 				if (hit)
 				{
-					if (!drawable || 
-						!drawable->getVObj()->isAttachment() ||
+					if (!drawable || !drawable->getVObj()->isAttachment() ||
 						(position-local_end).magVec() > ATTACHMENT_OVERRIDE_DIST)
-					{ //avatar overrides if previously hit drawable is not an attachment or 
-					  //attachment is far enough away from detected intersection
+					{	// Avatar overrides if previously hit drawable is not
+						// an attachment or attachment is far enough away from
+						// detected intersection
 						drawable = hit;
 						local_end = position;
 					}
 					else
-					{ //prioritize attachments over avatars
+					{	// prioritize attachments over avatars
 						position = local_end;
 
 						if (face_hit)
@@ -5807,12 +5820,11 @@ LLViewerObject* LLPipeline::lineSegmentIntersectInWorld(const LLVector3& start, 
 		}
 	}
 
-	//check all avatar nametags (silly, isn't it?)
-	for (std::vector< LLCharacter* >::iterator iter = LLCharacter::sInstances.begin();
-		iter != LLCharacter::sInstances.end();
-		++iter)
+	// check all avatar nametags (silly, isn't it?)
+	for (std::vector<LLCharacter*>::iterator iter = LLCharacter::sInstances.begin();
+		 iter != LLCharacter::sInstances.end(); ++iter)
 	{
-		LLVOAvatar* av = (LLVOAvatar*) *iter;
+		LLVOAvatar* av = (LLVOAvatar*)*iter;
 		if (av->mNameText.notNull() &&
 			av->mNameText->lineSegmentIntersect(start, local_end, position))
 		{
@@ -5829,14 +5841,14 @@ LLViewerObject* LLPipeline::lineSegmentIntersectInWorld(const LLVector3& start, 
 	return drawable ? drawable->getVObj().get() : NULL;
 }
 
-LLViewerObject* LLPipeline::lineSegmentIntersectInHUD(const LLVector3& start, const LLVector3& end,
+LLViewerObject* LLPipeline::lineSegmentIntersectInHUD(const LLVector3& start,
+													  const LLVector3& end,
 													  BOOL pick_transparent,
 													  S32* face_hit,
-													  LLVector3* intersection,         // return the intersection point
-													  LLVector2* tex_coord,            // return the texture coordinates of the intersection point
-													  LLVector3* normal,               // return the surface normal at the intersection point
-													  LLVector3* bi_normal             // return the surface bi-normal at the intersection point
-	)
+													  LLVector3* intersection,	// return the intersection point
+													  LLVector2* tex_coord,		// return the texture coordinates of the intersection point
+													  LLVector3* normal,		// return the surface normal at the intersection point
+													  LLVector3* bi_normal)		// return the surface bi-normal at the intersection point
 {
 	LLDrawable* drawable = NULL;
 
@@ -5856,7 +5868,12 @@ LLViewerObject* LLPipeline::lineSegmentIntersectInHUD(const LLVector3& start, co
 		LLSpatialPartition* part = region->getSpatialPartition(LLViewerRegion::PARTITION_HUD);
 		if (part)
 		{
-			LLDrawable* hit = part->lineSegmentIntersect(start, end, pick_transparent, face_hit, intersection, tex_coord, normal, bi_normal);
+			LLDrawable* hit = part->lineSegmentIntersect(start, end,
+														 pick_transparent,
+														 face_hit,
+														 intersection,
+														 tex_coord, normal,
+														 bi_normal);
 			if (hit)
 			{
 				drawable = hit;

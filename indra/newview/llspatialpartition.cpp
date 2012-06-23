@@ -73,6 +73,8 @@ static U32 sZombieGroups = 0;
 U32 LLSpatialGroup::sNodeCount = 0;
 BOOL LLSpatialGroup::sNoDelete = FALSE;
 
+U32 gOctreeMaxCapacity;
+
 static F32 sLastMaxTexPriority = 1.f;
 static F32 sCurMaxTexPriority = 1.f;
 
@@ -505,7 +507,7 @@ BOOL LLSpatialGroup::updateInGroup(LLDrawable *drawablep, BOOL immediate)
 	if (mOctreeNode->isInside(drawablep->getPositionGroup()) && 
 		(mOctreeNode->contains(drawablep) ||
 		 (drawablep->getBinRadius() > mOctreeNode->getSize()[0] &&
-				parent && parent->getElementCount() >= LL_OCTREE_MAX_CAPACITY)))
+		  parent && parent->getElementCount() >= gOctreeMaxCapacity)))
 	{
 		unbound();
 		setState(OBJECT_DIRTY);
@@ -787,7 +789,10 @@ class LLSpatialSetState : public LLSpatialGroup::OctreeTraveler
 public:
 	U32 mState;
 	LLSpatialSetState(U32 state) : mState(state) { }
-	virtual void visit(const LLSpatialGroup::OctreeNode* branch) { ((LLSpatialGroup*) branch->getListener(0))->setState(mState); }
+	virtual void visit(const LLSpatialGroup::OctreeNode* branch)
+	{
+		((LLSpatialGroup*) branch->getListener(0))->setState(mState);
+	}
 };
 
 class LLSpatialSetStateDiff : public LLSpatialSetState
@@ -849,7 +854,10 @@ class LLSpatialClearState : public LLSpatialGroup::OctreeTraveler
 public:
 	U32 mState;
 	LLSpatialClearState(U32 state) : mState(state) { }
-	virtual void visit(const LLSpatialGroup::OctreeNode* branch) { ((LLSpatialGroup*) branch->getListener(0))->clearState(mState); }
+	virtual void visit(const LLSpatialGroup::OctreeNode* branch)
+	{
+		((LLSpatialGroup*) branch->getListener(0))->clearState(mState);
+	}
 };
 
 class LLSpatialClearStateDiff : public LLSpatialClearState
@@ -4050,18 +4058,24 @@ BOOL LLSpatialPartition::isVisible(const LLVector3& v)
 class LLOctreeIntersect : public LLSpatialGroup::OctreeTraveler
 {
 public:
-	LLVector3 mStart;
-	LLVector3 mEnd;
-	S32       *mFaceHit;
-	LLVector3 *mIntersection;
-	LLVector2 *mTexCoord;
-	LLVector3 *mNormal;
-	LLVector3 *mBinormal;
-	LLDrawable* mHit;
-	BOOL mPickTransparent;
+	LLVector3	mStart;
+	LLVector3	mEnd;
+	S32*		mFaceHit;
+	LLVector3*	mIntersection;
+	LLVector2*	mTexCoord;
+	LLVector3*	mNormal;
+	LLVector3*	mBinormal;
+	LLDrawable*	mHit;
+	BOOL		mPickTransparent;
 
-	LLOctreeIntersect(LLVector3 start, LLVector3 end, BOOL pick_transparent,
-					  S32* face_hit, LLVector3* intersection, LLVector2* tex_coord, LLVector3* normal, LLVector3* binormal)
+	LLOctreeIntersect(LLVector3 start,
+					  LLVector3 end,
+					  BOOL pick_transparent,
+					  S32* face_hit,
+					  LLVector3* intersection,
+					  LLVector2* tex_coord,
+					  LLVector3* normal,
+					  LLVector3* binormal)
 		: mStart(start),
 		  mEnd(end),
 		  mFaceHit(face_hit),
@@ -4076,7 +4090,8 @@ public:
 
 	virtual void visit(const LLSpatialGroup::OctreeNode* branch) 
 	{
-		for (LLSpatialGroup::OctreeNode::const_element_iter i = branch->getData().begin(); i != branch->getData().end(); ++i)
+		for (LLSpatialGroup::OctreeNode::const_element_iter i = branch->getData().begin();
+			 i != branch->getData().end(); ++i)
 		{
 			check(*i);
 		}
@@ -4096,9 +4111,22 @@ public:
 		for (U32 i = 0; i < node->getChildCount(); i++)
 		{
 			const LLSpatialGroup::OctreeNode* child = node->getChild(i);
+			if (!child)
+			{
+				llwarns << "NULL spatial partition for node " << node
+						<< llendl;
+				continue;
+			}
+
 			LLVector3 res;
 
-			LLSpatialGroup* group = (LLSpatialGroup*) child->getListener(0);
+			LLSpatialGroup* group = (LLSpatialGroup*)child->getListener(0);
+			if (!group)
+			{
+				llwarns << "NULL spatial group for child " << child
+						<< " of node " << node << llendl;
+				continue;
+			}
 
 			LLVector4a size;
 			LLVector4a center;
@@ -4109,13 +4137,32 @@ public:
 			LLVector3 local_start = mStart;
 			LLVector3 local_end   = mEnd;
 
-			if (group->mSpatialPartition->isBridge())
+			if (group->mSpatialPartition)
 			{
-				LLMatrix4 local_matrix = group->mSpatialPartition->asBridge()->mDrawable->getRenderMatrix();
-				local_matrix.invert();
+				if (group->mSpatialPartition->isBridge())
+				{
+					if (group->mSpatialPartition->asBridge()->mDrawable)
+					{
+						LLMatrix4 local_matrix;
+						local_matrix = group->mSpatialPartition->asBridge()->mDrawable->getRenderMatrix();
+						local_matrix.invert();
 
-				local_start = mStart * local_matrix;
-				local_end   = mEnd   * local_matrix;
+						local_start = mStart * local_matrix;
+						local_end   = mEnd   * local_matrix;
+					}
+					else
+					{
+						llwarns << "NULL drawable for spatial partition bridge of group "
+								<< group << " of child " << child
+								<< " of node " << node << llendl;
+					}
+				}
+			}
+			else
+			{
+				llwarns << "NULL spatial partition for group " << group
+						<< " of child " << child << " of node " << node
+						<< llendl;
 			}
 
 			LLVector4a start, end;
@@ -4136,24 +4183,32 @@ public:
 		LLVector3 local_start = mStart;
 		LLVector3 local_end = mEnd;
 
-		if (!gPipeline.hasRenderType(drawable->getRenderType()) || !drawable->isVisible())
+		if (!drawable || !gPipeline.hasRenderType(drawable->getRenderType()) ||
+			!drawable->isVisible())
 		{
 			return false;
 		}
 
 		if (drawable->isSpatialBridge())
 		{
-			LLSpatialPartition *part = drawable->asPartition();
-			LLSpatialBridge* bridge = part->asBridge();
-			if (bridge && gPipeline.hasRenderType(bridge->mDrawableType))
+			LLSpatialPartition* part = drawable->asPartition();
+			if (part)
 			{
-				check(part->mOctree);
+				LLSpatialBridge* bridge = part->asBridge();
+				if (bridge && gPipeline.hasRenderType(bridge->mDrawableType))
+				{
+					check(part->mOctree);
+				}
+			}
+			else
+			{
+				llwarns << "NULL spatial partition for drawable " << drawable
+						<< llendl;
 			}
 		}
 		else
 		{
 			LLViewerObject* vobj = drawable->getVObj();
-
 			if (vobj)
 			{
 				LLVector3 intersection;
@@ -4177,7 +4232,10 @@ public:
 					}
 				}
 				if (!skip_check &&
-					vobj->lineSegmentIntersect(mStart, mEnd, -1, mPickTransparent, mFaceHit, &intersection, mTexCoord, mNormal, mBinormal))
+					vobj->lineSegmentIntersect(mStart, mEnd, -1,
+											   mPickTransparent, mFaceHit,
+											   &intersection, mTexCoord,
+											   mNormal, mBinormal))
 				{
 					mEnd = intersection;  // shorten ray so we only find CLOSER hits
 					if (mIntersection)
@@ -4193,17 +4251,17 @@ public:
 	}
 };
 
-LLDrawable* LLSpatialPartition::lineSegmentIntersect(const LLVector3& start, const LLVector3& end,
+LLDrawable* LLSpatialPartition::lineSegmentIntersect(const LLVector3& start,
+													 const LLVector3& end,
 													 BOOL pick_transparent,
-													 S32* face_hit,                   // return the face hit
-													 LLVector3* intersection,         // return the intersection point
-													 LLVector2* tex_coord,            // return the texture coordinates of the intersection point
-													 LLVector3* normal,               // return the surface normal at the intersection point
-													 LLVector3* bi_normal             // return the surface bi-normal at the intersection point
-	)
-
+													 S32* face_hit,				// return the face hit
+													 LLVector3* intersection,	// return the intersection point
+													 LLVector2* tex_coord,		// return the texture coordinates of the intersection point
+													 LLVector3* normal,			// return the surface normal at the intersection point
+													 LLVector3* bi_normal)		// return the surface bi-normal at the intersection point
 {
-	LLOctreeIntersect intersect(start, end, pick_transparent, face_hit, intersection, tex_coord, normal, bi_normal);
+	LLOctreeIntersect intersect(start, end, pick_transparent, face_hit,
+								intersection, tex_coord, normal, bi_normal);
 	LLDrawable* drawable = intersect.check(mOctree);
 
 	return drawable;

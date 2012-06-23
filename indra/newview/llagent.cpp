@@ -6476,15 +6476,15 @@ void LLAgent::requestLeaveGodMode()
 //-----------------------------------------------------------------------------
 void LLAgent::sendAgentSetAppearance()
 {
-	if (!isAgentAvatarValid() || gAgentWearables.isSettingOutfit()) return;
-
-	if (gAgentQueryManager.mNumPendingQueries > 0 &&
-		isAgentAvatarValid() && gAgentAvatarp->isUsingBakedTextures())
+	if (!isAgentAvatarValid() || gAgentWearables.isSettingOutfit() ||
+		(gAgentQueryManager.mNumPendingQueries > 0 &&
+		 gAgentAvatarp->isUsingBakedTextures()))
 	{
 		return;
 	}
 
-	llinfos << "TAT: Sent AgentSetAppearance: " << gAgentAvatarp->getBakedStatusForPrintout() << llendl;
+	llinfos << "TAT: Sent AgentSetAppearance: "
+			<< gAgentAvatarp->getBakedStatusForPrintout() << llendl;
 	//dumpAvatarTEs("sendAgentSetAppearance()");
 
 	LLMessageSystem* msg = gMessageSystem;
@@ -6493,17 +6493,27 @@ void LLAgent::sendAgentSetAppearance()
 	msg->addUUIDFast(_PREHASH_AgentID, getID());
 	msg->addUUIDFast(_PREHASH_SessionID, getSessionID());
 
-	// correct for the collision tolerance (to make it look like the 
-	// agent is actually walking on the ground/object)
-	// NOTE -- when we start correcting all of the other Havok geometry 
-	// to compensate for the COLLISION_TOLERANCE ugliness we will have 
-	// to tweak this number again
+	// Correct for the collision tolerance (to make it look like the agent is
+	// actually walking on the ground/object). Also allow correcting X and Y
+	// for the bounding box for micro or macro avatars (even though it won't
+	// affect animations)
 	LLVector3 body_size = gAgentAvatarp->mBodySize;
+	body_size.mV[VX] += gSavedSettings.getF32("AvatarOffsetX");
+	if (body_size.mV[VX] < 0.01f)
+	{
+		body_size.mV[VX] = 0.01f;
+	}
+	body_size.mV[VY] += gSavedSettings.getF32("AvatarOffsetY");
+	if (body_size.mV[VY] < 0.01f)
+	{
+		body_size.mV[VY] = 0.01f;
+	}
 	body_size.mV[VZ] += gSavedSettings.getF32("AvatarOffsetZ");
 	msg->addVector3Fast(_PREHASH_Size, body_size);
 
-	// To guard against out of order packets
-	// Note: always start by sending 1.  This resets the server's count. 0 on the server means "uninitialized"
+	// To guard against out of order packets.
+	// Note: always start by sending 1. This resets the server's count. 0 on
+	// the server means "uninitialized"
 	mAppearanceSerialNum++;
 	msg->addU32Fast(_PREHASH_SerialNum, mAppearanceSerialNum);
 

@@ -43,6 +43,9 @@
 			<panel name="chat_panel" tab_group="1"
 			 left="5" right="-5" bottom="5" top="25" follows="left|right|bottom">
 				<string name="gesture_label">Gestures</string>
+				<string name="normal_shortcuts">Press ENTER to say, CTRL ENTER to shout, SHIFT ENTER to whisper.</string>
+				<string name="swapped_shortcuts">Press ENTER to say, SHIFT ENTER to shout, CTRL ENTER to whisper.</string>
+
 				<line_editor name="Chat Editor" label="Click here to chat." font="SansSerif" max_length="1023"
 				 select_all_on_focus_received="false" select_on_focus="false" enabled="true" mouse_opaque="true"
 				 handle_edit_keys_directly="false" spell_check="true" tab_group="1"
@@ -51,10 +54,8 @@
 				<button name="open_text_editor_btn" label="&gt;" enabled="true" mouse_opaque="true"
 				 tool_tip="Click to open or focus the text input editor associated with this chat input line."
 				 right="-68" bottom_delta="0" width="20" height="20" follows="right|bottom" />
-				<flyout_button bottom="0" follows="right|bottom" height="20" label="Say" left="-65"
-				     list_position="above" mouse_opaque="true" name="Say"
-	 				 tool_tip="Press ENTER to say, CTRL ENTER to shout, SHIFT ENTER to whisper."
-				     width="70">
+				<flyout_button name="Say" label="Say" list_position="above" mouse_opaque="true"
+				 left="-65" bottom="0" width="70" height="20" follows="right|bottom">
 					<flyout_button_item value="shout" name="shout_item">
 						Shout
 					</flyout_button_item>

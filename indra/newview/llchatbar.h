@@ -37,6 +37,8 @@
 #include "llframetimer.h"
 #include "llchat.h"
 
+#include "llviewercontrol.h"
+
 class LLButton;
 class LLFrameTimer;
 class LLChatBarGestureObserver;
@@ -83,7 +85,17 @@ public:
 
 	// If input of the form "/20foo" or "/20 foo", returns "foo" and channel 20.
 	// Otherwise returns input and channel 0.
-	LLWString stripChannelNumber(const LLWString &mesg, S32* channel);
+	LLWString	stripChannelNumber(const LLWString &mesg, S32* channel);
+
+	static void startChat(const char* line);
+	static void stopChat();
+
+	static std::string getMatchingAvatarName(const std::string& match);
+
+protected:
+	/*virtual*/ void setVisible(BOOL visible);
+	void sendChat(EChatType type);
+	void updateChat();
 
 	// callbacks
 	static void	onClickSay(LLUICtrl*, void* userdata);
@@ -97,19 +109,14 @@ public:
 
 	static void onCommitGesture(LLUICtrl* ctrl, void* data);
 
-	static void startChat(const char* line);
-	static void stopChat();
-
-	/*virtual*/ void setVisible(BOOL visible);
-
-protected:
-	void sendChat(EChatType type);
-	void updateChat();
+public:
+	static BOOL		sSwappedShortcuts;
 
 protected:
 	bool 			mSecondary;
 	bool			mIsBuilt;
 	bool			mHasScrolledOnce;
+	BOOL			mLastSwappedShortcuts;
 
 	LLLineEditor*	mInputEditor;
 	LLButton*		mOpenTextEditorButton;
@@ -123,6 +130,8 @@ protected:
 	S32				mLastSpecialChatChannel;
 
 	LLChatBarGestureObserver* mObserver;
+
+	static std::set<std::string> sIgnoredNames;
 };
 
 extern LLChatBar *gChatBar;

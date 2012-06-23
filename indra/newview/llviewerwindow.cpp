@@ -3552,14 +3552,14 @@ LLHUDIcon* LLViewerWindow::cursorIntersectIcon(S32 mouse_x, S32 mouse_y, F32 dep
 }
 
 LLViewerObject* LLViewerWindow::cursorIntersect(S32 mouse_x, S32 mouse_y, F32 depth,
-												LLViewerObject *this_object,
+												LLViewerObject* this_object,
 												S32 this_face,
 												BOOL pick_transparent,
 												S32* face_hit,
-												LLVector3 *intersection,
-												LLVector2 *uv,
-												LLVector3 *normal,
-												LLVector3 *binormal,
+												LLVector3* intersection,
+												LLVector2* uv,
+												LLVector3* normal,
+												LLVector3* binormal,
 												LLVector3* start,
 												LLVector3* end)
 {
@@ -3594,8 +3594,8 @@ LLViewerObject* LLViewerWindow::cursorIntersect(S32 mouse_x, S32 mouse_y, F32 de
 	LLVector3 mouse_world_end   = mouse_point_global + mouse_direction_global * depth;
 
 	if (!LLViewerJoystick::getInstance()->getOverrideCamera())
-	{ //always set raycast intersection to mouse_world_end unless
-		//flycam is on (for DoF effect)
+	{	// always set raycast intersection to mouse_world_end unless flycam is
+		// on (for DoF effect)
 		gDebugRaycastIntersection = mouse_world_end;
 	}
 
@@ -3615,16 +3615,22 @@ LLViewerObject* LLViewerWindow::cursorIntersect(S32 mouse_x, S32 mouse_y, F32 de
 	{
 		if (this_object->isHUDAttachment()) // is a HUD object?
 		{
-			if (this_object->lineSegmentIntersect(mouse_hud_start, mouse_hud_end, this_face, pick_transparent,
-												  face_hit, intersection, uv, normal, binormal))
+			if (this_object->lineSegmentIntersect(mouse_hud_start,
+												  mouse_hud_end, this_face,
+												  pick_transparent,
+												  face_hit, intersection, uv,
+												  normal, binormal))
 			{
 				found = this_object;
 			}
 		}
 		else // is a world object
 		{
-			if (this_object->lineSegmentIntersect(mouse_world_start, mouse_world_end, this_face, pick_transparent,
-												  face_hit, intersection, uv, normal, binormal))
+			if (this_object->lineSegmentIntersect(mouse_world_start,
+												  mouse_world_end, this_face,
+												  pick_transparent,
+												  face_hit, intersection, uv,
+												  normal, binormal))
 			{
 				found = this_object;
 			}
@@ -3632,8 +3638,11 @@ LLViewerObject* LLViewerWindow::cursorIntersect(S32 mouse_x, S32 mouse_y, F32 de
 	}
 	else // check ALL objects
 			{
-		found = gPipeline.lineSegmentIntersectInHUD(mouse_hud_start, mouse_hud_end, pick_transparent,
-													face_hit, intersection, uv, normal, binormal);
+		found = gPipeline.lineSegmentIntersectInHUD(mouse_hud_start,
+													mouse_hud_end,
+													pick_transparent,
+													face_hit, intersection,
+													uv, normal, binormal);
 //MK
 		// HACK : don't allow focusing on HUDs unless we are in Mouselook mode
 		if (gRRenabled && gAgent.getCameraMode() != CAMERA_MODE_MOUSELOOK)
@@ -3647,8 +3656,13 @@ LLViewerObject* LLViewerWindow::cursorIntersect(S32 mouse_x, S32 mouse_y, F32 de
 //mk
 		if (!found) // if not found in HUD, look in world:
 		{
-			found = gPipeline.lineSegmentIntersectInWorld(mouse_world_start, mouse_world_end, pick_transparent,
-														  face_hit, intersection, uv, normal, binormal);
+			found = gPipeline.lineSegmentIntersectInWorld(mouse_world_start,
+														  mouse_world_end,
+														  pick_transparent,
+														  face_hit,
+														  intersection,
+														  uv, normal,
+														  binormal);
 			if (found && !pick_transparent)
 			{
 				gDebugRaycastIntersection = *intersection;

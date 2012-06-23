@@ -132,6 +132,9 @@ public:
     std::vector<S32>	getMisspelledWordsPositions();
 	virtual void		spellReplace(SpellMenuBind* data);
  
+	BOOL				getWordBoundriesAt(const S32 at, S32* word_begin,
+										   S32* word_length) const;
+
 	// LLEditMenuHandler interface
 	virtual void	undo();
 	virtual BOOL	canUndo() const;
@@ -224,6 +227,8 @@ public:
 	void			setCursorAndScrollToEnd();
 	void			scrollToPos(S32 pos);
 
+	S32				getCursorPos()					{ return mCursorPos; }
+
 	void			getLineAndColumnForPosition(S32 position,
 												S32* line,
 												S32* col,
@@ -294,8 +299,10 @@ public:
 
 	void			setOnScrollEndCallback(void (*callback)(void*),
 										   void* userdata);
-	void			setOnKeystrokeCallback(BOOL (*callback)(KEY, MASK, LLTextEditor*, void*),
-															void* userdata);
+	void 			setKeystrokeCallback(void (*callback)(LLTextEditor*, void*),
+										 void* userdata);
+	void			setOnHandleKeyCallback(BOOL (*callback)(KEY, MASK, LLTextEditor*, void*),
+										   void* userdata);
 
 	// new methods
 	void 			setValue(const LLSD& value);
@@ -306,6 +313,8 @@ public:
 	// Non-undoable
 	void			setText(const LLStringExplicit &utf8str);
 	void			setWText(const LLWString &wtext);
+
+	void			setSelection(S32 start, S32 end);
 
 	// Returns byte length limit
 	S32				getMaxLength() const 					{ return mMaxTextByteLength; }
@@ -376,8 +385,6 @@ protected:
 
 	S32				prevWordPos(S32 cursorPos) const;
 	S32				nextWordPos(S32 cursorPos) const;
-	BOOL			getWordBoundriesAt(const S32 at, S32* word_begin,
-									   S32* word_length) const;
 
 	S32 			getLineCount() const					{ return mLineStartList.size(); }
 	S32 			getLineStart(S32 line) const;
@@ -474,10 +481,10 @@ protected:
 								  const standouts_t &preedit_standouts,
 								  S32 caret_position);
 	virtual void	markAsPreedit(S32 position, S32 length);
-	virtual void	getPreeditRange(S32 *position, S32 *length) const;
-	virtual void	getSelectionRange(S32 *position, S32 *length) const;
-	virtual BOOL	getPreeditLocation(S32 query_offset, LLCoordGL *coord,
-									   LLRect *bounds, LLRect *control) const;
+	virtual void	getPreeditRange(S32* position, S32* length) const;
+	virtual void	getSelectionRange(S32* position, S32* length) const;
+	virtual BOOL	getPreeditLocation(S32 query_offset, LLCoordGL* coord,
+									   LLRect* bounds, LLRect* control) const;
 	virtual S32		getPreeditFontSize() const;
 	//
 	// Protected data
@@ -511,13 +518,16 @@ protected:
 
 	// Scrollbar data
 	class LLScrollbar*	mScrollbar;
-	BOOL			mHideScrollbarForShortDocs;
-	BOOL			mTakesNonScrollClicks;
-	void			(*mOnScrollEndCallback)(void*);
-	void			*mOnScrollEndData;
+	BOOL				mHideScrollbarForShortDocs;
+	BOOL				mTakesNonScrollClicks;
+	void				(*mOnScrollEndCallback)(void*);
+	void*				mOnScrollEndData;
 
-	BOOL			(*mOnKeystrokeCallback)(KEY, MASK, LLTextEditor*, void*);
-	void			*mOnKeystrokeData;
+	void				(*mKeystrokeCallback)(LLTextEditor*, void*);
+	void*				mKeystrokeData;
+
+	BOOL				(*mOnHandleKeyCallback)(KEY, MASK, LLTextEditor*, void*);
+	void*				mOnHandleKeyData;
 
 	LLWString			mPreeditWString;
 	LLWString			mPreeditOverwrittenWString;

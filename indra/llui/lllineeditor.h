@@ -183,7 +183,8 @@ public:
 
 	const std::string& getText() const						{ return mText.getString(); }
 	const LLWString& getWText() const						{ return mText.getWString(); }
-	LLWString getConvertedText() const; // trimmed text with paragraphs converted to newlines
+	// trimmed text with paragraphs converted to newlines
+	LLWString		getConvertedText() const;
 
 	S32				getLength() const						{ return mText.length(); }
 

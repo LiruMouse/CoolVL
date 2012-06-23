@@ -54,11 +54,13 @@ LLVoiceRemoteCtrl::LLVoiceRemoteCtrl (const std::string& name) : LLPanel(name)
 #if EXPANDED_VOICE_CTRL
 	if (gSavedSettings.getBOOL("ShowVoiceChannelPopup"))
 	{
-		LLUICtrlFactory::getInstance()->buildPanel(this, "panel_voice_remote_expanded.xml");
+		LLUICtrlFactory::getInstance()->buildPanel(this,
+												   "panel_voice_remote_expanded.xml");
 	}
 	else
 	{
-		LLUICtrlFactory::getInstance()->buildPanel(this, "panel_voice_remote.xml");
+		LLUICtrlFactory::getInstance()->buildPanel(this,
+												   "panel_voice_remote.xml");
 	}
 #else
 	LLUICtrlFactory::getInstance()->buildPanel(this, "panel_voice_remote.xml");
@@ -112,20 +114,22 @@ void LLVoiceRemoteCtrl::draw()
 	mTalkBtn->setEnabled(voice_active);
 	mTalkLockBtn->setEnabled(voice_active);
 
-	static LLCachedControl<bool> ptt_currently_enabled(gSavedSettings, "PTTCurrentlyEnabled");
+	static LLCachedControl<bool> ptt_currently_enabled(gSavedSettings,
+													   "PTTCurrentlyEnabled");
 	// propagate ptt state to button display,
 	if (!mTalkBtn->hasMouseCapture())
 	{
 		// not in push to talk mode, or push to talk is active means I'm talking
-		mTalkBtn->setToggleState(!ptt_currently_enabled || LLVoiceClient::getInstance()->getUserPTTState());
+		mTalkBtn->setToggleState(!ptt_currently_enabled ||
+								 LLVoiceClient::getInstance()->getUserPTTState());
 	}
 	mSpeakersBtn->setToggleState(LLFloaterActiveSpeakers::instanceVisible(LLSD()));
 	mTalkLockBtn->setToggleState(!ptt_currently_enabled);
 
 	std::string talk_blip_image;
-	if (LLVoiceClient::getInstance()->getIsSpeaking(gAgent.getID()))
+	if (LLVoiceClient::getInstance()->getIsSpeaking(gAgentID))
 	{
-		F32 voice_power = LLVoiceClient::getInstance()->getCurrentPower(gAgent.getID());
+		F32 voice_power = LLVoiceClient::getInstance()->getCurrentPower(gAgentID);
 
 		if (voice_power > LLVoiceClient::OVERDRIVEN_POWER_LEVEL)
 		{
@@ -133,7 +137,7 @@ void LLVoiceRemoteCtrl::draw()
 		}
 		else
 		{
-			F32 power = LLVoiceClient::getInstance()->getCurrentPower(gAgent.getID());
+			F32 power = LLVoiceClient::getInstance()->getCurrentPower(gAgentID);
 			S32 icon_image_idx = llmin(2, llfloor((power / LLVoiceClient::OVERDRIVEN_POWER_LEVEL) * 3.f));
 
 			switch (icon_image_idx)
@@ -275,11 +279,13 @@ void LLVoiceRemoteCtrl::onClickPopupBtn(void* user_data)
 	remotep->deleteAllChildren();
 	if (gSavedSettings.getBOOL("ShowVoiceChannelPopup"))
 	{
-		LLUICtrlFactory::getInstance()->buildPanel(remotep, "panel_voice_remote_expanded.xml");
+		LLUICtrlFactory::getInstance()->buildPanel(remotep,
+												   "panel_voice_remote_expanded.xml");
 	}
 	else
 	{
-		LLUICtrlFactory::getInstance()->buildPanel(remotep, "panel_voice_remote.xml");
+		LLUICtrlFactory::getInstance()->buildPanel(remotep,
+												   "panel_voice_remote.xml");
 	}
 	if (gOverlayBar)
 	{

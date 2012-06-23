@@ -42,30 +42,42 @@ class HBFloaterTextInput : public LLFloater
 {
 public:
 	HBFloaterTextInput(LLLineEditor* input_line,
-					   const std::string& dest);
+					   const std::string& dest,
+					   void (*typing_callback)(void*, BOOL),
+					   void* callback_data);
 	/*virtual*/ ~HBFloaterTextInput();
 
 	/*virtual*/ BOOL postBuild();
 	/*virtual*/ void draw();
 
 	static HBFloaterTextInput* show(LLLineEditor* input_line,
-									const std::string& dest = LLStringUtil::null);
+									const std::string& dest = LLStringUtil::null,
+									void (*typing_callback)(void*, BOOL) = NULL,
+									void* callback_data = NULL);
 
-	static void abort(LLLineEditor* input_line);
+	static void		abort(LLLineEditor* input_line);
 
-	static bool hasFloaterFor(LLLineEditor* input_line);
+	static bool		hasFloaterFor(LLLineEditor* input_line);
 
 private:
-	static BOOL onKeystrokeCallback(KEY key, MASK mask,
-									LLTextEditor* caller, void* userdata);
+	static void		onTextEditorFocusLost(LLFocusableElement* caller,
+										  void* userdata);
+	static void		onTextEditorKeystroke(LLTextEditor* caller,
+										  void* userdata);
+	static BOOL		onHandleKeyCallback(KEY key, MASK mask,
+										LLTextEditor* caller, void* userdata);
 
 private:
 	static std::map<LLLineEditor*, HBFloaterTextInput*> sInstancesMap;
+
+	void			(*mTypingCallback)(void*, BOOL);
+	void*			mTypingCallbackData;
 
 	LLLineEditor*	mCallerLineEditor;
 	LLTextEditor*	mTextEditor;
 
 	std::string 	mRectControl;
+	bool			mIsChatInput;
 	bool			mMustClose;
 };
 

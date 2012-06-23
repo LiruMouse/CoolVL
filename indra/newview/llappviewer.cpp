@@ -501,6 +501,13 @@ static void settings_to_globals()
 	LLSpellCheck::instance().setShowMisspelled(gSavedSettings.getBOOL("SpellCheckShow"));
 	LLSpellCheck::instance().setDictionary(gSavedSettings.getString("SpellCheckLanguage"));
 
+	if (!gSavedSettings.getBOOL("AvatarOffsetPersist"))
+	{
+		gSavedSettings.setF32("AvatarOffsetX", 0.f);
+		gSavedSettings.setF32("AvatarOffsetY", 0.f);
+		gSavedSettings.setF32("AvatarOffsetZ", 0.f);
+	}
+
 //MK
 	RRInterface::init();
 //mk

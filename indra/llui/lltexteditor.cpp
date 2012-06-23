@@ -289,8 +289,10 @@ LLTextEditor::LLTextEditor(const std::string& name,
 	mScrolledToBottom(TRUE),
 	mOnScrollEndCallback(NULL),
 	mOnScrollEndData(NULL),
-	mOnKeystrokeCallback(NULL),
-	mOnKeystrokeData(NULL),
+	mKeystrokeCallback(NULL),
+	mKeystrokeData(NULL),
+	mOnHandleKeyCallback(NULL),
+	mOnHandleKeyData(NULL),
 	mCursorColor(LLUI::sColorsGroup->getColor("TextCursorColor")),
 	mFgColor(LLUI::sColorsGroup->getColor("TextFgColor")),
 	mDefaultColor(LLUI::sColorsGroup->getColor("TextDefaultColor")),
@@ -508,7 +510,7 @@ void LLTextEditor::spell_correct(void* data)
 	}
 }
 
-void LLTextEditor::spell_show(void * data)
+void LLTextEditor::spell_show(void* data)
 {
 	SpellMenuBind* menu_bind = (SpellMenuBind*)data;
 	LLTextEditor* line = menu_bind->mOrigin;
@@ -1246,6 +1248,14 @@ void LLTextEditor::endSelection()
 	}
 }
 
+void LLTextEditor::setSelection(S32 start, S32 end)
+{
+	setCursorPos(end);
+	startSelection();
+	setCursorPos(start);
+	endSelection();
+}
+
 BOOL LLTextEditor::selectionContainsLineBreaks()
 {
 	if (hasSelection())
@@ -1279,7 +1289,7 @@ S32 LLTextEditor::indentLine(S32 pos, S32 spaces)
 	if (spaces >= 0)
 	{
 		// Indent
-		for (S32 i=0; i < spaces; i++)
+		for (S32 i = 0; i < spaces; i++)
 		{
 			delta_spaces += addChar(pos, ' ');
 		}
@@ -1287,7 +1297,7 @@ S32 LLTextEditor::indentLine(S32 pos, S32 spaces)
 	else
 	{
 		// Unindent
-		for (S32 i=0; i < -spaces; i++)
+		for (S32 i = 0; i < -spaces; i++)
 		{
 			const LLWString &wtext = mWText;
 			if (wtext[pos] == ' ')
@@ -1352,14 +1362,14 @@ void LLTextEditor::indentSelectedLines(S32 spaces)
 			//text = mWText;
 
 			// Find the next new line
-			while ((cur < right) && (text[cur] != '\n'))
+			while (cur < right && text[cur] != '\n')
 			{
 				cur++;
 			}
 		}
 		while (cur < right);
 
-		if ((right < getLength()) && (text[right] == '\n'))
+		if (right < getLength() && text[right] == '\n')
 		{
 			right++;
 		}
@@ -1820,7 +1830,7 @@ BOOL LLTextEditor::handleDoubleClick(S32 x, S32 y, MASK mask)
 		{
 			// Select word the cursor is over
 			while (mCursorPos > 0 &&
-				   LLWStringUtil::isPartOfWord(text[mCursorPos-1]))
+				   LLWStringUtil::isPartOfWord(text[mCursorPos - 1]))
 			{
 				mCursorPos--;
 			}
@@ -1862,13 +1872,12 @@ BOOL LLTextEditor::handleDoubleClick(S32 x, S32 y, MASK mask)
 // Allow calling cards to be dropped onto text fields.  Append the name and
 // a carriage return.
 // virtual
-BOOL LLTextEditor::handleDragAndDrop(S32 x, S32 y, MASK mask,
-					  BOOL drop, EDragAndDropType cargo_type, void *cargo_data,
-					  EAcceptance *accept,
-					  std::string& tooltip_msg)
+BOOL LLTextEditor::handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop,
+									 EDragAndDropType cargo_type,
+									 void* cargo_data,  EAcceptance* accept,
+									 std::string& tooltip_msg)
 {
 	*accept = ACCEPT_NO;
-
 	return TRUE;
 }
 
@@ -1892,6 +1901,11 @@ S32 LLTextEditor::execute(LLTextCmd* cmd)
 		// Push the new command is now on the top (front) of the undo stack.
 		mUndoStack.push_front(cmd);
 		mLastCmd = cmd;
+
+		if (mKeystrokeCallback)
+		{
+			mKeystrokeCallback(this, mKeystrokeData);
+		}
 	}
 	else
 	{
@@ -1986,6 +2000,10 @@ void LLTextEditor::removeCharOrTab()
 // Remove a single character from the text
 S32 LLTextEditor::removeChar(S32 pos)
 {
+	if (mKeystrokeCallback)
+	{
+		mKeystrokeCallback(this, mKeystrokeData);
+	}
 	return remove(pos, 1, FALSE);
 }
 
@@ -2013,6 +2031,11 @@ S32 LLTextEditor::addChar(S32 pos, llwchar wc)
 	{
 		make_ui_sound("UISndBadKeystroke");
 		return 0;
+	}
+
+	if (mKeystrokeCallback)
+	{
+		mKeystrokeCallback(this, mKeystrokeData);
 	}
 
 	if (mLastCmd && mLastCmd->canExtend(pos))
@@ -2317,6 +2340,11 @@ void LLTextEditor::cut()
 	deleteSelection(FALSE);
 
 	needsReflow();
+
+	if (mKeystrokeCallback)
+	{
+		mKeystrokeCallback(this, mKeystrokeData);
+	}
 }
 
 BOOL LLTextEditor::canCopy() const
@@ -2344,18 +2372,16 @@ BOOL LLTextEditor::canPaste() const
 // paste from clipboard
 void LLTextEditor::paste()
 {
-	bool is_primary = false;
-	pasteHelper(is_primary);
+	pasteHelper(false);
 }
 
 // paste from primary
 void LLTextEditor::pastePrimary()
 {
-	bool is_primary = true;
-	pasteHelper(is_primary);
+	pasteHelper(true);
 }
 
-// paste from primary (itsprimary == true) or clipboard (itsprimary == false)
+// paste from primary (is_primary == true) or clipboard (is_primary == false)
 void LLTextEditor::pasteHelper(bool is_primary)
 {
 	bool can_paste_it;
@@ -2390,7 +2416,7 @@ void LLTextEditor::pasteHelper(bool is_primary)
 	}
 
 	// Delete any selected characters (the paste replaces them)
-	if ((!is_primary) && hasSelection())
+	if (!is_primary && hasSelection())
 	{
 		deleteSelection(TRUE);
 	}
@@ -2422,6 +2448,11 @@ void LLTextEditor::pasteHelper(bool is_primary)
 	deselect();
 
 	needsReflow();
+
+	if (mKeystrokeCallback)
+	{
+		mKeystrokeCallback(this, mKeystrokeData);
+	}
 }
 
 // copy selection to primary
@@ -2711,7 +2742,7 @@ BOOL LLTextEditor::handleKeyHere(KEY key, MASK mask)
 
 	if (gFocusMgr.getKeyboardFocus() == this)
 	{
-		// Special case for TAB.  If want to move to next field, report not
+		// Special case for TAB. If want to move to next field, report not
 		// handled and let the parent take care of field movement.
 		if (KEY_TAB == key && mTabsToNextField)
 		{
@@ -2763,10 +2794,10 @@ BOOL LLTextEditor::handleKeyHere(KEY key, MASK mask)
 		// Handle most keys only if the text editor is writeable.
 		if (!mReadOnly)
 		{
-			if (!handled && mOnKeystrokeCallback)
+			if (!handled && mOnHandleKeyCallback)
 			{
-				handled = mOnKeystrokeCallback(key, mask, this,
-											   mOnKeystrokeData);
+				handled = mOnHandleKeyCallback(key, mask, this,
+											   mOnHandleKeyData);
 			}
 			if (!handled)
 			{
@@ -2784,7 +2815,7 @@ BOOL LLTextEditor::handleKeyHere(KEY key, MASK mask)
 			resetKeystrokeTimer();
 
 			// Most keystrokes will make the selection box go away, but not all will.
-			if (!selection_modified && KEY_SHIFT != key &&
+			if (!selection_modified && KEY_SHIFT != key && KEY_TAB != key &&
 				KEY_CONTROL != key && KEY_ALT != key && KEY_CAPSLOCK)
 			{
 				deselect();
@@ -2895,6 +2926,11 @@ void LLTextEditor::doDelete()
 	}
 
 	needsReflow();
+
+	if (mKeystrokeCallback)
+	{
+		mKeystrokeCallback(this, mKeystrokeData);
+	}
 }
 
 //----------------------------------------------------------------------------
@@ -3074,7 +3110,7 @@ void LLTextEditor::drawSelectionBackground()
 	// Draw selection even if we don't have keyboard focus for search/replace
 	if (hasSelection())
 	{
-		const LLWString &text = mWText;
+		const LLWString& text = mWText;
 		const S32 text_len = getLength();
 		std::queue<S32> line_endings;
 
@@ -3482,7 +3518,7 @@ void LLTextEditor::drawCursor()
 				gGL.color4fv(mCursorColor.mV);
 
 				gl_rect_2d(llfloor(cursor_left), llfloor(cursor_top),
-					llfloor(cursor_right), llfloor(cursor_bottom));
+						   llfloor(cursor_right), llfloor(cursor_bottom));
 
 				if (LL_KIM_OVERWRITE == gKeyboard->getInsertMode() &&
 					!hasSelection() && text[mCursorPos] != '\n')
@@ -3530,7 +3566,7 @@ void LLTextEditor::drawPreeditMarker()
 		return;
 	}
 
-	const llwchar *text = mWText.c_str();
+	const llwchar* text = mWText.c_str();
 	const S32 text_len = getLength();
 	const S32 num_lines = getLineCount();
 
@@ -4872,11 +4908,18 @@ void LLTextEditor::setOnScrollEndCallback(void (*callback)(void*),
 	mScrollbar->setOnScrollEndCallback(callback, userdata);
 }
 
-void LLTextEditor::setOnKeystrokeCallback(BOOL (*callback)(KEY, MASK, LLTextEditor*, void*),
+void LLTextEditor::setKeystrokeCallback(void (*callback)(LLTextEditor*, void*),
+										void* userdata)
+{
+	mKeystrokeCallback = callback;
+	mKeystrokeData = userdata;
+}
+
+void LLTextEditor::setOnHandleKeyCallback(BOOL (*callback)(KEY, MASK, LLTextEditor*, void*),
 										  void* userdata)
 {
-	mOnKeystrokeCallback = callback;
-	mOnKeystrokeData = userdata;
+	mOnHandleKeyCallback = callback;
+	mOnHandleKeyData = userdata;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -4964,7 +5007,7 @@ BOOL LLTextEditor::importBuffer(const char* buffer, S32 length)
 
 	delete[] text;
 
-	setCursorPos(0);
+	setCursorPos(mCursorPos);
 	deselect();
 
 	needsReflow();
@@ -5083,7 +5126,8 @@ LLXMLNodePtr LLTextEditor::getXML(bool save_children) const
 }
 
 // static
-LLView* LLTextEditor::fromXML(LLXMLNodePtr node, LLView *parent, LLUICtrlFactory *factory)
+LLView* LLTextEditor::fromXML(LLXMLNodePtr node, LLView* parent,
+							  LLUICtrlFactory* factory)
 {
 	std::string name("text_editor");
 	node->getAttributeString("name", name);
@@ -5215,7 +5259,7 @@ S32 LLTextEditor::findHTMLToken(const std::string &line, S32 pos,
 	}
 }
 
-BOOL LLTextEditor::findHTML(const std::string &line, S32 *begin, S32 *end) const
+BOOL LLTextEditor::findHTML(const std::string &line, S32* begin, S32* end) const
 {
 	
 	S32 m1,m2,m3;
@@ -5417,8 +5461,8 @@ void LLTextEditor::updatePreedit(const LLWString &preedit_string,
 	mKeystrokeTimer.reset();
 }
 
-BOOL LLTextEditor::getPreeditLocation(S32 query_offset, LLCoordGL *coord,
-									  LLRect *bounds, LLRect *control) const
+BOOL LLTextEditor::getPreeditLocation(S32 query_offset, LLCoordGL* coord,
+									  LLRect* bounds, LLRect* control) const
 {
 	if (control)
 	{
@@ -5470,7 +5514,7 @@ BOOL LLTextEditor::getPreeditLocation(S32 query_offset, LLCoordGL *coord,
 		current_line++;
 	}
 
-	const llwchar * const text = mWText.c_str();
+	const llwchar* const text = mWText.c_str();
 	const S32 line_height = llround(mGLFont->getLineHeight());
 
 	if (coord)
@@ -5526,7 +5570,7 @@ BOOL LLTextEditor::getPreeditLocation(S32 query_offset, LLCoordGL *coord,
 	return TRUE;
 }
 
-void LLTextEditor::getSelectionRange(S32 *position, S32 *length) const
+void LLTextEditor::getSelectionRange(S32* position, S32* length) const
 {
 	if (hasSelection())
 	{
@@ -5540,7 +5584,7 @@ void LLTextEditor::getSelectionRange(S32 *position, S32 *length) const
 	}
 }
 
-void LLTextEditor::getPreeditRange(S32 *position, S32 *length) const
+void LLTextEditor::getPreeditRange(S32* position, S32* length) const
 {
 	if (hasPreeditString())
 	{

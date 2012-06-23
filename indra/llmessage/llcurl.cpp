@@ -318,7 +318,17 @@ LLCurl::Easy* LLCurl::Easy::getEasy()
 									   CURLOPT_DNS_CACHE_TIMEOUT, 0);
 	check_curl_code(result);
 
+#if OPENSSL_V1
+	// Disable SSL/TLS session caching. Some servers refuse to talk to us when
+	// session ids are enabled. Not an issue with OpenSSL v0.9 but fails with
+	// OpenSSL v1.0.
+	result = curl_easy_setopt(easy->mCurlEasyHandle,
+							  CURLOPT_SSL_SESSIONID_CACHE, 0);
+	check_curl_code(result);
+#endif
+
 	++gCurlEasyCount;
+
 	return easy;
 }
 

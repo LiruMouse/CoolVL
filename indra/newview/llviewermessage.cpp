@@ -2701,8 +2701,8 @@ void check_translate_chat(const std::string &mesg, LLChat &chat, const BOOL hist
 void process_chat_from_simulator(LLMessageSystem *msg, void **user_data)
 {
 	LLChat		chat;
-	std::string		mesg;
-	std::string		from_name;
+	std::string	mesg;
+	std::string	from_name;
 	U8			source_temp;
 	U8			type_temp;
 	U8			audible_temp;
@@ -2916,11 +2916,11 @@ void process_chat_from_simulator(LLMessageSystem *msg, void **user_data)
 					// also scramble the name of the chatter (replace with a dummy name)
 					if (chatter && chatter->isAvatar())
 					{
-						from_name = gAgent.mRRInterface.getDummyName (from_name, chat.mAudible);
+						from_name = gAgent.mRRInterface.getDummyName(from_name, chat.mAudible);
 					}
 					else
 					{
-						from_name = gAgent.mRRInterface.getCensoredMessage (from_name);
+						from_name = gAgent.mRRInterface.getCensoredMessage(from_name);
 					}
 					chat.mFromName = from_name;
 				}
@@ -3020,10 +3020,12 @@ void process_chat_from_simulator(LLMessageSystem *msg, void **user_data)
 				{
 					if (gRRenabled && gAgent.mRRInterface.mContainsShowloc)
 					{
-						// hide every occurrence of the Parcel name if the location restriction is active
+						// hide every occurrence of the Parcel name if the
+						// location restriction is active
 						mesg = gAgent.mRRInterface.stringReplace (mesg, 
 								gAgent.mRRInterface.getParcelName(), "(Parcel hidden)");
-						// hide every occurrence of the Region name if the location restriction is active
+						// hide every occurrence of the Region name if the
+						// location restriction is active
 						mesg = gAgent.mRRInterface.stringReplace (mesg, 
 								gAgent.getRegion()->getName(), "(Region hidden)");
 					}
@@ -3050,18 +3052,21 @@ void process_chat_from_simulator(LLMessageSystem *msg, void **user_data)
 				break;
 			case CHAT_TYPE_START:
 			case CHAT_TYPE_STOP:
-				LL_WARNS("Messaging") << "Got chat type start/stop in main chat processing." << LL_ENDL;
+				LL_WARNS("Messaging") << "Got chat type start/stop in main chat processing."
+									  << LL_ENDL;
 				break;
 			default:
-				LL_WARNS("Messaging") << "Unknown type " << chat.mChatType << " in chat!" << LL_ENDL;
+				LL_WARNS("Messaging") << "Unknown type " << chat.mChatType
+									  << " in chat!" << LL_ENDL;
 				verb = " say, ";
 				break;
 			}
 //MK
-			if (gRRenabled && gAgent.mRRInterface.mContainsShownames && (!chatter || (chatter && !chatter->isAvatar())))
+			if (gRRenabled && gAgent.mRRInterface.mContainsShownames &&
+				(!chatter || (chatter && !chatter->isAvatar())))
 			{
 				// censor object chat but not avatar chat
-				mesg = gAgent.mRRInterface.getCensoredMessage (mesg);
+				mesg = gAgent.mRRInterface.getCensoredMessage(mesg);
 			}
 //mk
 			chat.mText = from_name + verb + mesg;

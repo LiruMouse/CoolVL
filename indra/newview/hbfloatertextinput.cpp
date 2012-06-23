@@ -39,21 +39,28 @@
 #include "lltexteditor.h"
 #include "lluictrlfactory.h"
 
+#include "llagent.h"
+#include "llchatbar.h"
 #include "llviewercontrol.h"
 
 //static
 std::map<LLLineEditor*, HBFloaterTextInput*>  HBFloaterTextInput::sInstancesMap;
 
 HBFloaterTextInput::HBFloaterTextInput(LLLineEditor* input_line,
-									   const std::string& dest)
+									   const std::string& dest,
+									   void (*typing_callback)(void*, BOOL),
+									   void* callback_data)
 :	LLFloater(std::string("text input")),
 	mCallerLineEditor(input_line),
+	mIsChatInput(dest.empty()),
+	mTypingCallback(typing_callback),
+	mTypingCallbackData(callback_data),
 	mMustClose(false)
 {
 	LLUICtrlFactory::getInstance()->buildFloater(this,
 												 "floater_text_input.xml");
 	std::string title;
-	if (dest.empty())
+	if (mIsChatInput)
 	{
 		title = getString("chat");
 		mRectControl = "ChatInputEditorRect";
@@ -92,6 +99,14 @@ HBFloaterTextInput::~HBFloaterTextInput()
 		mCallerLineEditor->setText(mTextEditor->getText());
 		mCallerLineEditor->setCursorToEnd();
 		mCallerLineEditor->setFocus(TRUE);
+		if (mIsChatInput)
+		{
+			gAgent.stopTyping();
+		}
+		else if (mTypingCallback)
+		{
+			mTypingCallback(mTypingCallbackData, FALSE);
+		}
 	}
 	mCallerLineEditor = NULL;
 	mTextEditor = NULL;
@@ -103,10 +118,16 @@ HBFloaterTextInput::~HBFloaterTextInput()
 BOOL HBFloaterTextInput::postBuild()
 {
 	mTextEditor = getChild<LLTextEditor>("text");
-	mTextEditor->setOnKeystrokeCallback(onKeystrokeCallback, this);
+	mTextEditor->setFocusLostCallback(onTextEditorFocusLost, this);
+	mTextEditor->setKeystrokeCallback(onTextEditorKeystroke, this);
+	mTextEditor->setOnHandleKeyCallback(onHandleKeyCallback, this);
 	mTextEditor->setText(mCallerLineEditor->getText());
 	mTextEditor->endOfDoc();
 	mTextEditor->setFocus(TRUE);
+	if (mIsChatInput && gSavedSettings.getBOOL("TabAutoCompleteName"))
+	{
+		mTextEditor->setTabsToNextField(FALSE);
+	}
 	return TRUE;
 }
 
@@ -125,7 +146,9 @@ void HBFloaterTextInput::draw()
 
 //static
 HBFloaterTextInput* HBFloaterTextInput::show(LLLineEditor* input_line,
-											 const std::string& dest)
+											 const std::string& dest,
+									 		 void (*typing_callback)(void*, BOOL),
+											 void* callback_data)
 {
 	HBFloaterTextInput* instance = NULL;
 
@@ -139,7 +162,8 @@ HBFloaterTextInput* HBFloaterTextInput::show(LLLineEditor* input_line,
 	}
 	else
 	{
-		instance = new HBFloaterTextInput(input_line, dest);
+		instance = new HBFloaterTextInput(input_line, dest, typing_callback,
+										  callback_data);
 	}
 
 	return instance;
@@ -156,9 +180,9 @@ void HBFloaterTextInput::abort(LLLineEditor* input_line)
 	it = sInstancesMap.find(input_line);
 	if (it != sInstancesMap.end())
 	{
-		HBFloaterTextInput* instance = (*it).second;
-		instance->mCallerLineEditor = NULL;
-		instance->close();
+		HBFloaterTextInput* self = (*it).second;
+		self->mCallerLineEditor = NULL;
+		self->close();
 		sInstancesMap.erase(it);
 	}
 }
@@ -170,19 +194,115 @@ bool HBFloaterTextInput::hasFloaterFor(LLLineEditor* input_line)
 }
 
 //static
-BOOL HBFloaterTextInput::onKeystrokeCallback(KEY key, MASK mask,
+void HBFloaterTextInput::onTextEditorFocusLost(LLFocusableElement* caller,
+											   void* userdata)
+{
+	HBFloaterTextInput* self = (HBFloaterTextInput*)userdata;
+	if (self)
+	{
+		if (self->mIsChatInput)
+		{
+			gAgent.stopTyping();
+		}
+		else if (self->mTypingCallback)
+		{
+			self->mTypingCallback(self->mTypingCallbackData, FALSE);
+		}
+	}
+}
+
+//static
+void HBFloaterTextInput::onTextEditorKeystroke(LLTextEditor* caller,
+											   void* userdata)
+{
+	HBFloaterTextInput* self = (HBFloaterTextInput*)userdata;
+	if (self)
+	{
+		if (self->mIsChatInput)
+		{
+			std::string text = self->mTextEditor->getText();
+			if (text.length() > 0 && text[0] != '/')
+			{
+				gAgent.startTyping();
+			}
+		}
+		else if (self->mTypingCallback)
+		{
+			self->mTypingCallback(self->mTypingCallbackData, TRUE);
+		}
+	}
+}
+
+//static
+BOOL HBFloaterTextInput::onHandleKeyCallback(KEY key, MASK mask,
 											 LLTextEditor* caller,
 											 void* userdata)
 {
+	BOOL handled = FALSE;
 	HBFloaterTextInput* self = (HBFloaterTextInput*)userdata;
-
-	if (self && key == KEY_RETURN && mask == MASK_NONE)
+	if (self)
 	{
-		// Flag for closing. We can't close now because then we would destroy
-		// the object to which pertains the method that called us...
-		self->mMustClose = true;
-		return TRUE;
+		if (key == KEY_RETURN)
+		{
+			if (mask == MASK_NONE)
+			{
+				// Flag for closing. We can't close now because then we would
+				// destroy the object to which pertains the method that called
+				// us...
+				self->mMustClose = true;
+				handled = TRUE;
+			}
+			else if (mask == (MASK_SHIFT | MASK_CONTROL))
+			{
+				S32 cursor = self->mTextEditor->getCursorPos();
+				std::string text = self->mTextEditor->getText();
+				// For some reason, the event is triggered twice: let's insert only
+				// one newline character.
+				if (cursor == 0 || text[cursor - 1] != '\n')
+				{
+					text = text.insert(cursor, "\n");
+					self->mTextEditor->setText(text);
+					self->mTextEditor->setCursorPos(cursor + 1);
+				}
+				handled = TRUE;
+			}
+		}
+		else if (KEY_TAB == key && mask == MASK_NONE)
+		{
+			std::string text = self->mTextEditor->getText();
+			S32 word_start = 0;
+			S32 word_len = 0;
+			S32 cursor = self->mTextEditor->getCursorPos();
+			S32 pos = cursor;
+			if (pos > 0 && pos != text.length() - 1)
+			{
+				// Make sure the word will be found if the cursor is at its
+				// end
+				pos--;
+			}
+			if (self->mTextEditor->getWordBoundriesAt(pos, &word_start,
+													  &word_len))
+			{
+				std::string word = text.substr(word_start, word_len);
+				std::string suggestion = LLChatBar::getMatchingAvatarName(word);
+				if (suggestion != word)
+				{
+					text = text.replace(word_start, word_len, suggestion);
+					self->mTextEditor->setText(text);
+					if (gSavedSettings.getBOOL("SelectAutoCompletedPart"))
+					{
+						self->mTextEditor->setSelection(cursor,
+														cursor + suggestion.length() - word.length());
+					}
+					else
+					{
+						self->mTextEditor->setCursorPos(cursor + suggestion.length() - word.length());
+					}
+				}
+			}
+			handled = TRUE;
+		}
 	}
 
-	return FALSE;
+	return handled;
 }
