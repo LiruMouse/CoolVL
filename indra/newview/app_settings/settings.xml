@@ -1803,6 +1803,17 @@
       <key>Value</key>
       <real>60.0</real>
     </map>
+    <key>AutoOpenTextInput</key>
+      <map>
+        <key>Comment</key>
+        <string>If TRUE, a text input floater is opened each time a chat or IM input line is scrolled</string>
+        <key>Persist</key>
+        <integer>1</integer>
+        <key>Type</key>
+        <string>Boolean</string>
+        <key>Value</key>
+        <integer>0</integer>
+      </map>
     <key>ChatBarStealsFocus</key>
       <map>
         <key>Comment</key>
@@ -1970,6 +1981,38 @@
         <integer>0</integer>
         <integer>400</integer>
         <integer>350</integer>
+        <integer>0</integer>
+      </array>
+    </map>
+    <key>ChatInputEditorRect</key>
+    <map>
+      <key>Comment</key>
+      <string>Rectangle for chatterbox window</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Rect</string>
+      <key>Value</key>
+      <array>
+        <integer>0</integer>
+        <integer>200</integer>
+        <integer>600</integer>
+        <integer>0</integer>
+      </array>
+    </map>
+    <key>IMInputEditorRect</key>
+    <map>
+      <key>Comment</key>
+      <string>Rectangle for chatterbox window</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Rect</string>
+      <key>Value</key>
+      <array>
+        <integer>0</integer>
+        <integer>200</integer>
+        <integer>600</integer>
         <integer>0</integer>
       </array>
     </map>

@@ -6,11 +6,11 @@
 		<panel name="User Interface" label="User Interface" border="true" mouse_opaque="true"
 		 left="1" bottom="-440" width="500" height="440" follows="left|top|right|bottom">
 			<view_border name="border1" bevel_style="none" border_thickness="1"
-			 bottom_delta="-70" left="10" height="60" width="470" follows="left|top"/>
+			 bottom_delta="-66" left="10" height="60" width="470" follows="left|top"/>
 			<text name="toolbar_buttons" type="string" length="1" enabled="true" mouse_opaque="true"
 			 bg_visible="false" border_drop_shadow_visible="false" border_visible="false" drop_shadow_visible="true"
 			 font="SansSerifSmall" v_pad="0" h_pad="0" halign="left"
-			 bottom="-32" left="20" height="18" width="300" follows="left|top">
+			 bottom="-28" left="20" height="18" width="300" follows="left|top">
 				Show the following buttons in the toolbar:
 			</text>
 			<check_box name="show_chat_button_check" control_name="ShowChatButton" label="Chat"
@@ -70,6 +70,11 @@
 			<check_box name="use_old_chat_history_check" control_name="UseOldChatHistory"
 			 label="Use the old style 'Chat history' window (requires a restart)"
 			 tool_tip="The old-style chat history does not have a chat input line, gesture combo and Say button (these are already present in the toolbar chat line), letting more room for the actual history."
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
+			<check_box name="auto_open_text_input_check" control_name="AutoOpenTextInput"
+			 label="Auto-open the text input floater when the chat or IM input lines are scrolled"
+			 tool_tip="When you fill up the chat or IM input lines with text, they start scrolling left to let you input more text (and up to 1023 characters) but then you loose visibility of what you typed at the start and editing your text is hard. With this setting checked, the Text Input floater gets automatically opened whenever the chat or IM input line is scrolled left for the first time when a new text is typed."
 			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
 			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
 			<check_box name="im_tabs_vertical_stacking_check" control_name="IMTabsVerticalStacking"
@@ -208,7 +213,7 @@
 			 left="15" bottom_delta="72" width="370" height="16" follows="left|top" />
 			<check_box name="spell_check_show_check" control_name="SpellCheckShow"
 			 label="Highlight misspelled words in text"
-			 tool_tip="When this setting is enabled the misspelled words in the currently focused text or line editor are underlined with a red wave-like line. Note that this setting may also be toggled on and off via the context menu of the line and text editors which got spell checking enabled."
+			 tool_tip="When this setting is enabled, the highligthing (underlining with a red wave-like line) of the misspelled words is enabled by default in spell-check enabled line and text editors. Note that you always can toggle on and off the highligthing for each line or text editor via their context menu."
 			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
 			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
 			<text name="language_label" font="SansSerifSmall"

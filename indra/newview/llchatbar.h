@@ -45,8 +45,7 @@ class LLFlyoutButton;
 class LLLineEditor;
 class LLUICtrl;
 
-class LLChatBar
-:	public LLPanel
+class LLChatBar : public LLPanel
 {
 public:
 	// constructor for inline chat-bars (e.g. hosted in chat history window)
@@ -88,11 +87,13 @@ public:
 
 	// callbacks
 	static void	onClickSay(LLUICtrl*, void* userdata);
+	static void onClickOpenTextEditor(void* userdata);
 
 	static void	onTabClick(void* userdata);
 	static void	onInputEditorKeystroke(LLLineEditor* caller, void* userdata);
-	static void	onInputEditorFocusLost(LLFocusableElement* caller,void* userdata);
-	static void	onInputEditorGainFocus(LLFocusableElement* caller,void* userdata);
+	static void	onInputEditorScrolled(LLLineEditor* caller, void* userdata);
+	static void	onInputEditorFocusLost(LLFocusableElement* caller, void* userdata);
+	static void	onInputEditorGainFocus(LLFocusableElement* caller, void* userdata);
 
 	static void onCommitGesture(LLUICtrl* ctrl, void* data);
 
@@ -106,21 +107,20 @@ protected:
 	void updateChat();
 
 protected:
-	BOOL mSecondary;
+	bool 			mSecondary;
+	bool			mIsBuilt;
+	bool			mHasScrolledOnce;
 
 	LLLineEditor*	mInputEditor;
-
+	LLButton*		mOpenTextEditorButton;
 	LLButton*		mHistoryButton;
-
 	LLFlyoutButton* mSayFlyoutButton;
+	LLComboBox*		mGestureCombo;
 
 	LLFrameTimer	mGestureLabelTimer;
 
 	// Which non-zero channel did we last chat on?
 	S32				mLastSpecialChatChannel;
-
-	BOOL			mIsBuilt;
-	LLComboBox*		mGestureCombo;
 
 	LLChatBarGestureObserver* mObserver;
 };

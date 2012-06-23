@@ -235,6 +235,16 @@
 				<key>website_url</key><string>http://sciencesim.com/</string>
 			</map>
 			<map>
+				<key>name</key><string>speculoos.net</string>
+				<key>label</key><string>Speculoos</string>
+				<key>login_uri</key><string>http://speculoos.net:8002/</string>
+				<key>helper_uri</key><string>http://backoffice.speculoos.net/currency/helper/</string>
+				<key>login_page</key><string>http://www.speculoos.net/splash</string>
+				<key>register_url</key><string>http://www.speculoos.net/user/register</string>
+				<key>password_url</key><string>http://www.speculoos.net/user/password</string>
+				<key>website_url</key><string>http://www.speculoos.net/</string>
+			</map>
+			<map>
 				<key>name</key><string>tertiarygrid.com</string>
 				<key>label</key><string>Tertiary grid</string>
 				<key>login_uri</key><string>http://tertiarygrid.com:8002/</string>

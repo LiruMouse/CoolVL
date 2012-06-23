@@ -235,7 +235,9 @@ public:
 	void			setHandleEditKeysDirectly(BOOL b)		{ mHandleEditKeysDirectly = b; }
 	void			setSelectAllonFocusReceived(BOOL b);
 
-	void			setKeystrokeCallback(void (*keystroke_callback)(LLLineEditor* caller, void* user_data));
+	void			setKeystrokeCallback(void (*keystroke_callback)(LLLineEditor*, void*));
+	void			setScrolledCallback(void (*scrolled_callback)(LLLineEditor*, void*),
+										void* userdata);
 
 	void			setMaxTextLength(S32 max_text_length);
 	void			setTextPadding(S32 left, S32 right); // Used to specify room for children before or after text.
@@ -310,6 +312,7 @@ protected:
     S32							mSpellCheckStart;		// the position of the first character, stored so we know when to update
     S32							mSpellCheckEnd;			// the location of the last character
 	BOOL						mSpellCheck;			// set in xui as "spell_check". Default value for a field
+	bool						mShowMisspelled;		// whether to highlight misspelled words or not
     LLFrameTimer				mSpellTimer;
 	std::vector<SpellMenuBind*>	mSuggestionMenuItems;	// to keep track of what we have to remove before rebuilding the context menu
 
@@ -334,6 +337,8 @@ protected:
 	BOOL		mRevertOnEsc;
 
 	void		(*mKeystrokeCallback)(LLLineEditor* caller, void* userdata);
+	void		(*mScrolledCallback)(LLLineEditor* caller, void* userdata);
+	void*		mScrolledCallbackData;
 
 	BOOL		mIsSelecting;				// Selection for clipboard operations
 	S32			mSelectionStart;
@@ -430,7 +435,8 @@ private:
 }; // end class LLLineEditor
 
 /*
- * @brief A line editor with a button to clear it and a callback to call on every edit event.
+ * @brief A line editor with a button to clear it and a callback to call on
+ *        every edit event.
  */
 class LLSearchEditor : public LLUICtrl
 {
@@ -457,7 +463,8 @@ public:
 												   void* user_data),
 												   void* data)
 	{
-		mSearchCallback = search_callback; mCallbackUserData = data;
+		mSearchCallback = search_callback;
+		mCallbackUserData = data;
 	}
 
 	// LLUICtrl interface

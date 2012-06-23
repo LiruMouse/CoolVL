@@ -426,23 +426,18 @@ bool inviteUserResponse(const LLSD& notification, const LLSD& response)
 			}
 			else
 			{
-				gIMMgr->addSession(
-					payload["session_name"].asString(),
-					type,
-					session_id);
+				gIMMgr->addSession(payload["session_name"].asString(), type,
+								   session_id);
 
-				std::string url = gAgent.getRegion()->getCapability(
-					"ChatSessionRequest");
+				std::string url;
+				url = gAgent.getRegion()->getCapability("ChatSessionRequest");
 
 				LLSD data;
 				data["method"] = "accept invitation";
 				data["session-id"] = session_id;
-				LLHTTPClient::post(
-					url,
-					data,
-					new LLViewerChatterBoxInvitationAcceptResponder(
-						session_id,
-						inv_type));
+				LLHTTPClient::post(url, data,
+								   new LLViewerChatterBoxInvitationAcceptResponder(session_id,
+																				   inv_type));
 			}
 		}
 		break;
@@ -470,16 +465,13 @@ bool inviteUserResponse(const LLSD& notification, const LLSD& response)
 		}
 		else
 		{
-			std::string url = gAgent.getRegion()->getCapability(
-				"ChatSessionRequest");
+			std::string url;
+			url = gAgent.getRegion()->getCapability("ChatSessionRequest");
 
 			LLSD data;
 			data["method"] = "decline invitation";
 			data["session-id"] = session_id;
-			LLHTTPClient::post(
-				url,
-				data,
-				NULL);
+			LLHTTPClient::post(url, data, NULL);
 		}
 	}
 

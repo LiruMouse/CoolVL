@@ -182,6 +182,8 @@ LLLineEditor::LLLineEditor(const std::string& name,
 	}
 	mImage = sImage;
 
+	mShowMisspelled = LLSpellCheck::instance().getShowMisspelled();
+
 	// Context menu.
 	// *TODO: translate
 	LLMenuGL* menu = new LLMenuGL("line_editor_context_menu");
@@ -393,6 +395,7 @@ void LLLineEditor::setCursorAtLocalPos(S32 local_mouse_x)
 void LLLineEditor::setCursor(S32 pos)
 {
 	S32 old_cursor_pos = getCursor();
+	S32 old_scroll_pos = mScrollHPos;
 	mCursorPos = llclamp(pos, 0, mText.length());
 
 	S32 pixels_after_scroll = findPixelNearestPos();
@@ -430,6 +433,11 @@ void LLLineEditor::setCursor(S32 pos)
 		{
 			mScrollHPos = getCursor();
 		}
+	}
+
+	if (mScrolledCallback && old_scroll_pos == 0 && old_scroll_pos != mScrollHPos)
+	{
+		mScrolledCallback(this, mScrolledCallbackData);
 	}
 }
 
@@ -576,8 +584,7 @@ void LLLineEditor::spell_show(void * data)
 
 	if (menu_bind && line)
 	{
-		BOOL show = (menu_bind->mWord == "Show Misspellings");
-		LLSpellCheck::instance().setShowMisspelled(show);
+		line->mShowMisspelled = (menu_bind->mWord == "Show Misspellings");
 	}
 }
 
@@ -901,7 +908,7 @@ BOOL LLLineEditor::handleRightMouseDown(S32 x, S32 y, MASK mask)
 
 			menu_bind = new SpellMenuBind;
 			menu_bind->mOrigin = this;
-			if (LLSpellCheck::instance().getShowMisspelled())
+			if (mShowMisspelled)
 			{
 				menu_bind->mWord = "Hide Misspellings";
 			}
@@ -1879,70 +1886,67 @@ void LLLineEditor::drawMisspelled(LLRect background)
 {
 	LLFastTimer t(LLFastTimer::FTM_RENDER_SPELLCHECK);
 
-	if (!mReadOnly && mSpellCheck && hasFocus())
+	S32 elapsed = (S32)mSpellTimer.getElapsedTimeF32();
+	S32 keystroke = (S32)mKeystrokeTimer.getElapsedTimeF32();
+	// Do not bother checking if the text didn't change in a while and
+	// fire a spell checking only once a second while typing.
+	if (keystroke < 2 && (elapsed & 1))
 	{
-		S32 elapsed = (S32)mSpellTimer.getElapsedTimeF32();
-		S32 keystroke = (S32)mKeystrokeTimer.getElapsedTimeF32();
-		// Do not bother checking if the text didn't change in a while and
-		// fire a spell checking only once a second while typing.
-		if (keystroke < 2 && (elapsed & 1))
-		{
-			LLFastTimer t(LLFastTimer::FTM_SPELLCHECK_CHECK_WORDS);
+		LLFastTimer t(LLFastTimer::FTM_SPELLCHECK_CHECK_WORDS);
 
-			S32 new_start_spell = mScrollHPos;
-			S32 cursorloc = calculateCursorFromMouse(mMaxHPixels);
-			S32 new_end_spell = (S32)mText.length() > cursorloc ? cursorloc
-																: (S32)mText.length();
-			if (isSpellDirty() || new_start_spell != mSpellCheckStart ||
-				new_end_spell != mSpellCheckEnd)
-			{
-				mSpellCheckStart = new_start_spell;
-				mSpellCheckEnd = new_end_spell;
-				resetSpellDirty();
-				mMisspellLocations = getMisspelledWordsPositions();
-			}
+		S32 new_start_spell = mScrollHPos;
+		S32 cursorloc = calculateCursorFromMouse(mMaxHPixels);
+		S32 new_end_spell = (S32)mText.length() > cursorloc ? cursorloc
+															: (S32)mText.length();
+		if (isSpellDirty() || new_start_spell != mSpellCheckStart ||
+			new_end_spell != mSpellCheckEnd)
+		{
+			mSpellCheckStart = new_start_spell;
+			mSpellCheckEnd = new_end_spell;
+			resetSpellDirty();
+			mMisspellLocations = getMisspelledWordsPositions();
 		}
+	}
 
-		if (LLSpellCheck::instance().getShowMisspelled())
+	if (mShowMisspelled)
+	{
+		LLFastTimer t(LLFastTimer::FTM_SPELLCHECK_HIGHLIGHT);
+
+		const S32 bottom = background.mBottom;
+		const S32 maxw = getRect().getWidth();
+
+		const S32 misspells = (S32)mMisspellLocations.size();
+
+		S32 wstart;
+		S32 wend;
+
+		for (S32 i = 0; i < misspells; i++)
 		{
-			LLFastTimer t(LLFastTimer::FTM_SPELLCHECK_HIGHLIGHT);
-
-			const S32 bottom = background.mBottom;
-			const S32 maxw = getRect().getWidth();
-
-			const S32 misspells = (S32)mMisspellLocations.size();
-
-			S32 wstart;
-			S32 wend;
-
-			for (S32 i = 0; i < misspells; i++)
 			{
-				{
-					LLFastTimer t(LLFastTimer::FTM_SPELL_WORD_BOUNDARIES);
+				LLFastTimer t(LLFastTimer::FTM_SPELL_WORD_BOUNDARIES);
 
-					wstart = findPixelNearestPos(mMisspellLocations[i++] - getCursor());
-					wend = findPixelNearestPos(mMisspellLocations[i] - getCursor());
-					if (wend > maxw)
-					{
-						wend = maxw;
-					}
-					if (wstart > maxw)
-					{
-						wstart = maxw;
-					}
+				wstart = findPixelNearestPos(mMisspellLocations[i++] - getCursor());
+				wend = findPixelNearestPos(mMisspellLocations[i] - getCursor());
+				if (wend > maxw)
+				{
+					wend = maxw;
 				}
+				if (wstart > maxw)
 				{
-					LLFastTimer t(LLFastTimer::FTM_SPELL_WORD_UNDERLINE);
+					wstart = maxw;
+				}
+			}
+			{
+				LLFastTimer t(LLFastTimer::FTM_SPELL_WORD_UNDERLINE);
 
-					// Draw the zig zag line
-					gGL.color4ub(255, 0, 0, 200);
-					while (wstart < wend)
-					{
-						gl_line_2d(wstart, bottom - 1, wstart + 3, bottom + 2);
-						gl_line_2d(wstart + 3, bottom + 2, wstart + 6,
-								   bottom - 1);
-						wstart += 6;
-					}
+				// Draw the zig zag line
+				gGL.color4ub(255, 0, 0, 200);
+				while (wstart < wend)
+				{
+					gl_line_2d(wstart, bottom - 1, wstart + 3, bottom + 2);
+					gl_line_2d(wstart + 3, bottom + 2, wstart + 6,
+							   bottom - 1);
+					wstart += 6;
 				}
 			}
 		}
@@ -2141,7 +2145,8 @@ void LLLineEditor::draw()
 	mBorder->setVisible(FALSE); // no more programmatic art.
 #endif
 
-	if (LLSpellCheck::instance().getSpellCheck())
+	if (!mReadOnly && mSpellCheck && hasFocus() &&
+		LLSpellCheck::instance().getSpellCheck())
 	{
 		drawMisspelled(background);
 	}
@@ -2659,9 +2664,17 @@ void LLLineEditor::setSelectAllonFocusReceived(BOOL b)
 }
 
 void LLLineEditor::setKeystrokeCallback(void (*keystroke_callback)(LLLineEditor* caller,
-										void* user_data))
+																   void* user_data))
 {
 	mKeystrokeCallback = keystroke_callback;
+}
+
+void LLLineEditor::setScrolledCallback(void (*scrolled_callback)(LLLineEditor* caller,
+									 							 void* user_data),
+									   void* userdata)
+{
+	mScrolledCallback = scrolled_callback;
+	mScrolledCallbackData = userdata;
 }
 
 // virtual

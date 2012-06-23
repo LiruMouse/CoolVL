@@ -364,6 +364,8 @@ LLTextEditor::LLTextEditor(const std::string& name,
 
 	mHTML.clear();
 
+	mShowMisspelled = LLSpellCheck::instance().getShowMisspelled();
+
 	// Context menu.
 	// *TODO: translate
 	LLMenuGL* menu = new LLMenuGL("text_editor_context_menu");
@@ -511,8 +513,7 @@ void LLTextEditor::spell_show(void * data)
 
 	if (menu_bind && line)
 	{
-		BOOL show = (menu_bind->mWord == "Show Misspellings");
-		LLSpellCheck::instance().setShowMisspelled(show);
+		line->mShowMisspelled = (menu_bind->mWord == "Show Misspellings");
 	}
 }
 
@@ -1624,7 +1625,7 @@ BOOL LLTextEditor::handleRightMouseDown(S32 x, S32 y, MASK mask)
 
 			menu_bind = new SpellMenuBind;
 			menu_bind->mOrigin = this;
-			if (LLSpellCheck::instance().getShowMisspelled())
+			if (mShowMisspelled)
 			{
 				menu_bind->mWord = "Hide Misspellings";
 			}
@@ -2760,6 +2761,11 @@ BOOL LLTextEditor::handleKeyHere(KEY key, MASK mask)
 		// Handle most keys only if the text editor is writeable.
 		if (!mReadOnly)
 		{
+			if (!handled && mOnKeystrokeCallback)
+			{
+				handled = mOnKeystrokeCallback(key, mask, this,
+											   mOnKeystrokeData);
+			}
 			if (!handled)
 			{
 				handled = handleSpecialKey(key, mask, &return_key_hit);
@@ -2769,7 +2775,6 @@ BOOL LLTextEditor::handleKeyHere(KEY key, MASK mask)
 					text_may_have_changed = TRUE;
 				}
 			}
-
 		}
 
 		if (handled)
@@ -3245,137 +3250,132 @@ void LLTextEditor::drawMisspelled()
 {
 	LLFastTimer t(LLFastTimer::FTM_RENDER_SPELLCHECK);
 
-	if (!mReadOnly && mSpellCheck && hasFocus())
+	// Do not bother checking if the text didn't change in a while, and
+	// fire a spell checking every second while typing only when the text
+	// is under 1024 characters large.
+	S32 elapsed = (S32)mSpellTimer.getElapsedTimeF32();
+	S32 keystroke = (S32)mKeystrokeTimer.getElapsedTimeF32();
+	if (keystroke < 2 &&
+		((getLength() < 1024 && (elapsed & 1)) || keystroke > 0))
 	{
-		// Do not bother checking if the text didn't change in a while, and
-		// fire a spell checking every second while typing only when the text
-		// is under 1024 characters large.
-		S32 elapsed = (S32)mSpellTimer.getElapsedTimeF32();
-		S32 keystroke = (S32)mKeystrokeTimer.getElapsedTimeF32();
-		if (keystroke < 2 &&
-			((getLength() < 1024 && (elapsed & 1)) || keystroke > 0))
+		LLFastTimer t(LLFastTimer::FTM_SPELLCHECK_CHECK_WORDS);
+
+		S32 new_start_spell = getLineStart(mScrollbar->getDocPos());
+		S32 new_end_spell = getLineStart(mScrollbar->getDocPos() + 1 +
+							mScrollbar->getDocSize()-mScrollbar->getDocPosMax());
+		if (mScrollbar->getDocPos() == mScrollbar->getDocPosMax())
 		{
-			LLFastTimer t(LLFastTimer::FTM_SPELLCHECK_CHECK_WORDS);
-
-			S32 new_start_spell = getLineStart(mScrollbar->getDocPos());
-			S32 new_end_spell = getLineStart(mScrollbar->getDocPos() + 1 +
-								mScrollbar->getDocSize()-mScrollbar->getDocPosMax());
-			if (mScrollbar->getDocPos() == mScrollbar->getDocPosMax())
-			{
-				new_end_spell = (S32)mWText.length();
-			}
-
-			if (isSpellDirty() || new_start_spell != mSpellCheckStart ||
-				new_end_spell != mSpellCheckEnd)
-			{
-				mSpellCheckStart = new_start_spell;
-				mSpellCheckEnd = new_end_spell;
-				resetSpellDirty();
-				mMisspellLocations = getMisspelledWordsPositions();
-			}
+			new_end_spell = (S32)mWText.length();
 		}
 
-		if (LLSpellCheck::instance().getShowMisspelled())
+		if (isSpellDirty() || new_start_spell != mSpellCheckStart ||
+			new_end_spell != mSpellCheckEnd)
 		{
-			LLFastTimer t(LLFastTimer::FTM_SPELLCHECK_HIGHLIGHT);
+			mSpellCheckStart = new_start_spell;
+			mSpellCheckEnd = new_end_spell;
+			resetSpellDirty();
+			mMisspellLocations = getMisspelledWordsPositions();
+		}
+	}
 
-			const LLWString& text = mWText;
-			const S32 text_len = getLength();
-			const S32 num_lines = getLineCount();
-			const F32 line_height = mGLFont->getLineHeight();
-			const S32 start_search_pos = mScrollbar->getDocPos();
-			// Skip through the lines we aren't drawing.
-			if (start_search_pos >= num_lines)
-			{
-				return;
-			}
-			const S32 start_line_start = getLineStart(start_search_pos);
-			const F32 start_text_y = (F32)mTextRect.mTop - line_height;
+	if (mShowMisspelled)
+	{
+		LLFastTimer t(LLFastTimer::FTM_SPELLCHECK_HIGHLIGHT);
 
-			const S32 misspells = (S32)mMisspellLocations.size();
+		const LLWString& text = mWText;
+		const S32 text_len = getLength();
+		const S32 num_lines = getLineCount();
+		const F32 line_height = mGLFont->getLineHeight();
+		const S32 start_search_pos = mScrollbar->getDocPos();
+		// Skip through the lines we aren't drawing.
+		if (start_search_pos >= num_lines)
+		{
+			return;
+		}
+		const S32 start_line_start = getLineStart(start_search_pos);
+		const F32 start_text_y = (F32)mTextRect.mTop - line_height;
 
-			bool found_first_visible = false;
-			bool visible;
+		const S32 misspells = (S32)mMisspellLocations.size();
+		bool found_first_visible = false;
+		bool visible;
 
-			for (S32 i = 0; i < misspells; i++)
-			{
-				S32 wstart = mMisspellLocations[i++];
-				S32 wend = mMisspellLocations[i];
+		for (S32 i = 0; i < misspells; i++)
+		{
+			S32 wstart = mMisspellLocations[i++];
+			S32 wend = mMisspellLocations[i];
 
-				S32 search_pos = start_search_pos;
-				S32 line_start = start_line_start;
-				F32 text_y = start_text_y;
+			S32 search_pos = start_search_pos;
+			S32 line_start = start_line_start;
+			F32 text_y = start_text_y;
 
-				F32 word_left = 0.f;
-				F32 word_right = 0.f;
+			F32 word_left = 0.f;
+			F32 word_right = 0.f;
 
-				S32 line_end = 0;
-				// Determine if the word is visible and if so at what
-				// coordinates
-				while (mTextRect.mBottom <= llround(text_y) &&
+			S32 line_end = 0;
+			// Determine if the word is visible and if so at what coordinates
+			while (mTextRect.mBottom <= llround(text_y) &&
 					   search_pos < num_lines)
+			{
+				line_end = text_len + 1;
+				S32 next_line = -1;
+				visible = false;
+
+				if (search_pos + 1 < num_lines)
 				{
-					line_end = text_len + 1;
-					S32 next_line = -1;
-					visible = false;
-
-					if (search_pos + 1 < num_lines)
-					{
-						next_line = getLineStart(search_pos + 1);
-						line_end = next_line - 1;
-					}
-					const llwchar* line = text.c_str() + line_start;
-					// Find the cursor and selection bounds
-					if (line_start <= wstart && wend <= line_end)
-					{
-						visible = true;
-						{
-							LLFastTimer t(LLFastTimer::FTM_SPELL_WORD_BOUNDARIES);
-
-							word_left = (F32)mTextRect.mLeft - 1.f +
-										mGLFont->getWidthF32(line, 0,
-															 wstart - line_start,
-															 mAllowEmbeddedItems);
-							word_right = (F32)mTextRect.mLeft + 1.f +
-										 mGLFont->getWidthF32(line, 0,
-															  wend - line_start,
-															  mAllowEmbeddedItems);
-						}
-						{
-							LLFastTimer t(LLFastTimer::FTM_SPELL_WORD_UNDERLINE);
-
-							// Draw the zig zag line
-							gGL.color4ub(255, 0, 0, 200);
-							while (word_left < word_right)
-							{
-								gl_line_2d((S32)word_left, (S32)text_y - 2,
-										   (S32)word_left + 3, (S32)text_y + 1);
-								gl_line_2d((S32)word_left + 3, (S32)text_y + 1,
-										   (S32)word_left + 6, (S32)text_y - 2);
-								word_left += 6;
-							}
-						}
-						break;
-					}
-					if (visible && !found_first_visible)
-					{
-						found_first_visible = true;
-					}
-					else if (!visible && found_first_visible)
-					{
-						// We found the last visible misspelled word. Stop now.
-						return;
-					}
-					// move down one line
-					text_y -= line_height;
-					line_start = next_line;
-					search_pos++;
+					next_line = getLineStart(search_pos + 1);
+					line_end = next_line - 1;
 				}
-				if (mShowLineNumbers)
+				const llwchar* line = text.c_str() + line_start;
+				// Find the cursor and selection bounds
+				if (line_start <= wstart && wend <= line_end)
 				{
-					word_left += UI_TEXTEDITOR_LINE_NUMBER_MARGIN;
-					word_right += UI_TEXTEDITOR_LINE_NUMBER_MARGIN;
+					visible = true;
+					{
+						LLFastTimer t(LLFastTimer::FTM_SPELL_WORD_BOUNDARIES);
+
+						word_left = (F32)mTextRect.mLeft - 1.f +
+									mGLFont->getWidthF32(line, 0,
+														 wstart - line_start,
+														 mAllowEmbeddedItems);
+						word_right = (F32)mTextRect.mLeft + 1.f +
+									 mGLFont->getWidthF32(line, 0,
+														  wend - line_start,
+														  mAllowEmbeddedItems);
+					}
+					{
+						LLFastTimer t(LLFastTimer::FTM_SPELL_WORD_UNDERLINE);
+
+						// Draw the zig zag line
+						gGL.color4ub(255, 0, 0, 200);
+						while (word_left < word_right)
+						{
+							gl_line_2d((S32)word_left, (S32)text_y - 2,
+									   (S32)word_left + 3, (S32)text_y + 1);
+							gl_line_2d((S32)word_left + 3, (S32)text_y + 1,
+									   (S32)word_left + 6, (S32)text_y - 2);
+							word_left += 6;
+						}
+					}
+					break;
 				}
+				if (visible && !found_first_visible)
+				{
+					found_first_visible = true;
+				}
+				else if (!visible && found_first_visible)
+				{
+					// We found the last visible misspelled word. Stop now.
+					return;
+				}
+				// move down one line
+				text_y -= line_height;
+				line_start = next_line;
+				search_pos++;
+			}
+			if (mShowLineNumbers)
+			{
+				word_left += UI_TEXTEDITOR_LINE_NUMBER_MARGIN;
+				word_right += UI_TEXTEDITOR_LINE_NUMBER_MARGIN;
 			}
 		}
 	}
@@ -3907,7 +3907,8 @@ void LLTextEditor::draw()
 		drawPreeditMarker();
 		drawText();
 		drawCursor();
-		if (LLSpellCheck::instance().getSpellCheck())
+		if (!mReadOnly && mSpellCheck && hasFocus() &&
+			LLSpellCheck::instance().getSpellCheck())
 		{
 			drawMisspelled();
 		}
@@ -4867,6 +4868,13 @@ void LLTextEditor::setOnScrollEndCallback(void (*callback)(void*),
 	mOnScrollEndCallback = callback;
 	mOnScrollEndData = userdata;
 	mScrollbar->setOnScrollEndCallback(callback, userdata);
+}
+
+void LLTextEditor::setOnKeystrokeCallback(BOOL (*callback)(KEY, MASK, LLTextEditor*, void*),
+										  void* userdata)
+{
+	mOnKeystrokeCallback = callback;
+	mOnKeystrokeData = userdata;
 }
 
 ///////////////////////////////////////////////////////////////////

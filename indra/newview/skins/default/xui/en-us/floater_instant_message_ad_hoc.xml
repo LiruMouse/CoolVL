@@ -4,30 +4,6 @@
      follows="left|top|right|bottom" height="297" label="(unknown)" left="1"
      min_height="125" min_width="360" mouse_opaque="true" name="im_floater"
      rect_control="" title="(unknown)" width="501">
-	<string name="ringing">
-		Joining Voice Chat...
-	</string>
-	<string name="connected">
-		Connected, click End Call to hang up
-	</string>
-	<string name="hang_up">
-		Left Voice Chat
-	</string>
-	<string name="voice_icon">
-		icn_voice-groupfocus.tga
-	</string>
-	<string name="title_string">
-		Instant Message with [NAME]
-	</string>
-	<string name="typing_start_string">
-		[NAME] is typing...
-	</string>
-	<string name="session_start_string">
-		Starting session with [NAME] please wait.
-	</string>
-	<string name="default_text_label">
-		Click here to instant message.
-	</string>
 	<layout_stack border="false" bottom="0" follows="left|top|right|bottom" height="277" left="2"
 	     orientation="horizontal" tab_group="1" width="495" name="panels">
 		<layout_panel border="false" bottom="0" default_tab_group="1" follows="left|top|bottom|right"
@@ -47,24 +23,32 @@
 			<text_editor type="string" length="1" bg_readonly_color="ChatHistoryBgColor" bg_writeable_color="ChatHistoryBgColor"
 			     bottom="-265" embedded_items="false" enabled="false"
 			     follows="left|top|right|bottom" font="SansSerif" height="239" left="5"
-			     max_length="2147483647" mouse_opaque="true" name="im_history"
-           track_bottom="true" 
+			     max_length="2147483647" mouse_opaque="true" name="im_history" track_bottom="true" 
 			     text_color="ChatHistoryTextColor"
 			     text_readonly_color="ChatHistoryTextColor" width="490" word_wrap="true" />
-			<line_editor bevel_style="in" border_style="line" border_thickness="1" bottom="7"
-			     enabled="true" follows="left|right|bottom" font="SansSerif"
-			     handle_edit_keys_directly="false" height="20"
-			     label="Click here to instant message" left="5" max_length="1022"
-			     mouse_opaque="true" name="chat_editor" select_all_on_focus_received="false"
-			     select_on_focus="false" tab_group="1" width="426" spell_check="true" />
-			<button bottom_delta="0" enabled="true" follows="right|bottom" font="SansSerif"
-			     halign="center" height="20" label="Send" left="436" mouse_opaque="true"
-			     name="send_btn" scale_image="true" width="60" />
+			<line_editor name="chat_editor" font="SansSerif" label="Click here to instant message" mouse_opaque="true"
+			 tab_group="1" bevel_style="in" border_style="line" border_thickness="1" handle_edit_keys_directly="false"
+			 select_all_on_focus_received="false" select_on_focus="false" max_length="1023" spell_check="true"
+			 left="5" bottom="7" width="402" height="20" follows="left|right|bottom" />
+			<button name="open_text_editor_btn" label="&gt;" enabled="true" mouse_opaque="true"
+			 tool_tip="Click to open or focus the text input editor associated with this IM input line."
+			 left="410" bottom_delta="0" width="20" height="20" follows="right|bottom" />
+			<button name="send_btn" label="Send" font="SansSerif" halign="center" mouse_opaque="true"
+			 left="432" bottom_delta="0" width="60" height="20" follows="right|bottom" />
 		</layout_panel>
 		<layout_panel auto_resize="false" bottom="0" can_resize="true"
 		     filename="panel_speaker_controls.xml" height="120" left="0" min_width="140"
 		     name="active_speakers_panel" top_delta="0" visible="false" width="140" />
 	</layout_stack>
+
+	<string name="ringing">Joining Voice Chat...</string>
+	<string name="connected">Connected, click End Call to hang up.</string>
+	<string name="hang_up">Left Voice Chat.</string>
+	<string name="voice_icon">icn_voice-groupfocus.tga</string>
+	<string name="title_string">Instant Message with [NAME].</string>
+	<string name="typing_start_string">[NAME] is typing...</string>
+	<string name="session_start_string">Starting session with [NAME] please wait...</string>
+	<string name="default_text_label">Click here to instant message.</string>
 	<string name="live_help_dialog">
 		*** Welcome to Help Request *** 
 Please first check our SL Help Pages by pressing F1, or by accessing the Knowledge Base http://secondlife.com/knowledgebase/ 

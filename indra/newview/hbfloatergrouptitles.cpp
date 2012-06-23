@@ -34,13 +34,13 @@
 
 #include "llviewerprecompiledheaders.h"
 
+#include "lluictrlfactory.h"
 #include "message.h"
 #include "roles_constants.h"
 
 #include "hbfloatergrouptitles.h"
 
 #include "llagent.h"
-#include "lluictrlfactory.h"
 #include "llviewercontrol.h"
 
 using namespace LLOldEvents;
@@ -79,7 +79,8 @@ HBFloaterGroupTitles::HBFloaterGroupTitles()
 :	LLFloater(std::string("group titles")),
 	mIsDirty(true)
 {
-	LLUICtrlFactory::getInstance()->buildFloater(this, "floater_group_titles.xml", NULL);
+	LLUICtrlFactory::getInstance()->buildFloater(this,
+												 "floater_group_titles.xml");
 	gAgent.addListener(this, "new group");
 	sInstance = this;
 }

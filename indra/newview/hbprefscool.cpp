@@ -114,6 +114,7 @@ private:
 	BOOL mShowMapButton;
 	BOOL mShowInventoryButton;
 	BOOL mUseOldChatHistory;
+	BOOL mAutoOpenTextInput;
 	BOOL mIMTabsVerticalStacking;
 	BOOL mUseOldStatusBarIcons;
 	BOOL mUseOldTrackingDots;
@@ -446,6 +447,7 @@ void HBPrefsCoolImpl::refreshValues()
 	mShowMapButton				= gSavedSettings.getBOOL("ShowMapButton");
 	mShowInventoryButton		= gSavedSettings.getBOOL("ShowInventoryButton");
 	mUseOldChatHistory			= gSavedSettings.getBOOL("UseOldChatHistory");
+	mAutoOpenTextInput			= gSavedSettings.getBOOL("AutoOpenTextInput");
 	mIMTabsVerticalStacking		= gSavedSettings.getBOOL("IMTabsVerticalStacking");
 	mUseOldStatusBarIcons		= gSavedSettings.getBOOL("UseOldStatusBarIcons");
 	mUseOldTrackingDots			= gSavedSettings.getBOOL("UseOldTrackingDots");
@@ -615,6 +617,7 @@ void HBPrefsCoolImpl::cancel()
 	gSavedSettings.setBOOL("ShowMapButton",				mShowMapButton);
 	gSavedSettings.setBOOL("ShowInventoryButton",		mShowInventoryButton);
 	gSavedSettings.setBOOL("UseOldChatHistory",			mUseOldChatHistory);
+	gSavedSettings.setBOOL("AutoOpenTextInput",			mAutoOpenTextInput);
 	gSavedSettings.setBOOL("IMTabsVerticalStacking",	mIMTabsVerticalStacking);
 	gSavedSettings.setBOOL("UseOldStatusBarIcons",		mUseOldStatusBarIcons);
 	gSavedSettings.setBOOL("UseOldTrackingDots",		mUseOldTrackingDots);

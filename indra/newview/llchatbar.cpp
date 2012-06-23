@@ -57,6 +57,7 @@
 #include "llagent.h"
 #include "llcommandhandler.h"	// secondlife:///app/chat/ support
 #include "llfloaterchat.h"
+#include "hbfloatertextinput.h"
 #include "llgesturemgr.h"
 #include "llinventorymodel.h"
 #include "lluiconstants.h"
@@ -97,12 +98,14 @@ private:
 LLChatBar::LLChatBar(const std::string& name) 
 :	LLPanel(name, LLRect(), BORDER_NO),
 	mInputEditor(NULL),
+	mOpenTextEditorButton(NULL),
 	mSayFlyoutButton(NULL),
 	mGestureLabelTimer(),
 	mLastSpecialChatChannel(0),
-	mIsBuilt(FALSE),
+	mIsBuilt(false),
+	mHasScrolledOnce(false),
 	mGestureCombo(NULL),
-	mSecondary(TRUE),
+	mSecondary(true),
 	mObserver(NULL)
 {
 }
@@ -110,13 +113,15 @@ LLChatBar::LLChatBar(const std::string& name)
 LLChatBar::LLChatBar(const std::string& name, const LLRect& rect) 
 :	LLPanel(name, rect, BORDER_NO),
 	mInputEditor(NULL),
+	mOpenTextEditorButton(NULL),
 	mHistoryButton(NULL),
 	mSayFlyoutButton(NULL),
 	mGestureLabelTimer(),
 	mLastSpecialChatChannel(0),
-	mIsBuilt(FALSE),
+	mIsBuilt(false),
+	mHasScrolledOnce(false),
 	mGestureCombo(NULL),
-	mSecondary(FALSE),
+	mSecondary(false),
 	mObserver(NULL)
 {
 	setIsChrome(TRUE);
@@ -142,6 +147,7 @@ LLChatBar::~LLChatBar()
 	gGestureManager.removeObserver(mObserver);
 	delete mObserver;
 	mObserver = NULL;
+	HBFloaterTextInput::abort(mInputEditor);
 	// LLView destructor cleans up children
 }
 
@@ -160,6 +166,12 @@ BOOL LLChatBar::postBuild()
 		mSayFlyoutButton->setCallbackUserData(this);
 	}
 
+	mOpenTextEditorButton = getChild<LLButton>("open_text_editor_btn", TRUE, FALSE);
+	if (mOpenTextEditorButton)
+	{
+		mOpenTextEditorButton->setClickedCallback(onClickOpenTextEditor, this);
+	}
+
 	// attempt to bind to an existing combo box named gesture
 	setGestureCombo(getChild<LLComboBox>("Gesture", TRUE, FALSE));
 
@@ -168,6 +180,7 @@ BOOL LLChatBar::postBuild()
 	{
 		mInputEditor->setCallbackUserData(this);
 		mInputEditor->setKeystrokeCallback(&onInputEditorKeystroke);
+		mInputEditor->setScrolledCallback(&onInputEditorScrolled, this);
 		mInputEditor->setFocusLostCallback(&onInputEditorFocusLost, this);
 		mInputEditor->setFocusReceivedCallback(&onInputEditorGainFocus, this);
 		mInputEditor->setCommitOnFocusLost(FALSE);
@@ -180,7 +193,7 @@ BOOL LLChatBar::postBuild()
 		mInputEditor->setEnableLineHistory(TRUE);
 	}
 
-	mIsBuilt = TRUE;
+	mIsBuilt = true;
 
 	return TRUE;
 }
@@ -242,47 +255,102 @@ void LLChatBar::layout()
 	// If this is not the main chat bar, return
 	if (mSecondary) return;
 
-	S32 rect_width = getRect().getWidth();
-	S32 pad = 4;
+	LLRect r = getRect();
 
+	// Get the width of the chat bar
+	S32 rect_width = r.getWidth();
+
+	// Padding (hard-coded) and origin of first element
+	S32 pad = 4;
+	S32 x = pad;
+	// Width consumed by the buttons and gesture combo (i.e. all elements but
+	// the input line).
+	S32 consumed_width = x;
+
+	// Calculate the elements height and centering
+	S32 height = BTN_HEIGHT;
+	if (height < 20)
+	{
+		height = 20;
+	}
+	S32 y = (r.getHeight() - height) / 2;
+	if (y < 2)
+	{
+		height = r.getHeight() - 4;
+		y = 2;
+	}
+
+	// Gesture combo width
 	S32 gesture_width = 0;
 	if (mGestureCombo)
 	{
-		LLRect gesture_rect = mGestureCombo->getRect();
-		gesture_width = gesture_rect.getWidth();
+		r = mGestureCombo->getRect();
+		gesture_width = r.getWidth();
+		consumed_width += gesture_width + pad;
 	}
-	S32 input_width = 0;
-	S32 btn_width = 68;
-	S32 segment_width = btn_width + pad;
-	S32 x = pad;
-	S32 y = 3;
-	LLRect r;
 
+	// Say button width
+	S32 say_btn_width = 0;
+	if (mSayFlyoutButton)
+	{
+		r = mSayFlyoutButton->getRect();
+		say_btn_width = r.getWidth();
+		consumed_width += say_btn_width + pad;
+	}
+
+	// Editor button width
+	S32 editor_btn_width = 0;
+	if (mOpenTextEditorButton)
+	{
+		r = mOpenTextEditorButton->getRect();
+		// Keep the button round if it is already
+		if (r.getWidth() == r.getHeight())
+		{
+			editor_btn_width = height;
+		}
+		else
+		{
+			editor_btn_width = r.getWidth();
+		}
+		consumed_width += editor_btn_width + pad;
+	}
+
+	// History button width
 	if (mHistoryButton)
 	{
-		r.setOriginAndSize(x, y, btn_width, BTN_HEIGHT);
+		r = mHistoryButton->getRect();
+		S32 history_btn_width = r.getWidth();
+		r.setOriginAndSize(x, y, history_btn_width, height);
 		mHistoryButton->setRect(r);
-		x += segment_width;
+		x += history_btn_width + pad;
+		consumed_width += history_btn_width + pad;
 	}
 
 	if (mInputEditor)
 	{
-		input_width = rect_width - 2 * segment_width - 3 * pad - gesture_width;
-		r.setOriginAndSize(x, y + 2, input_width, 18);
+		S32 input_width = rect_width - (consumed_width + pad);
+		r.setOriginAndSize(x, y + 2, input_width, height - 2);
 		mInputEditor->reshape(r.getWidth(), r.getHeight(), TRUE);
 		mInputEditor->setRect(r);
 		x += input_width + pad;
 	}
 
-	if (mSayFlyoutButton)
+	if (mOpenTextEditorButton)
 	{
-		r.setOriginAndSize(x, y, btn_width, BTN_HEIGHT);
-		mSayFlyoutButton->reshape(r.getWidth(), r.getHeight(), TRUE);
-		mSayFlyoutButton->setRect(r);
-		x = rect_width - (pad + gesture_width);
+		r.setOriginAndSize(x, y, editor_btn_width, height);
+		mOpenTextEditorButton->setRect(r);
+		x += editor_btn_width + pad;
 	}
 
-	r.setOriginAndSize(x, y, gesture_width, BTN_HEIGHT);
+	if (mSayFlyoutButton)
+	{
+		r.setOriginAndSize(x, y, say_btn_width, height);
+		mSayFlyoutButton->reshape(r.getWidth(), r.getHeight(), TRUE);
+		mSayFlyoutButton->setRect(r);
+		x += say_btn_width + pad;
+	}
+
+	r.setOriginAndSize(x, y, gesture_width, height);
 	if (mGestureCombo)
 	{
 		mGestureCombo->setRect(r);
@@ -300,10 +368,15 @@ void LLChatBar::refresh()
 
 	// HACK: Leave the name of the gesture in place for a few seconds.
 	const F32 SHOW_GESTURE_NAME_TIME = 2.f;
-	if (mGestureLabelTimer.getStarted() && mGestureLabelTimer.getElapsedTimeF32() > SHOW_GESTURE_NAME_TIME)
+	if (mGestureLabelTimer.getStarted() &&
+		mGestureLabelTimer.getElapsedTimeF32() > SHOW_GESTURE_NAME_TIME)
 	{
-		LLCtrlListInterface* gestures = mGestureCombo ? mGestureCombo->getListInterface() : NULL;
-		if (gestures) gestures->selectFirstItem();
+		LLCtrlListInterface* gestures = mGestureCombo ? mGestureCombo->getListInterface()
+													  : NULL;
+		if (gestures)
+		{
+			gestures->selectFirstItem();
+		}
 		mGestureLabelTimer.stop();
 	}
 
@@ -320,7 +393,22 @@ void LLChatBar::refresh()
 
 	if (mInputEditor)
 	{
-		mSayFlyoutButton->setEnabled(mInputEditor->getText().size() > 0);
+		bool has_text_editor = HBFloaterTextInput::hasFloaterFor(mInputEditor);
+		bool empty = mInputEditor->getText().size() == 0;
+		if (empty && !has_text_editor)
+		{
+			// Reset this flag if the chat input line is empty
+			mHasScrolledOnce = false;
+		}
+		mInputEditor->setEnabled(!has_text_editor);
+		if (mSayFlyoutButton)
+		{
+			mSayFlyoutButton->setEnabled(!empty && !has_text_editor);
+		}
+		if (mGestureCombo)
+		{
+			mGestureCombo->setEnabled(!has_text_editor);
+		}
 	}
 }
 
@@ -688,6 +776,20 @@ void LLChatBar::onInputEditorKeystroke(LLLineEditor* caller, void* userdata)
 }
 
 // static
+void LLChatBar::onInputEditorScrolled(LLLineEditor* caller, void* userdata)
+{
+	LLChatBar* self = (LLChatBar*)userdata;
+	if (!self || !caller) return;
+
+	if (!self->mHasScrolledOnce &&
+		gSavedSettings.getBOOL("AutoOpenTextInput"))
+	{
+		self->mHasScrolledOnce = true;
+		HBFloaterTextInput::show(caller);
+	}
+}
+
+// static
 void LLChatBar::onInputEditorFocusLost(LLFocusableElement* caller, void* userdata)
 {
 	// stop typing animation
@@ -714,6 +816,17 @@ void LLChatBar::onClickSay(LLUICtrl* ctrl, void* userdata)
 	}
 	LLChatBar* self = (LLChatBar*) userdata;
 	self->sendChat(chat_type);
+}
+
+// static
+void LLChatBar::onClickOpenTextEditor(void* userdata)
+{
+	LLChatBar* self = (LLChatBar*)userdata;
+	if (self && self->mInputEditor)
+	{
+		self->mHasScrolledOnce = true;
+		HBFloaterTextInput::show(self->mInputEditor);
+	}
 }
 
 void LLChatBar::sendChatFromViewer(const std::string &utf8text, EChatType type, BOOL animate)

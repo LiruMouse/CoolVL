@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater name="text input" title="Text Input"
+ can_close="true" can_drag_on_left="false" can_minimize="true" can_resize="true"
+ height="200" width="600" min_height="100" min_width="200">
+	<text_editor name="text" type="string" embedded_items="false" length="1" max_length="1024"
+	 font="SansSerif" ignore_tab="true" word_wrap="true" enabled="true" mouse_opaque="true"
+	 border_drop_shadow_visible="false" border_visible="false" bevel_style="none"
+	 border_style="line" border_thickness="0"
+	 bottom="-190" left="10" height="166" width="580" follows="left|top|right|bottom" />
+	<string name="chat">Chat Input Text</string>
+	<string name="im">IM Input Text for [NAME]</string>
+</floater>

@@ -96,7 +96,7 @@ InstallPassword
 {}
 
 InstallVersion
-{1.26.4.13}
+{1.26.4.14}
 
 Language,ca
 {No}
@@ -1722,6 +1722,7 @@ File B2FC6A5A-A1BD-1B1D-C68B-696B84655581 -active Yes -name floater_rlv_blacklis
 File 7A0058C4-31F7-8CE7-8857-3BC62449A5F8 -active Yes -name floater_model_preview.xml -parent D8EFD99D-CE67-9B93-8A34-27E9522DD8CB
 File 912F8DF4-3D86-D39C-CEF7-04BEFDAA4AA1 -active Yes -name panel_preferences_media.xml -parent D8EFD99D-CE67-9B93-8A34-27E9522DD8CB
 File 66D75BE9-1583-28BC-EBBD-08459998BAF3 -active Yes -name floater_debug_tags.xml -parent D8EFD99D-CE67-9B93-8A34-27E9522DD8CB
+File 471C8F44-372F-725D-5B26-7CD65186D311 -active Yes -name floater_text_input.xml -parent D8EFD99D-CE67-9B93-8A34-27E9522DD8CB
 File 1327C11E-BDEA-7087-1846-28626D26E1CA -active Yes -name silver -type dir -parent 1A5E0B77-9229-C5DB-CFD4-CCC6746E6B64
 File 503D710E-EA97-DE95-5732-0D75B6200404 -active Yes -name colors.xml -parent 1327C11E-BDEA-7087-1846-28626D26E1CA
 File 654CAB03-F1A1-02A4-3A8B-390B37E64EC9 -active Yes -name colors_base.xml -parent 1327C11E-BDEA-7087-1846-28626D26E1CA
@@ -2766,7 +2767,7 @@ array set Properties {
 {<%InstallDir%>}
 
 6CAFA81B-7B7F-0154-8D65-21519C7C1743,FileSize
-{128497874}
+{128524851}
 
 6CAFA81B-7B7F-0154-8D65-21519C7C1743,Name
 {Program Files}

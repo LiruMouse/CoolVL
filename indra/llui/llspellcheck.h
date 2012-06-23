@@ -66,7 +66,7 @@ public:
 					   std::vector<std::string>& suggestions);
 
 	void setSpellCheck(BOOL enable)		{ mSpellCheckEnable = enable; }
-	BOOL getSpellCheck()				{ return mSpellCheckEnable; }
+	BOOL getSpellCheck()				{ return mSpellCheckEnable && mHunspell; }
 
 	void setShowMisspelled(BOOL enable)	{ mShowMisspelled = enable; }
 	BOOL getShowMisspelled()			{ return mShowMisspelled; }

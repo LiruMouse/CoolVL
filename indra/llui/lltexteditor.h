@@ -294,6 +294,8 @@ public:
 
 	void			setOnScrollEndCallback(void (*callback)(void*),
 										   void* userdata);
+	void			setOnKeystrokeCallback(BOOL (*callback)(KEY, MASK, LLTextEditor*, void*),
+															void* userdata);
 
 	// new methods
 	void 			setValue(const LLSD& value);
@@ -514,6 +516,9 @@ protected:
 	void			(*mOnScrollEndCallback)(void*);
 	void			*mOnScrollEndData;
 
+	BOOL			(*mOnKeystrokeCallback)(KEY, MASK, LLTextEditor*, void*);
+	void			*mOnKeystrokeData;
+
 	LLWString			mPreeditWString;
 	LLWString			mPreeditOverwrittenWString;
 	std::vector<S32> 	mPreeditPositions;
@@ -574,6 +579,7 @@ private:
 	S32							mSpellCheckEnd;
     std::vector<S32>			mMisspellLocations;		// where all the misspelled words are
 	BOOL						mSpellCheck;			// set in xui as "spell_check". Default value for a field
+	bool						mShowMisspelled;		// whether to highlight misspelled words or not
     LLFrameTimer				mSpellTimer;
 	std::vector<SpellMenuBind*>	mSuggestionMenuItems;	// to keep track of what we have to remove before rebuilding the context menu
 	

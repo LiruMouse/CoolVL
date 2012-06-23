@@ -296,9 +296,8 @@ public:
 	 *
 	 * If etither string or substr are empty, this method returns false.
 	 */
-	static bool endsWith(
-		const std::basic_string<T>& string,
-		const std::basic_string<T>& substr);
+	static bool endsWith(const std::basic_string<T>& string,
+						 const std::basic_string<T>& substr);
 
 	static void	addCRLF(std::basic_string<T>& string);
 	static void	removeCRLF(std::basic_string<T>& string);

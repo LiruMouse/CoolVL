@@ -99,7 +99,7 @@ InstallPassword
 {}
 
 InstallVersion
-{1.26.4.13}
+{1.26.4.14}
 
 Language,ca
 {No}
@@ -1635,6 +1635,7 @@ File D19576F0-3555-46DB-AB6F-DA5175A1C87F -active Yes -name floater_model_previe
 File E1673CAE-74C1-4FCB-B4B2-AA83500F04D3 -active Yes -name floater_rlv_blacklist.xml -parent 98BF77B0-C5E3-411F-A8F1-A6918D4831BB
 File 4A796934-7169-40F1-BBC2-0ED8242C5993 -active Yes -name panel_preferences_media.xml -parent 98BF77B0-C5E3-411F-A8F1-A6918D4831BB
 File D9CC3BA8-CE90-4829-9307-2859DB6B3EB1 -active Yes -name floater_debug_tags.xml -parent 98BF77B0-C5E3-411F-A8F1-A6918D4831BB
+File B6A84E1B-66F7-4BF5-9D5A-EAFA6190F857 -active Yes -name floater_text_input.xml -parent 98BF77B0-C5E3-411F-A8F1-A6918D4831BB
 File 801E5197-45CE-4174-AC68-EDFCE93D9D7F -active Yes -name colors.xml -parent 3A542087-9E49-4945-AF4C-16608F2D6BE6
 File A8FE3E97-54B4-466F-BA84-6CEDCEA3E613 -active Yes -name silver -type dir -parent 1E430344-AAB4-45B1-AC0E-F04E115F6E46
 File C442D02F-67F7-47C5-B00D-AF6EFF9268D1 -active Yes -name xui -type dir -parent A8FE3E97-54B4-466F-BA84-6CEDCEA3E613
@@ -2631,7 +2632,7 @@ array set Properties {
 {<%InstallDir%>}
 
 4BD78D4C-6617-4C3F-8DC8-E11325B1ED0F,FileSize
-{77099744}
+{77111857}
 
 4BD78D4C-6617-4C3F-8DC8-E11325B1ED0F,Name
 {Program Files}
