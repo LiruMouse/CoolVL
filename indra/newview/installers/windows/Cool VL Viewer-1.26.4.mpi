@@ -99,7 +99,7 @@ InstallPassword
 {}
 
 InstallVersion
-{1.26.4.18}
+{1.26.4.19}
 
 Language,ca
 {No}
@@ -1571,7 +1571,6 @@ File E7681BF6-246D-4CCB-A6E9-E2E9EAEA4F3F -active Yes -name floater_report_abuse
 File 2289B235-5910-424E-A6E7-0325D2CCD39B -active Yes -name floater_report_bug.xml -parent 98BF77B0-C5E3-411F-A8F1-A6918D4831BB
 File C28342C4-5939-4A40-8AB2-2E71CCB34599 -active Yes -name floater_script_debug.xml -parent 98BF77B0-C5E3-411F-A8F1-A6918D4831BB
 File 2F93AE1D-1F16-4BA5-AB31-16414B54A15D -active Yes -name floater_script_queue.xml -parent 98BF77B0-C5E3-411F-A8F1-A6918D4831BB
-File 4E5A27CF-12D2-4CC3-B534-D2245528D6F1 -active Yes -name floater_script_search.xml -parent 98BF77B0-C5E3-411F-A8F1-A6918D4831BB
 File 734C9B51-18FC-4755-9955-1083A1ECDB33 -active Yes -name floater_select_key.xml -parent 98BF77B0-C5E3-411F-A8F1-A6918D4831BB
 File 6E63714B-9041-4EEC-A48E-18E111A471F4 -active Yes -name floater_sell_land.xml -parent 98BF77B0-C5E3-411F-A8F1-A6918D4831BB
 File 8E3CE945-8B5F-4C11-9D34-2F278A000304 -active Yes -name floater_sim_release_message.xml -parent 98BF77B0-C5E3-411F-A8F1-A6918D4831BB
@@ -2062,6 +2061,8 @@ Condition 33F69FDB-E407-4AE5-88E9-8F1A2E4C5FA9 -active Yes -name 33f69fdb-e407-4
 ActionGroup 80ACC115-0DE1-4AAE-B4D6-4232728C81EB -active Yes -name 80acc115-0de1-4aae-b4d6-4232728c81eb -type actiongroup -parent ActionGroupsInstall -setup Install -title {Startup Actions}
 Action 08919EE0-21F7-4260-9564-55A9C822F13B -active Yes -name 08919ee0-21f7-4260-9564-55a9c822f13b -type action -parent 80ACC115-0DE1-4AAE-B4D6-4232728C81EB -setup Install -title {Create Install Panes} -component CreateInstallPanes
 ActionGroup 3C21DA1A-D305-47D2-838F-CA155241BD62 -active Yes -name 3c21da1a-d305-47d2-838f-ca155241bd62 -type actiongroup -parent ActionGroupsInstall -setup Install -title {Install Actions}
+Action 41881E4D-B791-45D9-A8D3-34340544D840 -active Yes -name 41881e4d-b791-45d9-a8d3-34340544d840 -type action -parent 3C21DA1A-D305-47D2-838F-CA155241BD62 -setup Install -title {Delete File} -component DeleteFile
+Condition 22973765-D3A9-4DE7-942E-7BA59B008177 -active Yes -name 22973765-d3a9-4de7-942e-7ba59b008177 -parent 41881E4D-B791-45D9-A8D3-34340544D840 -title {File Exists Condition} -component FileExistsCondition
 Action 8CBADBD3-FD0E-4920-B122-AD7599A264EB -active Yes -name 8cbadbd3-fd0e-4920-b122-ad7599a264eb -type action -parent 3C21DA1A-D305-47D2-838F-CA155241BD62 -setup Install -title {Install Selected Files} -component InstallSelectedFiles
 Action 64C8BAA8-D636-4FFF-996B-0ED728F6B664 -active Yes -name 64c8baa8-d636-4fff-996b-0ed728f6b664 -type action -parent 3C21DA1A-D305-47D2-838F-CA155241BD62 -setup Install -title {Set Need Components flag} -operator OR -component SetVirtualText
 Condition C217928D-4719-44C1-90DD-C19A418CCF99 -active Yes -name c217928d-4719-44c1-90dd-c19a418ccf99 -parent 64C8BAA8-D636-4FFF-996B-0ED728F6B664 -setup Install -title {File Exists Condition} -component FileExistsCondition
@@ -2406,6 +2407,12 @@ array set Properties {
 22623DC3-639D-46D5-AFFE-30F3AA0D1EB2,ExitType
 {Finish}
 
+22973765-D3A9-4DE7-942E-7BA59B008177,CheckCondition
+{Before Action is Executed}
+
+22973765-D3A9-4DE7-942E-7BA59B008177,Filename
+{<%InstallDir%>/skins/default/xui/en-us/floater_script_search.xml}
+
 23D56725-7D4C-4B8A-A05D-F3DF8240AFCC,CheckCondition
 {Before Action is Executed}
 
@@ -2574,6 +2581,12 @@ array set Properties {
 405536AE-8D7F-429B-B760-E409A2FA0214,Prompt
 {<%InstallStartupText%>}
 
+41881E4D-B791-45D9-A8D3-34340544D840,Files
+{<%InstallDir%>/skins/default/xui/en-us/floater_script_search.xml}
+
+41881E4D-B791-45D9-A8D3-34340544D840,IgnoreErrors
+{Yes}
+
 41A2D222-BADE-4E3C-AD2C-13220E77F1CC,Action
 {Check Actions}
 
@@ -2632,7 +2645,7 @@ array set Properties {
 {<%InstallDir%>}
 
 4BD78D4C-6617-4C3F-8DC8-E11325B1ED0F,FileSize
-{77147126}
+{77154465}
 
 4BD78D4C-6617-4C3F-8DC8-E11325B1ED0F,Name
 {Program Files}

@@ -266,13 +266,12 @@ void LLHUDObject::updateAll()
 // static
 void LLHUDObject::renderAll()
 {
-	LLHUDObject *hud_objp;
-	
-	hud_object_list_t::iterator object_it;
-	for (object_it = sHUDObjects.begin(); object_it != sHUDObjects.end(); )
+	for (hud_object_list_t::iterator object_it = sHUDObjects.begin(),
+									 end = sHUDObjects.end();
+		 object_it != end; )
 	{
 		hud_object_list_t::iterator cur_it = object_it++;
-		hud_objp = (*cur_it);
+		LLHUDObject* hud_objp = *cur_it;
 		if (hud_objp->getNumRefs() == 1)
 		{
 			sHUDObjects.erase(cur_it);
@@ -289,13 +288,12 @@ void LLHUDObject::renderAll()
 // static
 void LLHUDObject::renderAllForTimer()
 {
-	LLHUDObject *hud_objp;
-	
-	hud_object_list_t::iterator object_it;
-	for (object_it = sHUDObjects.begin(); object_it != sHUDObjects.end(); )
+	for (hud_object_list_t::iterator object_it = sHUDObjects.begin(),
+									 end = sHUDObjects.end();
+		 object_it != end; )
 	{
 		hud_object_list_t::iterator cur_it = object_it++;
-		hud_objp = (*cur_it);
+		LLHUDObject* hud_objp = *cur_it;
 		if (hud_objp->getNumRefs() == 1)
 		{
 			sHUDObjects.erase(cur_it);

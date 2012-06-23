@@ -184,16 +184,18 @@ void LLMotionController::purgeExcessMotions()
 	if (mLoadedMotions.size() > MAX_MOTION_INSTANCES)
 	{
 		// clean up deprecated motions
-		for (motion_set_t::iterator deprecated_motion_it = mDeprecatedMotions.begin(); 
-			 deprecated_motion_it != mDeprecatedMotions.end(); )
+		for (motion_set_t::iterator
+				deprecated_motion_it = mDeprecatedMotions.begin(),
+				end = mDeprecatedMotions.end();
+			 deprecated_motion_it != end; )
 		{
 			motion_set_t::iterator cur_iter = deprecated_motion_it++;
 			LLMotion* cur_motionp = *cur_iter;
 			if (!isMotionActive(cur_motionp))
 			{
 				// Motion is deprecated so we know it's not cannonical,
-				//  we can safely remove the instance
-				removeMotionInstance(cur_motionp); // modifies mDeprecatedMotions
+				// we can safely remove the instance
+				removeMotionInstance(cur_motionp);
 				mDeprecatedMotions.erase(cur_iter);
 			}
 		}
@@ -204,9 +206,9 @@ void LLMotionController::purgeExcessMotions()
 	{
 		// too many motions active this frame, kill all blenders
 		mPoseBlender.clearBlenders();
-		for (motion_set_t::iterator loaded_motion_it = mLoadedMotions.begin(); 
-			 loaded_motion_it != mLoadedMotions.end(); 
-			 ++loaded_motion_it)
+		for (motion_set_t::iterator loaded_motion_it = mLoadedMotions.begin(),
+									end = mLoadedMotions.end(); 
+			 loaded_motion_it != end; ++loaded_motion_it)
 		{
 			LLMotion* cur_motionp = *loaded_motion_it;
 			// motion isn't playing, delete it
@@ -216,11 +218,11 @@ void LLMotionController::purgeExcessMotions()
 			}
 		}
 	}
-	
+
 	// clean up all inactive, loaded motions
-	for (std::set<LLUUID>::iterator motion_it = motions_to_kill.begin();
-		motion_it != motions_to_kill.end();
-		++motion_it)
+	for (std::set<LLUUID>::iterator motion_it = motions_to_kill.begin(),
+									end = motions_to_kill.end();
+		motion_it != end; ++motion_it)
 	{
 		// look up the motion again by ID to get canonical instance
 		// and kill it only if that one is inactive
@@ -245,8 +247,9 @@ void LLMotionController::purgeExcessMotions()
 void LLMotionController::deactivateStoppedMotions()
 {
 	// Since we're hidden, deactivate any stopped motions.
-	for (motion_list_t::iterator iter = mActiveMotions.begin();
-		 iter != mActiveMotions.end(); )
+	for (motion_list_t::iterator iter = mActiveMotions.begin(),
+								 end = mActiveMotions.end();
+		 iter != end; )
 	{
 		motion_list_t::iterator curiter = iter++;
 		LLMotion* motionp = *curiter;
@@ -267,8 +270,9 @@ void LLMotionController::setTimeStep(F32 step)
 	if (step != 0.f)
 	{
 		// make sure timestamps conform to new quantum
-		for (motion_list_t::iterator iter = mActiveMotions.begin();
-			 iter != mActiveMotions.end(); ++iter)
+		for (motion_list_t::iterator iter = mActiveMotions.begin(),
+									 end = mActiveMotions.end();
+			 iter != end; ++iter)
 		{
 			LLMotion* motionp = *iter;
 			F32 activation_time = motionp->mActivationTimestamp;
@@ -530,8 +534,9 @@ void LLMotionController::updateIdleMotion(LLMotion* motionp)
 //-----------------------------------------------------------------------------
 void LLMotionController::updateIdleActiveMotions()
 {
-	for (motion_list_t::iterator iter = mActiveMotions.begin();
-		 iter != mActiveMotions.end(); )
+	for (motion_list_t::iterator iter = mActiveMotions.begin(),
+								 end = mActiveMotions.end();
+		 iter != end; )
 	{
 		motion_list_t::iterator curiter = iter++;
 		LLMotion* motionp = *curiter;
@@ -550,8 +555,9 @@ void LLMotionController::updateMotionsByType(LLMotion::LLMotionBlendType anim_ty
 	memset(&last_joint_signature, 0, sizeof(U8) * LL_CHARACTER_MAX_JOINTS);
 
 	// iterate through active motions in chronological order
-	for (motion_list_t::iterator iter = mActiveMotions.begin();
-		 iter != mActiveMotions.end(); )
+	for (motion_list_t::iterator iter = mActiveMotions.begin(),
+								 end = mActiveMotions.end();
+		 iter != end; )
 	{
 		motion_list_t::iterator curiter = iter++;
 		LLMotion* motionp = *curiter;
@@ -598,7 +604,7 @@ void LLMotionController::updateMotionsByType(LLMotion::LLMotionBlendType anim_ty
 			continue;
 		}
 
-		LLPose *posep = motionp->getPose();
+		LLPose* posep = motionp->getPose();
 
 		// only filter by LOD after running every animation at least once (to prime the avatar state)
 		if (mHasRunOnce && motionp->getMinPixelArea() > mCharacter->getPixelArea())
@@ -612,7 +618,7 @@ void LLMotionController::updateMotionsByType(LLMotion::LLMotionBlendType anim_ty
 				// this will only be called when an animation stops itself (runs out of time)
 				if (mLastTime <= motionp->mSendStopTimestamp)
 				{
-					mCharacter->requestStopMotion( motionp );
+					mCharacter->requestStopMotion(motionp);
 					stopMotionInstance(motionp, FALSE);
 				}
 			}
@@ -754,8 +760,9 @@ void LLMotionController::updateMotionsByType(LLMotion::LLMotionBlendType anim_ty
 void LLMotionController::updateLoadingMotions()
 {
 	// query pending motions for completion
-	for (motion_set_t::iterator iter = mLoadingMotions.begin();
-		 iter != mLoadingMotions.end(); )
+	for (motion_set_t::iterator iter = mLoadingMotions.begin(),
+								end = mLoadingMotions.end();
+		 iter != end; )
 	{
 		motion_set_t::iterator curiter = iter++;
 		LLMotion* motionp = *curiter;
@@ -1032,8 +1039,9 @@ LLMotion* LLMotionController::findMotion(const LLUUID& id) const
 //-----------------------------------------------------------------------------
 void LLMotionController::deactivateAllMotions()
 {
-	for (motion_map_t::iterator iter = mAllMotions.begin();
-		 iter != mAllMotions.end(); iter++)
+	for (motion_map_t::iterator iter = mAllMotions.begin(),
+								end = mAllMotions.end();
+		 iter != end; ++iter)
 	{
 		LLMotion* motionp = iter->second;
 		deactivateMotionInstance(motionp);
@@ -1045,10 +1053,11 @@ void LLMotionController::deactivateAllMotions()
 //-----------------------------------------------------------------------------
 void LLMotionController::flushAllMotions()
 {
-	std::vector<std::pair<LLUUID,F32> > active_motions;
+	std::vector<std::pair<LLUUID, F32> > active_motions;
 	active_motions.reserve(mActiveMotions.size());
-	for (motion_list_t::iterator iter = mActiveMotions.begin();
-		 iter != mActiveMotions.end(); )
+	for (motion_list_t::iterator iter = mActiveMotions.begin(),
+								 end = mActiveMotions.end();
+		 iter != end; )
 	{
 		motion_list_t::iterator curiter = iter++;
 		LLMotion* motionp = *curiter;
@@ -1066,8 +1075,10 @@ void LLMotionController::flushAllMotions()
 	mCharacter->removeAnimationData("Hand Pose");
 
 	// restart motions
-	for (std::vector<std::pair<LLUUID,F32> >::iterator iter = active_motions.begin();
-		 iter != active_motions.end(); ++iter)
+	for (std::vector<std::pair<LLUUID,F32> >::iterator
+			iter = active_motions.begin(),
+			end = active_motions.end();
+		 iter != end; ++iter)
 	{
 		startMotion(iter->first, iter->second);
 	}

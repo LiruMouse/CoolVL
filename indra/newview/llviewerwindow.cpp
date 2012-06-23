@@ -738,7 +738,7 @@ bool LLViewerWindow::shouldShowToolTipFor(LLMouseHandler *mh)
 	return false;
 }
 
-BOOL LLViewerWindow::handleAnyMouseClick(LLWindow *window,
+BOOL LLViewerWindow::handleAnyMouseClick(LLWindow* window,
 										 LLCoordGL pos,
 										 MASK mask,
 										 LLMouseHandler::EClickType clicktype,
@@ -921,13 +921,13 @@ BOOL LLViewerWindow::handleAnyMouseClick(LLWindow *window,
 	return (!down);
 }
 
-BOOL LLViewerWindow::handleMouseDown(LLWindow *window, LLCoordGL pos, MASK mask)
+BOOL LLViewerWindow::handleMouseDown(LLWindow* window, LLCoordGL pos, MASK mask)
 {
 	BOOL down = TRUE;
 	return handleAnyMouseClick(window, pos, mask, LLMouseHandler::CLICK_LEFT, down);
 }
 
-BOOL LLViewerWindow::handleDoubleClick(LLWindow *window, LLCoordGL pos, MASK mask)
+BOOL LLViewerWindow::handleDoubleClick(LLWindow* window, LLCoordGL pos, MASK mask)
 {
 	// try handling as a double-click first, then a single-click if that
 	// wasn't handled.
@@ -937,13 +937,13 @@ BOOL LLViewerWindow::handleDoubleClick(LLWindow *window, LLCoordGL pos, MASK mas
 									handleMouseDown(window, pos, mask);
 }
 
-BOOL LLViewerWindow::handleMouseUp(LLWindow *window, LLCoordGL pos, MASK mask)
+BOOL LLViewerWindow::handleMouseUp(LLWindow* window, LLCoordGL pos, MASK mask)
 {
 	BOOL down = FALSE;
 	return handleAnyMouseClick(window, pos, mask, LLMouseHandler::CLICK_LEFT, down);
 }
 
-BOOL LLViewerWindow::handleRightMouseDown(LLWindow *window, LLCoordGL pos, MASK mask)
+BOOL LLViewerWindow::handleRightMouseDown(LLWindow* window, LLCoordGL pos, MASK mask)
 {
 	S32 x = pos.mX;
 	S32 y = pos.mY;
@@ -975,34 +975,42 @@ BOOL LLViewerWindow::handleRightMouseDown(LLWindow *window, LLCoordGL pos, MASK 
 	return TRUE;
 }
 
-BOOL LLViewerWindow::handleRightMouseUp(LLWindow *window,  LLCoordGL pos, MASK mask)
+BOOL LLViewerWindow::handleRightMouseUp(LLWindow* window,  LLCoordGL pos, MASK mask)
 {
 	BOOL down = FALSE;
 	return handleAnyMouseClick(window,pos,mask,LLMouseHandler::CLICK_RIGHT,down);
 }
 
-BOOL LLViewerWindow::handleMiddleMouseDown(LLWindow *window,  LLCoordGL pos, MASK mask)
+BOOL LLViewerWindow::handleMiddleMouseDown(LLWindow* window,  LLCoordGL pos, MASK mask)
 {
 	BOOL down = TRUE;
-	LLVoiceClient::getInstance()->middleMouseState(true);
-	handleAnyMouseClick(window,pos,mask,LLMouseHandler::CLICK_MIDDLE,down);
+	if (LLVoiceClient::instanceExists())
+	{
+		LLVoiceClient::getInstance()->middleMouseState(true);
+	}
+
+	handleAnyMouseClick(window, pos, mask, LLMouseHandler::CLICK_MIDDLE, down);
 
 	// Always handled as far as the OS is concerned.
 	return TRUE;
 }
 
-BOOL LLViewerWindow::handleMiddleMouseUp(LLWindow *window,  LLCoordGL pos, MASK mask)
+BOOL LLViewerWindow::handleMiddleMouseUp(LLWindow* window,  LLCoordGL pos, MASK mask)
 {
 	BOOL down = FALSE;
-	LLVoiceClient::getInstance()->middleMouseState(false);
-	handleAnyMouseClick(window,pos,mask,LLMouseHandler::CLICK_MIDDLE,down);
+	if (LLVoiceClient::instanceExists())
+	{
+		LLVoiceClient::getInstance()->middleMouseState(false);
+	}
+
+	handleAnyMouseClick(window, pos, mask, LLMouseHandler::CLICK_MIDDLE, down);
 
 	// Always handled as far as the OS is concerned.
 	return TRUE;
 }
 
 // WARNING: this is potentially called multiple times per frame
-void LLViewerWindow::handleMouseMove(LLWindow *window,  LLCoordGL pos, MASK mask)
+void LLViewerWindow::handleMouseMove(LLWindow* window,  LLCoordGL pos, MASK mask)
 {
 	S32 x = pos.mX;
 	S32 y = pos.mY;
@@ -1041,7 +1049,7 @@ void LLViewerWindow::handleMouseMove(LLWindow *window,  LLCoordGL pos, MASK mask
 	}
 }
 
-void LLViewerWindow::handleMouseLeave(LLWindow *window)
+void LLViewerWindow::handleMouseLeave(LLWindow* window)
 {
 	// Note: we won't get this if we have captured the mouse.
 	llassert(gFocusMgr.getMouseCapture() == NULL);
@@ -1052,7 +1060,7 @@ void LLViewerWindow::handleMouseLeave(LLWindow *window)
 	}
 }
 
-BOOL LLViewerWindow::handleCloseRequest(LLWindow *window)
+BOOL LLViewerWindow::handleCloseRequest(LLWindow* window)
 {
 	// User has indicated they want to close, but we may need to ask
 	// about modified documents.
@@ -1061,19 +1069,19 @@ BOOL LLViewerWindow::handleCloseRequest(LLWindow *window)
 	return FALSE;
 }
 
-void LLViewerWindow::handleQuit(LLWindow *window)
+void LLViewerWindow::handleQuit(LLWindow* window)
 {
 	LLAppViewer::instance()->forceQuit();
 }
 
-void LLViewerWindow::handleResize(LLWindow *window,  S32 width,  S32 height)
+void LLViewerWindow::handleResize(LLWindow* window, S32 width, S32 height)
 {
 	reshape(width, height);
 	mResDirty = true;
 }
 
 // The top-level window has gained focus (e.g. via ALT-TAB)
-void LLViewerWindow::handleFocus(LLWindow *window)
+void LLViewerWindow::handleFocus(LLWindow* window)
 {
 	gFocusMgr.setAppHasFocus(TRUE);
 	LLModalDialog::onAppFocusGained();
@@ -1095,7 +1103,7 @@ void LLViewerWindow::handleFocus(LLWindow *window)
 }
 
 // The top-level window has lost focus (e.g. via ALT-TAB)
-void LLViewerWindow::handleFocusLost(LLWindow *window)
+void LLViewerWindow::handleFocusLost(LLWindow* window)
 {
 	gFocusMgr.setAppHasFocus(FALSE);
 	//LLModalDialog::onAppFocusLost();
@@ -1127,10 +1135,14 @@ void LLViewerWindow::handleFocusLost(LLWindow *window)
 	gForegroundTime.pause();
 }
 
-BOOL LLViewerWindow::handleTranslatedKeyDown(KEY key,  MASK mask, BOOL repeated)
+BOOL LLViewerWindow::handleTranslatedKeyDown(KEY key, MASK mask, BOOL repeated)
 {
-	// Let the voice chat code check for its PTT key.  Note that this never affects event processing.
-	LLVoiceClient::getInstance()->keyDown(key, mask);
+	// Let the voice chat code check for its PTT key. Note that this never
+	// affects event processing.
+	if (LLVoiceClient::instanceExists())
+	{
+		LLVoiceClient::getInstance()->keyDown(key, mask);
+	}
 
 	if (gAwayTimer.getElapsedTimeF32() > MIN_AFK_TIME)
 	{
@@ -1151,13 +1163,18 @@ BOOL LLViewerWindow::handleTranslatedKeyDown(KEY key,  MASK mask, BOOL repeated)
 
 BOOL LLViewerWindow::handleTranslatedKeyUp(KEY key,  MASK mask)
 {
-	// Let the voice chat code check for its PTT key.  Note that this never affects event processing.
-	LLVoiceClient::getInstance()->keyUp(key, mask);
+	// Let the voice chat code check for its PTT key. Note that this never
+	// affects event processing.
+	if (LLVoiceClient::instanceExists())
+	{
+		LLVoiceClient::getInstance()->keyUp(key, mask);
+	}
 
 	return FALSE;
 }
 
-void LLViewerWindow::handleScanKey(KEY key, BOOL key_down, BOOL key_up, BOOL key_level)
+void LLViewerWindow::handleScanKey(KEY key, BOOL key_down, BOOL key_up,
+								   BOOL key_level)
 {
 	LLViewerJoystick::getInstance()->setCameraNeedsUpdate(true);
 	return gViewerKeyboard.scanKey(key, key_down, key_up, key_level);
@@ -1227,7 +1244,7 @@ BOOL LLViewerWindow::handleActivate(LLWindow* window, BOOL activated)
 	return TRUE;
 }
 
-BOOL LLViewerWindow::handleActivateApp(LLWindow *window, BOOL activating)
+BOOL LLViewerWindow::handleActivateApp(LLWindow* window, BOOL activating)
 {
 	//if (!activating) gAgent.changeCameraToDefault();
 
@@ -1235,11 +1252,12 @@ BOOL LLViewerWindow::handleActivateApp(LLWindow *window, BOOL activating)
 	return FALSE;
 }
 
-void LLViewerWindow::handleMenuSelect(LLWindow *window,  S32 menu_item)
+void LLViewerWindow::handleMenuSelect(LLWindow* window,  S32 menu_item)
 {
 }
 
-BOOL LLViewerWindow::handlePaint(LLWindow *window,  S32 x,  S32 y, S32 width,  S32 height)
+BOOL LLViewerWindow::handlePaint(LLWindow* window, S32 x, S32 y, S32 width,
+								 S32 height)
 {
 #if LL_WINDOWS
 	if (gNoRender)
@@ -1263,15 +1281,17 @@ BOOL LLViewerWindow::handlePaint(LLWindow *window,  S32 x,  S32 y, S32 width,  S
 
 		std::string temp_str;
 		temp_str = llformat("%s FPS %3.1f Phy FPS %2.1f Time Dil %1.3f",		/* Flawfinder: ignore */
-				name_str.c_str(),
-				LLViewerStats::getInstance()->mFPSStat.getMeanPerSec(),
-				LLViewerStats::getInstance()->mSimPhysicsFPS.getPrev(0),
-				LLViewerStats::getInstance()->mSimTimeDilation.getPrev(0));
+							name_str.c_str(),
+							LLViewerStats::getInstance()->mFPSStat.getMeanPerSec(),
+							LLViewerStats::getInstance()->mSimPhysicsFPS.getPrev(0),
+							LLViewerStats::getInstance()->mSimTimeDilation.getPrev(0));
 		S32 len = temp_str.length();
 		TextOutA(hdc, 0, 0, temp_str.c_str(), len); 
 
 		LLVector3d pos_global = gAgent.getPositionGlobal();
-		temp_str = llformat("Avatar pos %6.1lf %6.1lf %6.1lf", pos_global.mdV[0], pos_global.mdV[1], pos_global.mdV[2]);
+		temp_str = llformat("Avatar pos %6.1lf %6.1lf %6.1lf",
+							pos_global.mdV[0], pos_global.mdV[1],
+							pos_global.mdV[2]);
 		len = temp_str.length();
 		TextOutA(hdc, 0, 25, temp_str.c_str(), len); 
 
@@ -1283,27 +1303,27 @@ BOOL LLViewerWindow::handlePaint(LLWindow *window,  S32 x,  S32 y, S32 width,  S
 	return FALSE;
 }
 
-void LLViewerWindow::handleScrollWheel(LLWindow *window,  S32 clicks)
+void LLViewerWindow::handleScrollWheel(LLWindow* window,  S32 clicks)
 {
 	handleScrollWheel(clicks);
 }
 
-void LLViewerWindow::handleWindowBlock(LLWindow *window)
+void LLViewerWindow::handleWindowBlock(LLWindow* window)
 {
 	send_agent_pause();
 }
 
-void LLViewerWindow::handleWindowUnblock(LLWindow *window)
+void LLViewerWindow::handleWindowUnblock(LLWindow* window)
 {
 	send_agent_resume();
 }
 
-void LLViewerWindow::handleDataCopy(LLWindow *window, S32 data_type, void *data)
+void LLViewerWindow::handleDataCopy(LLWindow* window, S32 data_type,
+									void* data)
 {
 	const S32 SLURL_MESSAGE_TYPE = 0;
-	switch (data_type)
+	if (data_type == SLURL_MESSAGE_TYPE)
 	{
-	case SLURL_MESSAGE_TYPE:
 		// received URL
 		std::string url = (const char*)data;
 		LLMediaCtrl* web = NULL;
@@ -1313,11 +1333,10 @@ void LLViewerWindow::handleDataCopy(LLWindow *window, S32 data_type, void *data)
 			// bring window to foreground, as it has just been "launched" from a URL
 			mWindow->bringToFront();
 		}
-		break;
 	}
 }
 
-BOOL LLViewerWindow::handleTimerEvent(LLWindow *window)
+BOOL LLViewerWindow::handleTimerEvent(LLWindow* window)
 {
 	if (LLViewerJoystick::getInstance()->getOverrideCamera())
 	{
@@ -1327,7 +1346,7 @@ BOOL LLViewerWindow::handleTimerEvent(LLWindow *window)
 	return FALSE;
 }
 
-BOOL LLViewerWindow::handleDeviceChange(LLWindow *window)
+BOOL LLViewerWindow::handleDeviceChange(LLWindow* window)
 {
 	// give a chance to use a joystick after startup (hot-plugging)
 	if (!LLViewerJoystick::getInstance()->isJoystickInitialized())
@@ -1338,17 +1357,17 @@ BOOL LLViewerWindow::handleDeviceChange(LLWindow *window)
 	return FALSE;
 }
 
-void LLViewerWindow::handlePingWatchdog(LLWindow *window, const char * msg)
+void LLViewerWindow::handlePingWatchdog(LLWindow* window, const char* msg)
 {
 	LLAppViewer::instance()->pingMainloopTimeout(msg);
 }
 
-void LLViewerWindow::handleResumeWatchdog(LLWindow *window)
+void LLViewerWindow::handleResumeWatchdog(LLWindow* window)
 {
 	LLAppViewer::instance()->resumeMainloopTimeout();
 }
 
-void LLViewerWindow::handlePauseWatchdog(LLWindow *window)
+void LLViewerWindow::handlePauseWatchdog(LLWindow* window)
 {
 	LLAppViewer::instance()->pauseMainloopTimeout();
 }
@@ -1384,8 +1403,10 @@ LLViewerWindow::LLViewerWindow(const std::string& title,
 	mIsFullscreenChecked(false),
 	mCurrResolutionIndex(0)
 {
-	LLNotificationChannel::buildChannel("VW_alerts", "Visible", LLNotificationFilters::filterBy<std::string>(&LLNotification::getType, "alert"));
-	LLNotificationChannel::buildChannel("VW_alertmodal", "Visible", LLNotificationFilters::filterBy<std::string>(&LLNotification::getType, "alertmodal"));
+	LLNotificationChannel::buildChannel("VW_alerts", "Visible",
+										LLNotificationFilters::filterBy<std::string>(&LLNotification::getType, "alert"));
+	LLNotificationChannel::buildChannel("VW_alertmodal", "Visible",
+										LLNotificationFilters::filterBy<std::string>(&LLNotification::getType, "alertmodal"));
 
 	LLNotifications::instance().getChannel("VW_alerts")->connectChanged(&LLViewerWindow::onAlert);
 	LLNotifications::instance().getChannel("VW_alertmodal")->connectChanged(&LLViewerWindow::onAlert);
@@ -1421,11 +1442,13 @@ LLViewerWindow::LLViewerWindow(const std::string& title,
         LLAppViewer::instance()->forceExit(1);
 	}
 
-	// Get the real window rect the window was created with (since there are various OS-dependent reasons why
-	// the size of a window or fullscreen context may have been adjusted slightly...)
+	// Get the real window rect the window was created with (since there are
+	// various OS-dependent reasons why the size of a window or fullscreen
+	// context may have been adjusted slightly...)
 	F32 ui_scale_factor = gSavedSettings.getF32("UIScaleFactor");
 
-	mDisplayScale.setVec(llmax(1.f / mWindow->getPixelAspectRatio(), 1.f), llmax(mWindow->getPixelAspectRatio(), 1.f));
+	mDisplayScale.setVec(llmax(1.f / mWindow->getPixelAspectRatio(), 1.f),
+						 llmax(mWindow->getPixelAspectRatio(), 1.f));
 	mDisplayScale *= ui_scale_factor;
 	LLUI::setScaleFactor(mDisplayScale);
 
@@ -1433,7 +1456,9 @@ LLViewerWindow::LLViewerWindow(const std::string& title,
 		LLCoordWindow size;
 		mWindow->getSize(&size);
 		mWindowRect.set(0, size.mY, size.mX, 0);
-		mVirtualWindowRect.set(0, llround((F32)size.mY / mDisplayScale.mV[VY]), llround((F32)size.mX / mDisplayScale.mV[VX]), 0);
+		mVirtualWindowRect.set(0, llround((F32)size.mY / mDisplayScale.mV[VY]),
+							   llround((F32)size.mX / mDisplayScale.mV[VX]),
+							   0);
 	}
 
 	LLFontManager::initClass();
@@ -1452,7 +1477,8 @@ LLViewerWindow::LLViewerWindow(const std::string& title,
 	{
 		gSavedSettings.setBOOL("RenderVBOEnable", FALSE);
 	}
-	LLVertexBuffer::initClass(gSavedSettings.getBOOL("RenderVBOEnable"), gSavedSettings.getBOOL("RenderVBOMappingDisable"));
+	LLVertexBuffer::initClass(gSavedSettings.getBOOL("RenderVBOEnable"),
+							  gSavedSettings.getBOOL("RenderVBOMappingDisable"));
 	llinfos << "LLVertexBuffer initialization done." << llendl;
 	gGL.init();
 
@@ -1512,13 +1538,13 @@ void LLViewerWindow::initGLDefaults()
 	gGL.setSceneBlendType(LLRender::BT_ALPHA);
 	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 
-	F32 ambient[4] = {0.f,0.f,0.f,0.f };
-	F32 diffuse[4] = {1.f,1.f,1.f,1.f };
-	glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT,ambient);
-	glMaterialfv(GL_FRONT_AND_BACK,GL_DIFFUSE,diffuse);
+	F32 ambient[4] = { 0.f, 0.f, 0.f, 0.f };
+	F32 diffuse[4] = { 1.f, 1.f, 1.f, 1.f };
+	glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT, ambient);
+	glMaterialfv(GL_FRONT_AND_BACK,GL_DIFFUSE, diffuse);
 
-	glPixelStorei(GL_PACK_ALIGNMENT,1);
-	glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	gGL.getTexUnit(0)->enable(LLTexUnit::TT_TEXTURE);
 
@@ -1560,9 +1586,9 @@ void LLViewerWindow::initBase()
 
 	// Create global views
 
-	// Create the floater view at the start so that other views can add children to it. 
-	// (But wait to add it as a child of the root view so that it will be in front of the 
-	// other views.)
+	// Create the floater view at the start so that other views can add
+	// children to it (but wait to add it as a child of the root view so that
+	// it will be in front of the other views).
 
 	// Constrain floaters to inside the menu and status bar regions.
 	LLRect floater_view_rect = full_window;
@@ -1581,9 +1607,9 @@ void LLViewerWindow::initBase()
 	gFloaterView = new LLFloaterView("Floater View", floater_view_rect);
 	gFloaterView->setVisible(TRUE);
 
-	gSnapshotFloaterView = new LLSnapshotFloaterView("Snapshot Floater View", full_window);
-	// Snapshot floater must start invisible otherwise it eats all
-	// the tooltips. JC
+	gSnapshotFloaterView = new LLSnapshotFloaterView("Snapshot Floater View",
+													 full_window);
+	// Snapshot floater must start invisible otherwise it eats all the tooltips
 	gSnapshotFloaterView->setVisible(FALSE);
 
 	// Console
@@ -1608,7 +1634,8 @@ void LLViewerWindow::initBase()
 	gHUDView->setFollowsAll();
 	mRootView->addChild(gHUDView);
 
-	// Add floater view at the end so it will be on top, and give it tab priority over others
+	// Add floater view at the end so it will be on top, and give it tab
+	// priority over others
 	mRootView->addChild(gFloaterView, -1);
 	mRootView->addChild(gSnapshotFloaterView);
 
@@ -1616,7 +1643,8 @@ void LLViewerWindow::initBase()
 	LLRect notify_rect = full_window;
 	//notify_rect.mTop -= 24;
 	notify_rect.mBottom += STATUS_BAR_HEIGHT;
-	gNotifyBoxView = new LLNotifyBoxView("notify_container", notify_rect, FALSE, FOLLOWS_ALL);
+	gNotifyBoxView = new LLNotifyBoxView("notify_container", notify_rect,
+										 FALSE, FOLLOWS_ALL);
 	mRootView->addChild(gNotifyBoxView, -2);
 
 	// Tooltips go above floaters
@@ -1633,7 +1661,8 @@ void LLViewerWindow::initBase()
 	mToolTip->setVisible(FALSE);
 
 	// Add the progress bar view (startup view), which overrides everything
-	mProgressView = new LLProgressView(std::string("ProgressView"), full_window);
+	mProgressView = new LLProgressView(std::string("ProgressView"),
+									   full_window);
 	mRootView->addChild(mProgressView);
 	setShowProgress(FALSE);
 	setProgressCancelButtonVisible(FALSE);
@@ -1654,10 +1683,8 @@ void adjust_rect_top_center(const std::string& control, const LLRect& window)
 	LLRect r = gSavedSettings.getRect(control);
 	if (r.mLeft == 0 && r.mBottom == 0)
 	{
-		r.setLeftTopAndSize(window.getWidth()/2 - r.getWidth()/2,
-			window.getHeight(),
-			r.getWidth(),
-			r.getHeight());
+		r.setLeftTopAndSize(window.getWidth() / 2 - r.getWidth() / 2,
+							window.getHeight(), r.getWidth(), r.getHeight());
 		gSavedSettings.setRect(control, r);
 	}
 }
@@ -1668,9 +1695,7 @@ void adjust_rect_top_right(const std::string& control, const LLRect& window)
 	if (r.mLeft == 0 && r.mBottom == 0)
 	{
 		r.setLeftTopAndSize(window.getWidth() - r.getWidth(),
-			window.getHeight(),
-			r.getWidth(), 
-			r.getHeight());
+							window.getHeight(), r.getWidth(), r.getHeight());
 		gSavedSettings.setRect(control, r);
 	}
 }
@@ -1693,11 +1718,8 @@ void adjust_rect_bottom_center(const std::string& control, const LLRect& window)
 	LLRect r = gSavedSettings.getRect(control);
 	if (r.mLeft == 0 && r.mBottom == 0)
 	{
-		r.setOriginAndSize(
-			window.getWidth()/2 - r.getWidth()/2,
-			TOOLBAR_HEIGHT,
-			r.getWidth(),
-			r.getHeight());
+		r.setOriginAndSize(window.getWidth() / 2 - r.getWidth() / 2,
+						   TOOLBAR_HEIGHT, r.getWidth(), r.getHeight());
 		gSavedSettings.setRect(control, r);
 	}
 }
@@ -1770,11 +1792,8 @@ void LLViewerWindow::adjustRectanglesForFirstUse(const LLRect& window)
 	r = gSavedSettings.getRect("FloaterInventoryRect");
 	if (r.mLeft == 0 && r.mBottom == 0)
 	{
-		r.setOriginAndSize(
-			window.getWidth() - r.getWidth(),
-			0,
-			r.getWidth(),
-			r.getHeight());
+		r.setOriginAndSize(window.getWidth() - r.getWidth(),
+						   0, r.getWidth(), r.getHeight());
 		gSavedSettings.setRect("FloaterInventoryRect", r);
 	}
 
@@ -1784,17 +1803,15 @@ void LLViewerWindow::adjustRectanglesForFirstUse(const LLRect& window)
 	r = gSavedSettings.getRect("FloaterHUDRect2");
 	if (r.mLeft == 0 && r.mBottom == 0)
 	{
-		r.setOriginAndSize(
-			window.getWidth()/4 - r.getWidth()/2,
-			2*window.getHeight()/3 - r.getHeight()/2,
-			r.getWidth(),
-			r.getHeight());
+		r.setOriginAndSize(window.getWidth() / 4 - r.getWidth() / 2,
+						   2 * window.getHeight() / 3 - r.getHeight() / 2,
+						   r.getWidth(), r.getHeight());
 		gSavedSettings.setRect("FloaterHUDRect2", r);
 	}
 }
 
-//Rectangles need to be adjusted after the window is constructed
-//in order for proper centering to take place
+// Rectangles need to be adjusted after the window is constructed in order for
+// proper centering to take place
 void LLViewerWindow::adjustControlRectanglesForFirstUse(const LLRect& window)
 {
 	adjust_rect_bottom_center("FloaterMoveRect2", window);
@@ -1809,7 +1826,7 @@ void LLViewerWindow::initWorldUI()
 	S32 width = mRootView->getRect().getWidth();
 	LLRect full_window(0, height, width, 0);
 
-	if (gToolBar == NULL)			// Don't re-enter if objects are alreay created
+	if (gToolBar == NULL)	// Don't re-enter if objects are alreay created
 	{
 		if (gAudiop)
 		{

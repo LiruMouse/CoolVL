@@ -1,11 +1,11 @@
-/** 
+/**
  * @file lljoint.cpp
  * @brief Implementation of LLJoint class.
  *
  * $LicenseInfo:firstyear=2001&license=viewergpl$
- * 
+ *
  * Copyright (c) 2001-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -58,7 +58,6 @@ LLJoint::LLJoint()
 	touch();
 	mResetAfterRestoreOldXform = false;
 }
-
 
 //-----------------------------------------------------------------------------
 // LLJoint()
@@ -95,7 +94,6 @@ LLJoint::~LLJoint()
 	removeAllChildren();
 }
 
-
 //-----------------------------------------------------------------------------
 // setup()
 //-----------------------------------------------------------------------------
@@ -124,8 +122,9 @@ void LLJoint::touch(U32 flags)
 			child_flags |= POSITION_DIRTY;
 		}
 
-		for (child_list_t::iterator iter = mChildren.begin();
-			 iter != mChildren.end(); ++iter)
+		for (child_list_t::iterator iter = mChildren.begin(),
+									end = mChildren.end();
+			 iter != end; ++iter)
 		{
 			LLJoint* joint = *iter;
 			joint->touch(child_flags);
@@ -145,7 +144,6 @@ LLJoint *LLJoint::getRoot()
 	return getParent()->getRoot();
 }
 
-
 //-----------------------------------------------------------------------------
 // findJoint()
 //-----------------------------------------------------------------------------
@@ -154,8 +152,9 @@ LLJoint *LLJoint::findJoint( const std::string &name )
 	if (name == getName())
 		return this;
 
-	for (child_list_t::iterator iter = mChildren.begin();
-		 iter != mChildren.end(); ++iter)
+	for (child_list_t::iterator iter = mChildren.begin(),
+								end = mChildren.end();
+		 iter != end; ++iter)
 	{
 		LLJoint* joint = *iter;
 		LLJoint *found = joint->findJoint(name);
@@ -165,9 +164,8 @@ LLJoint *LLJoint::findJoint( const std::string &name )
 		}
 	}
 
-	return NULL;	
+	return NULL;
 }
-
 
 //--------------------------------------------------------------------
 // addChild()
@@ -179,35 +177,35 @@ void LLJoint::addChild(LLJoint* joint)
 
 	mChildren.push_back(joint);
 	joint->mXform.setParent(&mXform);
-	joint->mParent = this;	
+	joint->mParent = this;
 	joint->touch();
 }
-
 
 //--------------------------------------------------------------------
 // removeChild()
 //--------------------------------------------------------------------
 void LLJoint::removeChild(LLJoint* joint)
 {
-	child_list_t::iterator iter = std::find(mChildren.begin(), mChildren.end(), joint);
+	child_list_t::iterator iter = std::find(mChildren.begin(), mChildren.end(),
+											joint);
 	if (iter != mChildren.end())
 	{
 		mChildren.erase(iter);
-	
+
 		joint->mXform.setParent(NULL);
 		joint->mParent = NULL;
 		joint->touch();
 	}
 }
 
-
 //--------------------------------------------------------------------
 // removeAllChildren()
 //--------------------------------------------------------------------
 void LLJoint::removeAllChildren()
 {
-	for (child_list_t::iterator iter = mChildren.begin();
-		 iter != mChildren.end();)
+	for (child_list_t::iterator iter = mChildren.begin(),
+								end = mChildren.end();
+		 iter != end; )
 	{
 		child_list_t::iterator curiter = iter++;
 		LLJoint* joint = *curiter;
@@ -218,7 +216,6 @@ void LLJoint::removeAllChildren()
 	}
 }
 
-
 //--------------------------------------------------------------------
 // getPosition()
 //--------------------------------------------------------------------
@@ -226,7 +223,6 @@ const LLVector3& LLJoint::getPosition()
 {
 	return mXform.getPosition();
 }
-
 
 //--------------------------------------------------------------------
 // setPosition()
@@ -240,7 +236,6 @@ void LLJoint::setPosition( const LLVector3& pos )
 	}
 }
 
-
 //--------------------------------------------------------------------
 // setDefaultFromCurrentXform()
 //--------------------------------------------------------------------
@@ -248,7 +243,7 @@ void LLJoint::setDefaultFromCurrentXform( void )
 {
 	mDefaultXform = mXform;
 	touch(MATRIX_DIRTY | POSITION_DIRTY);
-	
+
 }
 
 //--------------------------------------------------------------------
@@ -272,7 +267,7 @@ void LLJoint::restoreOldXform( void )
 // restoreOldXform()
 //--------------------------------------------------------------------
 void LLJoint::restoreToDefaultXform( void )
-{	
+{
 	mXform = mDefaultXform;
 	setPosition(mXform.getPosition());
 }
@@ -293,7 +288,6 @@ LLVector3 LLJoint::getLastWorldPosition()
 {
 	return mXform.getWorldPosition();
 }
-
 
 //--------------------------------------------------------------------
 // setWorldPosition()
@@ -323,7 +317,6 @@ void LLJoint::setWorldPosition( const LLVector3& pos )
 	setPosition( localPos );
 }
 
-
 //--------------------------------------------------------------------
 // mXform.getRotation()
 //--------------------------------------------------------------------
@@ -331,7 +324,6 @@ const LLQuaternion& LLJoint::getRotation()
 {
 	return mXform.getRotation();
 }
-
 
 //--------------------------------------------------------------------
 // setRotation()
@@ -347,7 +339,6 @@ void LLJoint::setRotation( const LLQuaternion& rot )
 		}
 	}
 }
-
 
 //--------------------------------------------------------------------
 // getWorldRotation()
@@ -392,7 +383,6 @@ void LLJoint::setWorldRotation( const LLQuaternion& rot )
 	setRotation(LLQuaternion(temp_mat));
 }
 
-
 //--------------------------------------------------------------------
 // getScale()
 //--------------------------------------------------------------------
@@ -414,8 +404,6 @@ void LLJoint::setScale( const LLVector3& scale )
 
 }
 
-
-
 //--------------------------------------------------------------------
 // getWorldMatrix()
 //--------------------------------------------------------------------
@@ -425,7 +413,6 @@ const LLMatrix4 &LLJoint::getWorldMatrix()
 
 	return mXform.getWorldMatrix();
 }
-
 
 //--------------------------------------------------------------------
 // setWorldMatrix()
@@ -483,15 +470,16 @@ void LLJoint::updateWorldPRSParent()
 // updateWorldMatrixChildren()
 //-----------------------------------------------------------------------------
 void LLJoint::updateWorldMatrixChildren()
-{	
+{
 	if (!this->mUpdateXform) return;
 
 	if (mDirtyFlags & MATRIX_DIRTY)
 	{
 		updateWorldMatrix();
 	}
-	for (child_list_t::iterator iter = mChildren.begin();
-		 iter != mChildren.end(); ++iter)
+	for (child_list_t::iterator iter = mChildren.begin(),
+								end = mChildren.end();
+		 iter != end; ++iter)
 	{
 		LLJoint* joint = *iter;
 		joint->updateWorldMatrixChildren();
@@ -519,7 +507,6 @@ const LLVector3 &LLJoint::getSkinOffset()
 	return mSkinOffset;
 }
 
-
 //--------------------------------------------------------------------
 // setSkinOffset()
 //--------------------------------------------------------------------
@@ -528,7 +515,6 @@ void LLJoint::setSkinOffset( const LLVector3& offset )
 	mSkinOffset = offset;
 }
 
-
 //-----------------------------------------------------------------------------
 // clampRotation()
 //-----------------------------------------------------------------------------
@@ -536,8 +522,9 @@ void LLJoint::clampRotation(LLQuaternion old_rot, LLQuaternion new_rot)
 {
 	LLVector3 main_axis(1.f, 0.f, 0.f);
 
-	for (child_list_t::iterator iter = mChildren.begin();
-		 iter != mChildren.end(); ++iter)
+	for (child_list_t::iterator iter = mChildren.begin(),
+								end = mChildren.end();
+		 iter != end; ++iter)
 	{
 		LLJoint* joint = *iter;
 		if (joint->isAnimatable())

@@ -50,7 +50,7 @@
 
 LLToolGun::LLToolGun(LLToolComposite* composite)
 :	LLTool(std::string("gun"), composite),
-		mIsSelected(FALSE)
+	mIsSelected(FALSE)
 {
 }
 
@@ -84,7 +84,8 @@ BOOL LLToolGun::handleHover(S32 x, S32 y, MASK mask)
 	{
 		const F32 NOMINAL_MOUSE_SENSITIVITY = 0.0025f;
 
-		static LLCachedControl<F32> sensitivity(gSavedSettings, "MouseSensitivity");
+		static LLCachedControl<F32> sensitivity(gSavedSettings,
+												"MouseSensitivity");
 		F32 mouse_sensitivity = clamp_rescale((F32)sensitivity,
 											  0.f, 15.f, 0.5f, 2.75f)
 								* NOMINAL_MOUSE_SENSITIVITY;
@@ -98,7 +99,8 @@ BOOL LLToolGun::handleHover(S32 x, S32 y, MASK mask)
 		if (dx != 0 || dy != 0)
 		{
 			// ...actually moved off center
-			static LLCachedControl<bool> invert_mouse(gSavedSettings, "InvertMouse");
+			static LLCachedControl<bool> invert_mouse(gSavedSettings,
+													  "InvertMouse");
 			if (invert_mouse)
 			{
 				gAgent.pitch(mouse_sensitivity * -dy);
@@ -108,17 +110,20 @@ BOOL LLToolGun::handleHover(S32 x, S32 y, MASK mask)
 				gAgent.pitch(mouse_sensitivity * dy);
 			}
 			LLVector3 skyward = gAgent.getReferenceUpVector();
-			gAgent.rotate(mouse_sensitivity * dx, skyward.mV[VX], skyward.mV[VY], skyward.mV[VZ]);
+			gAgent.rotate(mouse_sensitivity * dx, skyward.mV[VX],
+						  skyward.mV[VY], skyward.mV[VZ]);
 
 			gViewerWindow->moveCursorToCenter();
 			gViewerWindow->hideCursor();
 		}
 
-		lldebugst(LLERR_USER_INPUT) << "hover handled by LLToolGun (mouselook)" << llendl;
+		lldebugst(LLERR_USER_INPUT) << "hover handled by LLToolGun (mouselook)"
+									<< llendl;
 	}
 	else
 	{
-		lldebugst(LLERR_USER_INPUT) << "hover handled by LLToolGun (not mouselook)" << llendl;
+		lldebugst(LLERR_USER_INPUT) << "hover handled by LLToolGun (not mouselook)"
+									<< llendl;
 	}
 
 	// HACK to avoid assert: error checking system makes sure that the cursor
@@ -131,10 +136,11 @@ BOOL LLToolGun::handleHover(S32 x, S32 y, MASK mask)
 
 void LLToolGun::draw()
 {
-	static LLCachedControl<bool> show_crosshairs(gSavedSettings, "ShowCrosshairs");
+	static LLCachedControl<bool> show_crosshairs(gSavedSettings,
+												 "ShowCrosshairs");
 	if (show_crosshairs)
 	{
-		LLUIImagePtr crosshair = LLUI::getUIImage("UIImgCrosshairsUUID");
+		static LLUIImagePtr crosshair = LLUI::getUIImage("UIImgCrosshairsUUID");
 		crosshair->draw((gViewerWindow->getWindowWidth() - crosshair->getWidth()) / 2,
 						(gViewerWindow->getWindowHeight() - crosshair->getHeight()) / 2);
 	}

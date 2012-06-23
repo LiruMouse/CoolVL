@@ -336,13 +336,6 @@ void LLFloaterCustomize::initWearablePanels()
 	part->mCameraOffset.setVec(-1.6f, 0.15f, -0.5f);
 	panel->addSubpart("Legs", SUBPART_SHAPE_LEGS, part);
 
-	if (panel->getChild<LLUICtrl>("sex radio", TRUE, FALSE))
-	{
-		panel->childSetCommitCallback("sex radio",
-									  LLPanelEditWearable::onCommitSexChange,
-									  panel);
-	}
-
 	/////////////////////////////////////////
 	// Skin
 	panel = mWearablePanelList[LLWearableType::WT_SKIN];

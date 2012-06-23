@@ -34,6 +34,11 @@
 	 radio_style="false" enabled="true" mouse_opaque="true"
 	 label="Automatically play media" font="SansSerifSmall"
 	 bottom_delta="-20" left_delta="20" height="16" width="330" follows="left|top" />
+	<check_box name="media_hud" control_name="MediaOnAPrimUI"
+	 radio_style="false" enabled="true" mouse_opaque="true"
+	 label="Show the media HUD when hovering on media textures" font="SansSerifSmall"
+	 tool_tip="When this setting is enabled and you hover the mouse pointer on the face of an object bearing a playing media, the media HUD is shown."
+	 bottom_delta="-20" left_delta="0" height="16" width="330" follows="left|top" />
 	<check_box name="media_enable_filter" control_name="MediaEnableFilter"
 	 radio_style="false" enabled="true" mouse_opaque="true"
 	 label="Parcel media and audio stream filtering" font="SansSerifSmall"

@@ -1059,7 +1059,8 @@ void LLVOAvatar::initClass()
 { 
 	std::string xmlFile;
 
-	xmlFile = gDirUtilp->getExpandedFilename(LL_PATH_CHARACTER,AVATAR_DEFAULT_CHAR) + "_lad.xml";
+	xmlFile = gDirUtilp->getExpandedFilename(LL_PATH_CHARACTER,
+											 AVATAR_DEFAULT_CHAR) + "_lad.xml";
 	if (!sXMLTree.parseFile(xmlFile, FALSE))
 	{
 		llerrs << "Problem reading avatar configuration file:" << xmlFile
@@ -1070,8 +1071,8 @@ void LLVOAvatar::initClass()
 	LLXmlTreeNode* root = sXMLTree.getRoot();
 	if (!root) 
 	{
-		llerrs << "No root node found in avatar configuration file: " << xmlFile
-			   << llendl;
+		llerrs << "No root node found in avatar configuration file: "
+			   << xmlFile << llendl;
 		return;
 	}
 
@@ -1094,7 +1095,8 @@ void LLVOAvatar::initClass()
 
 	S32 wearable_def_version = 1;
 	static LLStdStringHandle wearable_definition_version_string = LLXmlTree::addAttributeString("wearable_definition_version");
-	root->getFastAttributeS32(wearable_definition_version_string, wearable_def_version);
+	root->getFastAttributeS32(wearable_definition_version_string,
+							  wearable_def_version);
 	LLWearable::setCurrentDefinitionVersion(wearable_def_version);
 
 	std::string mesh_file_name;
@@ -1109,14 +1111,16 @@ void LLVOAvatar::initClass()
 
 	std::string skeleton_file_name;
 	static LLStdStringHandle file_name_string = LLXmlTree::addAttributeString("file_name");
-	if (!skeleton_node->getFastAttributeString(file_name_string, skeleton_file_name))
+	if (!skeleton_node->getFastAttributeString(file_name_string,
+											   skeleton_file_name))
 	{
 		llerrs << "No file name in skeleton node in avatar config file: "
 			   << xmlFile << llendl;
 	}
 
 	std::string skeleton_path;
-	skeleton_path = gDirUtilp->getExpandedFilename(LL_PATH_CHARACTER,skeleton_file_name);
+	skeleton_path = gDirUtilp->getExpandedFilename(LL_PATH_CHARACTER,
+												   skeleton_file_name);
 	if (!parseSkeletonFile(skeleton_path))
 	{
 		llerrs << "Error parsing skeleton file: " << skeleton_path << llendl;
@@ -7765,8 +7769,8 @@ void LLVOAvatar::dumpXMLCallback(LLFilePicker::ESaveFilter type,
 		const std::string& wearable_name = LLWearableType::getTypeName((LLWearableType::EType)type);
 		apr_file_printf(file, "\n\t\t<!-- wearable: %s -->\n", wearable_name.c_str());
 
-		for (LLVisualParam* param = gAgentAvatarp->getFirstVisualParam(); param;
-			 param = gAgentAvatarp->getNextVisualParam())
+		for (LLVisualParam* param = gAgentAvatarp->getFirstVisualParam();
+			 param; param = gAgentAvatarp->getNextVisualParam())
 		{
 			LLViewerVisualParam* viewer_param = (LLViewerVisualParam*)param;
 			if (viewer_param->getWearableType() == type && viewer_param->isTweakable())

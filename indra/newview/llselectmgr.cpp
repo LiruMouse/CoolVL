@@ -6390,7 +6390,8 @@ LLObjectSelection::~LLObjectSelection()
 
 void LLObjectSelection::cleanupNodes()
 {
-	for (list_t::iterator iter = mList.begin(); iter != mList.end();)
+	for (list_t::iterator iter = mList.begin(), end = mList.end();
+		 iter != end; )
 	{
 		list_t::iterator curiter = iter++;
 		LLSelectNode* node = *curiter;

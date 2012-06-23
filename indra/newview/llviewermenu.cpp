@@ -240,9 +240,6 @@ void init_restrained_life_menu(LLMenuGL* menu);
 //mk
 void init_debug_baked_texture_menu(LLMenuGL* menu);
 
-BOOL enable_land_build(void*);
-BOOL enable_object_build(void*);
-
 LLVOAvatar* find_avatar_from_object(LLViewerObject* object);
 LLVOAvatar* find_avatar_from_object(const LLUUID& object_id);
 
@@ -2006,7 +2003,8 @@ bool toggle_build_mode()
 	else
 	{
 //MK
-		if (gRRenabled && (gAgent.mRRInterface.mContainsRez || gAgent.mRRInterface.mContainsEdit))
+		if (gRRenabled && (gAgent.mRRInterface.mContainsRez ||
+						   gAgent.mRRInterface.mContainsEdit))
 		{
 			return false;
 		}
@@ -2088,7 +2086,8 @@ class LLObjectBuild : public view_listener_t
 	bool handleEvent(LLPointer<LLEvent> event, const LLSD& userdata)
 	{
 //MK
-		if (gRRenabled && (gAgent.mRRInterface.mContainsRez || gAgent.mRRInterface.mContainsEdit))
+		if (gRRenabled && (gAgent.mRRInterface.mContainsRez ||
+						   gAgent.mRRInterface.mContainsEdit))
 		{
 			return false;
 		}
@@ -2326,67 +2325,18 @@ class LLLandEnableBuyPass : public view_listener_t
 	}
 };
 
-// BUG: Should really check if CLICK POINT is in a parcel where you can build.
-BOOL enable_land_build(void*)
-{
-//MK
-	if (gRRenabled && (gAgent.mRRInterface.mContainsRez || gAgent.mRRInterface.mContainsEdit))
-	{
-		return false;
-	}
-//mk
-	if (gAgent.isGodlike()) return TRUE;
-	if (gAgent.inPrelude()) return FALSE;
-
-	BOOL can_build = FALSE;
-	LLParcel* agent_parcel = LLViewerParcelMgr::getInstance()->getAgentParcel();
-	if (agent_parcel)
-	{
-		can_build = agent_parcel->getAllowModify();
-	}
-	return can_build;
-}
-
-// BUG: Should really check if OBJECT is in a parcel where you can build.
-BOOL enable_object_build(void*)
-{
-//MK
-	if (gRRenabled && (gAgent.mRRInterface.mContainsRez || gAgent.mRRInterface.mContainsEdit))
-	{
-		return false;
-	}
-//mk
-	if (gAgent.isGodlike()) return TRUE;
-	if (gAgent.inPrelude()) return FALSE;
-
-	BOOL can_build = FALSE;
-	LLParcel* agent_parcel = LLViewerParcelMgr::getInstance()->getAgentParcel();
-	if (agent_parcel)
-	{
-		can_build = agent_parcel->getAllowModify();
-	}
-	return can_build;
-}
-
 class LLEnableEdit : public view_listener_t
 {
 	bool handleEvent(LLPointer<LLEvent> event, const LLSD& userdata)
 	{
-		// *HACK:  The new "prelude" Help Islands have a build sandbox area,
-		// so users need the Edit and Create pie menu options when they are
-		// there.  Eventually this needs to be replaced with code that only 
-		// lets you edit objects if you have permission to do so (edit perms,
-		// group edit, god).  See also lltoolbar.cpp.  JC
-		bool enable = true;
-		if (gAgent.inPrelude())
-		{
-			enable = LLViewerParcelMgr::getInstance()->agentCanBuild()
-				|| LLSelectMgr::getInstance()->getSelection()->isAttachment();
-		}
+		// *HACK: See LLViewerParcelMgr::agentCanBuild() for the "false" flag.
+		bool enable = LLViewerParcelMgr::getInstance()->agentCanBuild(false) ||
+					  LLSelectMgr::getInstance()->getSelection()->isAttachment();
 //MK
-		if (gRRenabled && enable)
+		if (enable && gRRenabled)
 		{
-			LLViewerObject* obj = LLSelectMgr::getInstance()->getSelection()->getPrimaryObject();
+			LLViewerObject* obj;
+			obj = LLSelectMgr::getInstance()->getSelection()->getPrimaryObject();
 			if (obj && !gAgent.mRRInterface.canEdit(obj))
 			{
 				enable = false;
@@ -2695,14 +2645,9 @@ class LLObjectEnableImport : public view_listener_t
 {
 	bool handleEvent(LLPointer<LLEvent> event, const LLSD& userdata)
 	{
-		bool new_value = !LLFilePickerThread::isInUse() && !LLDirPickerThread::isInUse();
-//MK
-		if (new_value && gRRenabled)
-		{
-			new_value = !gAgent.mRRInterface.mContainsRez &&
-						!gAgent.mRRInterface.mContainsEdit;
-		}
-//mk
+		bool new_value = !LLFilePickerThread::isInUse() &&
+						 !LLDirPickerThread::isInUse() &&
+						 LLViewerParcelMgr::getInstance()->agentCanBuild();
 		gMenuHolder->findControl(userdata["control"].asString())->setValue(new_value);
 		return true;
 	}
@@ -6728,44 +6673,47 @@ class LLAttachmentEnableDrop : public view_listener_t
 {
 	bool handleEvent(LLPointer<LLEvent> event, const LLSD& userdata)
 	{
-		BOOL can_build   = gAgent.isGodlike() || (LLViewerParcelMgr::getInstance()->agentCanBuild());
+		// Add an inventory observer to only allow dropping the newly attached
+		// item once it exists in your inventory.  Look at Jira 2422. -jwolk
 
-		//Add an inventory observer to only allow dropping the newly attached item
-		//once it exists in your inventory.  Look at Jira 2422.
-		//-jwolk
+		// A bug occurs when you wear/drop an item before it actively is added
+		// to your inventory if this is the case (you're on a slow sim, etc.),
+		// a copy of the object, well, a newly created object with the same
+		// properties, is placed in your inventory. Therefore, we disable the
+		// drop option until the item is in your inventory
 
-		// A bug occurs when you wear/drop an item before it actively is added to your inventory
-		// if this is the case (you're on a slow sim, etc.) a copy of the object,
-		// well, a newly created object with the same properties, is placed
-		// in your inventory.  Therefore, we disable the drop option until the
-		// item is in your inventory
-
-		LLViewerObject*              object         = LLSelectMgr::getInstance()->getSelection()->getPrimaryObject();
-		LLViewerJointAttachment*     attachment_pt  = NULL;
-		LLInventoryItem*             item           = NULL;
+		LLViewerObject* object = LLSelectMgr::getInstance()->getSelection()->getPrimaryObject();
+		LLViewerJointAttachment* attachment_pt = NULL;
+		LLInventoryItem* item = NULL;
 
 		if (object)
 		{
     		S32 attachmentID  = ATTACHMENT_ID_FROM_STATE(object->getState());
-			attachment_pt = get_if_there(gAgentAvatarp->mAttachmentPoints, attachmentID, (LLViewerJointAttachment*)NULL);
+			attachment_pt = get_if_there(gAgentAvatarp->mAttachmentPoints,
+										 attachmentID,
+										 (LLViewerJointAttachment*)NULL);
 
 			if (attachment_pt)
 			{
-				for (LLViewerJointAttachment::attachedobjs_vec_t::iterator attachment_iter = attachment_pt->mAttachedObjects.begin();
-					 attachment_iter != attachment_pt->mAttachedObjects.end();
-					 ++attachment_iter)
+				for (LLViewerJointAttachment::attachedobjs_vec_t::iterator
+						attachment_iter = attachment_pt->mAttachedObjects.begin(),
+						end = attachment_pt->mAttachedObjects.end();
+					 attachment_iter != end; ++attachment_iter)
 				{
-					// make sure item is in your inventory (it could be a delayed attach message being sent from the sim)
-					// so check to see if the item is in the inventory already
+					// make sure item is in your inventory (it could be a
+					// delayed attach message being sent from the sim) so check
+					// to see if the item is in the inventory already
 					item = gInventory.getItem((*attachment_iter)->getAttachmentItemID());
 					if (!item)
 					{
-						// Item does not exist, make an observer to enable the pie menu 
-						// when the item finishes fetching worst case scenario 
-						// if a fetch is already out there (being sent from a slow sim)
-						// we refetch and there are 2 fetches
-						LLWornItemFetchedObserver* wornItemFetched = new LLWornItemFetchedObserver();
-						LLInventoryFetchObserver::item_ref_t items; //add item to the inventory item to be fetched
+						// Item does not exist, make an observer to enable the
+						// pie menu when the item finishes fetching worst case
+						// scenario if a fetch is already out there (being sent
+						// from a slow sim) we refetch and there are 2 fetches
+						LLWornItemFetchedObserver* wornItemFetched;
+						wornItemFetched = new LLWornItemFetchedObserver();
+						// add item to the inventory item to be fetched:
+						LLInventoryFetchObserver::item_ref_t items;
 
 						items.push_back((*attachment_iter)->getAttachmentItemID());
 
@@ -6776,14 +6724,11 @@ class LLAttachmentEnableDrop : public view_listener_t
 			}
 		}
 
-		//now check to make sure that the item is actually in the inventory before we enable dropping it
-		bool new_value = enable_detach(NULL) && can_build && item;
-//MK
-		if (gRRenabled && gAgent.mRRInterface.mContainsRez)
-		{
-			new_value = false;
-		}
-//mk
+		// now check to make sure that the item is actually in the inventory
+		// before we enable dropping it
+		bool new_value = enable_detach(NULL) && item &&
+						 LLViewerParcelMgr::getInstance()->agentCanBuild();
+
 		gMenuHolder->findControl(userdata["control"].asString())->setValue(new_value);
 		return true;
 	}
@@ -6802,8 +6747,10 @@ BOOL enable_detach(void*)
 			return FALSE;
 		}
 
-		// prevent a clever workaround that allowed to detach several objects at the same time by selecting them
-		if (gAgent.mRRInterface.mContainsDetach && LLSelectMgr::getInstance()->getSelection()->getRootObjectCount() > 1)
+		// prevent a clever workaround that allowed to detach several objects
+		// at the same time by selecting them
+		if (gAgent.mRRInterface.mContainsDetach &&
+			LLSelectMgr::getInstance()->getSelection()->getRootObjectCount() > 1)
 		{
 			return FALSE;
 		}

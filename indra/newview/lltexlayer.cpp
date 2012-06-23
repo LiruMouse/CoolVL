@@ -1931,8 +1931,9 @@ BOOL LLTexLayer::renderMorphMasks(S32 x, S32 y, S32 width, S32 height, const LLC
 	// Accumulate alphas
 	LLGLSNoAlphaTest gls_no_alpha_test;
 	gGL.color4f(1.f, 1.f, 1.f, 1.f);
-	for (param_alpha_list_t::iterator iter = mParamAlphaList.begin();
-		 iter != mParamAlphaList.end(); ++iter)
+	for (param_alpha_list_t::iterator iter = mParamAlphaList.begin(),
+									  end = mParamAlphaList.end();
+		 iter != end; ++iter)
 	{
 		LLTexLayerParamAlpha* param = *iter;
 		success &= param->render(x, y, width, height);
@@ -1999,8 +2000,9 @@ BOOL LLTexLayer::renderMorphMasks(S32 x, S32 y, S32 width, S32 height, const LLC
 		const LLUUID& uuid = getUUID();
 		alpha_mask_crc.update((U8*)(&uuid.mData), UUID_BYTES);
 
-		for (param_alpha_list_t::const_iterator iter = mParamAlphaList.begin();
-			 iter != mParamAlphaList.end(); ++iter)
+		for (param_alpha_list_t::const_iterator iter = mParamAlphaList.begin(),
+												end = mParamAlphaList.end();
+			 iter != end; ++iter)
 		{
 			const LLTexLayerParamAlpha* param = *iter;
 			F32 param_weight = param->getWeight();
@@ -2190,8 +2192,9 @@ BOOL LLTexLayerTemplate::render(S32 x, S32 y, S32 width, S32 height)
 
 	BOOL success = TRUE;
 	updateWearableCache();
-	for (wearable_cache_t::const_iterator iter = mWearableCache.begin();
-		 iter!= mWearableCache.end(); ++iter)
+	for (wearable_cache_t::const_iterator iter = mWearableCache.begin(),
+										  end = mWearableCache.end();
+		 iter!= end; ++iter)
 	{
 		LLWearable* wearable = *iter;
 		LLLocalTextureObject* lto = NULL;

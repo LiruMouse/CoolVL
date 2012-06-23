@@ -97,19 +97,15 @@ void setDefaultTextures()
 		// defaults from the user settings...
 		LL_TEXTURE_PLYWOOD = LLUUID(gSavedSettings.getString("DefaultObjectTexture"));
 		LL_TEXTURE_BLANK = LLUUID(gSavedSettings.getString("UIImgWhiteUUID"));
-		if (gSavedSettings.controlExists("UIImgInvisibleUUID"))
-		{
-			// This control only exists in the Cool VL Viewer (added by the
-			// AllowInvisibleTextureInPicker patch)
-			LL_TEXTURE_INVISIBLE = LLUUID(gSavedSettings.getString("UIImgInvisibleUUID"));
-		}
+		LL_TEXTURE_INVISIBLE = LLUUID(gSavedSettings.getString("UIImgInvisibleUUID"));
 	}
 }
 
 class importResponder: public LLNewAgentInventoryResponder
 {
 public:
-	importResponder(const LLSD& post_data, const LLUUID& vfile_id, LLAssetType::EType asset_type)
+	importResponder(const LLSD& post_data, const LLUUID& vfile_id,
+					LLAssetType::EType asset_type)
 	:	LLNewAgentInventoryResponder(post_data, vfile_id, asset_type)
 	{
 	}
@@ -117,7 +113,8 @@ public:
 	//virtual 
 	virtual void uploadComplete(const LLSD& content)
 	{
-		LL_DEBUGS("ObjectBackup") << "LLNewAgentInventoryResponder::result from capabilities" << LL_ENDL;
+		LL_DEBUGS("ObjectBackup") << "LLNewAgentInventoryResponder::result from capabilities"
+								  << LL_ENDL;
 
 		LLAssetType::EType asset_type = LLAssetType::lookup(mPostData["asset_type"].asString());
 		LLInventoryType::EType inventory_type = LLInventoryType::lookup(mPostData["inventory_type"].asString());
@@ -138,8 +135,10 @@ public:
 		}
 
 		// Actually add the upload to viewer inventory
-		LL_INFOS("ObjectBackup") << "Adding " << content["new_inventory_item"].asUUID() << " "
-				<< content["new_asset"].asUUID() << " to inventory." << LL_ENDL;
+		LL_INFOS("ObjectBackup") << "Adding "
+								 << content["new_inventory_item"].asUUID()
+								 << " " << content["new_asset"].asUUID()
+								 << " to inventory." << LL_ENDL;
 		if (mPostData["folder_id"].asUUID().notNull())
 		{
 			LLPermissions perm;
@@ -155,24 +154,25 @@ public:
 			}
 			perm.initMasks(PERM_ALL, PERM_ALL, PERM_NONE, PERM_NONE, next_owner_perm);
 			S32 creation_date_now = time_corrected();
-			LLPointer<LLViewerInventoryItem> item
-				= new LLViewerInventoryItem(content["new_inventory_item"].asUUID(),
-											mPostData["folder_id"].asUUID(),
-											perm,
-											content["new_asset"].asUUID(),
-											asset_type,
-											inventory_type,
-											mPostData["name"].asString(),
-											mPostData["description"].asString(),
-											LLSaleInfo::DEFAULT,
-											LLInventoryItem::II_FLAGS_NONE,
-											creation_date_now);
+			LLPointer<LLViewerInventoryItem> item;
+			item = new LLViewerInventoryItem(content["new_inventory_item"].asUUID(),
+											 mPostData["folder_id"].asUUID(),
+											 perm,
+											 content["new_asset"].asUUID(),
+											 asset_type,
+											 inventory_type,
+											 mPostData["name"].asString(),
+											 mPostData["description"].asString(),
+											 LLSaleInfo::DEFAULT,
+											 LLInventoryItem::II_FLAGS_NONE,
+											 creation_date_now);
 			gInventory.updateItem(item);
 			gInventory.notifyObservers();
 		}
 		else
 		{
-			LL_WARNS("ObjectBackup") << "Can't find a folder to put it into" << LL_ENDL;
+			LL_WARNS("ObjectBackup") << "Can't find a folder to put it into"
+									 << LL_ENDL;
 		}
 
 		// remove the "Uploading..." message
@@ -192,11 +192,14 @@ public:
 		setImage(image);
 	}
 
-	void setData(U8* data, S32 datasize, S32 imagesize, S32 imageformat, BOOL imagelocal)
+	void setData(U8* data, S32 datasize, S32 imagesize, S32 imageformat,
+				 BOOL imagelocal)
 	{
 		if (imageformat == IMG_CODEC_TGA && mFormattedImage->getCodec() == IMG_CODEC_J2C)
 		{
-			LL_WARNS("ObjectBackup") << "FAILED: texture " << mID << " is formatted as TGA. Not saving." << LL_ENDL;
+			LL_WARNS("ObjectBackup") << "FAILED: texture " << mID
+									 << " is formatted as TGA. Not saving."
+									 << LL_ENDL;
 			LLObjectBackup::getInstance()->mNonExportedTextures |= LLObjectBackup::TEXTURE_BAD_ENCODING;
 			mFormattedImage = NULL;
 			mImageSize = 0;
@@ -221,14 +224,16 @@ public:
 	{
 		if (success && mFormattedImage.notNull() && mImageSize > 0)
 		{
-			LL_INFOS("ObjectBackup") << "SUCCESS getting texture " << mID << LL_ENDL;
+			LL_INFOS("ObjectBackup") << "SUCCESS getting texture " << mID
+									 << LL_ENDL;
 			std::string name;
 			mID.toString(name);
 			name = LLObjectBackup::getInstance()->getfolder() + "//" + name;
 			LL_INFOS("ObjectBackup") << "Saving to " << name << LL_ENDL;			
 			if (!mFormattedImage->save(name))
 			{
-				LL_WARNS("ObjectBackup") << "FAILED to save texture " << mID << LL_ENDL;
+				LL_WARNS("ObjectBackup") << "FAILED to save texture " << mID
+										 << LL_ENDL;
 				LLObjectBackup::getInstance()->mNonExportedTextures |= LLObjectBackup::TEXTURE_SAVED_FAILED;
 			}
 		}
@@ -236,18 +241,20 @@ public:
 		{
 			if (!success)
 			{
-				LL_WARNS("ObjectBackup") << "FAILED to get texture " << mID << LL_ENDL;
+				LL_WARNS("ObjectBackup") << "FAILED to get texture " << mID
+										 << LL_ENDL;
 				LLObjectBackup::getInstance()->mNonExportedTextures |= LLObjectBackup::TEXTURE_MISSING;
 			}
 			if (mFormattedImage.isNull())
 			{
-				LL_WARNS("ObjectBackup") << "FAILED: NULL texture " << mID << LL_ENDL;
+				LL_WARNS("ObjectBackup") << "FAILED: NULL texture " << mID
+										 << LL_ENDL;
 				LLObjectBackup::getInstance()->mNonExportedTextures |= LLObjectBackup::TEXTURE_IS_NULL;
 			}
 		}	
 
-		LLObjectBackup::getInstance()->mNextTextureReady = true;
-		//JUST SAY NO TO APR DEADLOCKING
+		LLObjectBackup::getInstance()->mCheckNextTexture = true;
+		//Just say no to apr deadlocking
 		//LLObjectBackup::getInstance()->exportNextTexture();
 	}
 
@@ -257,7 +264,7 @@ private:
 };
 
 LLObjectBackup::LLObjectBackup()
-: LLFloater("Object Backup")
+:	LLFloater("Object Backup")
 {
 	LLUICtrlFactory::getInstance()->buildFloater(this,
 												 "floater_object_backup.xml",
@@ -331,7 +338,8 @@ void LLObjectBackup::updateImportNumbers()
 
 	if (mRetexture)
 	{
-		sstr << " Textures uploads remaining : " << mTexturesList.size() << "\n";
+		sstr << " Textures uploads remaining : " << mTexturesList.size()
+			 << "\n";
 		ctrl->setValue(LLSD("Text") = sstr.str());
 	}
 	else
@@ -359,7 +367,8 @@ void LLObjectBackup::exportCallback(LLFilePicker::ESaveFilter type,
 	{
 		if (sInstance)
 		{
-			LLViewerObject* object = LLSelectMgr::getInstance()->getSelection()->getPrimaryObject();
+			LLViewerObject* object;
+			object = LLSelectMgr::getInstance()->getSelection()->getPrimaryObject();
 			if (object)
 			{
 				sInstance->doExportObject(filename);
@@ -397,11 +406,12 @@ void LLObjectBackup::doExportObject(std::string filename)
 	gIdleCallbacks.addFunction(exportWorker, NULL);
 }
 
-bool LLObjectBackup::validatePerms(const LLPermissions *item_permissions)
+bool LLObjectBackup::validatePerms(const LLPermissions* item_permissions)
 {
 	if (gIsInSecondLife)
 	{
-		// In Second Life, you must be the creator to be permitted to export the asset.
+		// In Second Life, you must be the creator to be permitted to export
+		// the asset.
 		return (gAgent.getID() == item_permissions->getOwner() &&
 				gAgent.getID() == item_permissions->getCreator());
 	}
@@ -450,7 +460,7 @@ LLUUID LLObjectBackup::validateTextureID(LLUUID asset_id)
 
 	if (items.count())
 	{
-		for (S32 i = 0; i < items.count(); i++)
+		for (S32 i = 0, count = items.count(); i < count; ++i)
 		{
 			const LLPermissions item_permissions = items[i]->getPermissions();
 			if (validatePerms(&item_permissions))
@@ -497,7 +507,8 @@ void LLObjectBackup::exportWorker(void *userdata)
 				}
 				else
 				{
-					LL_WARNS("ObjectBackup") << "Incorrect permission to export" << LL_ENDL;
+					LL_WARNS("ObjectBackup") << "Incorrect permission to export"
+											 << LL_ENDL;
 					sInstance->mExportState = EXPORT_FAILED;
 					selmgr->getSelection()->unref();
 				}
@@ -521,7 +532,8 @@ void LLObjectBackup::exportWorker(void *userdata)
 					object->boostTexturePriority(TRUE);
 					LLViewerObject::child_list_t children = object->getChildren();
 					children.push_front(object); //push root onto list
-					LLSD prim_llsd = sInstance->primsToLLSD(children, is_attachment);				
+					LLSD prim_llsd = sInstance->primsToLLSD(children,
+															is_attachment);
 					LLSD stuff;
 					if (is_attachment)
 					{
@@ -555,11 +567,11 @@ void LLObjectBackup::exportWorker(void *userdata)
 
 		case EXPORT_TEXTURES:
 		{
-			if (sInstance->mNextTextureReady == false)
+			if (!sInstance->mCheckNextTexture)
+			{
+				// The texture is being fetched. Wait till next idle callback.
 				return;
-
-			// Ok we got work to do
-			sInstance->mNextTextureReady = false;
+			}
 
 			if (sInstance->mTexturesList.empty())
 			{
@@ -567,6 +579,8 @@ void LLObjectBackup::exportWorker(void *userdata)
 				return;
 			}
 
+			// Ok, we got work to do...
+			sInstance->mCheckNextTexture = false;
 			sInstance->exportNextTexture();
 			break;
 		}
@@ -577,7 +591,7 @@ void LLObjectBackup::exportWorker(void *userdata)
 			llofstream export_file(sInstance->mFileName);
 			LLSDSerialize::toPrettyXML(sInstance->mLLSD, export_file);
 			export_file.close();
-			sInstance->mNextTextureReady = true;	
+			sInstance->mCheckNextTexture = true;	
 			sInstance->mExportState = EXPORT_TEXTURES;
 			break;
 		}
@@ -587,12 +601,14 @@ void LLObjectBackup::exportWorker(void *userdata)
 			gIdleCallbacks.deleteFunction(exportWorker);
 			if (sInstance->mNonExportedTextures == LLObjectBackup::TEXTURE_OK)
 			{
-				LL_INFOS("ObjectBackup") << "Export successful and complete." << LL_ENDL;
+				LL_INFOS("ObjectBackup") << "Export successful and complete."
+										 << LL_ENDL;
 				LLNotifications::instance().add("ExportSuccessful");
 			}
 			else
 			{
-				LL_INFOS("ObjectBackup") << "Export successful but incomplete: some texture(s) not saved." << LL_ENDL;
+				LL_INFOS("ObjectBackup") << "Export successful but incomplete: some texture(s) not saved."
+										 << LL_ENDL;
 				std::string reason;
 				if (sInstance->mNonExportedTextures & LLObjectBackup::TEXTURE_BAD_PERM)
 				{
@@ -642,27 +658,31 @@ void LLObjectBackup::exportWorker(void *userdata)
 	}
 }
 
-LLSD LLObjectBackup::primsToLLSD(LLViewerObject::child_list_t child_list, bool is_attachment)
+LLSD LLObjectBackup::primsToLLSD(LLViewerObject::child_list_t child_list,
+								 bool is_attachment)
 {
 	LLViewerObject* object;
 	LLSD llsd;
 	char localid[16];
 
-	for (LLViewerObject::child_list_t::iterator i = child_list.begin(); i != child_list.end(); ++i)
+	for (LLViewerObject::child_list_t::iterator i = child_list.begin();
+		 i != child_list.end(); ++i)
 	{
 		object = (*i);
 		LLUUID id = object->getID();
 
-		LL_INFOS("ObjectBackup") << "Exporting prim " << object->getID().asString() << LL_ENDL;
+		LL_INFOS("ObjectBackup") << "Exporting prim "
+								 << object->getID().asString() << LL_ENDL;
 
-		// Create an LLSD object that represents this prim. It will be injected in to the overall LLSD
-		// tree structure
+		// Create an LLSD object that represents this prim. It will be injected
+		// in to the overall LLSD tree structure
 		LLSD prim_llsd;
 
 		if (!object->isRoot())
 		{
 			// Parent id
-			snprintf(localid, sizeof(localid), "%u", object->getSubParent()->getLocalID());
+			snprintf(localid, sizeof(localid), "%u",
+					 object->getSubParent()->getLocalID());
 			prim_llsd["parent"] = localid;
 		}
 
@@ -719,22 +739,17 @@ LLSD LLObjectBackup::primsToLLSD(LLViewerObject::child_list_t child_list, bool i
 				LLUUID sculpt_texture = sculpt->getSculptTexture();
 				if (sculpt_texture == validateTextureID(sculpt_texture))
 				{
-					bool alreadyseen = false;
-					std::list<LLUUID>::iterator iter;
-					for (iter = mTexturesList.begin(); iter != mTexturesList.end(); iter++) 
+					if (mTexturesList.count(sculpt_texture) == 0)
 					{
-						if ((*iter) == sculpt_texture)
-							alreadyseen = true;
-					}
-					if (alreadyseen == false)
-					{
-						LL_INFOS("ObjectBackup") << "Found a sculpt texture, adding to list " << sculpt_texture << LL_ENDL;
-						mTexturesList.push_back(sculpt_texture);
+						LL_INFOS("ObjectBackup") << "Found a sculpt texture, adding to list "
+												 << sculpt_texture << LL_ENDL;
+						mTexturesList.insert(sculpt_texture);
 					}
 				}
 				else
 				{
-					LL_WARNS("ObjectBackup") << "Incorrect permission to export a sculpt texture." << LL_ENDL;
+					LL_WARNS("ObjectBackup") << "Incorrect permission to export a sculpt texture."
+											 << LL_ENDL;
 					getInstance()->mExportState = EXPORT_FAILED;
 				}
 			}
@@ -744,30 +759,26 @@ LLSD LLObjectBackup::primsToLLSD(LLViewerObject::child_list_t child_list, bool i
 		LLSD te_llsd;
 		LLSD this_te_llsd;
 		LLUUID t_id;
-		U8 te_count = object->getNumTEs();
-		for (U8 i = 0; i < te_count; i++)
+		for (U8 i = 0, count = object->getNumTEs(); i < count; ++i)
 		{
-			bool alreadyseen = false;
 			t_id = validateTextureID(object->getTE(i)->getID());
 			this_te_llsd = object->getTE(i)->asLLSD();
 			this_te_llsd["imageid"] = t_id;
 			te_llsd.append(this_te_llsd);
-			if (t_id != LL_TEXTURE_BLANK && t_id != LL_TEXTURE_INVISIBLE) // Do not export non-existent default textures
+			// Do not export non-existent default textures
+			if (t_id != LL_TEXTURE_BLANK && t_id != LL_TEXTURE_INVISIBLE)
  			{
-				std::list<LLUUID>::iterator iter;
-				for (iter = mTexturesList.begin(); iter != mTexturesList.end(); iter++) 
+				if (mTexturesList.count(t_id) == 0)
 				{
-					if ((*iter) == t_id)
-						alreadyseen = true;
+					mTexturesList.insert(t_id);
 				}
-				if (alreadyseen == false)
-					mTexturesList.push_back(t_id);
 			}
 		}
 		prim_llsd["textures"] = te_llsd;
 
-		// The keys in the primitive maps do not have to be localids, they can be any
-		// string. We simply use localids because they are a unique identifier
+		// The keys in the primitive maps do not have to be localids, they can
+		// be any string. We simply use localids because they are a unique
+		// identifier
 		snprintf(localid, sizeof(localid), "%u", object->getLocalID());
 		llsd[(const char*)localid] = prim_llsd;
 	}
@@ -777,71 +788,76 @@ LLSD LLObjectBackup::primsToLLSD(LLViewerObject::child_list_t child_list, bool i
 
 void LLObjectBackup::exportNextTexture()
 {
-	if (mTexturesList.empty())
-	{
-		LL_INFOS("ObjectBackup") << "Finished exporting textures." << LL_ENDL;
-		return;
-	}
-
 	LLUUID id;
-	std::list<LLUUID>::iterator iter;
-	iter = mTexturesList.begin();
-
+	std::set<LLUUID>::iterator iter = mTexturesList.begin();
 	while (true)
 	{
+		if (mTexturesList.empty())
+		{
+			mCheckNextTexture = true;
+			LL_INFOS("ObjectBackup") << "Finished exporting textures." << LL_ENDL;
+			return;
+		}
 		if (iter == mTexturesList.end())
 		{
-			mNextTextureReady = true;
+			// Not yet ready, wait and re-check at next idle callback...
+			mCheckNextTexture = true;
 			return;
 		}
 
-		id = (*iter);
+		id = *iter++;
 		if (id.isNull())
 		{
 			// NULL texture id: just remove and ignore.
-			mTexturesList.remove(id);
-			iter = mTexturesList.begin();
+			mTexturesList.erase(id);
+			LL_DEBUGS("ObjectBackup") << "Null texture UUID found, ignoring."
+									  << LL_ENDL;
 			continue;
 		}
 
 		LLViewerTexture* imagep = LLViewerTextureManager::findTexture(id);
-		if (imagep != NULL)
+		if (imagep)
 		{
-			S32 cur_discard = imagep->getDiscardLevel();
-			if (cur_discard > 0)
+			if (imagep->getDiscardLevel() > 0)
 			{
-				if (imagep->getBoostLevel() <= LLViewerTexture::BOOST_PREVIEW)
+				// Boost texture loading
+				imagep->setBoostLevel(LLViewerTexture::BOOST_PREVIEW);
+				LL_DEBUGS("ObjectBackup") << "Boosting texture: " << id
+										  << LL_ENDL;
+				LLViewerFetchedTexture* tex;
+				tex = LLViewerTextureManager::staticCastToFetchedTexture(imagep);
+				if (tex && tex->getDesiredDiscardLevel() > 0)
 				{
-					// Boost texture loading
-					imagep->setBoostLevel(LLViewerTexture::BOOST_PREVIEW);
-				}
-				else
-				{
-					// Already boosted: don't discard it as a last ressort
-					imagep->dontDiscard();
+					// Set min discard level to 0
+					tex->setMinDiscardLevel(0);
+					LL_DEBUGS("ObjectBackup") << "Min discard level set to 0 for texture: "
+											  << id << LL_ENDL;
 				}
 			}
 			else
 			{
+				// Texture is ready !
 				break;
 			}
 		}
 		else
 		{
-			LL_WARNS("ObjectBackup") << "We *DON'T* have the texture " << id.asString() << LL_ENDL;
+			LL_WARNS("ObjectBackup") << "We *DON'T* have the texture " << id
+									 << LL_ENDL;
 			mNonExportedTextures |= TEXTURE_MISSING;
-			mTexturesList.remove(id);
-			return;
+			mTexturesList.erase(id);
 		}
-		iter++;
 	}
 
-	mTexturesList.remove(id);
+	mTexturesList.erase(id);
 
-	LL_INFOS("ObjectBackup") << "Requesting texture " << id << LL_ENDL;
+	LL_INFOS("ObjectBackup") << "Requesting texture " << id << " from cache."
+							 << LL_ENDL;
 	LLImageJ2C* mFormattedImage = new LLImageJ2C;
 	CacheReadResponder* responder = new CacheReadResponder(id, mFormattedImage);
-  	LLAppViewer::getTextureCache()->readFromCache(id, LLWorkerThread::PRIORITY_HIGH, 0, 999999, responder);
+  	LLAppViewer::getTextureCache()->readFromCache(id,
+												  LLWorkerThread::PRIORITY_HIGH,
+												  0, 999999, responder);
 }
 
 //static
@@ -886,7 +902,8 @@ void LLObjectBackup::doImportObject(std::string filename)
 	show(false);
 
 	mAgentPos = gAgent.getPositionAgent();
-	mAgentRot = LLQuaternion(gAgent.getAtAxis(), gAgent.getLeftAxis(), gAgent.getUpAxis());
+	mAgentRot = LLQuaternion(gAgent.getAtAxis(), gAgent.getLeftAxis(),
+							 gAgent.getUpAxis());
 
 	// Get the texture map
 	
@@ -900,11 +917,12 @@ void LLObjectBackup::doImportObject(std::string filename)
 	mRezCount = 0;
 	updateImportNumbers();
 
-	for (prim_arr_it = mLLSD["data"].beginArray(); prim_arr_it != mLLSD["data"].endArray(); prim_arr_it++)
+	for (prim_arr_it = mLLSD["data"].beginArray();
+		 prim_arr_it != mLLSD["data"].endArray(); ++prim_arr_it)
 	{
 		LLSD llsd2 = (*prim_arr_it)["group_body"];
 
-		for (prim_it = llsd2.beginMap(); prim_it != llsd2.endMap(); prim_it++)
+		for (prim_it = llsd2.beginMap(); prim_it != llsd2.endMap(); ++prim_it)
 		{
 			LLSD prim_llsd = llsd2[prim_it->first];
 			LLSD::array_iterator text_it;
@@ -917,42 +935,33 @@ void LLObjectBackup::doImportObject(std::string filename)
 				if ((sculpt->getSculptType() & LL_SCULPT_TYPE_MASK) != LL_SCULPT_TYPE_MESH)
 				{
 					LLUUID orig = sculpt->getSculptTexture();
-					bool alreadyseen = false;
-					for (iter = mTexturesList.begin(); iter != mTexturesList.end(); iter++)
+					if (mTexturesList.count(orig) == 0)
 					{
-						if ((*iter) == orig)
-							alreadyseen = true;
-					}
-					if (alreadyseen == false)
-					{
-						LL_INFOS("ObjectBackup") << "Found a new SCULPT texture to upload " << orig << LL_ENDL;			
-						mTexturesList.push_back(orig);
+						LL_INFOS("ObjectBackup") << "Found a new SCULPT texture to upload "
+												 << orig << LL_ENDL;			
+						mTexturesList.insert(orig);
 					}
 				}
 			}
 
 			LLSD te_llsd = prim_llsd["textures"];
 
-			for (text_it = te_llsd.beginArray(); text_it != te_llsd.endArray(); text_it++)
+			for (text_it = te_llsd.beginArray(); text_it != te_llsd.endArray();
+				 ++text_it)
 			{
 				LLSD the_te = (*text_it);
 				LLTextureEntry te;
 				te.fromLLSD(the_te);
 
 				LLUUID id = te.getID();
-				if (id != LL_TEXTURE_PLYWOOD && id != LL_TEXTURE_BLANK && id != LL_TEXTURE_INVISIBLE) // Do not upload the default textures
+				if (id != LL_TEXTURE_PLYWOOD && id != LL_TEXTURE_BLANK &&
+					id != LL_TEXTURE_INVISIBLE) // Do not upload the default textures
  				{
-					bool alreadyseen = false;
-
-					for (iter = mTexturesList.begin(); iter != mTexturesList.end(); iter++)
+					if (mTexturesList.count(te.getID()) == 0)
 					{
-						if ((*iter) == te.getID())
-							alreadyseen = true;
-					}
-					if (alreadyseen == false)
-					{
-						LL_INFOS("ObjectBackup") << "Found a new texture to upload "<< te.getID() << LL_ENDL;			
-						mTexturesList.push_back(te.getID());
+						LL_INFOS("ObjectBackup") << "Found a new texture to upload "
+												 << te.getID() << LL_ENDL;
+						mTexturesList.insert(te.getID());
 					}
 				}	     
 			}
@@ -1012,10 +1021,12 @@ void LLObjectBackup::importNextObject()
 	mRootRot = ll_quaternion_from_sd((*mGroupPrimImportIter)["root_rotation"]);
 
 	rezAgentOffset(LLVector3(0.0, 2.0, 0.0));
-	// Now we must wait for the callback when ViewerObjectList gets the new objects and we have the correct number selected
+	// Now we must wait for the callback when ViewerObjectList gets the new
+	// objects and we have the correct number selected
 }
 
-// This function takes a pointer to a viewerobject and applies the prim definition that prim_llsd has
+// This function takes a pointer to a viewerobject and applies the prim
+// definition that prim_llsd has
 void LLObjectBackup::xmlToPrim(LLSD prim_llsd, LLViewerObject* object)
 {
 	LLUUID id = object->getID();
@@ -1049,17 +1060,20 @@ void LLObjectBackup::xmlToPrim(LLSD prim_llsd, LLViewerObject* object)
 
 	object->setScale(LLVector3(prim_llsd["scale"]));
 
-	if (prim_llsd.has("shadows"))
-		if (prim_llsd["shadows"].asInteger() == 1)
-			object->setFlags(FLAGS_CAST_SHADOWS, true);
+	if (prim_llsd.has("shadows") &&  prim_llsd["shadows"].asInteger() == 1)
+	{
+		object->setFlags(FLAGS_CAST_SHADOWS, true);
+	}
 
-	if (prim_llsd.has("phantom"))
-		if (prim_llsd["phantom"].asInteger() == 1)
-			object->setFlags(FLAGS_PHANTOM, true);
+	if (prim_llsd.has("phantom") && prim_llsd["phantom"].asInteger() == 1)
+	{
+		object->setFlags(FLAGS_PHANTOM, true);
+	}
 
-	if (prim_llsd.has("physical"))
-		if (prim_llsd["physical"].asInteger() == 1)
-			object->setFlags(FLAGS_USE_PHYSICS, true);
+	if (prim_llsd.has("physical") && prim_llsd["physical"].asInteger() == 1)
+	{
+		object->setFlags(FLAGS_USE_PHYSICS, true);
+	}
 
 	// Volume params
 	LLVolumeParams volume_params = object->getVolume()->getParams();
@@ -1071,7 +1085,8 @@ void LLObjectBackup::xmlToPrim(LLSD prim_llsd, LLViewerObject* object)
 		LLSculptParams* sculpt = new LLSculptParams();
 		sculpt->fromLLSD(prim_llsd["sculpt"]);
 
-		// TODO: check if map is valid and only set texture if map is valid and changes
+		// TODO: check if map is valid and only set texture if map is valid and
+		// changes
 
 		if (mAssetMap[sculpt->getSculptTexture()].notNull())
 		{
@@ -1079,21 +1094,24 @@ void LLObjectBackup::xmlToPrim(LLSD prim_llsd, LLViewerObject* object)
 			sculpt->setSculptTexture(replacement);
 		}
 
-		object->setParameterEntry(LLNetworkData::PARAMS_SCULPT, (LLNetworkData&)(*sculpt), true);
+		object->setParameterEntry(LLNetworkData::PARAMS_SCULPT,
+								  (LLNetworkData&)(*sculpt), true);
 	}
 		
 	if (prim_llsd.has("light"))
 	{
 		LLLightParams* light = new LLLightParams();
 		light->fromLLSD(prim_llsd["light"]);
-		object->setParameterEntry(LLNetworkData::PARAMS_LIGHT, (LLNetworkData&)(*light), true);
+		object->setParameterEntry(LLNetworkData::PARAMS_LIGHT,
+								  (LLNetworkData&)(*light), true);
 	}
 
 	if (prim_llsd.has("flexible"))
 	{
 		LLFlexibleObjectData* flex = new LLFlexibleObjectData();
 		flex->fromLLSD(prim_llsd["flexible"]);
-		object->setParameterEntry(LLNetworkData::PARAMS_FLEXIBLE, (LLNetworkData&)(*flex), true);
+		object->setParameterEntry(LLNetworkData::PARAMS_FLEXIBLE,
+								  (LLNetworkData&)(*flex), true);
 	}
 
 	// Textures
@@ -1102,7 +1120,8 @@ void LLObjectBackup::xmlToPrim(LLSD prim_llsd, LLViewerObject* object)
 	LLSD::array_iterator text_it;
 	U8 i = 0;
 
-	for (text_it = te_llsd.beginArray(); text_it != te_llsd.endArray(); text_it++)
+	for (text_it = te_llsd.beginArray(); text_it != te_llsd.endArray();
+		 ++text_it)
 	{
 	    LLSD the_te = (*text_it);
 	    LLTextureEntry te;
@@ -1119,9 +1138,8 @@ void LLObjectBackup::xmlToPrim(LLSD prim_llsd, LLViewerObject* object)
 
 	LL_INFOS("ObjectBackup") << "Textures done !" << LL_ENDL;
 
-	//bump the iterator now so the callbacks hook together nicely
-	//if (mPrimImportIter != mThisGroup.endMap())
-	//	mPrimImportIter++;
+	// Bump the iterator now so the callbacks hook together nicely
+	//if (mPrimImportIter != mThisGroup.endMap()) ++mPrimImportIter;
 
 	object->sendRotationUpdate();
 	object->sendTEUpdate();	
@@ -1131,19 +1149,18 @@ void LLObjectBackup::xmlToPrim(LLSD prim_llsd, LLViewerObject* object)
 	LLSelectMgr::getInstance()->deselectAll();
 }
 
-// This is fired when the update packet is processed so we know the prim settings have stuck
+// This is fired when the update packet is processed so we know the prim
+// settings have stuck
 void LLObjectBackup::primUpdate(LLViewerObject* object)
 {
-	if (!mRunning)
+	if (!mRunning || (object != NULL && object->mID != mExpectingUpdate))
+	{
 		return;
+	}
 
-	if (object != NULL)
-		if (object->mID != mExpectingUpdate)
-			return;
-
-	mCurPrim++;
+	++mCurPrim;
 	updateImportNumbers();
-	mPrimImportIter++;
+	++mPrimImportIter;
 
 	LLUUID x;
 	mExpectingUpdate = x.null;
@@ -1163,8 +1180,8 @@ void LLObjectBackup::primUpdate(LLViewerObject* object)
 			root->setRotation(mRootRot);
 		}
 
-		mCurObject++;
-		mGroupPrimImportIter++;
+		++mCurObject;
+		++mGroupPrimImportIter;
 		if (mGroupPrimImportIter != mLLSD["data"].endArray())
 		{
 			importNextObject();
@@ -1180,7 +1197,8 @@ void LLObjectBackup::primUpdate(LLViewerObject* object)
 
 	if (mToSelect.empty())
 	{
-		LL_WARNS("ObjectBackup") << "error: ran out of objects to mod." << LL_ENDL;
+		LL_WARNS("ObjectBackup") << "error: ran out of objects to mod."
+								 << LL_ENDL;
 		mRunning = false;
 		destroy();
 		return;
@@ -1190,7 +1208,7 @@ void LLObjectBackup::primUpdate(LLViewerObject* object)
 	{
 		//rezAgentOffset(LLVector3(1.0, 0.0, 0.0));
 		LLSD prim_llsd = mThisGroup[mPrimImportIter->first];
-		mProcessIter++;
+		++mProcessIter;
 		xmlToPrim(prim_llsd, *mProcessIter);	
 	}
 }
@@ -1200,10 +1218,10 @@ bool LLObjectBackup::newPrim(LLViewerObject* pobject)
 {
 	if (mRunning)
 	{
-		mRezCount++;
+		++mRezCount;
 		mToSelect.push_back(pobject);
 		updateImportNumbers();
-		mPrimImportIter++;
+		++mPrimImportIter;
 
 		pobject->setPosition(offsetAgent(LLVector3(0.0, 1.0, 0.0)));
 		LLSelectMgr::getInstance()->sendMultipleUpdate(UPD_POSITION);
@@ -1214,9 +1232,10 @@ bool LLObjectBackup::newPrim(LLViewerObject* pobject)
 		}
 		else
 		{
-			LL_INFOS("ObjectBackup") << "All prims rezzed, moving to build stage" << LL_ENDL;
-			// Deselecting is required to ensure that the first child prim
-			// in the link set (which is also the last rezzed prim and thus
+			LL_INFOS("ObjectBackup") << "All prims rezzed, moving to build stage"
+									 << LL_ENDL;
+			// Deselecting is required to ensure that the first child prim in
+			// the link set (which is also the last rezzed prim and thus
 			// currently selected) will be properly renamed and desced.
 			LLSelectMgr::getInstance()->deselectAll();
 			mPrimImportIter = mThisGroup.beginMap();
@@ -1233,17 +1252,22 @@ void LLObjectBackup::updateMap(LLUUID uploaded_asset)
 	if (mCurrentAsset.isNull())
 		return;
 
-	LL_INFOS("ObjectBackup") << "Mapping " << mCurrentAsset << " to " << uploaded_asset << LL_ENDL;
+	LL_INFOS("ObjectBackup") << "Mapping " << mCurrentAsset << " to "
+							 << uploaded_asset << LL_ENDL;
 	mAssetMap.insert(std::pair<LLUUID, LLUUID>(mCurrentAsset, uploaded_asset));
 }
 
-void myupload_new_resource(const LLTransactionID &tid, LLAssetType::EType asset_type,
-						 std::string name, std::string desc, S32 compression_info,
-						 LLFolderType::EType destination_folder_type,
-						 LLInventoryType::EType inv_type, U32 next_owner_perm,
-						 const std::string& display_name,
-						 LLAssetStorage::LLStoreAssetCallback callback,
-						 void *userdata)
+void myupload_new_resource(const LLTransactionID& tid,
+						   LLAssetType::EType asset_type,
+						   std::string name,
+						   std::string desc,
+						   S32 compression_info,
+						   LLFolderType::EType destination_folder_type,
+						   LLInventoryType::EType inv_type,
+						   U32 next_owner_perm,
+						   const std::string& display_name,
+						   LLAssetStorage::LLStoreAssetCallback callback,
+						   void* userdata)
 {
 	if (gDisconnected)
 	{
@@ -1271,13 +1295,15 @@ void myupload_new_resource(const LLTransactionID &tid, LLAssetType::EType asset_
 
 		std::ostringstream llsdxml;
 		LLSDSerialize::toXML(body, llsdxml);
-		LL_DEBUGS("ObjectBackup") << "posting body to capability: " << llsdxml.str() << LL_ENDL;
+		LL_DEBUGS("ObjectBackup") << "posting body to capability: "
+								  << llsdxml.str() << LL_ENDL;
 		//LLHTTPClient::post(url, body, new LLNewAgentInventoryResponder(body, uuid, asset_type));
 		LLHTTPClient::post(url, body, new importResponder(body, uuid, asset_type));
 	}
 	else
 	{
-		LL_INFOS("ObjectBackup") << "NewAgentInventory capability not found. Can't upload !" << LL_ENDL;	
+		LL_INFOS("ObjectBackup") << "NewAgentInventory capability not found. Can't upload !"
+								 << LL_ENDL;	
 	}
 }
 
@@ -1285,7 +1311,8 @@ void LLObjectBackup::uploadNextAsset()
 {
 	if (mTexturesList.empty())
 	{
-		LL_INFOS("ObjectBackup") << "Texture list is empty, moving to rez stage." << LL_ENDL;
+		LL_INFOS("ObjectBackup") << "Texture list is empty, moving to rez stage."
+								 << LL_ENDL;
 		mCurrentAsset = LLUUID::null;
 		importFirstObject();
 		return;
@@ -1293,12 +1320,12 @@ void LLObjectBackup::uploadNextAsset()
 
 	updateImportNumbers();
 
-	std::list<LLUUID>::iterator iter;
-	iter = mTexturesList.begin();
+	std::set<LLUUID>::iterator iter = mTexturesList.begin();
 	LLUUID id = *iter;
-	mTexturesList.pop_front();
+	mTexturesList.erase(iter);
 
-	LL_INFOS("ObjectBackup") << "Got texture ID " << id << ": trying to upload" << LL_ENDL;
+	LL_INFOS("ObjectBackup") << "Got texture ID " << id
+							 << ": trying to upload..." << LL_ENDL;
 
 	mCurrentAsset = id;
 	std::string struid;
@@ -1328,7 +1355,8 @@ void LLObjectBackup::uploadNextAsset()
 	}
 	else
 	{
-		LL_WARNS("ObjectBackup") << "Unable to access output file " << filename << LL_ENDL;
+		LL_WARNS("ObjectBackup") << "Unable to access output file " << filename
+								 << LL_ENDL;
 		uploadNextAsset();
 		return;
 	}

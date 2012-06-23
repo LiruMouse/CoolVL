@@ -1138,12 +1138,12 @@ const std::string LLInventoryPanel::WORNITEMS_SORT_ORDER = std::string("WornItem
 const std::string LLInventoryPanel::INHERIT_SORT_ORDER = std::string("");
 
 LLInventoryPanel::LLInventoryPanel(const std::string& name,
-								    const std::string& sort_order_setting,
-									const LLRect& rect,
-									LLInventoryModel* inventory,
-									BOOL allow_multi_select,
-									LLView *parent_view) :
-	LLPanel(name, rect, TRUE),
+								   const std::string& sort_order_setting,
+								   const LLRect& rect,
+								   LLInventoryModel* inventory,
+								   BOOL allow_multi_select,
+								   LLView* parent_view)
+:	LLPanel(name, rect, TRUE),
 	mInventory(inventory),
 	mInventoryObserver(NULL),
 	mFolders(NULL),
@@ -1160,10 +1160,7 @@ BOOL LLInventoryPanel::postBuild()
 {
 	init_inventory_panel_actions(this);
 
-	LLRect folder_rect(0,
-					   0,
-					   getRect().getWidth(),
-					   0);
+	LLRect folder_rect(0, 0, getRect().getWidth(), 0);
 	mFolders = new LLFolderView(getName(), NULL, folder_rect, LLUUID::null, this);
 	mFolders->setAllowMultiSelect(mAllowMultiSelect);
 
@@ -1171,7 +1168,7 @@ BOOL LLInventoryPanel::postBuild()
 	LLRect scroller_view_rect = getRect();
 	scroller_view_rect.translate(-scroller_view_rect.mLeft, -scroller_view_rect.mBottom);
 	mScroller = new LLScrollableContainerView(std::string("Inventory Scroller"),
-											   scroller_view_rect,
+											  scroller_view_rect,
 											  mFolders);
 	mScroller->setFollowsAll();
 	mScroller->setReserveScrollCorner(TRUE);

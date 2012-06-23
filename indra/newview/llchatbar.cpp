@@ -233,6 +233,12 @@ BOOL LLChatBar::handleKeyHere(KEY key, MASK mask)
 {
 	BOOL handled = FALSE;
 
+	if (HBFloaterTextInput::hasFloaterFor(mInputEditor))
+	{
+		HBFloaterTextInput::show(mInputEditor);
+		return TRUE;
+	}
+
 	// ALT-RETURN is reserved for windowed/fullscreen toggle
 	if (KEY_RETURN == key)
 	{

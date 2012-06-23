@@ -257,10 +257,12 @@ void LLAudioEngine::idle(F32 max_decode_time)
 
 	F32 max_priority = -1.f;
 	LLAudioSource *max_sourcep = NULL; // Maximum priority source without a channel
-	source_map::iterator iter;
-	for (iter = mAllSources.begin(); iter != mAllSources.end();)
+	for (source_map::iterator iter = mAllSources.begin(),
+							  end = mAllSources.end();
+		 iter != end; )
 	{
-		LLAudioSource *sourcep = iter->second;
+		source_map::iterator curiter = iter++;
+		LLAudioSource* sourcep = curiter->second;
 
 		// Update this source
 		sourcep->update();
@@ -270,45 +272,39 @@ void LLAudioEngine::idle(F32 max_decode_time)
 		{
 			// The source is done playing, clean it up.
 			delete sourcep;
-			mAllSources.erase(iter++);
+			mAllSources.erase(curiter);
 			continue;
 		}
 
-		if (sourcep->isMuted())
+		if (!sourcep->isMuted() && !sourcep->getChannel() &&
+			sourcep->getCurrentBuffer())
 		{
-			++iter;
-		  	continue;
-		}
-
-		if (!sourcep->getChannel() && sourcep->getCurrentBuffer())
-		{
-			// We could potentially play this sound if its priority is high enough.
+			// We could potentially play this sound if its priority is high
+			// enough.
 			if (sourcep->getPriority() > max_priority)
 			{
 				max_priority = sourcep->getPriority();
 				max_sourcep = sourcep;
 			}
 		}
-
-		// Move on to the next source
-		iter++;
 	}
 
-	// Now, do priority-based organization of audio sources.
-	// All channels used, check priorities.
-	// Find channel with lowest priority
+	// Now, do priority-based organization of audio sources. All channels used,
+	// check priorities. Find channel with lowest priority.
 	if (max_sourcep)
 	{
 		LLAudioChannel *channelp = getFreeChannel(max_priority);
 		if (channelp)
 		{
-			//llinfos << "Replacing source in channel due to priority!" << llendl;
+			//llinfos << "Replacing source in channel due to priority!"
+			//		<< llendl;
 			max_sourcep->setChannel(channelp);
 			channelp->setSource(max_sourcep);
 			if (max_sourcep->isSyncSlave())
 			{
-				// A sync slave, it doesn't start playing until it's synced up with the master.
-				// Flag this channel as waiting for sync, and return true.
+				// A sync slave, it doesn't start playing until it's synced up
+				// with the master. Flag this channel as waiting for sync, and
+				// return true.
 				channelp->setWaiting(true);
 			}
 			else
@@ -322,25 +318,29 @@ void LLAudioEngine::idle(F32 max_decode_time)
 		}
 	}
 
-	// Do this BEFORE we update the channels
-	// Update the channels to sync up with any changes that the source made,
-	// such as changing what sound was playing.
+	// Do this BEFORE we update the channels. Update the channels to sync up
+	// with any changes that the source made, such as changing what sound was
+	// playing.
 	updateChannels();
 
-	// Update queued sounds (switch to next queued data if the current has finished playing)
-	for (iter = mAllSources.begin(); iter != mAllSources.end(); ++iter)
+	// Update queued sounds (switch to next queued data if the current has
+	// finished playing)
+	for (source_map::iterator iter = mAllSources.begin(),
+							  end = mAllSources.end();
+		 iter != end; ++iter)
 	{
-		// This is lame, instead of this I could actually iterate through all the sources
-		// attached to each channel, since only those with active channels
-		// can have anything interesting happen with their queue? (Maybe not true)
-		LLAudioSource *sourcep = iter->second;
+		// This is lame, instead of this I could actually iterate through all
+		// the sources attached to each channel, since only those with active
+		// channels can have anything interesting happen with their queue ?
+		// (Maybe not true)
+		LLAudioSource* sourcep = iter->second;
 		if (!sourcep->mQueuedDatap || sourcep->isMuted())
 		{
 			// Muted, or nothing queued, so we don't care.
 			continue;
 		}
 
-		LLAudioChannel *channelp = sourcep->getChannel();
+		LLAudioChannel* channelp = sourcep->getChannel();
 		if (!channelp)
 		{
 			// This sound isn't playing, so we just process move the queue
@@ -413,9 +413,11 @@ void LLAudioEngine::idle(F32 max_decode_time)
 	LLAudioSource *sync_masterp = NULL;
 	LLAudioChannel *master_channelp = NULL;
 	F32 max_sm_priority = -1.f;
-	for (iter = mAllSources.begin(); iter != mAllSources.end(); ++iter)
+	for (source_map::iterator iter = mAllSources.begin(),
+							  end = mAllSources.end();
+		 iter != end; ++iter)
 	{
-		LLAudioSource *sourcep = iter->second;
+		LLAudioSource* sourcep = iter->second;
 		if (sourcep->isMuted())
 		{
 			continue;
@@ -434,10 +436,13 @@ void LLAudioEngine::idle(F32 max_decode_time)
 	if (master_channelp && master_channelp->mLoopedThisFrame)
 	{
 		// Synchronize loop slaves with their masters
-		// Update queued sounds (switch to next queued data if the current has finished playing)
-		for (iter = mAllSources.begin(); iter != mAllSources.end(); ++iter)
+		// Update queued sounds (switch to next queued data if the current has
+		// finished playing)
+		for (source_map::iterator iter = mAllSources.begin(),
+								  end = mAllSources.end();
+			 iter != end; ++iter)
 		{
-			LLAudioSource *sourcep = iter->second;
+			LLAudioSource* sourcep = iter->second;
 
 			if (!sourcep->isSyncSlave())
 			{
@@ -503,7 +508,8 @@ void LLAudioEngine::idle(F32 max_decode_time)
 	updateInternetStream();
 }
 
-bool LLAudioEngine::updateBufferForData(LLAudioData *adp, const LLUUID &audio_uuid)
+bool LLAudioEngine::updateBufferForData(LLAudioData* adp,
+										const LLUUID& audio_uuid)
 {
 	if (!adp)
 	{

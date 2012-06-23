@@ -34,29 +34,31 @@
 #define LL_PANELMEDIAHUD_H
 
 #include "llpanel.h"
+
 #include "llviewermedia.h"
 
+class LLButton;
 class LLCoordWindow;
+class LLView;
 class LLViewerMediaImpl;
 
 class LLPanelMediaHUD : public LLPanel
 {
 public:
 	LLPanelMediaHUD(viewer_media_t media_impl);
-	virtual ~LLPanelMediaHUD();
+	/*virtual*/ ~LLPanelMediaHUD();
 	/*virtual*/ BOOL postBuild();
-	virtual void draw();
-	virtual void setAlpha(F32 alpha);
+	/*virtual*/ void draw();
+	/*virtual*/ void setAlpha(F32 alpha);
 	virtual BOOL handleScrollWheel(S32 x, S32 y, S32 clicks);
 	void updateShape();
 	bool isMouseOver();
-	void setMediaFocus(bool b) { mMediaFocus = b; }
+	void setMediaFocus(bool b)						{ mMediaFocus = b; }
 	void nextZoomLevel();
-	void resetZoomLevel() { mCurrentZoom = ZOOM_NONE; }
+	void resetZoomLevel()							{ mCurrentZoom = ZOOM_NONE; }
 
-	LLHandle<LLPanelMediaHUD>	getHandle() const { return mPanelHandle; }
-	void setMediaImpl(viewer_media_t media_impl) { mMediaImpl = media_impl; }
-
+	LLHandle<LLPanelMediaHUD>	getHandle() const	{ return mPanelHandle; }
+	void setMediaImpl(viewer_media_t media_impl)	{ mMediaImpl = media_impl; }
 
 	enum EZoomLevel
 	{
@@ -93,6 +95,23 @@ private:
 	static void onScrollDown(void* user_data);
 	static void onScrollDownHeld(void* user_data);
 	static void onScrollStop(void* user_data);
+
+private:
+	LLButton* mCloseButton;
+	LLButton* mBackButton;
+	LLButton* mForwardButton;
+	LLButton* mHomeButton;
+	LLButton* mOpenButton;
+	LLButton* mReloadButton;
+	LLButton* mPlayButton;
+	LLButton* mPauseButton;
+	LLButton* mStopButton;
+	LLButton* mMediaStopButton;
+
+	LLPanel* mFocusedControls;
+	LLPanel* mHoverControls;
+
+	LLView* mMediaRegion;
 
 	bool mMediaFocus;
 	LLMatrix4 mLastCameraMat;

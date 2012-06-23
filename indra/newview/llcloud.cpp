@@ -32,27 +32,25 @@
 
 #include "llviewerprecompiledheaders.h"
 
-#include "llmath.h"
-//#include "vmath.h"
-#include "v3math.h"
-#include "v4math.h"
-#include "llquaternion.h"
-#include "v4color.h"
-
-#include "llwind.h"
 #include "llcloud.h"
+
 #include "llgl.h"
-#include "llviewerobjectlist.h"
-#include "llvoclouds.h"
-#include "llvosky.h"
-#include "llsky.h"
-#include "llviewerregion.h"
+#include "llglheaders.h"
+#include "llquaternion.h"
 #include "patch_dct.h"
 #include "patch_code.h"
-#include "llglheaders.h"
-#include "pipeline.h"
+#include "v4color.h"
+#include "v4math.h"
+
 #include "lldrawpool.h"
+#include "llsky.h"
+#include "llviewerobjectlist.h"
+#include "llviewerregion.h"
+#include "llvoclouds.h"
+#include "llvosky.h"
+#include "llwind.h"
 #include "llworld.h"
+#include "pipeline.h"
 
 extern LLPipeline gPipeline;
 
@@ -72,21 +70,20 @@ enum
 };
 
 // Used for patch decoder
-S32 gBuffer[16*16];
-
+S32 gBuffer[256];
 
 //static
 S32 LLCloudPuff::sPuffCount = 0;
 
-LLCloudPuff::LLCloudPuff() :
-	mAlpha(0.01f),
-	mRate(CLOUD_GROW_RATE*CLOUD_UPDATE_RATE),
+LLCloudPuff::LLCloudPuff()
+:	mAlpha(0.01f),
+	mRate(CLOUD_GROW_RATE * CLOUD_UPDATE_RATE),
 	mLifeState(LL_PUFF_GROWING)
 {
 }
 
-LLCloudGroup::LLCloudGroup() :
-	mCloudLayerp(NULL),
+LLCloudGroup::LLCloudGroup()
+:	mCloudLayerp(NULL),
 	mDensity(0.f),
 	mTargetPuffCount(0),
 	mVOCloudsp(NULL)
@@ -105,7 +102,7 @@ void LLCloudGroup::cleanup()
 	}
 }
 
-void LLCloudGroup::setCenterRegion(const LLVector3 &center)
+void LLCloudGroup::setCenterRegion(const LLVector3& center)
 {
 	mCenterRegion = center;
 }
@@ -116,28 +113,29 @@ void LLCloudGroup::updatePuffs(const F32 dt)
 
 	if (!mVOCloudsp)
 	{
-		mVOCloudsp = (LLVOClouds *)gObjectList.createObjectViewer(LLViewerObject::LL_VO_CLOUDS, mCloudLayerp->getRegion());
+		mVOCloudsp = (LLVOClouds*)gObjectList.createObjectViewer(LLViewerObject::LL_VO_CLOUDS,
+																 mCloudLayerp->getRegion());
 		mVOCloudsp->setCloudGroup(this);
 		mVOCloudsp->setPositionRegion(mCenterRegion);
-		mVOCloudsp->setScale(LLVector3(256.f/CLOUD_GROUPS_PER_EDGE + CLOUD_PUFF_WIDTH,
-										 256.f/CLOUD_GROUPS_PER_EDGE + CLOUD_PUFF_WIDTH,
-										 CLOUD_HEIGHT_RANGE + CLOUD_PUFF_HEIGHT)*0.5f);
+		mVOCloudsp->setScale(LLVector3(256.f / CLOUD_GROUPS_PER_EDGE + CLOUD_PUFF_WIDTH,
+									   256.f / CLOUD_GROUPS_PER_EDGE + CLOUD_PUFF_WIDTH,
+									   CLOUD_HEIGHT_RANGE + CLOUD_PUFF_HEIGHT) * 0.5f);
 		gPipeline.createObject(mVOCloudsp);
 	}
 
 	LLVector3 velocity;
 	LLVector3d vel_d;
 	// Update the positions of all of the clouds
-	for (U32 i = 0; i < mCloudPuffs.size(); i++)
+	for (U32 i = 0, count = mCloudPuffs.size(); i < count; ++i)
 	{
-		LLCloudPuff &puff = mCloudPuffs[i];
+		LLCloudPuff& puff = mCloudPuffs[i];
 		velocity = mCloudLayerp->getRegion()->mWind.getCloudVelocity(mCloudLayerp->getRegion()->getPosRegionFromGlobal(puff.mPositionGlobal));
-		velocity *= CLOUD_VELOCITY_SCALE*CLOUD_UPDATE_RATE;
+		velocity *= CLOUD_VELOCITY_SCALE * CLOUD_UPDATE_RATE;
 		vel_d.setVec(velocity);
-		mCloudPuffs[i].mPositionGlobal += vel_d;
-		mCloudPuffs[i].mAlpha += mCloudPuffs[i].mRate * dt;
-		mCloudPuffs[i].mAlpha = llmin(1.f, mCloudPuffs[i].mAlpha);
-		mCloudPuffs[i].mAlpha = llmax(0.f, mCloudPuffs[i].mAlpha);
+		puff.mPositionGlobal += vel_d;
+		puff.mAlpha += mCloudPuffs[i].mRate * dt;
+		puff.mAlpha = llmin(1.f, mCloudPuffs[i].mAlpha);
+		puff.mAlpha = llmax(0.f, mCloudPuffs[i].mAlpha);
 	}
 }
 
@@ -163,8 +161,8 @@ void LLCloudGroup::updatePuffOwnership()
 		{
 			//llinfos << "Killing puff not in group" << llendl;
 			mCloudPuffs[i].setLifeState(LL_PUFF_DYING);
-			mCloudPuffs[i].mRate = CLOUD_DECAY_RATE*CLOUD_UPDATE_RATE;
-			i++;
+			mCloudPuffs[i].mRate = CLOUD_DECAY_RATE * CLOUD_UPDATE_RATE;
+			++i;
 			continue;
 		}
 		//llinfos << "Puff handed off!" << llendl;
@@ -184,43 +182,41 @@ void LLCloudGroup::updatePuffCount()
 	{
 		return;
 	}
-	S32 i;
 	S32 target_puff_count = llround(CLOUD_DENSITY * mDensity);
 	target_puff_count = llmax(0, target_puff_count);
 	target_puff_count = llmin(CLOUD_COUNT_MAX, target_puff_count);
-	S32 current_puff_count = (S32) mCloudPuffs.size();
+	S32 current_puff_count = (S32)mCloudPuffs.size();
 	// Create a new cloud if we need one
 	if (current_puff_count < target_puff_count)
 	{
 		LLVector3d puff_pos_global;
 		mCloudPuffs.resize(target_puff_count);
-		for (i = current_puff_count; i < target_puff_count; i++)
+		for (S32 i = current_puff_count; i < target_puff_count; ++i)
 		{
 			puff_pos_global = mVOCloudsp->getPositionGlobal();
-			F32 x = ll_frand(256.f/CLOUD_GROUPS_PER_EDGE) - 128.f/CLOUD_GROUPS_PER_EDGE;
-			F32 y = ll_frand(256.f/CLOUD_GROUPS_PER_EDGE) - 128.f/CLOUD_GROUPS_PER_EDGE;
-			F32 z = ll_frand(CLOUD_HEIGHT_RANGE) - 0.5f*CLOUD_HEIGHT_RANGE;
+			F32 x = ll_frand(256.f / CLOUD_GROUPS_PER_EDGE) - 128.f / CLOUD_GROUPS_PER_EDGE;
+			F32 y = ll_frand(256.f / CLOUD_GROUPS_PER_EDGE) - 128.f / CLOUD_GROUPS_PER_EDGE;
+			F32 z = ll_frand(CLOUD_HEIGHT_RANGE) - 0.5f  *CLOUD_HEIGHT_RANGE;
 			puff_pos_global += LLVector3d(x, y, z);
 			mCloudPuffs[i].mPositionGlobal = puff_pos_global;
 			mCloudPuffs[i].mAlpha = 0.01f;
-			LLCloudPuff::sPuffCount++;
+			++LLCloudPuff::sPuffCount;
 		}
 	}
 
 	// Count the number of live puffs
 	S32 live_puff_count = 0;
-	for (i = 0; i < (S32) mCloudPuffs.size(); i++)
+	for (S32 i = 0, count = mCloudPuffs.size(); i < count; ++i)
 	{
 		if (mCloudPuffs[i].getLifeState() != LL_PUFF_DYING)
 		{
-			live_puff_count++;
+			++live_puff_count;
 		}
 	}
 
-
 	// Start killing enough puffs so the live puff count == target puff count
 	S32 new_dying_count = llmax(0, live_puff_count - target_puff_count);
-	i = 0;
+	S32 i = 0;
 	while (new_dying_count > 0)
 	{
 		if (mCloudPuffs[i].getLifeState() != LL_PUFF_DYING)
@@ -228,33 +224,33 @@ void LLCloudGroup::updatePuffCount()
 			//llinfos << "Killing extra live cloud" << llendl;
 			mCloudPuffs[i].setLifeState(LL_PUFF_DYING);
 			mCloudPuffs[i].mRate = CLOUD_DECAY_RATE*CLOUD_UPDATE_RATE;
-			new_dying_count--;
+			--new_dying_count;
 		}
-		i++;
+		++i;
 	}
 
 	// Remove fully dead puffs
 	i = 0;
-	while (i < (S32) mCloudPuffs.size())
+	while (i < (S32)mCloudPuffs.size())
 	{
 		if (mCloudPuffs[i].isDead())
 		{
 			//llinfos << "Removing dead puff!" << llendl;
 			mCloudPuffs.erase(mCloudPuffs.begin() + i);
-			LLCloudPuff::sPuffCount--;
+			--LLCloudPuff::sPuffCount;
 		}
 		else
 		{
-			i++;
+			++i;
 		}
 	}
 }
 
-BOOL LLCloudGroup::inGroup(const LLCloudPuff &puff) const
+BOOL LLCloudGroup::inGroup(const LLCloudPuff& puff) const
 {
 	// Do min/max check on center of the cloud puff
 	F32 min_x, min_y, max_x, max_y;
-	F32 delta = 128.f/CLOUD_GROUPS_PER_EDGE;
+	F32 delta = 128.f / CLOUD_GROUPS_PER_EDGE;
 	min_x = mCenterRegion.mV[VX] - delta;
 	min_y = mCenterRegion.mV[VY] - delta;
 	max_x = mCenterRegion.mV[VX] + delta;
@@ -262,10 +258,8 @@ BOOL LLCloudGroup::inGroup(const LLCloudPuff &puff) const
 
 	LLVector3 pos_region = mCloudLayerp->getRegion()->getPosRegionFromGlobal(puff.getPositionGlobal());
 
-	if ((pos_region.mV[VX] < min_x)
-		|| (pos_region.mV[VY] < min_y)
-		|| (pos_region.mV[VX] > max_x)
-		|| (pos_region.mV[VY] > max_y))
+	if (pos_region.mV[VX] < min_x || pos_region.mV[VY] < min_y ||
+		pos_region.mV[VX] > max_x || pos_region.mV[VY] > max_y)
 	{
 		return FALSE;
 	}
@@ -279,49 +273,45 @@ LLCloudLayer::LLCloudLayer()
 	mWindp(NULL),
 	mDensityp(NULL)
 {
-	S32 i, j;
-	for (i = 0; i < 4; i++)
+	for (S32 i = 0; i < 4; ++i)
 	{
 		mNeighbors[i] = NULL;
 	}
 
 	F32 x, y;
-	for (i = 0; i < CLOUD_GROUPS_PER_EDGE; i++)
+	for (S32 i = 0; i < CLOUD_GROUPS_PER_EDGE; ++i)
 	{
-		y = (0.5f + i)*(256.f/CLOUD_GROUPS_PER_EDGE);
-		for (j = 0; j < CLOUD_GROUPS_PER_EDGE; j++)
+		y = (0.5f + i) * 256.f / CLOUD_GROUPS_PER_EDGE;
+		for (S32 j = 0; j < CLOUD_GROUPS_PER_EDGE; ++j)
 		{
-			x = (0.5f + j)*(256.f/CLOUD_GROUPS_PER_EDGE);
+			x = (0.5f + j) * 256.f / CLOUD_GROUPS_PER_EDGE;
 
 			mCloudGroups[i][j].setCloudLayerp(this);
-			mCloudGroups[i][j].setCenterRegion(LLVector3(x, y, CLOUD_HEIGHT_MEAN));
+			mCloudGroups[i][j].setCenterRegion(LLVector3(x, y,
+														 CLOUD_HEIGHT_MEAN));
 		}
 	}
 }
-
-
 
 LLCloudLayer::~LLCloudLayer()
 {
 	destroy();
 }
 
-
-void LLCloudLayer::create(LLViewerRegion *regionp)
+void LLCloudLayer::create(LLViewerRegion* regionp)
 {
 	llassert(regionp);
 
 	mRegionp = regionp;
-	mDensityp = new F32 [CLOUD_GRIDS_PER_EDGE * CLOUD_GRIDS_PER_EDGE];
+	mDensityp = new F32[CLOUD_GRIDS_PER_EDGE * CLOUD_GRIDS_PER_EDGE];
 
-	U32 i;
-	for (i = 0; i < CLOUD_GRIDS_PER_EDGE*CLOUD_GRIDS_PER_EDGE; i++)
+	for (U32 i = 0; i < CLOUD_GRIDS_PER_EDGE*CLOUD_GRIDS_PER_EDGE; ++i)
 	{
 		mDensityp[i] = 0.f;
 	}
 }
 
-void LLCloudLayer::setRegion(LLViewerRegion *regionp)
+void LLCloudLayer::setRegion(LLViewerRegion* regionp)
 {
 	mRegionp = regionp;
 }
@@ -338,18 +328,16 @@ void LLCloudLayer::destroy()
 void LLCloudLayer::reset()
 {
 	// Kill all of the existing puffs
-	S32 i, j;
-	
-	for (i = 0; i < CLOUD_GROUPS_PER_EDGE; i++)
+	for (S32 i = 0; i < CLOUD_GROUPS_PER_EDGE; ++i)
 	{
-		for (j = 0; j < CLOUD_GROUPS_PER_EDGE; j++)
+		for (S32 j = 0; j < CLOUD_GROUPS_PER_EDGE; ++j)
 		{
 			mCloudGroups[i][j].cleanup();
 		}
 	}
 }
 
-void LLCloudLayer::setWindPointer(LLWind *windp)
+void LLCloudLayer::setWindPointer(LLWind* windp)
 {
 	if (mWindp)
 	{
@@ -368,7 +356,7 @@ void LLCloudLayer::setWidth(F32 width)
 	mMetersPerGrid = width / CLOUD_GRIDS_PER_EDGE;
 }
 
-F32 LLCloudLayer::getDensityRegion(const LLVector3 &pos_region)
+F32 LLCloudLayer::getDensityRegion(const LLVector3& pos_region)
 {	
 	// "position" is region-local
 	S32 i, j, ii, jj;
@@ -377,7 +365,6 @@ F32 LLCloudLayer::getDensityRegion(const LLVector3 &pos_region)
 	j = lltrunc(pos_region.mV[VY] / mMetersPerGrid);
 	ii = i + 1;
 	jj = j + 1;
-
 
 	// clamp 
 	if (i >= (S32)CLOUD_GRIDS_PER_EDGE)
@@ -410,8 +397,8 @@ F32 LLCloudLayer::getDensityRegion(const LLVector3 &pos_region)
 		jj = j;
 	}
 
-	F32 dx = (pos_region.mV[VX] - (F32) i * mMetersPerGrid) / mMetersPerGrid;
-	F32 dy = (pos_region.mV[VY] - (F32) j * mMetersPerGrid) / mMetersPerGrid;
+	F32 dx = (pos_region.mV[VX] - (F32)i * mMetersPerGrid) / mMetersPerGrid;
+	F32 dy = (pos_region.mV[VY] - (F32)j * mMetersPerGrid) / mMetersPerGrid;
 	F32 omdx = 1.0f - dx;
 	F32 omdy = 1.0f - dy;
 
@@ -423,15 +410,15 @@ F32 LLCloudLayer::getDensityRegion(const LLVector3 &pos_region)
 	return density;
 }
 
-void LLCloudLayer::decompress(LLBitPack &bitpack, LLGroupHeader *group_headerp)
+void LLCloudLayer::decompress(LLBitPack& bitpack, LLGroupHeader* group_headerp)
 {
-	LLPatchHeader  patch_header;
+	LLPatchHeader patch_header;
 
 	init_patch_decompressor(group_headerp->patch_size);
 
 	// Don't use the packed group_header stride because the strides used on
 	// simulator and viewer are not equal.
-	group_headerp->stride = group_headerp->patch_size; 		// offset required to step up one row
+	group_headerp->stride = group_headerp->patch_size; 	// offset required to step up one row
 	set_group_of_patch_header(group_headerp);
 
 	decode_patch_header(bitpack, &patch_header);
@@ -441,14 +428,12 @@ void LLCloudLayer::decompress(LLBitPack &bitpack, LLGroupHeader *group_headerp)
 
 void LLCloudLayer::updatePuffs(const F32 dt)
 {
-	// We want to iterate through all of the cloud groups
-	// and update their density targets
+	// We want to iterate through all of the cloud groups and update their
+	// density targets
 
-	S32 i, j;
-	
-	for (i = 0; i < CLOUD_GROUPS_PER_EDGE; i++)
+	for (S32 i = 0; i < CLOUD_GROUPS_PER_EDGE; ++i)
 	{
-		for (j = 0; j < CLOUD_GROUPS_PER_EDGE; j++)
+		for (S32 j = 0; j < CLOUD_GROUPS_PER_EDGE; ++j)
 		{
 			mCloudGroups[i][j].updatePuffs(dt);
 		}
@@ -457,11 +442,9 @@ void LLCloudLayer::updatePuffs(const F32 dt)
 
 void LLCloudLayer::updatePuffOwnership()
 {
-	S32 i, j;
-	
-	for (i = 0; i < CLOUD_GROUPS_PER_EDGE; i++)
+	for (S32 i = 0; i < CLOUD_GROUPS_PER_EDGE; ++i)
 	{
-		for (j = 0; j < CLOUD_GROUPS_PER_EDGE; j++)
+		for (S32 j = 0; j < CLOUD_GROUPS_PER_EDGE; ++j)
 		{
 			mCloudGroups[i][j].updatePuffOwnership();
 		}
@@ -470,24 +453,20 @@ void LLCloudLayer::updatePuffOwnership()
 
 void LLCloudLayer::updatePuffCount()
 {
-	S32 i, j;
-	
-	for (i = 0; i < CLOUD_GROUPS_PER_EDGE; i++)
+	for (S32 i = 0; i < CLOUD_GROUPS_PER_EDGE; ++i)
 	{
-		for (j = 0; j < CLOUD_GROUPS_PER_EDGE; j++)
+		for (S32 j = 0; j < CLOUD_GROUPS_PER_EDGE; ++j)
 		{
 			mCloudGroups[i][j].updatePuffCount();
 		}
 	}
 }
 
-LLCloudGroup *LLCloudLayer::findCloudGroup(const LLCloudPuff &puff)
+LLCloudGroup *LLCloudLayer::findCloudGroup(const LLCloudPuff& puff)
 {
-	S32 i, j;
-	
-	for (i = 0; i < CLOUD_GROUPS_PER_EDGE; i++)
+	for (S32 i = 0; i < CLOUD_GROUPS_PER_EDGE; ++i)
 	{
-		for (j = 0; j < CLOUD_GROUPS_PER_EDGE; j++)
+		for (S32 j = 0; j < CLOUD_GROUPS_PER_EDGE; ++j)
 		{
 			if (mCloudGroups[i][j].inGroup(puff))
 			{
@@ -498,9 +477,7 @@ LLCloudGroup *LLCloudLayer::findCloudGroup(const LLCloudPuff &puff)
 	return NULL;
 }
 
-
-
-void LLCloudLayer::connectNeighbor(LLCloudLayer *cloudp, U32 direction)
+void LLCloudLayer::connectNeighbor(LLCloudLayer* cloudp, U32 direction)
 {
 	if (direction >= 4)
 	{
@@ -510,9 +487,10 @@ void LLCloudLayer::connectNeighbor(LLCloudLayer *cloudp, U32 direction)
 
 	mNeighbors[direction] = cloudp;
 	if (cloudp)
+	{
 		mNeighbors[direction]->mNeighbors[gDirOpposite[direction]] = this;
+	}
 }
-
 
 void LLCloudLayer::disconnectNeighbor(U32 direction)
 {
@@ -529,11 +507,9 @@ void LLCloudLayer::disconnectNeighbor(U32 direction)
 	}
 }
 
-
 void LLCloudLayer::disconnectAllNeighbors()
 {
-	S32 i;
-	for (i = 0; i < 4; i++)
+	for (S32 i = 0; i < 4; ++i)
 	{
 		disconnectNeighbor(i);
 	}

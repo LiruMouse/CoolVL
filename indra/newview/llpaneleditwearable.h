@@ -41,6 +41,7 @@
 #include "lltextbox.h"
 #include "lluictrl.h"
 
+#include "llfilepicker.h"
 #include "llvoavatardefines.h"
 #include "llvoavatarself.h"
 #include "llwearabletype.h"
@@ -171,9 +172,15 @@ public:
 
 	virtual void			setVisible(BOOL visible);
 
+private:
 	// Callbacks
 	static void				onCommitSexChange(LLUICtrl*, void* userdata);
-private:
+	static void				onBtnImport(void* userdata);
+	static void 			importCallback(LLFilePicker::ELoadFilter type,
+										   std::string& filename,
+										   std::deque<std::string>& files,
+										   void* userdata);
+
 	static void				onBtnSubpart(void* userdata);
 	static void				onBtnTakeOff(void* userdata);
 	static void				onBtnSave(void* userdata);
@@ -205,11 +212,14 @@ private:
 
 	LLSpinCtrl*						mSpinLayer;
 
+	LLButton*						mButtonImport;
 	LLButton*						mButtonCreateNew;
 	LLButton*						mButtonSave;
 	LLButton*						mButtonSaveAs;
 	LLButton*						mButtonRevert;
 	LLButton*						mButtonTakeOff;
+
+	LLUICtrl*						mSexRadio;
 
 	LLIconCtrl*						mWearableIcon;
 	LLIconCtrl*						mLockIcon;

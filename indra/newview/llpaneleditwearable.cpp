@@ -35,7 +35,9 @@
 #include "llpaneleditwearable.h"
 
 #include "llcheckboxctrl.h"
+#include "llnotifications.h"
 #include "lluictrlfactory.h"
+#include "llxmltree.h"
 
 #include "llagent.h"
 #include "llagentwearables.h"
@@ -56,11 +58,13 @@ LLPanelEditWearable::LLPanelEditWearable(LLWearableType::EType type)
 	mType(type),
 	mLayer(0),					// Use the first layer by default
 	mSpinLayer(NULL),
+	mButtonImport(NULL),
 	mButtonCreateNew(NULL),
 	mButtonSave(NULL),
 	mButtonSaveAs(NULL),
 	mButtonRevert(NULL),
 	mButtonTakeOff(NULL),
+	mSexRadio(NULL),
 	mLockIcon(NULL),
 	mWearableIcon(NULL),
 	mNotWornInstructions(NULL),
@@ -116,6 +120,12 @@ BOOL LLPanelEditWearable::postBuild()
 	mTitleLoading			= getChild<LLTextBox>("title_loading", TRUE, FALSE);
 	mPath					= getChild<LLTextBox>("path", TRUE, FALSE);
 
+	mButtonImport			= getChild<LLButton>("import", TRUE, FALSE);
+	if (mButtonImport)
+	{
+		mButtonImport->setClickedCallback(onBtnImport, this);
+	}
+
 	mButtonCreateNew		= getChild<LLButton>("Create New", TRUE, FALSE);
 	if (mButtonCreateNew)
 	{
@@ -153,12 +163,20 @@ BOOL LLPanelEditWearable::postBuild()
 		mButtonRevert->setClickedCallback(onBtnRevert, this);
 	}
 
+	mSexRadio				= getChild<LLUICtrl>("sex radio", TRUE, FALSE);
+	if (mSexRadio)
+	{
+		mSexRadio->setCommitCallback(onCommitSexChange);
+		mSexRadio->setCallbackUserData(this);
+	}
+
 	return TRUE;
 }
 
 LLPanelEditWearable::~LLPanelEditWearable()
 {
-	std::for_each(mSubpartList.begin(), mSubpartList.end(), DeletePairedPointer());
+	std::for_each(mSubpartList.begin(), mSubpartList.end(),
+				  DeletePairedPointer());
 
 	// Clear colorswatch commit callbacks that point to this object.
 	for (std::map<std::string, S32>::iterator iter = mColorList.begin();
@@ -612,23 +630,23 @@ void LLPanelEditWearable::draw()
 		mNoModifyInstructions->setVisible(has_wearable && !is_modifiable);
 	}
 
-	for (std::map<ESubpart, LLSubpart*>::iterator iter = mSubpartList.begin();
-		 iter != mSubpartList.end(); ++iter)
+	for (std::map<ESubpart, LLSubpart*>::iterator iter = mSubpartList.begin(),
+												  end = mSubpartList.end();
+		 iter != end; ++iter)
 	{
 		std::string btn_name = iter->second->mButtonName;
-		if (btn_name.empty() ||	!getChild<LLButton>(btn_name, TRUE, FALSE))
+		LLButton* button = getChild<LLButton>(btn_name, TRUE, FALSE);
+		if (button)
 		{
-			continue;
-		}
-
-		childSetVisible(btn_name, has_wearable);
-		if (has_wearable && is_complete && is_modifiable)
-		{
-			childSetEnabled(btn_name, iter->second->mSex & gAgentAvatarp->getSex());
-		}
-		else
-		{
-			childSetEnabled(btn_name, FALSE);
+			button->setVisible(has_wearable);
+			if (has_wearable && is_complete && is_modifiable)
+			{
+				button->setEnabled(iter->second->mSex & gAgentAvatarp->getSex());
+			}
+			else
+			{
+				button->setEnabled(FALSE);
+			}
 		}
 	}
 
@@ -692,16 +710,18 @@ void LLPanelEditWearable::draw()
 			mPath->setTextArg("[PATH]", path);
 		}
 
-		for (std::map<std::string, S32>::iterator iter = mTextureList.begin();
-			 iter != mTextureList.end(); ++iter)
+		for (std::map<std::string, S32>::iterator iter = mTextureList.begin(),
+												  end = mTextureList.end();
+			 iter != end; ++iter)
 		{
 			std::string name = iter->first;
 			LLTextureCtrl* texture_ctrl = getChild<LLTextureCtrl>(name, TRUE, FALSE);
-			ETextureIndex te = (ETextureIndex)iter->second;
-			childSetVisible(name, is_copyable && is_modifiable && is_complete);
 			if (texture_ctrl)
 			{
-                LLLocalTextureObject *lto = mWearable->getLocalTextureObject(te);
+				texture_ctrl->setVisible(is_copyable && is_modifiable && is_complete);
+
+				ETextureIndex te = (ETextureIndex)iter->second;
+                LLLocalTextureObject* lto = mWearable->getLocalTextureObject(te);
 
 				LLUUID new_id = LLUUID::null;
                 if (lto && lto->getID() != IMG_DEFAULT_AVATAR)
@@ -721,30 +741,33 @@ void LLPanelEditWearable::draw()
 			}
 		}
 
-		for (std::map<std::string, S32>::iterator iter = mColorList.begin();
-			 iter != mColorList.end(); ++iter)
+		for (std::map<std::string, S32>::iterator iter = mColorList.begin(),
+												  end = mColorList.end();
+			 iter != end; ++iter)
 		{
 			std::string name = iter->first;
-			ETextureIndex te = (ETextureIndex)iter->second;
-			childSetVisible(name, is_modifiable && is_complete);
-			childSetEnabled(name, is_modifiable && is_complete);
 			LLColorSwatchCtrl* ctrl = getChild<LLColorSwatchCtrl>(name, TRUE, FALSE);
 			if (ctrl)
 			{
+				ctrl->setVisible(is_modifiable && is_complete);
+				ctrl->setEnabled(is_modifiable && is_complete);
+				ETextureIndex te = (ETextureIndex)iter->second;
 				ctrl->set(mWearable->getClothesColor(te));
 			}
 		}
 
-		for (std::map<std::string, S32>::iterator iter = mInvisibilityList.begin();
-			 iter != mInvisibilityList.end(); ++iter)
+		for (std::map<std::string, S32>::iterator
+				iter = mInvisibilityList.begin(),
+				end = mInvisibilityList.end();
+			 iter != end; ++iter)
 		{
 			std::string name = iter->first;
-			ETextureIndex te = (ETextureIndex)iter->second;
-			childSetVisible(name, is_copyable && is_modifiable && is_complete);
-			childSetEnabled(name, is_copyable && is_modifiable && is_complete);
 			LLCheckBoxCtrl* ctrl = getChild<LLCheckBoxCtrl>(name, TRUE, FALSE);
 			if (ctrl)
 			{
+				ctrl->setVisible(is_copyable && is_modifiable && is_complete);
+				ctrl->setEnabled(is_copyable && is_modifiable && is_complete);
+				ETextureIndex te = (ETextureIndex)iter->second;
 				ctrl->set(!gAgentAvatarp->isTextureVisible(te, mWearable));
 			}
 		}
@@ -772,18 +795,21 @@ void LLPanelEditWearable::draw()
 
 void LLPanelEditWearable::hideTextureControls()
 {
-	for (std::map<std::string, S32>::iterator iter = mTextureList.begin();
-			 iter != mTextureList.end(); ++iter)
+	for (std::map<std::string, S32>::iterator iter = mTextureList.begin(),
+											  end = mTextureList.end();
+			 iter != end; ++iter)
 	{
 		childSetVisible(iter->first, FALSE);
 	}
-	for (std::map<std::string, S32>::iterator iter = mColorList.begin();
-			 iter != mColorList.end(); ++iter)
+	for (std::map<std::string, S32>::iterator iter = mColorList.begin(),
+											  end = mColorList.end();
+			 iter != end; ++iter)
 	{
 		childSetVisible(iter->first, FALSE);
 	}
-	for (std::map<std::string, S32>::iterator iter = mInvisibilityList.begin();
-		 iter != mInvisibilityList.end(); ++iter)
+	for (std::map<std::string, S32>::iterator iter = mInvisibilityList.begin(),
+											  end = mInvisibilityList.end();
+		 iter != end; ++iter)
 	{
 		childSetVisible(iter->first, FALSE);
 	}
@@ -833,8 +859,9 @@ void LLPanelEditWearable::setVisible(BOOL visible)
 	LLPanel::setVisible(visible);
 	if (!visible)
 	{
-		for (std::map<std::string, S32>::iterator iter = mColorList.begin();
-			 iter != mColorList.end(); ++iter)
+		for (std::map<std::string, S32>::iterator iter = mColorList.begin(),
+												  end = mColorList.end();
+			 iter != end; ++iter)
 		{
 			// this forces any open color pickers to cancel their selection
 			childSetEnabled(iter->first, FALSE);
@@ -871,8 +898,9 @@ void LLPanelEditWearable::onCommitSexChange(LLUICtrl*, void* userdata)
 	{
 		return;
 	}
-
-	param->setWeight(new_sex == SEX_MALE, TRUE);
+	self->mWearable->setVisualParamWeight(param->getID(), new_sex == SEX_MALE,
+										  TRUE);
+	self->mWearable->writeToAvatar();
 
 	gAgentAvatarp->updateSexDependentLayerSets(TRUE);
 
@@ -882,6 +910,136 @@ void LLPanelEditWearable::onCommitSexChange(LLUICtrl*, void* userdata)
 
 	// Assumes that we're in the "Shape" Panel.
 	self->setSubpart(SUBPART_SHAPE_WHOLE);
+}
+
+// Helper for the callback below
+void error_message(std::string message)
+{
+	LLSD args;
+	args["MESSAGE"] = message;
+	LLNotifications::instance().add("GenericAlert", args);
+}
+
+//static
+void LLPanelEditWearable::importCallback(LLFilePicker::ELoadFilter type,
+										 std::string& filename,
+										 std::deque<std::string>& files,
+										 void* userdata)
+{
+	LLPanelEditWearable* self = (LLPanelEditWearable*)userdata;
+	if (!self || !self->mWearable || !gFloaterCustomize || filename.empty() ||
+		!isAgentAvatarValid())
+	{
+		return;
+	}
+	llinfos << "Selected import file: " << filename << llendl;
+	LLXmlTree xml_tree;
+	if (!xml_tree.parseFile(filename, FALSE))
+	{
+		error_message("Can't read the xml file, aborting.");
+		return;
+	}
+
+	// Check the file format and version
+	LLXmlTreeNode* root = xml_tree.getRoot();
+	if (!root) 
+	{
+		error_message("No root node found in xml file, aborting.");
+		return;
+	}
+	if (!root->hasName("linden_genepool"))
+	{
+		error_message("Not an avatar dump, aborting.");
+		return;
+	}
+	std::string version;
+	static LLStdStringHandle version_string = LLXmlTree::addAttributeString("version");
+	if (!root->getFastAttributeString(version_string, version) ||
+		version != "1.0")
+	{
+		error_message("Invalid or missing avatar dump version, aborting.");
+		return;
+	}
+	LLXmlTreeNode* node = root->getChildByName("archetype");
+	if (!node)
+	{
+		error_message("Missing archetype node in avatar dump, aborting.");
+		return;
+	}
+
+	// Read the file and place the params' id and value in a map
+	S32 id;
+	F32 value;
+	static LLStdStringHandle id_string = LLXmlTree::addAttributeString("id");
+	static LLStdStringHandle value_string = LLXmlTree::addAttributeString("value");
+	std::map<S32, F32> params_map;
+	for (LLXmlTreeNode* child = node->getChildByName("param"); child;
+		 child = node->getNextNamedChild())
+	{
+		if (child->getFastAttributeS32(id_string, id) &&
+			child->getFastAttributeF32(value_string, value))
+		{
+			params_map.insert(std::pair<S32, F32>(id, value));
+		}
+	}
+
+	// Now set the visual params that correspond to our type
+	bool sex_changed = false;
+	std::map<S32, F32>::const_iterator it;
+	std::map<S32, F32>::const_iterator end = params_map.end();
+	for (LLVisualParam* param = gAgentAvatarp->getFirstVisualParam(); param;
+		 param = gAgentAvatarp->getNextVisualParam())
+	{
+		LLViewerVisualParam* viewer_param = (LLViewerVisualParam*)param;
+		if (viewer_param->getWearableType() == self->mType &&
+			viewer_param->isTweakable())
+		{
+			id = viewer_param->getID();
+			it = params_map.find(id);
+			if (it != end)
+			{
+				value = it->second;
+				if (viewer_param->getName() == "male")
+				{
+					ESex sex = gSavedSettings.getU32("AvatarSex") ? SEX_MALE
+																  : SEX_FEMALE;
+					ESex new_sex = value > 0.5f ? SEX_MALE : SEX_FEMALE;
+					if (new_sex != sex)
+					{
+						gSavedSettings.setU32("AvatarSex",
+											  new_sex == SEX_MALE);
+						sex_changed = true;
+					}
+				}
+				llinfos << "Setting param id " << id << " to value "
+						<< value << llendl;
+				self->mWearable->setVisualParamWeight(id, value, TRUE);
+			}
+		}
+	}
+	self->mWearable->writeToAvatar();
+	if (sex_changed)
+	{
+		gAgentAvatarp->updateSexDependentLayerSets(TRUE);
+		gAgentAvatarp->updateVisualParams();
+		gFloaterCustomize->clearScrollingPanelList();
+		// Assumes that we're in the "Shape" Panel.
+		self->setSubpart(SUBPART_SHAPE_WHOLE);
+	}
+	else
+	{
+		gAgentAvatarp->updateVisualParams();
+		gFloaterCustomize->updateScrollingPanelUI();
+	}
+}
+
+//static
+void LLPanelEditWearable::onBtnImport(void* userdata)
+{
+	LLPanelEditWearable* self = (LLPanelEditWearable*)userdata;
+	if (!self) return;
+	(new LLLoadFilePicker(LLFilePicker::FFLOAD_XML,
+						  LLPanelEditWearable::importCallback, self))->getFile();
 }
 
 //static
@@ -909,28 +1067,30 @@ void LLPanelEditWearable::setUIPermissions(U32 perm_mask, BOOL is_complete)
 	BOOL is_copyable = (perm_mask & PERM_COPY) ? TRUE : FALSE;
 	BOOL is_modifiable = (perm_mask & PERM_MODIFY) ? TRUE : FALSE;
 
+	if (mButtonImport)	mButtonImport->setEnabled(is_modifiable && is_complete);
 	if (mButtonSave)	mButtonSave->setEnabled(is_modifiable && is_complete);
 	if (mButtonSaveAs)	mButtonSaveAs->setEnabled(is_copyable && is_complete);
+	if (mSexRadio)		mSexRadio->setEnabled(is_modifiable && is_complete);
 
-	if (getChild<LLUICtrl>("sex radio", TRUE, FALSE))
+	for (std::map<std::string, S32>::iterator iter = mTextureList.begin(),
+											  end = mTextureList.end();
+		 iter != end; ++iter)
 	{
-		childSetEnabled("sex radio", is_modifiable && is_complete);
+		childSetVisible(iter->first,
+						is_copyable && is_modifiable && is_complete);
 	}
-
-	for (std::map<std::string, S32>::iterator iter = mTextureList.begin();
-		 iter != mTextureList.end(); ++iter)
-	{
-		childSetVisible(iter->first, is_copyable && is_modifiable && is_complete);
-	}
-	for (std::map<std::string, S32>::iterator iter = mColorList.begin();
-		 iter != mColorList.end(); ++iter)
+	for (std::map<std::string, S32>::iterator iter = mColorList.begin(),
+											  end = mColorList.end();
+		 iter != end; ++iter)
 	{
 		childSetVisible(iter->first, is_modifiable && is_complete);
 	}
-	for (std::map<std::string, S32>::iterator iter = mInvisibilityList.begin();
-		 iter != mInvisibilityList.end(); ++iter)
+	for (std::map<std::string, S32>::iterator iter = mInvisibilityList.begin(),
+											  end = mInvisibilityList.end();
+		 iter != end; ++iter)
 	{
-		childSetVisible(iter->first, is_copyable && is_modifiable && is_complete);
+		childSetVisible(iter->first,
+						is_copyable && is_modifiable && is_complete);
 	}
 }
 

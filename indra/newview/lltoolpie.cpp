@@ -1,11 +1,11 @@
-/** 
+/**
  * @file lltoolpie.cpp
  * @brief LLToolPie class implementation
  *
  * $LicenseInfo:firstyear=2001&license=viewergpl$
- * 
+ *
  * Copyright (c) 2001-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -116,7 +116,7 @@ BOOL LLToolPie::handleRightMouseDown(S32 x, S32 y, MASK mask)
 //mk
 	// don't pick transparent so users can't "pay" transparent objects
 	gViewerWindow->pickAsync(x, y, mask, rightMouseCallback, FALSE, TRUE);
-	mPieMouseButtonDown = TRUE; 
+	mPieMouseButtonDown = TRUE;
 	// don't steal focus from UI
 	return FALSE;
 }
@@ -145,7 +145,7 @@ BOOL LLToolPie::pickAndShowMenu(BOOL always_show)
 		if (parcel)
 		{
 			LLViewerParcelMgr::getInstance()->selectCollisionParcel();
-			if (parcel->getParcelFlag(PF_USE_PASS_LIST) 
+			if (parcel->getParcelFlag(PF_USE_PASS_LIST)
 				&& !LLViewerParcelMgr::getInstance()->isCollisionBanned())
 			{
 				// if selling passes, just buy one
@@ -197,11 +197,11 @@ BOOL LLToolPie::pickAndShowMenu(BOOL always_show)
 //mk
 
 		mClickAction = 0;
-		if (object && object->getClickAction()) 
+		if (object && object->getClickAction())
 		{
 			mClickAction = object->getClickAction();
 		}
-		else if (parent && parent->getClickAction()) 
+		else if (parent && parent->getClickAction())
 		{
 			mClickAction = parent->getClickAction();
 		}
@@ -359,7 +359,7 @@ BOOL LLToolPie::pickAndShowMenu(BOOL always_show)
 
 	if (!gMenuHolder)
 	{
-		// Either at early initialization or late quitting stage 
+		// Either at early initialization or late quitting stage
 		return TRUE;
 	}
 
@@ -584,7 +584,7 @@ ECursorType cursor_from_object(LLViewerObject* object)
 		break;
 
 	case CLICK_ACTION_PLAY:
-	case CLICK_ACTION_OPEN_MEDIA: 
+	case CLICK_ACTION_OPEN_MEDIA:
 		cursor = cursor_from_parcel_media(click_action);
 		break;
 
@@ -708,7 +708,7 @@ BOOL LLToolPie::handleHover(S32 x, S32 y, MASK mask)
 			gViewerWindow->getWindow()->setCursor(UI_CURSOR_HAND);
 		}
 
-		else 
+		else
 		{
 			gViewerWindow->getWindow()->setCursor(UI_CURSOR_ARROW);
 		}
@@ -739,7 +739,7 @@ BOOL LLToolPie::handleMouseUp(S32 x, S32 y, MASK mask)
 		case CLICK_ACTION_OPEN:
 			// Because these actions open UI dialogs, we won't change
 			// the cursor again until the next hover and GL pick over
-			// the world.  Keep the cursor an arrow, assuming that 
+			// the world.  Keep the cursor an arrow, assuming that
 			// after the user moves off the UI, they won't be on the
 			// same object anymore.
 			gViewerWindow->getWindow()->setCursor(UI_CURSOR_ARROW);
@@ -759,7 +759,7 @@ BOOL LLToolPie::handleMouseUp(S32 x, S32 y, MASK mask)
 
 BOOL LLToolPie::handleRightMouseUp(S32 x, S32 y, MASK mask)
 {
-	mPieMouseButtonDown = FALSE; 
+	mPieMouseButtonDown = FALSE;
 	LLToolMgr::getInstance()->clearTransientTool();
 	return LLTool::handleRightMouseUp(x, y, mask);
 }
@@ -889,7 +889,7 @@ static bool handle_media_click(const LLPickInfo& pick)
 	LLPointer<LLViewerObject> objectp = pick.getObject();
 
 	if (!parcel || objectp.isNull() || pick.mObjectFace < 0 ||
-		pick.mObjectFace >= objectp->getNumTEs()) 
+		pick.mObjectFace >= objectp->getNumTEs())
 	{
 		LLSelectMgr::getInstance()->deselect();
 		LLViewerMediaFocus::getInstance()->clearFocus();
@@ -897,33 +897,37 @@ static bool handle_media_click(const LLPickInfo& pick)
 		return false;
 	}
 
-	// HACK: This is directly referencing an impl name. BAD!
-	// This can be removed when we have a truly generic media browser that only
-	// builds an impl based on the type of url it is passed.
-
-	// is media playing on this face?
+	// Is media playing on this face?
 	const LLTextureEntry* tep = objectp->getTE(pick.mObjectFace);
-
-	viewer_media_t media_impl = LLViewerMedia::getMediaImplFromTextureID(tep->getID());
-	if (tep && media_impl.notNull() && media_impl->hasMedia() &&
-		gSavedSettings.getBOOL("MediaOnAPrimUI"))
+	if (tep)
 	{
-		LLObjectSelectionHandle selection = LLViewerMediaFocus::getInstance()->getSelection(); 
-		if (!selection->contains(pick.getObject(), pick.mObjectFace))
+		// HACK: This is directly referencing an impl name. BAD!
+		// This can be removed when we have a truly generic media browser that
+		// only builds an impl based on the type of url it is passed.
+		viewer_media_t media_impl;
+		media_impl = LLViewerMedia::getMediaImplFromTextureID(tep->getID());
+		if (media_impl.notNull() && media_impl->hasMedia() &&
+			gSavedSettings.getBOOL("MediaOnAPrimUI"))
 		{
-			LLViewerMediaFocus::getInstance()->setFocusFace(TRUE,
-															pick.getObject(),
-															pick.mObjectFace,
-															media_impl);
+			LLObjectSelectionHandle selection;
+			selection = LLViewerMediaFocus::getInstance()->getSelection();
+			if (selection && !selection->contains(pick.getObject(),
+												  pick.mObjectFace))
+			{
+				LLViewerMediaFocus::getInstance()->setFocusFace(TRUE,
+																pick.getObject(),
+																pick.mObjectFace,
+																media_impl);
+			}
+			else
+			{
+				media_impl->mouseDown(pick.mXYCoords.mX, pick.mXYCoords.mY,
+									  gKeyboard->currentMask(TRUE));
+				// the mouse-up will happen when capture is lost
+				media_impl->mouseCapture();
+			}
+			return true;
 		}
-		else
-		{
-			media_impl->mouseDown(pick.mXYCoords.mX, pick.mXYCoords.mY,
-								  gKeyboard->currentMask(TRUE));
-			media_impl->mouseCapture(); // the mouse-up will happen when capture is lost
-		}
-
-		return true;
 	}
 
 	LLSelectMgr::getInstance()->deselect();
@@ -949,35 +953,36 @@ static bool handle_media_hover(const LLPickInfo& pick)
 		return false;
 	}
 
-	// HACK: This is directly referencing an impl name. BAD!
-	// This can be removed when we have a truly generic media browser that only
-	// builds an impl based on the type of url it is passed.
-
-	// is media playing on this face?
+	// Is media playing on this face?
 	const LLTextureEntry* tep = objectp->getTE(pick.mObjectFace);
-	viewer_media_t media_impl = LLViewerMedia::getMediaImplFromTextureID(tep->getID());
-	if (tep
-		&& media_impl.notNull()
-		&& media_impl->hasMedia()
-		&& gSavedSettings.getBOOL("MediaOnAPrimUI"))
+	if (tep)
 	{
-		if (LLViewerMediaFocus::getInstance()->getFocus())
+		// HACK: This is directly referencing an impl name. BAD !
+		// This can be removed when we have a truly generic media browser that
+		// only builds an impl based on the type of url it is passed.
+		viewer_media_t media_impl;
+		media_impl = LLViewerMedia::getMediaImplFromTextureID(tep->getID());
+		static LLCachedControl<bool> media_ui(gSavedSettings, "MediaOnAPrimUI");
+		if (media_ui && media_impl.notNull() && media_impl->hasMedia())
 		{
-			media_impl->mouseMove(pick.mXYCoords.mX, pick.mXYCoords.mY,
-								  gKeyboard->currentMask(TRUE));
-		}
+			if (LLViewerMediaFocus::getInstance()->getFocus())
+			{
+				media_impl->mouseMove(pick.mXYCoords.mX, pick.mXYCoords.mY,
+									  gKeyboard->currentMask(TRUE));
+			}
 
-		// Set mouse over flag if unset
-		if (! LLViewerMediaFocus::getInstance()->getMouseOverFlag())
-		{
-			LLSelectMgr::getInstance()->setHoverObject(objectp,
-													   pick.mObjectFace);
-			LLViewerMediaFocus::getInstance()->setMouseOverFlag(true,
-																media_impl);
-			LLViewerMediaFocus::getInstance()->setPickInfo(pick);
-		}
+			// Set mouse over flag if unset
+			if (!LLViewerMediaFocus::getInstance()->getMouseOverFlag())
+			{
+				LLSelectMgr::getInstance()->setHoverObject(objectp,
+														   pick.mObjectFace);
+				LLViewerMediaFocus::getInstance()->setMouseOverFlag(true,
+																	media_impl);
+				LLViewerMediaFocus::getInstance()->setPickInfo(pick);
+			}
 
-		return true;
+			return true;
+		}
 	}
 	LLViewerMediaFocus::getInstance()->setMouseOverFlag(false);
 

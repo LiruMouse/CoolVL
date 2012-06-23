@@ -399,34 +399,28 @@ void LLToolBar::refresh()
 		sitting = gAgentAvatarp->mIsSitting;
 	}
 	mFlyButton->setEnabled(!sitting && (gAgent.canFly() || gAgent.getFlying()));
- 
+
 //MK
 	if (gRRenabled)
 	{
-		mBuildButton->setEnabled(LLViewerParcelMgr::getInstance()->agentCanBuild() &&
-								 !gAgent.mRRInterface.mContainsRez &&
-								 !gAgent.mRRInterface.mContainsEdit);
 		mRadarButton->setEnabled(!gAgent.mRRInterface.mContainsShownames);
 		mMiniMapButton->setEnabled(!gAgent.mRRInterface.mContainsShowminimap);
 		mMapButton->setEnabled(!gAgent.mRRInterface.mContainsShowworldmap &&
 							   !gAgent.mRRInterface.mContainsShowloc);
 		mInventoryButton->setEnabled(!gAgent.mRRInterface.mContainsShowinv);
 	}
-	else
 //mk
-		mBuildButton->setEnabled(LLViewerParcelMgr::getInstance()->agentCanBuild());
 
-	// Check to see if we are in build mode
-	BOOL build_mode = LLToolMgr::getInstance()->inEdit();
-	// And not just clicking on a scripted object
-	if (LLToolGrab::getInstance()->getHideBuildHighlight())
+	mBuildButton->setEnabled(LLViewerParcelMgr::getInstance()->agentCanBuild());
+	// Check to see if we are in build mode and not just clicking on a scripted
+	// object
+	bool build_mode = LLToolMgr::getInstance()->inEdit() &&
+					 !LLToolGrab::getInstance()->getHideBuildHighlight();
+	static LLCachedControl<bool> build_btn_state(gSavedSettings,
+												 "BuildBtnState");
+	if (build_mode != build_btn_state)
 	{
-		build_mode = FALSE;
-	}
-	static LLCachedControl<bool> build_btn_state(gSavedSettings, "BuildBtnState");
-	if ((bool)build_mode != build_btn_state)
-	{
-		gSavedSettings.setBOOL("BuildBtnState", build_mode);
+		gSavedSettings.setBOOL("BuildBtnState", (BOOL)build_mode);
 	}
 }
 

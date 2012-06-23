@@ -48,6 +48,7 @@
 				<icon name="media_panel_divider-4" image_name="media_panel_divider.png" visible="true" height="22" width="3" left_delta="22" 
 					scale_image="false" bottom="5"/>
 				<button name="new_window" label="" left_delta="3" width="24" bottom_delta="1" height="22" image_unselected="media_btn_newwindow.png" 
+				 tool_tip="Open this media in a browser."
 					image_selected="media_btn_newwindow.png" scale_image="true"/>
 				<icon name="media_panel_divider-5" image_name="media_panel_divider.png" visible="true" height="22" width="3" left_delta="24" 
 					scale_image="false" bottom="5"/>
@@ -57,9 +58,11 @@
 			<panel name="media_hover_controls" width="57" left="74" height="32" bottom="0" visible="false">
 				<icon name="media_panel_metacontrols_bg-hover" image_name="media_panel_bg.png" visible="true" height="32" width="57" scale_image="true" bottom="0" left="0"/>
 				<button name="zoom_frame_hover" label="" left_delta="4" width="22" bottom="5" height="22" image_unselected="media_btn_optimalzoom.png" image_selected="media_btn_optimalzoom.png" 
+				 tool_tip="Zoom on this media and expand the media HUD."
 					scale_image="true"/>
 				<icon name="media_panel_divider" image_name="media_panel_divider.png" visible="true" height="22" width="3" left_delta="22" scale_image="false" bottom="5"/>
 				<button name="new_window_hover" label="" left_delta="3" width="24" bottom_delta="1" height="22" image_unselected="media_btn_newwindow.png" image_selected="media_btn_newwindow.png" 
+				 tool_tip="Open this media in a browser."
 					scale_image="true"/>
 			</panel>
     </layout_panel>

@@ -1,11 +1,11 @@
-/** 
+/**
  * @file lldynamictexture.cpp
  * @brief Implementation of LLDynamicTexture class
  *
  * $LicenseInfo:firstyear=2001&license=viewergpl$
- * 
+ *
  * Copyright (c) 2001-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -36,15 +36,15 @@
 
 // Linden library includes
 #include "llglheaders.h"
+#include "llrender.h"
+#include "llvertexbuffer.h"
 
 // Viewer includes
-#include "llviewerwindow.h"
 #include "llviewercamera.h"
 #include "llviewercontrol.h"
-#include "llviewertexture.h"
-#include "llvertexbuffer.h"
 #include "llviewerdisplay.h"
-#include "llrender.h"
+#include "llviewertexture.h"
+#include "llviewerwindow.h"
 
 // static
 LLViewerDynamicTexture::instance_list_t LLViewerDynamicTexture::sInstances[LLViewerDynamicTexture::ORDER_COUNT];
@@ -53,8 +53,10 @@ S32 LLViewerDynamicTexture::sNumRenders = 0;
 //-----------------------------------------------------------------------------
 // LLViewerDynamicTexture()
 //-----------------------------------------------------------------------------
-LLViewerDynamicTexture::LLViewerDynamicTexture(S32 width, S32 height, S32 components, EOrder order, BOOL clamp) : 
-	LLViewerTexture(width, height, components, FALSE),
+LLViewerDynamicTexture::LLViewerDynamicTexture(S32 width, S32 height,
+											   S32 components, EOrder order,
+											   BOOL clamp)
+:	LLViewerTexture(width, height, components, FALSE),
 	mClamp(clamp)
 {
 	llassert(1 <= components && components <= 4);
@@ -72,11 +74,12 @@ LLViewerDynamicTexture::~LLViewerDynamicTexture()
 {
 	for (S32 order = 0; order < ORDER_COUNT; order++)
 	{
-		LLViewerDynamicTexture::sInstances[order].erase(this);  // will fail in all but one case.
+		// will fail in all but one case.
+		LLViewerDynamicTexture::sInstances[order].erase(this);
 	}
 }
 
-//virtual 
+//virtual
 S8 LLViewerDynamicTexture::getType() const
 {
 	return LLViewerTexture::DYNAMIC_TEXTURE;
@@ -91,17 +94,23 @@ void LLViewerDynamicTexture::generateGLTexture()
 	generateGLTexture(-1, 0, 0, FALSE);
 }
 
-void LLViewerDynamicTexture::generateGLTexture(LLGLint internal_format, LLGLenum primary_format, LLGLenum type_format, BOOL swap_bytes)
+void LLViewerDynamicTexture::generateGLTexture(LLGLint internal_format,
+											   LLGLenum primary_format,
+											   LLGLenum type_format,
+											   BOOL swap_bytes)
 {
 	if (mComponents < 1 || mComponents > 4)
 	{
-		llerrs << "Bad number of components in dynamic texture: " << mComponents << llendl;
+		llerrs << "Bad number of components in dynamic texture: "
+			   << mComponents << llendl;
 	}
 
-	LLPointer<LLImageRaw> raw_image = new LLImageRaw(mFullWidth, mFullHeight, mComponents);
+	LLPointer<LLImageRaw> raw_image = new LLImageRaw(mFullWidth, mFullHeight,
+													 mComponents);
 	if (internal_format >= 0)
 	{
-		setExplicitFormat(internal_format, primary_format, type_format, swap_bytes);
+		setExplicitFormat(internal_format, primary_format, type_format,
+						  swap_bytes);
 	}
 	createGLTexture(0, raw_image, 0, TRUE, LLViewerTexture::DYNAMIC_TEX);
 	setAddressMode((mClamp) ? LLTexUnit::TAM_CLAMP : LLTexUnit::TAM_WRAP);
@@ -125,7 +134,8 @@ void LLViewerDynamicTexture::preRender(BOOL clear_depth)
 		// force rendering to on-screen portion of frame buffer
 		LLCoordScreen window_pos;
 		gViewerWindow->getWindow()->getPosition(&window_pos);
-		mOrigin.set(0, gViewerWindow->getWindowDisplayHeight() - mFullHeight);  // top left corner
+		// top left corner
+		mOrigin.set(0, gViewerWindow->getWindowDisplayHeight() - mFullHeight);
 
 		if (window_pos.mX < 0)
 		{
@@ -169,13 +179,17 @@ void LLViewerDynamicTexture::postRender(BOOL success)
 			else if (!mGLTexturep->getHasGLTexture())
 			{
 				generateGLTexture();
-			}			
-			else if (mGLTexturep->getDiscardLevel() != 0)	//do not know how it happens, but regenerate one if it does.
+			}
+			else if (mGLTexturep->getDiscardLevel() != 0)
 			{
+				// do not know how it happens, but regenerate one if it does.
 				generateGLTexture();
 			}
 
-			success = mGLTexturep->setSubImageFromFrameBuffer(0, 0, mOrigin.mX, mOrigin.mY, mFullWidth, mFullHeight);
+			success = mGLTexturep->setSubImageFromFrameBuffer(0, 0, mOrigin.mX,
+															  mOrigin.mY,
+															  mFullWidth,
+															  mFullHeight);
 		}
 	}
 
@@ -194,7 +208,8 @@ void LLViewerDynamicTexture::postRender(BOOL success)
 //-----------------------------------------------------------------------------
 // static
 // updateDynamicTextures()
-// Calls update on each dynamic texture.  Calls each group in order: "first," then "middle," then "last."
+// Calls update on each dynamic texture. Calls each group in order: "first,"
+// then "middle," then "last."
 //-----------------------------------------------------------------------------
 BOOL LLViewerDynamicTexture::updateAllInstances()
 {
@@ -206,29 +221,31 @@ BOOL LLViewerDynamicTexture::updateAllInstances()
 
 	BOOL result = FALSE;
 	BOOL ret = FALSE;
-	for (S32 order = 0; order < ORDER_COUNT; order++)
+	for (S32 order = 0; order < ORDER_COUNT; ++order)
 	{
-		for (instance_list_t::iterator iter = LLViewerDynamicTexture::sInstances[order].begin();
-			 iter != LLViewerDynamicTexture::sInstances[order].end(); ++iter)
+		for (instance_list_t::iterator
+				iter = LLViewerDynamicTexture::sInstances[order].begin(),
+				end = LLViewerDynamicTexture::sInstances[order].end();
+			 iter != end; ++iter)
 		{
-			LLViewerDynamicTexture *dynamicTexture = *iter;
+			LLViewerDynamicTexture* dynamicTexture = *iter;
 			if (dynamicTexture->needsRender())
 			{
 				glClear(GL_DEPTH_BUFFER_BIT);
 				gDepthDirty = TRUE;
 
-				gGL.color4f(1,1,1,1);
+				gGL.color4f(1, 1, 1, 1);
 				dynamicTexture->preRender();	// Must be called outside of startRender()
 				result = FALSE;
 				if (dynamicTexture->render())
 				{
 					ret = TRUE;
 					result = TRUE;
-					sNumRenders++;
+					++sNumRenders;
 				}
 				gGL.flush();
 				LLVertexBuffer::unbind();
-				
+
 				dynamicTexture->postRender(result);
 			}
 		}
@@ -243,12 +260,14 @@ BOOL LLViewerDynamicTexture::updateAllInstances()
 //-----------------------------------------------------------------------------
 void LLViewerDynamicTexture::destroyGL()
 {
-	for (S32 order = 0; order < ORDER_COUNT; order++)
+	for (S32 order = 0; order < ORDER_COUNT; ++order)
 	{
-		for (instance_list_t::iterator iter = LLViewerDynamicTexture::sInstances[order].begin();
-			 iter != LLViewerDynamicTexture::sInstances[order].end(); ++iter)
+		for (instance_list_t::iterator
+				iter = LLViewerDynamicTexture::sInstances[order].begin(),
+				end = LLViewerDynamicTexture::sInstances[order].end();
+			 iter != end; ++iter)
 		{
-			LLViewerDynamicTexture *dynamicTexture = *iter;
+			LLViewerDynamicTexture* dynamicTexture = *iter;
 			dynamicTexture->destroyGLTexture();
 		}
 	}
@@ -263,14 +282,16 @@ void LLViewerDynamicTexture::restoreGL()
 	if (gGLManager.mIsDisabled)
 	{
 		return;
-	}			
-	
-	for (S32 order = 0; order < ORDER_COUNT; order++)
+	}
+
+	for (S32 order = 0; order < ORDER_COUNT; ++order)
 	{
-		for (instance_list_t::iterator iter = LLViewerDynamicTexture::sInstances[order].begin();
-			 iter != LLViewerDynamicTexture::sInstances[order].end(); ++iter)
+		for (instance_list_t::iterator
+				iter = LLViewerDynamicTexture::sInstances[order].begin(),
+				end = LLViewerDynamicTexture::sInstances[order].end();
+			 iter != end; ++iter)
 		{
-			LLViewerDynamicTexture *dynamicTexture = *iter;
+			LLViewerDynamicTexture* dynamicTexture = *iter;
 			dynamicTexture->restoreGLTexture();
 		}
 	}

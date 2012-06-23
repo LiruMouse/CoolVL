@@ -929,8 +929,9 @@ void LLBumpImageList::addTextureStats(U8 bump, const LLUUID& base_image_id, F32 
 
 void LLBumpImageList::updateImages()
 {
-	for (bump_image_map_t::iterator iter = mBrightnessEntries.begin();
-		 iter != mBrightnessEntries.end(); )
+	for (bump_image_map_t::iterator iter = mBrightnessEntries.begin(),
+									end = mBrightnessEntries.end();
+		 iter != end; )
 	{
 		bump_image_map_t::iterator curiter = iter++;
 		LLViewerTexture* image = curiter->second;
@@ -951,14 +952,16 @@ void LLBumpImageList::updateImages()
 
 			if (destroy)
 			{
-				//llinfos << "*** Destroying bright " << (void*)image << llendl;
-				mBrightnessEntries.erase(curiter);   // deletes the image thanks to reference counting
+				//llinfos << "Destroying bright " << (void*)image << llendl;
+				// deletes the image thanks to reference counting
+				mBrightnessEntries.erase(curiter);
 			}
 		}
 	}
 
-	for (bump_image_map_t::iterator iter = mDarknessEntries.begin();
-		 iter != mDarknessEntries.end(); )
+	for (bump_image_map_t::iterator iter = mDarknessEntries.begin(),
+									end = mDarknessEntries.end();
+		 iter != end; )
 	{
 		bump_image_map_t::iterator curiter = iter++;
 		LLViewerTexture* image = curiter->second;
@@ -979,8 +982,9 @@ void LLBumpImageList::updateImages()
 
 			if (destroy)
 			{
-				//llinfos << "*** Destroying dark " << (void*)image << llendl;;
-				mDarknessEntries.erase(curiter);  // deletes the image thanks to reference counting
+				//llinfos << "Destroying dark " << (void*)image << llendl;
+				// deletes the image thanks to reference counting
+				mDarknessEntries.erase(curiter);
 			}
 		}
 	}

@@ -141,7 +141,7 @@ void LLStreamingAudio_FMOD::update()
 {
 	// Kill dead internet streams, if possible
 	std::list<LLAudioStreamManagerFMOD *>::iterator iter;
-	for (iter = mDeadStreams.begin(); iter != mDeadStreams.end();)
+	for (iter = mDeadStreams.begin(); iter != mDeadStreams.end(); )
 	{
 		LLAudioStreamManagerFMOD *streamp = *iter;
 		if (streamp->stopStream())
@@ -152,7 +152,7 @@ void LLStreamingAudio_FMOD::update()
 		}
 		else
 		{
-			iter++;
+			++iter;
 		}
 	}
 

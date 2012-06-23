@@ -83,8 +83,8 @@ public:
 	static const U32 TEXTURE_IS_NULL = 0x08;
 	static const U32 TEXTURE_SAVED_FAILED = 0x10;
 
-	// Is ready for next texture?
-	bool mNextTextureReady;
+	// Are we ready to check for next texture ?
+	bool mCheckNextTexture;
 
 	// Export state machine
 	enum export_states mExportState; 
@@ -157,10 +157,10 @@ private:
 	U32 mRezCount;
 
 	// Rebase map
-	std::map<LLUUID,LLUUID> mAssetMap;
+	std::map<LLUUID, LLUUID> mAssetMap;
 
 	// Export texture list
-	std::list<LLUUID> mTexturesList;
+	std::set<LLUUID> mTexturesList;
 
 	// Import object tracking
 	std::vector<LLViewerObject*> mToSelect;

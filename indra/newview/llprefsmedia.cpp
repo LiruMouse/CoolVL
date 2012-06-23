@@ -76,9 +76,11 @@ BOOL LLPrefsMedia::postBuild()
 		gSavedSettings.setBOOL("NotifyStreamChanges", FALSE);
 	}
 	childSetEnabled("auto_streaming_video", mPreviousStreamingVideo);
+	childSetEnabled("media_hud", mPreviousStreamingVideo);
 	if (!mPreviousStreamingVideo)
 	{
 		gSavedSettings.setBOOL("ParcelMediaAutoPlayEnable", FALSE);
+		mPreviousParcelMediaAutoPlay = FALSE;
 	}
 	childSetEnabled("media_lookup_ip", mPreviousMediaEnableFilter);
 
@@ -99,6 +101,8 @@ void LLPrefsMedia::refreshValues()
 	mPreviousStreamingMusic			= gSavedSettings.getBOOL("AudioStreamingMusic");
 	mPreviousNotifyStreamChanges	= gSavedSettings.getBOOL("NotifyStreamChanges");
 	mPreviousStreamingVideo			= gSavedSettings.getBOOL("AudioStreamingVideo");
+	mPreviousParcelMediaAutoPlay	= gSavedSettings.getBOOL("ParcelMediaAutoPlayEnable");
+	mPreviousMediaOnAPrimUI			= gSavedSettings.getBOOL("PreviousMediaOnAPrimUI");
 	mPreviousMediaEnableFilter		= gSavedSettings.getBOOL("MediaEnableFilter");
 	mPreviousMediaLookupIP			= gSavedSettings.getBOOL("MediaLookupIP");
 
@@ -109,24 +113,26 @@ void LLPrefsMedia::refreshValues()
 
 void LLPrefsMedia::cancel()
 {
-	gSavedSettings.setF32("AudioLevelMaster",		mPreviousVolume);
-	gSavedSettings.setF32("AudioLevelUI",			mPreviousUI);
-	gSavedSettings.setF32("AudioLevelSFX",			mPreviousSFX);
-	gSavedSettings.setF32("AudioLevelAmbient",		mPreviousEnvironment);
-	gSavedSettings.setF32("AudioLevelMusic",		mPreviousMusicVolume);
-	gSavedSettings.setF32("AudioLevelMedia",		mPreviousMediaVolume);
-	gSavedSettings.setF32("AudioLevelDoppler",		mPreviousDoppler);
-	gSavedSettings.setF32("AudioLevelRolloff",		mPreviousRolloff);
+	gSavedSettings.setF32("AudioLevelMaster",			mPreviousVolume);
+	gSavedSettings.setF32("AudioLevelUI",				mPreviousUI);
+	gSavedSettings.setF32("AudioLevelSFX",				mPreviousSFX);
+	gSavedSettings.setF32("AudioLevelAmbient",			mPreviousEnvironment);
+	gSavedSettings.setF32("AudioLevelMusic",			mPreviousMusicVolume);
+	gSavedSettings.setF32("AudioLevelMedia",			mPreviousMediaVolume);
+	gSavedSettings.setF32("AudioLevelDoppler",			mPreviousDoppler);
+	gSavedSettings.setF32("AudioLevelRolloff",			mPreviousRolloff);
 
-	gSavedSettings.setBOOL("AudioStreamingMusic",	mPreviousStreamingMusic);
-	gSavedSettings.setBOOL("NotifyStreamChanges",	mPreviousNotifyStreamChanges);
-	gSavedSettings.setBOOL("AudioStreamingVideo",	mPreviousStreamingVideo);
-	gSavedSettings.setBOOL("MediaEnableFilter",		mPreviousMediaEnableFilter);
-	gSavedSettings.setBOOL("MediaLookupIP",			mPreviousMediaLookupIP);
+	gSavedSettings.setBOOL("AudioStreamingMusic",		mPreviousStreamingMusic);
+	gSavedSettings.setBOOL("NotifyStreamChanges",		mPreviousNotifyStreamChanges);
+	gSavedSettings.setBOOL("AudioStreamingVideo",		mPreviousStreamingVideo);
+	gSavedSettings.setBOOL("ParcelMediaAutoPlayEnable",	mPreviousParcelMediaAutoPlay);
+	gSavedSettings.setBOOL("PreviousMediaOnAPrimUI",	mPreviousMediaOnAPrimUI);
+	gSavedSettings.setBOOL("MediaEnableFilter",			mPreviousMediaEnableFilter);
+	gSavedSettings.setBOOL("MediaLookupIP",				mPreviousMediaLookupIP);
 
-	gSavedSettings.setBOOL("MuteAudio",				mPreviousMuteAudio);
-	gSavedSettings.setBOOL("MuteWhenMinimized",		mPreviousMuteWhenMinimized);
-	gSavedSettings.setBOOL("EnableGestureSounds",	mPreviousEnableGestureSounds);
+	gSavedSettings.setBOOL("MuteAudio",					mPreviousMuteAudio);
+	gSavedSettings.setBOOL("MuteWhenMinimized",			mPreviousMuteWhenMinimized);
+	gSavedSettings.setBOOL("EnableGestureSounds",		mPreviousEnableGestureSounds);
 }
 
 //static
@@ -142,6 +148,7 @@ void LLPrefsMedia::onCommitCheckBoxMedia(LLUICtrl* ctrl, void* user_data)
 		gSavedSettings.setBOOL("ParcelMediaAutoPlayEnable", FALSE);
 	}
 	self->childSetEnabled("auto_streaming_video", enabled);
+	self->childSetEnabled("media_hud", enabled);
 }
 
 //static

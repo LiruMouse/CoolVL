@@ -1,11 +1,11 @@
-/** 
+/**
  * @file llcontainerview.h
  * @brief Container for all statistics info.
  *
  * $LicenseInfo:firstyear=2001&license=viewergpl$
- * 
+ *
  * Copyright (c) 2001-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -34,18 +34,15 @@
 #define LL_LLCONTAINERVIEW_H
 
 #include "stdtypes.h"
+
 #include "lltextbox.h"
+
 #include "llstatbar.h"
 
 class LLScrollableContainerView;
 
 class LLContainerView : public LLView
 {
-protected:
-	BOOL mDisplayChildren;
-	std::string mLabel;
-public:
-	BOOL mCollapsible;
 public:
 	LLContainerView(const std::string& name, const LLRect& rect);
 	~LLContainerView();
@@ -54,18 +51,29 @@ public:
 	virtual BOOL handleMouseUp(S32 x, S32 y, MASK mask);
 
 	virtual void draw();
-	virtual void reshape(S32 width, S32 height, BOOL called_from_parent = TRUE);
-	virtual LLRect getRequiredRect();	// Return the height of this object, given the set options.
+	virtual void reshape(S32 width, S32 height,
+						 BOOL called_from_parent = TRUE);
+	// Returns the height of this object, given the set options:
+	virtual LLRect getRequiredRect();
 
 	void setLabel(const std::string& label);
-	void showLabel(BOOL show) { mShowLabel = show; }
+	void showLabel(BOOL show)									{ mShowLabel = show; }
 	void setDisplayChildren(const BOOL displayChildren);
-	BOOL getDisplayChildren() { return mDisplayChildren; }
-	void setScrollContainer(LLScrollableContainerView* scroll) {mScrollContainer = scroll;}
+	BOOL getDisplayChildren()									{ return mDisplayChildren; }
+	void setScrollContainer(LLScrollableContainerView* scroll)	{ mScrollContainer = scroll; }
 
- private:
-	LLScrollableContainerView* mScrollContainer;
+private:
 	void arrange(S32 width, S32 height, BOOL called_from_parent = TRUE);
+
+public:
+	BOOL mCollapsible;
+
+protected:
+	BOOL mDisplayChildren;
+	std::string mLabel;
+
+private:
+	LLScrollableContainerView* mScrollContainer;
 	BOOL mShowLabel;
 };
 #endif // LL_CONTAINERVIEW_

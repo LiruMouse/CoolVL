@@ -742,7 +742,8 @@ BOOL LLSpatialGroup::removeObject(LLDrawable* drawablep, BOOL from_octree)
 
 		if (drawablep->isSpatialBridge())
 		{
-			for (bridge_list_t::iterator i = mBridgeList.begin(), end = mBridgeList.end();
+			for (bridge_list_t::iterator i = mBridgeList.begin(),
+										 end = mBridgeList.end();
 				 i != end; ++i)
 			{
 				if (*i == drawablep)

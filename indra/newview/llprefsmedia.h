@@ -72,6 +72,8 @@ private:
 	BOOL	mPreviousStreamingMusic;
 	BOOL	mPreviousNotifyStreamChanges;
 	BOOL	mPreviousStreamingVideo;
+	BOOL	mPreviousParcelMediaAutoPlay;
+	BOOL	mPreviousMediaOnAPrimUI;
 	BOOL	mPreviousMediaEnableFilter;
 	BOOL	mPreviousMediaLookupIP;
 

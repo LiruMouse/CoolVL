@@ -988,8 +988,9 @@ BOOL LLVOAvatarSelf::isWearingAttachment(const LLUUID& inv_item_id) const
 //-----------------------------------------------------------------------------
 BOOL LLVOAvatarSelf::attachmentWasRequested(const LLUUID& inv_item_id) const
 {
-	const F32 REQUEST_EXPIRATION_SECONDS = 5.0;  // any request older than this is ignored/removed.
-	std::map<LLUUID,LLTimer>::iterator it = mAttachmentRequests.find(inv_item_id);
+	// Any request older than this is ignored/removed.
+	const F32 REQUEST_EXPIRATION_SECONDS = 5.0;
+	std::map<LLUUID, LLTimer>::iterator it = mAttachmentRequests.find(inv_item_id);
 	if (it != mAttachmentRequests.end())
 	{
 		const LLTimer& request_time = it->second;

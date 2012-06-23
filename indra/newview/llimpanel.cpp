@@ -1726,6 +1726,12 @@ BOOL LLFloaterIMPanel::handleKeyHere(KEY key, MASK mask)
 	BOOL handled = FALSE;
 	if (KEY_RETURN == key)
 	{
+		if (HBFloaterTextInput::hasFloaterFor(mInputEditor))
+		{
+			HBFloaterTextInput::show(mInputEditor);
+			return TRUE;
+		}
+
 		if (mask == MASK_NONE || mask == MASK_CONTROL || mask == MASK_SHIFT)
 		{
 			sendMsg();

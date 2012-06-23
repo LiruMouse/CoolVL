@@ -1,11 +1,11 @@
-/** 
+/**
  * @file llstatbar.cpp
  * @brief A little map of the world with network information
  *
  * $LicenseInfo:firstyear=2001&license=viewergpl$
- * 
+ *
  * Copyright (c) 2001-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -34,12 +34,14 @@
 
 #include "llstatbar.h"
 
+#include "llfontgl.h"
+#include "llgl.h"
 #include "llmath.h"
 #include "llui.h"
-#include "llgl.h"
-#include "llfontgl.h"
 
 #include "llstat.h"
+
+#include "llviewercontrol.h"
 
 ///////////////////////////////////////////////////////////////////////////////////
 
@@ -49,20 +51,19 @@ LLStatBar::LLStatBar(const std::string& name,
 					 BOOL default_bar,
 					 BOOL default_history)
 :	LLView(name, rect, TRUE),
-	mSetting(setting)
+	mSetting(setting),
+	mMinBar(0.f),
+	mMaxBar(50.f),
+	mStatp(NULL),
+	mTickSpacing(10.f),
+	mLabelSpacing(10.f),
+	mPrecision(0),
+	mUpdatesPerSec(5),
+	mLabel(name),
+	mPerSec(TRUE),
+	mValue(0.f),
+	mDisplayMean(TRUE)
 {
-	mMinBar = 0.f;
-	mMaxBar = 50.f;
-	mStatp = NULL;
-	mTickSpacing = 10.f;
-	mLabelSpacing = 10.f;
-	mPrecision = 0;
-	mUpdatesPerSec = 5;
-	mLabel = name;
-	mPerSec = TRUE;
-	mValue = 0.f;
-	mDisplayMean = TRUE;
-
 	S32 mode = -1;
 	if (mSetting.length() > 0)
 	{
@@ -192,7 +193,7 @@ void LLStatBar::draw()
 
 	// Draw the value.
 	LLFontGL::getFontMonospace()->renderUTF8(value_str, 0, width,
-											 getRect().getHeight(), 
+											 getRect().getHeight(),
 											 LLColor4(1.f, 1.f, 1.f, 0.5f),
 											 LLFontGL::RIGHT, LLFontGL::TOP);
 
@@ -206,28 +207,33 @@ void LLStatBar::draw()
 		top = bar_top;
 		bottom = bar_top - bar_height - tick_height/2;
 
+		LLColor4 color = LLColor4(1.f, 1.f, 1.f, 0.1f);
 		LLGLSUIDefault gls_ui;
 		gGL.getTexUnit(0)->unbind(LLTexUnit::TT_TEXTURE);
-		for (tick_value = mMinBar; tick_value <= mMaxBar; tick_value += mTickSpacing)
+		for (tick_value = mMinBar; tick_value <= mMaxBar;
+			 tick_value += mTickSpacing)
 		{
-			left = llfloor((tick_value - mMinBar)*value_scale);
+			left = llfloor((tick_value - mMinBar) * value_scale);
 			right = left + tick_width;
-			gl_rect_2d(left, top, right, bottom, LLColor4(1.f, 1.f, 1.f, 0.1f));
+			gl_rect_2d(left, top, right, bottom, color);
 		}
 
+		color = LLColor4(1.f, 1.f, 1.f, 0.5f);
+		LLColor4 color2 = LLColor4(1.f, 1.f, 1.f, 0.25f);
 		// Draw the tick labels (and big ticks).
 		bottom = bar_top - bar_height - tick_height;
-		for (tick_value = mMinBar; tick_value <= mMaxBar; tick_value += mLabelSpacing)
+		for (tick_value = mMinBar; tick_value <= mMaxBar;
+			 tick_value += mLabelSpacing)
 		{
 			left = llfloor((tick_value - mMinBar)*value_scale);
 			right = left + tick_width;
-			gl_rect_2d(left, top, right, bottom, LLColor4(1.f, 1.f, 1.f, 0.25f));
+			gl_rect_2d(left, top, right, bottom, color2);
 
 			tick_label = llformat( value_format.c_str(), tick_value);
 			// draw labels for the tick marks
 			LLFontGL::getFontMonospace()->renderUTF8(tick_label, 0, left - 1,
 													 bar_top - bar_height - tick_height,
-											 		 LLColor4(1.f, 1.f, 1.f, 0.5f),
+											 		 color,
 											 		 LLFontGL::LEFT,
 													 LLFontGL::TOP);
 		}
@@ -258,11 +264,11 @@ void LLStatBar::draw()
 		right = (S32) ((max - mMinBar) * value_scale);
 		gl_rect_2d(left, top, right, bottom, LLColor4(1.f, 0.f, 0.f, 0.25f));
 
+		color = LLColor4(1.f, 0.f, 0.f, 1.f);
 		S32 num_values = mStatp->getNumValues() - 1;
 		if (mDisplayHistory)
 		{
-			S32 i;
-			for (i = 0; i < num_values; i++)
+			for (S32 i = 0; i < num_values; i++)
 			{
 				if (i == mStatp->getNextBin())
 				{
@@ -272,13 +278,13 @@ void LLStatBar::draw()
 				{
 					left = (S32)((mStatp->getPrevPerSec(i) - mMinBar) * value_scale);
 					right = (S32)((mStatp->getPrevPerSec(i) - mMinBar) * value_scale) + 1;
-					gl_rect_2d(left, bottom+i+1, right, bottom+i, LLColor4(1.f, 0.f, 0.f, 1.f));
+					gl_rect_2d(left, bottom + i + 1, right, bottom + i, color);
 				}
 				else
 				{
 					left = (S32)((mStatp->getPrev(i) - mMinBar) * value_scale);
 					right = (S32)((mStatp->getPrev(i) - mMinBar) * value_scale) + 1;
-					gl_rect_2d(left, bottom+i+1, right, bottom+i, LLColor4(1.f, 0.f, 0.f, 1.f));
+					gl_rect_2d(left, bottom + i + 1, right, bottom + i, color);
 				}
 			}
 		}
@@ -287,14 +293,14 @@ void LLStatBar::draw()
 			// draw current
 			left = (S32) ((current - mMinBar) * value_scale) - 1;
 			right = (S32) ((current - mMinBar) * value_scale) + 1;
-			gl_rect_2d(left, top, right, bottom, LLColor4(1.f, 0.f, 0.f, 1.f));
+			gl_rect_2d(left, top, right, bottom, color);
 		}
 
 		// draw mean bar
 		top = bar_top + 2;
 		bottom = bar_top - bar_height - 2;
-		left = (S32) ((mean - mMinBar) * value_scale) - 1;
-		right = (S32) ((mean - mMinBar) * value_scale) + 1;
+		left = (S32)((mean - mMinBar) * value_scale) - 1;
+		right = (S32)((mean - mMinBar) * value_scale) + 1;
 		gl_rect_2d(left, top, right, bottom, LLColor4(0.f, 1.f, 0.f, 1.f));
 	}
 

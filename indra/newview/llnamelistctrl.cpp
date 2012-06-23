@@ -1,11 +1,11 @@
-/** 
+/**
  * @file llnamelistctrl.cpp
  * @brief A list of names, automatically refreshed from name cache.
  *
  * $LicenseInfo:firstyear=2003&license=viewergpl$
- * 
+ *
  * Copyright (c) 2003-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -37,9 +37,9 @@
 #include "llnamelistctrl.h"
 
 #include "llcachename.h"
+#include "llinventory.h"
 
 #include "llagent.h"
-#include "llinventory.h"
 #include "llviewercontrol.h"
 
 static LLRegisterWidget<LLNameListCtrl> r("name_list");
@@ -90,7 +90,7 @@ BOOL LLNameListCtrl::addNameItem(const LLUUID& agent_id, EAddPosition pos,
 // virtual, public
 BOOL LLNameListCtrl::handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop,
 									   EDragAndDropType cargo_type,
-									   void *cargo_data, 
+									   void *cargo_data,
 									   EAcceptance *accept,
 									   std::string& tooltip_msg)
 {
@@ -105,7 +105,7 @@ BOOL LLNameListCtrl::handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop,
 	{
 		if (drop)
 		{
-			LLInventoryItem* item = (LLInventoryItem *)cargo_data;
+			LLInventoryItem* item = (LLInventoryItem*)cargo_data;
 			addNameItem(item->getCreatorUUID());
 		}
 
@@ -122,7 +122,8 @@ BOOL LLNameListCtrl::handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop,
 			}
 			else
 			{
-				// backwards compatable English tooltip (should be overridden in xml)
+				// backwards compatable English tooltip (should be overridden
+				// in xml)
 				tooltip_msg.assign("Drag a calling card here\nto add a resident.");
 			}
 		}
@@ -149,7 +150,8 @@ void LLNameListCtrl::addGroupNameItem(const LLUUID& group_id, EAddPosition pos,
 void LLNameListCtrl::addGroupNameItem(LLScrollListItem* item, EAddPosition pos)
 
 {
-	//llinfos << "LLNameListCtrl::addGroupNameItem " << item->getUUID() << llendl;
+	//llinfos << "LLNameListCtrl::addGroupNameItem " << item->getUUID()
+	//		<< llendl;
 
 	std::string group_name;
 	gCacheName->getGroupName(item->getUUID(), group_name);
@@ -182,9 +184,11 @@ BOOL LLNameListCtrl::addNameItem(LLScrollListItem* item, EAddPosition pos)
 	return result;
 }
 
-LLScrollListItem* LLNameListCtrl::addElement(const LLSD& value, EAddPosition pos, void* userdata)
+LLScrollListItem* LLNameListCtrl::addElement(const LLSD& value, EAddPosition pos,
+											 void* userdata)
 {
-	LLScrollListItem* item = LLScrollListCtrl::addElement(value, pos, userdata);
+	LLScrollListItem* item = LLScrollListCtrl::addElement(value, pos,
+														  userdata);
 
 	// use supplied name by default
 	std::string fullname = value["name"].asString();
@@ -236,11 +240,13 @@ void LLNameListCtrl::removeNameItem(const LLUUID& agent_id)
 }
 
 // public
-void LLNameListCtrl::refresh(const LLUUID& id, const std::string& fullname, bool is_group)
+void LLNameListCtrl::refresh(const LLUUID& id, const std::string& fullname,
+							 bool is_group)
 {
 	// TODO: scan items for that ID, fix if necessary
-	item_list::iterator iter;
-	for (iter = getItemList().begin(); iter != getItemList().end(); iter++)
+	for (item_list::iterator iter = getItemList().begin(),
+							 end = getItemList().end();
+		 iter != end; ++iter)
 	{
 		LLScrollListItem* item = *iter;
 		if (item->getUUID() == id)
@@ -256,11 +262,13 @@ void LLNameListCtrl::refresh(const LLUUID& id, const std::string& fullname, bool
 }
 
 // static
-void LLNameListCtrl::refreshAll(const LLUUID& id, const std::string& fullname, bool is_group)
+void LLNameListCtrl::refreshAll(const LLUUID& id, const std::string& fullname,
+								bool is_group)
 {
-	std::set<LLNameListCtrl*>::iterator it;
-	for (it = LLNameListCtrl::sInstances.begin();
-		 it != LLNameListCtrl::sInstances.end(); ++it)
+	for (std::set<LLNameListCtrl*>::iterator
+			it = LLNameListCtrl::sInstances.begin(),
+			end = LLNameListCtrl::sInstances.end();
+		 it != end; ++it)
 	{
 		LLNameListCtrl* ctrl = *it;
 		ctrl->refresh(id, fullname, is_group);
@@ -288,8 +296,8 @@ LLXMLNodePtr LLNameListCtrl::getXML(bool save_children) const
 	return node;
 }
 
-LLView* LLNameListCtrl::fromXML(LLXMLNodePtr node, LLView *parent,
-								LLUICtrlFactory *factory)
+LLView* LLNameListCtrl::fromXML(LLXMLNodePtr node, LLView* parent,
+								LLUICtrlFactory* factory)
 {
 	std::string name("name_list");
 	node->getAttributeString("name", name);
@@ -324,7 +332,8 @@ LLView* LLNameListCtrl::fromXML(LLXMLNodePtr node, LLView *parent,
 	}
 
 	BOOL allow_calling_card_drop = FALSE;
-	if (node->getAttributeBOOL("allow_calling_card_drop", allow_calling_card_drop))
+	if (node->getAttributeBOOL("allow_calling_card_drop",
+							   allow_calling_card_drop))
 	{
 		name_list->setAllowCallingCardDrop(allow_calling_card_drop);
 	}
@@ -346,7 +355,8 @@ LLView* LLNameListCtrl::fromXML(LLXMLNodePtr node, LLView *parent,
 	S32 index = 0;
 	//S32 total_static = 0;
 	LLXMLNodePtr child;
-	for (child = node->getFirstChild(); child.notNull(); child = child->getNextSibling())
+	for (child = node->getFirstChild(); child.notNull();
+		 child = child->getNextSibling())
 	{
 		if (child->hasName("column"))
 		{
@@ -391,7 +401,8 @@ LLView* LLNameListCtrl::fromXML(LLXMLNodePtr node, LLView *parent,
 	}
 	name_list->setColumnHeadings(columns);
 
-	for (child = node->getFirstChild(); child.notNull(); child = child->getNextSibling())
+	for (child = node->getFirstChild(); child.notNull();
+		 child = child->getNextSibling())
 	{
 		if (child->hasName("row"))
 		{
@@ -404,7 +415,8 @@ LLView* LLNameListCtrl::fromXML(LLXMLNodePtr node, LLView *parent,
 
 			S32 column_idx = 0;
 			LLXMLNodePtr row_child;
-			for (row_child = node->getFirstChild(); row_child.notNull(); row_child = row_child->getNextSibling())
+			for (row_child = node->getFirstChild(); row_child.notNull();
+				 row_child = row_child->getNextSibling())
 			{
 				if (row_child->hasName("column"))
 				{
@@ -447,7 +459,8 @@ LLView* LLNameListCtrl::fromXML(LLXMLNodePtr node, LLView *parent,
 	return name_list;
 }
 
-bool LLNameListCtrl::getResidentName(const LLUUID& agent_id, std::string& fullname)
+bool LLNameListCtrl::getResidentName(const LLUUID& agent_id,
+									 std::string& fullname)
 {
 	LLAvatarName av_name;
 	if (LLAvatarNameCache::get(agent_id, &av_name))

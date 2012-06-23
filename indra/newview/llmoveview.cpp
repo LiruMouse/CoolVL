@@ -66,7 +66,8 @@ LLFloaterMove::LLFloaterMove(const LLSD& key)
 {
 	setIsChrome(TRUE);
 
-	LLUICtrlFactory::getInstance()->buildFloater(this,"floater_moveview.xml", NULL, FALSE); 
+	LLUICtrlFactory::getInstance()->buildFloater(this, "floater_moveview.xml",
+												 NULL, FALSE); 
 
 	getChild<LLSpinCtrl>("z_offset")->setToolTip(getString("z_offset_tooltip"));
 
@@ -148,7 +149,7 @@ F32 LLFloaterMove::getYawRate(F32 time)
 {
 	if (time < NUDGE_TIME)
 	{
-		F32 rate = YAW_NUDGE_RATE + time * (1 - YAW_NUDGE_RATE)/ NUDGE_TIME;
+		F32 rate = YAW_NUDGE_RATE + time * (1 - YAW_NUDGE_RATE) / NUDGE_TIME;
 		return rate;
 	}
 	else

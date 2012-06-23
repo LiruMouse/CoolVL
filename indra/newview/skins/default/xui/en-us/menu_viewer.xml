@@ -643,6 +643,7 @@
 		     mouse_opaque="true" name="Build" shortcut="B" width="211">
 			<on_click function="Tools.BuildMode" userdata="" />
 			<on_check function="Tools.CheckBuildMode" />
+			<on_enable function="EnableEdit" />
 		</menu_item_check>
 		<menu bottom="-554" create_jump_keys="true" drop_shadow="true" enabled="true"
 		     height="109" label="Select Tool" left="0" mouse_opaque="false"

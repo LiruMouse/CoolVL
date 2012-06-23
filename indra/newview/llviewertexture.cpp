@@ -712,7 +712,8 @@ bool LLViewerTexture::bindDefaultImage(S32 stage)
 	if (stage < 0) return false;
 
 	bool res = true;
-	if (LLViewerFetchedTexture::sDefaultImagep.notNull() && this != LLViewerFetchedTexture::sDefaultImagep.get())
+	if (LLViewerFetchedTexture::sDefaultImagep.notNull() &&
+		LLViewerFetchedTexture::sDefaultImagep.get() != this)
 	{
 		// use default if we've got it
 		res = gGL.getTexUnit(stage)->bind(LLViewerFetchedTexture::sDefaultImagep);
@@ -3373,7 +3374,7 @@ void LLViewerMediaTexture::removeFace(LLFace* facep)
 		LLViewerTexture* tex = gTextureList.findImage(te->getID());
 		if (tex)
 		{
-			for (std::list< LLPointer<LLViewerTexture> >::iterator iter = mTextureList.begin();
+			for (std::list<LLPointer<LLViewerTexture> >::iterator iter = mTextureList.begin();
 				 iter != mTextureList.end(); ++iter)
 			{
 				if (*iter == tex)

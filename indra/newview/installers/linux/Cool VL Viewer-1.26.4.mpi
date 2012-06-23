@@ -96,7 +96,7 @@ InstallPassword
 {}
 
 InstallVersion
-{1.26.4.18}
+{1.26.4.19}
 
 Language,ca
 {No}
@@ -1612,7 +1612,6 @@ File 9B29B956-1712-A979-F725-6AF228C97987 -active Yes -name floater_script_debug
 File 9DA5006D-CA4C-174C-69A4-F80D5E1524F9 -active Yes -name floater_script_ed_panel.xml -parent D8EFD99D-CE67-9B93-8A34-27E9522DD8CB
 File AFB2F463-767A-CEC8-6608-133D5810D69A -active Yes -name floater_script_preview.xml -parent D8EFD99D-CE67-9B93-8A34-27E9522DD8CB
 File C6745DE8-B6DB-B6BD-14A3-6C81FEF6FC78 -active Yes -name floater_script_queue.xml -parent D8EFD99D-CE67-9B93-8A34-27E9522DD8CB
-File E6D9B970-7251-946A-2CCC-8DD6B2B9ECCB -active Yes -name floater_script_search.xml -parent D8EFD99D-CE67-9B93-8A34-27E9522DD8CB
 File 20FFF440-67E2-94D6-C81A-017217ED25B6 -active Yes -name floater_search_replace.xml -parent D8EFD99D-CE67-9B93-8A34-27E9522DD8CB
 File D5A7F76B-9ECB-7A3C-D6BC-AFAE3391D1F7 -active Yes -name floater_select_key.xml -parent D8EFD99D-CE67-9B93-8A34-27E9522DD8CB
 File 4DF3BCF4-6FEF-7973-3F8F-725AEB391F3A -active Yes -name floater_sell_land.xml -parent D8EFD99D-CE67-9B93-8A34-27E9522DD8CB
@@ -2119,6 +2118,8 @@ Condition 93A2BD20-EA08-9B27-FA23-C1FFD481AD9F -active Yes -name 93a2bd20-ea08-9
 ActionGroup 3D42EA75-6FD0-AAE2-81AA-803AC1C409CC -active Yes -name 3d42ea75-6fd0-aae2-81aa-803ac1c409cc -parent ActionGroupsInstall -setup Install -title {Startup Actions}
 Action 58CC124A-3561-BEF9-FF93-8187562C4208 -active Yes -name 58cc124a-3561-bef9-ff93-8187562c4208 -parent 3D42EA75-6FD0-AAE2-81AA-803AC1C409CC -setup Install -title {Create Install Panes} -component CreateInstallPanes
 ActionGroup C201C2D2-A390-FA01-0226-0E42B30CDB8D -active Yes -name c201c2d2-a390-fa01-0226-0e42b30cdb8d -parent ActionGroupsInstall -setup Install -title {Install Actions}
+Action E093AA99-39A4-26EC-0E37-66A294982694 -active Yes -name e093aa99-39a4-26ec-0e37-66a294982694 -type action -parent C201C2D2-A390-FA01-0226-0E42B30CDB8D -setup Install -title {Delete File} -component DeleteFile
+Condition 31967B99-3B65-3C2D-C31E-DD9D6933844E -active Yes -name 31967b99-3b65-3c2d-c31e-dd9d6933844e -parent E093AA99-39A4-26EC-0E37-66A294982694 -setup Install -title {File Exists Condition} -component FileExistsCondition
 Action 97A2D2A8-676C-FE70-4F1A-BE501CF63A9F -active Yes -name 97a2d2a8-676c-fe70-4f1a-be501cf63a9f -parent C201C2D2-A390-FA01-0226-0E42B30CDB8D -setup Install -title {Install Selected Files} -component InstallSelectedFiles
 Action 1B048CDA-F332-1C4A-6A20-568E24C84FDF -active Yes -name 1b048cda-f332-1c4a-6a20-568e24c84fdf -type action -parent C201C2D2-A390-FA01-0226-0E42B30CDB8D -setup Install -title {Write Text To File} -component WriteTextToFile
 Action 379B6C9C-D339-8C4C-5656-2696CAFADFE8 -active Yes -name db900f52-ebed-1566-7bd5-f04888ffca14 -type action -parent C201C2D2-A390-FA01-0226-0E42B30CDB8D -setup Install -title {Install Uninstaller} -component InstallUninstaller
@@ -2441,6 +2442,12 @@ array set Properties {
 
 2D9A3A48-A4F7-026F-2EF2-B256EEC9ECDA,String
 {<%InstallStopped%>}
+
+31967B99-3B65-3C2D-C31E-DD9D6933844E,CheckCondition
+{Before Action is Executed}
+
+31967B99-3B65-3C2D-C31E-DD9D6933844E,Filename
+{<%InstallDir%>/skins/default/xui/en-us/floater_script_search.xml}
 
 31F6E677-ABD0-2291-7965-F3B908D96B46,CheckCondition
 {Before Action is Executed}
@@ -2767,7 +2774,7 @@ array set Properties {
 {<%InstallDir%>}
 
 6CAFA81B-7B7F-0154-8D65-21519C7C1743,FileSize
-{128672016}
+{128752979}
 
 6CAFA81B-7B7F-0154-8D65-21519C7C1743,Name
 {Program Files}
@@ -3446,6 +3453,12 @@ E083EE12-FA6D-BBD3-04FC-EE2FF9DB9C78,Operator
 
 E083EE12-FA6D-BBD3-04FC-EE2FF9DB9C78,String
 {<%InstallStopped%>}
+
+E093AA99-39A4-26EC-0E37-66A294982694,Files
+{<%InstallDir%>/skins/default/xui/en-us/floater_script_search.xml}
+
+E093AA99-39A4-26EC-0E37-66A294982694,IgnoreErrors
+{Yes}
 
 E472A696-B7D3-AFA5-5427-0F22EDD22FD6,CheckCondition
 {Before Next Pane is Displayed}

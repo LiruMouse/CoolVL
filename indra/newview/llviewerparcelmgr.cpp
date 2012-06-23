@@ -98,13 +98,14 @@ struct LLGodForceOwnerData
 	S32 mLocalID;
 	LLHost mHost;
 
-	LLGodForceOwnerData(
-		const LLUUID& owner_id,
-		S32 local_parcel_id,
-		const LLHost& host) :
-		mOwnerID(owner_id),
+	LLGodForceOwnerData(const LLUUID& owner_id,
+						S32 local_parcel_id,
+						const LLHost& host)
+	:	mOwnerID(owner_id),
 		mLocalID(local_parcel_id),
-		mHost(host) {}
+		mHost(host)
+	{
+	}
 };
 
 //
@@ -631,16 +632,31 @@ LLParcel *LLViewerParcelMgr::getAgentParcel() const
 }
 
 // Return whether the agent can build on the land they are on
-BOOL LLViewerParcelMgr::agentCanBuild() const
+bool LLViewerParcelMgr::agentCanBuild(bool prelude_check) const
 {
 	if (gAgent.isGodlike())
 	{
 		return true;
 	}
+	// *HACK: The "prelude" Help Islands have a build sandbox area, so users
+	// need the Edit and Create pie menu options when they are there, thus the
+	// prelude_check flag (see LLEnableEdit in llviewermenu.cpp).
+	if (prelude_check && gAgent.inPrelude())
+	{
+		return false;
+	}
 	if (!mAgentParcel)
 	{
 		return false;
 	}
+//MK
+	if (gRRenabled &&
+		(gAgent.mRRInterface.mContainsRez ||
+		 gAgent.mRRInterface.mContainsEdit))
+	{
+		return false;
+	}
+//mk
 	return (mAgentParcel->allowModifyBy(gAgent.getID(), gAgent.getGroupID()) ||
 			gAgent.hasPowerInGroup(mAgentParcel->getGroupID(), GP_LAND_ALLOW_CREATE));
 }

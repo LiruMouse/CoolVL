@@ -165,7 +165,7 @@ public:
 	BOOL	agentCanTakeDamage() const;
 	BOOL	agentCanFly() const;
 	F32		agentDrawDistance() const;
-	BOOL	agentCanBuild() const;
+	bool	agentCanBuild(bool prelude_check = true) const;
 
 	F32		getHoverParcelWidth() const		
 				{ return F32(mHoverEastNorth.mdV[VX] - mHoverWestSouth.mdV[VX]); }

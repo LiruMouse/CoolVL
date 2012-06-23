@@ -300,7 +300,8 @@ const std::string MARKER_FILE_NAME("SecondLife.exec_marker");
 const std::string ERROR_MARKER_FILE_NAME("CoolVLViewer.error_marker");
 const std::string LLERROR_MARKER_FILE_NAME("CoolVLViewer.llerror_marker");
 const std::string LOGOUT_MARKER_FILE_NAME("CoolVLViewer.logout_marker");
-static BOOL gDoDisconnect = FALSE;
+static bool gDoDisconnect = false;
+static bool gLoggingOut = false;
 static std::string gLaunchFileOnQuit;
 
 // Used on Win32 for other apps to identify our window (eg, win_setup)
@@ -3101,6 +3102,13 @@ static bool finish_quit(const LLSD& notification, const LLSD& response)
 
 	if (option == 0)
 	{
+		// Some OpenSim grids can really be annoying and spuriuously
+		// trigger "You have been disconnected" dialogs on normal
+		// logouts... Let's flag that it's a normal logout.
+		// NOTE: do NOT flag it with gDoDisconnect or LLApp::setQuitting()
+		// (the first would make the viewer wait forever, and the second
+		// would cause a truncated logout process)
+		gLoggingOut = true;
 		LLAppViewer::instance()->requestQuit();
 	}
 	return false;
@@ -3143,7 +3151,7 @@ static bool finish_early_exit(const LLSD& notification, const LLSD& response)
 void LLAppViewer::earlyExit(const std::string& name, const LLSD& substitutions)
 {
    	LL_WARNS("AppInit") << "app_early_exit: " << name << LL_ENDL;
-	gDoDisconnect = TRUE;
+	gDoDisconnect = true;
 	LLNotifications::instance().add(name, substitutions, LLSD(),
 									finish_early_exit);
 }
@@ -3539,7 +3547,7 @@ void LLAppViewer::forceDisconnect(const std::string& mesg)
 	}
 
 	LLSD args;
-	gDoDisconnect = TRUE;
+	gDoDisconnect = true;
 
 	if (LLStartUp::getStartupState() < STATE_STARTED)
 	{
@@ -3547,6 +3555,10 @@ void LLAppViewer::forceDisconnect(const std::string& mesg)
 		args["ERROR_MESSAGE"] = big_reason;
 		LLNotifications::instance().add("ErrorMessage", args, LLSD(),
 										&finish_forced_disconnect);
+	}
+	else if (gLoggingOut)	// In OpenSim, we may get here while logging out
+	{
+        LLAppViewer::instance()->forceQuit();
 	}
 	else
 	{

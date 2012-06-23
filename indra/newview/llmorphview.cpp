@@ -52,7 +52,7 @@
 #include "llvoavatarself.h"
 #include "pipeline.h"
 
-LLMorphView *gMorphView = NULL;
+LLMorphView* gMorphView = NULL;
 
 const F32 EDIT_AVATAR_ORBIT_SPEED = 0.1f;
 const F32 EDIT_AVATAR_MAX_CAMERA_PITCH = 0.5f;

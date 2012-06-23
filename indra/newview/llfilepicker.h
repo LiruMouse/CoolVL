@@ -82,9 +82,10 @@ class LLFilePicker
 	friend class LLDirPicker;
 	friend void chooser_responder(GtkWidget *, gint, gpointer);
 #endif // LL_GTK
+
 public:
 	// calling this before main() is undefined
-	static LLFilePicker& instance(void) { return sInstance; }
+	static LLFilePicker& instance(void)	{ return sInstance; }
 
 	enum ELoadFilter
 	{
@@ -142,14 +143,15 @@ public:
 	const std::string getCurFile();
 
 	// Returns the index of the current file.
-	S32 getCurFileNum() const { return mCurrentFile; }
+	S32 getCurFileNum() const			{ return mCurrentFile; }
 
-	S32 getFileCount() const { return (S32)mFiles.size(); }
+	S32 getFileCount() const			{ return (S32)mFiles.size(); }
 
-	// See llvfs/lldir.h : getBaseFileName and getDirName to extract base or directory names
+	// See llvfs/lldir.h: getBaseFileName and getDirName to extract base or
+	// directory names
 
-	// clear any lists of buffers or whatever, and make sure the file
-	// picker isn't locked.
+	// clear any lists of buffers or whatever, and make sure the file picker
+	// isn't locked.
 	void reset();
 
 private:
@@ -176,12 +178,15 @@ private:
 	OSStatus doNavSaveDialog(ESaveFilter filter, const std::string& filename);
 	void getFilePath(SInt32 index);
 	void getFileName(SInt32 index);
-	static Boolean navOpenFilterProc(AEDesc *theItem, void *info, void *callBackUD, NavFilterModes filterMode);
+	static Boolean navOpenFilterProc(AEDesc *theItem, void* info,
+									 void* callBackUD,
+									 NavFilterModes filterMode);
 #endif
 
 #if LL_GTK
 	static void add_to_selectedfiles(gpointer data, gpointer user_data);
-	static void chooser_responder(GtkWidget *widget, gint response, gpointer user_data);
+	static void chooser_responder(GtkWidget* widget, gint response,
+								  gpointer user_data);
 	// we remember the last path that was accessed for a particular usage
 	static std::map <std::string, std::string> sContextToPathMap;
 	std::string mCurContextName;
@@ -269,7 +274,7 @@ public:
 
 	LLLoadFilePicker(LLFilePicker::ELoadFilter type,
 					 LLLoadFilePickerCallback callback,
-					 void *user_data = NULL)
+					 void* user_data = NULL)
 	:	LLFilePickerThread(type),
 		mNotifyCallback(callback),
 		mCallbackUserData(user_data)
@@ -302,7 +307,7 @@ public:
 
 	LLSaveFilePicker(LLFilePicker::ESaveFilter type,
 					 LLSaveFilePickerCallback callback,
-					 void *user_data = NULL)
+					 void* user_data = NULL)
 	:	LLFilePickerThread(type),
 		mNotifyCallback(callback),
 		mCallbackUserData(user_data)

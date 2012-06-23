@@ -1640,22 +1640,25 @@ void LLDrawPoolAvatar::removeRiggedFace(LLFace* facep)
 				mRiggedFace[i][index] == facep)
 			{
 				facep->setRiggedIndex(i,-1);
-				mRiggedFace[i].erase(mRiggedFace[i].begin()+index);
-				for (U32 j = index; j < mRiggedFace[i].size(); ++j)
+				mRiggedFace[i].erase(mRiggedFace[i].begin() + index);
+				for (U32 j = index, count = mRiggedFace[i].size(); j < count;
+					 ++j)
 				{	// bump indexes down for faces referenced after erased face
 					mRiggedFace[i][j]->setRiggedIndex(i, j);
 				}
 			}
 			else
 			{
-				llerrs << "Face reference data corrupt for rigged type " << i << llendl;
+				llerrs << "Face reference data corrupt for rigged type " << i
+					   << llendl;
 			}
 		}
 	}
 }
 
 LLVertexBufferAvatar::LLVertexBufferAvatar()
-:	LLVertexBuffer(sDataMask, GL_STREAM_DRAW_ARB) // avatars are always stream draw due to morph targets
+	// avatars are always stream draw due to morph targets
+:	LLVertexBuffer(sDataMask, GL_STREAM_DRAW_ARB)
 {
 }
 

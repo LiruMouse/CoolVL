@@ -33,8 +33,8 @@
 #ifndef LL_LLSTATGRAPH_H
 #define LL_LLSTATGRAPH_H
 
-#include "llview.h"
 #include "llframetimer.h"
+#include "llview.h"
 #include "v4color.h"
 
 class LLStat;
@@ -49,15 +49,16 @@ public:
 	void setLabel(const std::string& label);
 	void setUnits(const std::string& units);
 	void setPrecision(const S32 precision);
-	void setStat(LLStat *statp);
+	void setStat(LLStat* statp);
 	void setThreshold(const S32 i, F32 value);
 	void setMin(const F32 min);
 	void setMax(const F32 max);
 
 	/*virtual*/ void setValue(const LLSD& value);
 	
-	LLStat *mStatp;
+	LLStat* mStatp;
 	BOOL mPerSec;
+
 private:
 	F32 mValue;
 

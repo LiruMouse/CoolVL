@@ -440,7 +440,9 @@ void LLPipeline::cleanup()
 	mGroupQ1.clear();
 	mGroupQ2.clear();
 
-	for (pool_set_t::iterator iter = mPools.begin(); iter != mPools.end(); )
+	for (pool_set_t::iterator iter = mPools.begin(),
+							  end = mPools.end();
+		 iter != end; )
 	{
 		pool_set_t::iterator curiter = iter++;
 		LLDrawPool* poolp = *curiter;
@@ -2263,8 +2265,9 @@ void LLPipeline::updateGeom(F32 max_dtime)
 	LLVOVolume::preUpdateGeom();
 
 	// Iterate through all drawables on the priority build queue,
-	for (LLDrawable::drawable_list_t::iterator iter = mBuildQ1.begin();
-		 iter != mBuildQ1.end(); )
+	for (LLDrawable::drawable_list_t::iterator iter = mBuildQ1.begin(),
+											   end = mBuildQ1.end();
+		 iter != end; )
 	{
 		LLDrawable::drawable_list_t::iterator curiter = iter++;
 		LLDrawable* drawablep = *curiter;
@@ -2273,7 +2276,9 @@ void LLPipeline::updateGeom(F32 max_dtime)
 			if (drawablep->isState(LLDrawable::IN_REBUILD_Q2))
 			{
 				drawablep->clearState(LLDrawable::IN_REBUILD_Q2);
-				LLDrawable::drawable_list_t::iterator find = std::find(mBuildQ2.begin(), mBuildQ2.end(), drawablep);
+				LLDrawable::drawable_list_t::iterator find = std::find(mBuildQ2.begin(),
+																	   mBuildQ2.end(),
+																	   drawablep);
 				if (find != mBuildQ2.end())
 				{
 					mBuildQ2.erase(find);
@@ -2306,14 +2311,15 @@ void LLPipeline::updateGeom(F32 max_dtime)
 	LLSpatialGroup* last_group = NULL;
 	LLSpatialBridge* last_bridge = NULL;
 
-	for (LLDrawable::drawable_list_t::iterator iter = mBuildQ2.begin();
-		 iter != mBuildQ2.end(); )
+	for (LLDrawable::drawable_list_t::iterator iter = mBuildQ2.begin(),
+											   end = mBuildQ2.end();
+		 iter != end; )
 	{
 		LLDrawable::drawable_list_t::iterator curiter = iter++;
 		LLDrawable* drawablep = *curiter;
 
-		LLSpatialBridge* bridge = drawablep->isRoot() ? drawablep->getSpatialBridge() :
-									drawablep->getParent()->getSpatialBridge();
+		LLSpatialBridge* bridge = drawablep->isRoot() ? drawablep->getSpatialBridge()
+													  : drawablep->getParent()->getSpatialBridge();
 
 		if (drawablep->getSpatialGroup() != last_group &&
 			(!last_bridge || bridge != last_bridge) &&
@@ -2322,8 +2328,8 @@ void LLPipeline::updateGeom(F32 max_dtime)
 			break;
 		}
 
-		//make sure updates don't stop in the middle of a spatial group
-		//to avoid thrashing (objects are enqueued by group)
+		// make sure updates don't stop in the middle of a spatial group
+		// to avoid thrashing (objects are enqueued by group)
 		last_group = drawablep->getSpatialGroup();
 		last_bridge = bridge;
 
@@ -8836,7 +8842,8 @@ void LLPipeline::generateHighlight(LLCamera& camera)
 		mHighlight.clear();
 
 		gGL.getTexUnit(0)->bind(LLViewerFetchedTexture::sWhiteImagep);
-		for (std::set<HighlightItem>::iterator iter = mHighlightSet.begin(), end = mHighlightSet.end();
+		for (std::set<HighlightItem>::iterator iter = mHighlightSet.begin(),
+											   end = mHighlightSet.end();
 			 iter != end; )
 		{
 			std::set<HighlightItem>::iterator cur_iter = iter++;

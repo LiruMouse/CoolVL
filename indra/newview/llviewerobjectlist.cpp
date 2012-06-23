@@ -195,7 +195,7 @@ BOOL LLViewerObjectList::removeFromLocalIDTable(const LLViewerObject* objectp)
 		//		<< iter->second	<< ") did not match object " << objectp->getID() << llendl;
 	}
 
-	return FALSE ;
+	return FALSE;
 }
 
 void LLViewerObjectList::setUUIDAndLocal(const LLUUID &id,

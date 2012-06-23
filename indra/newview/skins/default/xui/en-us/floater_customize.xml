@@ -79,15 +79,18 @@
 			 name="Legs" scale_image="true" width="82" />
 			<radio_group bottom="-392" control_name="AvatarSex" draw_border="true" follows="left|top"
 			 height="34" left="8" mouse_opaque="true" name="sex radio" width="82">
-				<radio_item type="string" length="1" bottom="-17" follows="left|top" height="16" left="1" mouse_opaque="true"
+				<radio_item type="string" length="1" bottom="-20" follows="left|top" height="16" left="1" mouse_opaque="true"
 				 name="radio" width="82">
 					Female
 				</radio_item>
-				<radio_item type="string" length="1" bottom="-33" follows="left|top" height="16" left="1" mouse_opaque="true"
+				<radio_item type="string" length="1" bottom="-36" follows="left|top" height="16" left="1" mouse_opaque="true"
 				 name="radio2" width="82">
 					Male
 				</radio_item>
 			</radio_group>
+			<button name="import" label="Import" font="SansSerifSmall" mouse_opaque="true"
+			 tool_tip="Import the parameters from an archetype.xml file (as created from the 'Advanced' -> 'Character' -> 'Appearance to XML...' feature)."
+			 left="8" bottom="-450" width="82" height="18" follows="left|top" />
 			<text type="string" length="1" bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
 			 bottom="-486" drop_shadow_visible="true" follows="left|top|right"
 			 font="SansSerif" h_pad="0" halign="right" height="28" right="117"
@@ -170,6 +173,9 @@
 			 default_image_name="Default" follows="left|top" height="80"
 			 label="Lower Body" left="14" mouse_opaque="true" name="Lower Body"
 			 tool_tip="Click to choose a picture" width="70" />
+			<button name="import" label="Import" font="SansSerifSmall" mouse_opaque="true"
+			 tool_tip="Import the parameters from an archetype.xml file (as created from the 'Advanced' -> 'Character' -> 'Appearance to XML...' feature)."
+			 left="8" bottom="-464" width="82" height="18" follows="left|top" />
 			<text type="string" length="1" bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
 			 bottom="-486" drop_shadow_visible="true" follows="left|top|right"
 			 font="SansSerif" h_pad="0" halign="right" height="28" right="117"
@@ -244,6 +250,9 @@
 			 default_image_name="Default" follows="left|top" height="80" label="Texture"
 			 left="14" mouse_opaque="true" name="Texture"
 			 tool_tip="Click to choose a picture" width="70" />
+			<button name="import" label="Import" font="SansSerifSmall" mouse_opaque="true"
+			 tool_tip="Import the parameters from an archetype.xml file (as created from the 'Advanced' -> 'Character' -> 'Appearance to XML...' feature)."
+			 left="8" bottom="-450" width="82" height="18" follows="left|top" />
 			<text type="string" length="1" bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
 			 bottom="-486" drop_shadow_visible="true" follows="left|top|right"
 			 font="SansSerif" h_pad="0" halign="right" height="28" right="117"
@@ -306,6 +315,9 @@
 			 default_image_name="Default" follows="left|top" height="80" label="Iris"
 			 left="14" mouse_opaque="true" name="Iris"
 			 tool_tip="Click to choose a picture" width="70" />
+			<button name="import" label="Import" font="SansSerifSmall" mouse_opaque="true"
+			 tool_tip="Import the parameters from an archetype.xml file (as created from the 'Advanced' -> 'Character' -> 'Appearance to XML...' feature)."
+			 left="8" bottom="-450" width="82" height="18" follows="left|top" />
 			<text type="string" length="1" bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
 			 bottom="-486" drop_shadow_visible="true" follows="left|top|right"
 			 font="SansSerif" h_pad="0" halign="right" height="28" right="117"
@@ -1302,8 +1314,8 @@ avatar. Alternately, you create a new one from scratch and wear it.
 			 bottom="-52" drop_shadow_visible="true" follows="left|top|right"
 			 font="SansSerifSmall" h_pad="0" halign="left" height="28" left="8"
 			 mouse_opaque="true" name="not worn instructions" v_pad="0" width="373">
-				Put on new physics by dragging it from your inventory to your
-avatar. Alternately, you create new ones from scratch and wear then.
+				Put on new physics by dragging them from your inventory to your
+avatar. Alternately, you create new ones from scratch and wear them.
 			</text>
 			<text type="string" length="1" bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
 			 bottom="-74" drop_shadow_visible="true" follows="left|top|right"

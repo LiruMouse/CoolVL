@@ -1,11 +1,11 @@
-/** 
+/**
  * @file llsurface.cpp
  * @brief Implementation of LLSurface class
  *
  * $LicenseInfo:firstyear=2000&license=viewergpl$
- * 
+ *
  * Copyright (c) 2000-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -105,7 +105,7 @@ LLSurface::LLSurface(U32 type, LLViewerRegion *regionp) :
 	// In here temporarily.
 	mSurfacePatchUpdateCount = 0;
 
-	for (S32 i = 0; i < 8; i++)
+	for (S32 i = 0; i < 8; ++i)
 	{
 		mNeighbors[i] = NULL;
 	}
@@ -160,11 +160,11 @@ void LLSurface::setRegion(LLViewerRegion *regionp)
 }
 
 // Assumes that arguments are powers of 2, and that
-// grids_per_edge / grids_per_patch_edge = power of 2 
+// grids_per_edge / grids_per_patch_edge = power of 2
 void LLSurface::create(const S32 grids_per_edge,
 					   const S32 grids_per_patch_edge,
 					   const LLVector3d &origin_global,
-					   const F32 width) 
+					   const F32 width)
 {
 	// Initialize various constants for the surface
 	mGridsPerEdge = grids_per_edge + 1;  // Add 1 for the east and north buffer
@@ -189,7 +189,7 @@ void LLSurface::create(const S32 grids_per_edge,
 	mNorm = new LLVector3[number_of_grids];
 
 	// Reset the surface to be a flat square grid
-	for (S32 i = 0; i < number_of_grids; i++) 
+	for (S32 i = 0; i < number_of_grids; ++i)
 	{
 		// Surface is flat and zero
 		// Normals all point up
@@ -235,9 +235,9 @@ void LLSurface::createSTexture()
 		// Fill with dummy gray data.
 		LLPointer<LLImageRaw> raw = new LLImageRaw(sTextureSize, sTextureSize, 3);
 		U8 *default_texture = raw->getData();
-		for (S32 i = 0; i < sTextureSize; i++)
+		for (S32 i = 0; i < sTextureSize; ++i)
 		{
-			for (S32 j = 0; j < sTextureSize; j++)
+			for (S32 j = 0; j < sTextureSize; ++j)
 			{
 				*(default_texture + (i*sTextureSize + j) * 3) = 128;
 				*(default_texture + (i*sTextureSize + j) * 3 + 1) = 128;
@@ -259,14 +259,14 @@ void LLSurface::createWaterTexture()
 		// Create the water texture
 		LLPointer<LLImageRaw> raw = new LLImageRaw(sTextureSize / 2, sTextureSize / 2, 4);
 		U8 *default_texture = raw->getData();
-		for (S32 i = 0; i < sTextureSize / 2; i++)
+		for (S32 i = 0; i < sTextureSize / 2; ++i)
 		{
-			for (S32 j = 0; j < sTextureSize / 2; j++)
+			for (S32 j = 0; j < sTextureSize / 2; ++j)
 			{
-				*(default_texture + (i*sTextureSize/2 + j)*4) = MAX_WATER_COLOR.mV[0];
-				*(default_texture + (i*sTextureSize / 2 + j) * 4 + 1) = MAX_WATER_COLOR.mV[1];
-				*(default_texture + (i*sTextureSize / 2 + j) * 4 + 2) = MAX_WATER_COLOR.mV[2];
-				*(default_texture + (i*sTextureSize / 2 + j) * 4 + 3) = MAX_WATER_COLOR.mV[3];
+				*(default_texture + (i * sTextureSize/2 + j) * 4) = MAX_WATER_COLOR.mV[0];
+				*(default_texture + (i * sTextureSize / 2 + j) * 4 + 1) = MAX_WATER_COLOR.mV[1];
+				*(default_texture + (i * sTextureSize / 2 + j) * 4 + 2) = MAX_WATER_COLOR.mV[2];
+				*(default_texture + (i * sTextureSize / 2 + j) * 4 + 3) = MAX_WATER_COLOR.mV[3];
 			}
 		}
 
@@ -302,16 +302,16 @@ void LLSurface::initTextures()
 	}
 }
 
-void LLSurface::setOriginGlobal(const LLVector3d &origin_global) 
+void LLSurface::setOriginGlobal(const LLVector3d &origin_global)
 {
 	LLVector3d new_origin_global;
 	mOriginGlobal = origin_global;
 	LLSurfacePatch *patchp;
 	S32 i, j;
 	// Need to update the southwest corners of the patches
-	for (j = 0; j < mPatchesPerEdge; j++) 
+	for (j = 0; j < mPatchesPerEdge; ++j)
 	{
-		for (i = 0; i < mPatchesPerEdge; i++) 
+		for (i = 0; i < mPatchesPerEdge; ++i)
 		{
 			patchp = getPatch(i, j);
 
@@ -391,7 +391,7 @@ void LLSurface::connectNeighbor(LLSurface *neighborp, U32 direction)
 	else if (EAST == direction)
 	{
 		// Do east/west connections, first
-		for (i = 0; i < (S32)mPatchesPerEdge; i++)
+		for (i = 0; i < (S32)mPatchesPerEdge; ++i)
 		{
 			patchp = getPatch(mPatchesPerEdge - 1, i);
 			neighbor_patchp = neighborp->getPatch(0, i);
@@ -404,7 +404,7 @@ void LLSurface::connectNeighbor(LLSurface *neighborp, U32 direction)
 		}
 
 		// Now do northeast/southwest connections
-		for (i = 0; i < (S32)mPatchesPerEdge - 1; i++)
+		for (i = 0; i < (S32)mPatchesPerEdge - 1; ++i)
 		{
 			patchp = getPatch(mPatchesPerEdge - 1, i);
 			neighbor_patchp = neighborp->getPatch(0, i + 1);
@@ -413,7 +413,7 @@ void LLSurface::connectNeighbor(LLSurface *neighborp, U32 direction)
 			neighbor_patchp->connectNeighbor(patchp, SOUTHWEST);
 		}
 		// Now do southeast/northwest connections
-		for (i = 1; i < (S32)mPatchesPerEdge; i++)
+		for (i = 1; i < (S32)mPatchesPerEdge; ++i)
 		{
 			patchp = getPatch(mPatchesPerEdge - 1, i);
 			neighbor_patchp = neighborp->getPatch(0, i - 1);
@@ -425,7 +425,7 @@ void LLSurface::connectNeighbor(LLSurface *neighborp, U32 direction)
 	else if (NORTH == direction)
 	{
 		// Do north/south connections, first
-		for (i = 0; i < (S32)mPatchesPerEdge; i++)
+		for (i = 0; i < (S32)mPatchesPerEdge; ++i)
 		{
 			patchp = getPatch(i, mPatchesPerEdge - 1);
 			neighbor_patchp = neighborp->getPatch(i, 0);
@@ -438,7 +438,7 @@ void LLSurface::connectNeighbor(LLSurface *neighborp, U32 direction)
 		}
 
 		// Do northeast/southwest connections
-		for (i = 0; i < (S32)mPatchesPerEdge - 1; i++)
+		for (i = 0; i < (S32)mPatchesPerEdge - 1; ++i)
 		{
 			patchp = getPatch(i, mPatchesPerEdge - 1);
 			neighbor_patchp = neighborp->getPatch(i + 1, 0);
@@ -447,7 +447,7 @@ void LLSurface::connectNeighbor(LLSurface *neighborp, U32 direction)
 			neighbor_patchp->connectNeighbor(patchp, SOUTHWEST);
 		}
 		// Do southeast/northwest connections
-		for (i = 1; i < (S32)mPatchesPerEdge; i++)
+		for (i = 1; i < (S32)mPatchesPerEdge; ++i)
 		{
 			patchp = getPatch(i, mPatchesPerEdge - 1);
 			neighbor_patchp = neighborp->getPatch(i - 1, 0);
@@ -459,7 +459,7 @@ void LLSurface::connectNeighbor(LLSurface *neighborp, U32 direction)
 	else if (WEST == direction)
 	{
 		// Do east/west connections, first
-		for (i = 0; i < mPatchesPerEdge; i++)
+		for (i = 0; i < mPatchesPerEdge; ++i)
 		{
 			patchp = getPatch(0, i);
 			neighbor_patchp = neighborp->getPatch(mPatchesPerEdge - 1, i);
@@ -472,7 +472,7 @@ void LLSurface::connectNeighbor(LLSurface *neighborp, U32 direction)
 		}
 
 		// Now do northeast/southwest connections
-		for (i = 1; i < mPatchesPerEdge; i++)
+		for (i = 1; i < mPatchesPerEdge; ++i)
 		{
 			patchp = getPatch(0, i);
 			neighbor_patchp = neighborp->getPatch(mPatchesPerEdge - 1, i - 1);
@@ -482,7 +482,7 @@ void LLSurface::connectNeighbor(LLSurface *neighborp, U32 direction)
 		}
 
 		// Now do northwest/southeast connections
-		for (i = 0; i < mPatchesPerEdge - 1; i++)
+		for (i = 0; i < mPatchesPerEdge - 1; ++i)
 		{
 			patchp = getPatch(0, i);
 			neighbor_patchp = neighborp->getPatch(mPatchesPerEdge - 1, i + 1);
@@ -494,7 +494,7 @@ void LLSurface::connectNeighbor(LLSurface *neighborp, U32 direction)
 	else if (SOUTH == direction)
 	{
 		// Do north/south connections, first
-		for (i = 0; i < mPatchesPerEdge; i++)
+		for (i = 0; i < mPatchesPerEdge; ++i)
 		{
 			patchp = getPatch(i, 0);
 			neighbor_patchp = neighborp->getPatch(i, mPatchesPerEdge - 1);
@@ -507,7 +507,7 @@ void LLSurface::connectNeighbor(LLSurface *neighborp, U32 direction)
 		}
 
 		// Now do northeast/southwest connections
-		for (i = 1; i < mPatchesPerEdge; i++)
+		for (i = 1; i < mPatchesPerEdge; ++i)
 		{
 			patchp = getPatch(i, 0);
 			neighbor_patchp = neighborp->getPatch(i - 1, mPatchesPerEdge - 1);
@@ -516,7 +516,7 @@ void LLSurface::connectNeighbor(LLSurface *neighborp, U32 direction)
 			neighbor_patchp->connectNeighbor(patchp, NORTHEAST);
 		}
 		// Now do northeast/southwest connections
-		for (i = 0; i < mPatchesPerEdge - 1; i++)
+		for (i = 0; i < mPatchesPerEdge - 1; ++i)
 		{
 			patchp = getPatch(i, 0);
 			neighbor_patchp = neighborp->getPatch(i + 1, mPatchesPerEdge - 1);
@@ -529,8 +529,7 @@ void LLSurface::connectNeighbor(LLSurface *neighborp, U32 direction)
 
 void LLSurface::disconnectNeighbor(LLSurface *surfacep)
 {
-	S32 i;
-	for (i = 0; i < 8; i++)
+	for (S32 i = 0; i < 8; ++i)
 	{
 		if (surfacep == mNeighbors[i])
 		{
@@ -538,8 +537,9 @@ void LLSurface::disconnectNeighbor(LLSurface *surfacep)
 		}
 	}
 
-	// Iterate through surface patches, removing any connectivity to removed surface.
-	for (i = 0; i < mNumberOfPatches; i++)
+	// Iterate through surface patches, removing any connectivity to removed
+	// surface.
+	for (S32 i = 0; i < mNumberOfPatches; ++i)
 	{
 		(mPatchList + i)->disconnectNeighbor(surfacep);
 	}
@@ -547,8 +547,7 @@ void LLSurface::disconnectNeighbor(LLSurface *surfacep)
 
 void LLSurface::disconnectAllNeighbors()
 {
-	S32 i;
-	for (i = 0; i < 8; i++)
+	for (S32 i = 0; i < 8; ++i)
 	{
 		if (mNeighbors[i])
 		{
@@ -597,14 +596,14 @@ void LLSurface::moveZ(const S32 x, const S32 y, const F32 delta)
 	mSurfaceZ[x + y*mGridsPerEdge] += delta;
 }
 
-void LLSurface::updatePatchVisibilities(LLAgent &agent) 
+void LLSurface::updatePatchVisibilities(LLAgent &agent)
 {
 	LLVector3 pos_region = mRegionp->getPosRegionFromGlobal(gAgent.getCameraPositionGlobal());
 
 	LLSurfacePatch *patchp;
 
 	mVisiblePatchCount = 0;
-	for (S32 i = 0; i < mNumberOfPatches; i++) 
+	for (S32 i = 0; i < mNumberOfPatches; ++i)
 	{
 		patchp = mPatchList + i;
 
@@ -638,14 +637,16 @@ BOOL LLSurface::idleUpdate(F32 max_update_time)
 
 	// Always call updateNormals() / updateVerticalStats()
 	//  every frame to avoid artifacts
-	for (std::set<LLSurfacePatch *>::iterator iter = mDirtyPatchList.begin();
-		 iter != mDirtyPatchList.end();)
+	for (std::set<LLSurfacePatch *>::iterator iter = mDirtyPatchList.begin(),
+											  end = mDirtyPatchList.end();
+		 iter != end; )
 	{
 		std::set<LLSurfacePatch *>::iterator curiter = iter++;
 		LLSurfacePatch *patchp = *curiter;
 		patchp->updateNormals();
 		patchp->updateVerticalStats();
-		if (max_update_time == 0.f || update_timer.getElapsedTimeF32() < max_update_time)
+		if (max_update_time == 0.f ||
+			update_timer.getElapsedTimeF32() < max_update_time)
 		{
 			if (patchp->updateTexture())
 			{
@@ -658,9 +659,9 @@ BOOL LLSurface::idleUpdate(F32 max_update_time)
 	return did_update;
 }
 
-void LLSurface::decompressDCTPatch(LLBitPack &bitpack, LLGroupHeader *gopp, BOOL b_large_patch) 
+void LLSurface::decompressDCTPatch(LLBitPack& bitpack, LLGroupHeader* gopp,
+								   BOOL b_large_patch)
 {
-
 	LLPatchHeader  ph;
 	S32 j, i;
 	S32 patch[LARGE_PATCH_SIZE*LARGE_PATCH_SIZE];
@@ -683,15 +684,11 @@ void LLSurface::decompressDCTPatch(LLBitPack &bitpack, LLGroupHeader *gopp, BOOL
 
 		if (i >= mPatchesPerEdge || j >= mPatchesPerEdge)
 		{
-			llwarns << "Received invalid terrain packet - patch header patch ID incorrect!" 
-				<< " patches per edge " << mPatchesPerEdge
-				<< " i " << i
-				<< " j " << j
-				<< " dc_offset " << ph.dc_offset
-				<< " range " << (S32)ph.range
-				<< " quant_wbits " << (S32)ph.quant_wbits
-				<< " patchids " << (S32)ph.patchids
-				<< llendl;
+			llwarns << "Received invalid terrain packet - patch header patch ID incorrect!"
+					<< " patches per edge " << mPatchesPerEdge << " i " << i
+					<< " j " << j << " dc_offset " << ph.dc_offset << " range "
+					<< (S32)ph.range << " quant_wbits " << (S32)ph.quant_wbits
+					<< " patchids " << (S32)ph.patchids << llendl;
             LLAppViewer::instance()->badNetworkHandler();
 			return;
 		}
@@ -701,7 +698,8 @@ void LLSurface::decompressDCTPatch(LLBitPack &bitpack, LLGroupHeader *gopp, BOOL
 		decode_patch(bitpack, patch);
 		decompress_patch(patchp->getDataZ(), patch, &ph);
 
-		// Update edges for neighbors.  Need to guarantee that this gets done before we generate vertical stats.
+		// Update edges for neighbors.  Need to guarantee that this gets done
+		// before we generate vertical stats.
 		patchp->updateNorthEdge();
 		patchp->updateEastEdge();
 		if (patchp->getNeighborPatch(WEST))
@@ -741,9 +739,9 @@ F32 LLSurface::resolveHeightRegion(const F32 x, const F32 y) const
 	F32 height = 0.0f;
 	F32 oometerspergrid = 1.f/mMetersPerGrid;
 
-	// Check to see if v is actually above surface 
-	// We use (mGridsPerEdge-1) below rather than (mGridsPerEdge) 
-	// becuase of the east and north buffers 
+	// Check to see if v is actually above surface
+	// We use (mGridsPerEdge-1) below rather than (mGridsPerEdge)
+	// becuase of the east and north buffers
 
 	if (x >= 0.f && x <= mMetersPerEdge && y >= 0.f && y <= mMetersPerEdge)
 	{
@@ -757,13 +755,13 @@ F32 LLSurface::resolveHeightRegion(const F32 x, const F32 y) const
 		// Figure out if v is in first or second triangle of the square
 		// and calculate the slopes accordingly
 		//    |       |
-		// -(i,j+1)---(i+1,j+1)--   
+		// -(i,j+1)---(i+1,j+1)--
 		//    |  1   /  |          ^
 		//    |    /  2 |          |
 		//    |  /      |          j
 		// --(i,j)----(i+1,j)--
 		//    |       |
-		// 
+		//
 		//      i ->
 		// where N = mGridsPerEdge
 
@@ -776,13 +774,13 @@ F32 LLSurface::resolveHeightRegion(const F32 x, const F32 y) const
 		F32 dx = x - left   * mMetersPerGrid;
 		F32 dy = y - bottom * mMetersPerGrid;
 
-		if (dy > dx) 
+		if (dy > dx)
 		{
 			// triangle 1
 			dy *= left_top  - left_bottom;
 			dx *= right_top - left_top;
 		}
-		else 
+		else
 		{
 			// triangle 2
 			dx *= right_bottom - left_bottom;
@@ -819,9 +817,9 @@ LLVector3 LLSurface::resolveNormalGlobal(const LLVector3d& pos_global) const
 	LLVector3 normal;
 	F32 dzx, dzy;
 
-	if (pos_global.mdV[VX] >= mOriginGlobal.mdV[VX]  &&  
-		pos_global.mdV[VX] < mOriginGlobal.mdV[VX] + mMetersPerEdge  &&
-		pos_global.mdV[VY] >= mOriginGlobal.mdV[VY]  &&  
+	if (pos_global.mdV[VX] >= mOriginGlobal.mdV[VX] &&
+		pos_global.mdV[VX] < mOriginGlobal.mdV[VX] + mMetersPerEdge &&
+		pos_global.mdV[VY] >= mOriginGlobal.mdV[VY] &&
 		pos_global.mdV[VY] < mOriginGlobal.mdV[VY] + mMetersPerEdge)
 	{
 		U32 i, j, k;
@@ -833,26 +831,26 @@ LLVector3 LLSurface::resolveNormalGlobal(const LLVector3d& pos_global) const
 		// Figure out if v is in first or second triangle of the square
 		// and calculate the slopes accordingly
 		//    |       |
-		// -(k+N)---(k+1+N)--   
+		// -(k+N)---(k+1+N)--
 		//    |  1 /  |          ^
 		//    |   / 2 |          |
 		//    |  /    |          j
 		// --(k)----(k+1)--
 		//    |       |
-		// 
+		//
 		//      i ->
 		// where N = mGridsPerEdge
 
 		// dx and dy are incremental steps from (mSurface + k)
 		dx = (F32)(pos_global.mdV[VX] - i*mMetersPerGrid - mOriginGlobal.mdV[VX]);
 		dy = (F32)(pos_global.mdV[VY] - j*mMetersPerGrid - mOriginGlobal.mdV[VY]);
-		if (dy > dx) 
+		if (dy > dx)
 		{  // triangle 1
 			dzx = *(mSurfaceZ + k + 1 + mGridsPerEdge) - *(mSurfaceZ + k + mGridsPerEdge);
 			dzy = *(mSurfaceZ + k) - *(mSurfaceZ + k + mGridsPerEdge);
 			normal.setVec(-dzx,dzy,1);
 		}
-		else 
+		else
 		{	// triangle 2
 			dzx = *(mSurfaceZ + k) - *(mSurfaceZ + k + 1);
 			dzy = *(mSurfaceZ + k + 1 + mGridsPerEdge) - *(mSurfaceZ + k + 1);
@@ -865,12 +863,12 @@ LLVector3 LLSurface::resolveNormalGlobal(const LLVector3d& pos_global) const
 
 LLSurfacePatch *LLSurface::resolvePatchRegion(const F32 x, const F32 y) const
 {
-// x and y should be region-local coordinates. 
+// x and y should be region-local coordinates.
 // If x and y are outside of the surface, then the returned
 // index will be for the nearest boundary patch.
 //
 // 12      | 13| 14|       15
-//         |   |   |    
+//         |   |   |
 //     +---+---+---+---+
 //     | 12| 13| 14| 15|
 // ----+---+---+---+---+-----
@@ -880,7 +878,7 @@ LLSurfacePatch *LLSurface::resolvePatchRegion(const F32 x, const F32 y) const
 // ----+---+---+---+---+-----
 //     | 0 | 1 | 2 | 3 |
 //     +---+---+---+---+
-//         |   |   |    
+//         |   |   |
 // 0       | 1 | 2 |        3
 //
 
@@ -941,7 +939,7 @@ LLSurfacePatch *LLSurface::resolvePatchGlobal(const LLVector3d &pos_global) cons
 	return resolvePatchRegion(pos_region);
 }
 
-std::ostream& operator<<(std::ostream &s, const LLSurface &S) 
+std::ostream& operator<<(std::ostream &s, const LLSurface &S)
 {
 	s << "{ \n";
 	s << "  mGridsPerEdge = " << S.mGridsPerEdge - 1 << " + 1\n";
@@ -956,12 +954,12 @@ std::ostream& operator<<(std::ostream &s, const LLSurface &S)
 
 // ---------------- LLSurface:: Protected ----------------
 
-void LLSurface::createPatchData() 
+void LLSurface::createPatchData()
 {
-	// Assumes mGridsPerEdge, mGridsPerPatchEdge, and mPatchesPerEdge have been properly set
-	// TODO -- check for create() called when surface is not empty
+	// Assumes mGridsPerEdge, mGridsPerPatchEdge, and mPatchesPerEdge have been
+	// properly set. *TODO: check for create() called when surface is not empty
 	S32 i, j;
-	LLSurfacePatch *patchp;
+	LLSurfacePatch* patchp;
 
 	// Allocate memory
 	mPatchList = new LLSurfacePatch[mNumberOfPatches];
@@ -969,18 +967,18 @@ void LLSurface::createPatchData()
 	// One of each for each camera
 	mVisiblePatchCount = mNumberOfPatches;
 
-	for (j = 0; j < mPatchesPerEdge; j++)
+	for (j = 0; j < mPatchesPerEdge; ++j)
 	{
-		for (i = 0; i < mPatchesPerEdge; i++)
+		for (i = 0; i < mPatchesPerEdge; ++i)
 		{
 			patchp = getPatch(i, j);
 			patchp->setSurface(this);
 		}
 	}
 
-	for (j = 0; j < mPatchesPerEdge; j++)
+	for (j = 0; j < mPatchesPerEdge; ++j)
 	{
-		for (i = 0; i < mPatchesPerEdge; i++)
+		for (i = 0; i < mPatchesPerEdge; ++i)
 		{
 			patchp = getPatch(i, j);
 			patchp->mHasReceivedData = FALSE;
@@ -991,14 +989,15 @@ void LLSurface::createPatchData()
 			patchp->setDataZ(mSurfaceZ + data_offset);
 			patchp->setDataNorm(mNorm + data_offset);
 
-			// We make each patch point to its neighbors so we can do resolution checking 
-			// when butting up different resolutions.  Patches that don't have neighbors
-			// somewhere will point to NULL on that side.
+			// We make each patch point to its neighbors so we can do
+			// resolution checking  when butting up different resolutions.
+			// Patches that don't have neighbors somewhere will point to NULL
+			// on that side.
 			if (i < mPatchesPerEdge - 1)
 			{
 				patchp->setNeighborPatch(EAST,getPatch(i + 1, j));
 			}
-			else 
+			else
 			{
 				patchp->setNeighborPatch(EAST, NULL);
 			}
@@ -1007,7 +1006,7 @@ void LLSurface::createPatchData()
 			{
 				patchp->setNeighborPatch(NORTH, getPatch(i, j + 1));
 			}
-			else 
+			else
 			{
 				patchp->setNeighborPatch(NORTH, NULL);
 			}
@@ -1016,7 +1015,7 @@ void LLSurface::createPatchData()
 			{
 				patchp->setNeighborPatch(WEST, getPatch(i - 1, j));
 			}
-			else 
+			else
 			{
 				patchp->setNeighborPatch(WEST, NULL);
 			}
@@ -1025,7 +1024,7 @@ void LLSurface::createPatchData()
 			{
 				patchp->setNeighborPatch(SOUTH, getPatch(i, j - 1));
 			}
-			else 
+			else
 			{
 				patchp->setNeighborPatch(SOUTH, NULL);
 			}
@@ -1034,7 +1033,7 @@ void LLSurface::createPatchData()
 			{
 				patchp->setNeighborPatch(NORTHEAST, getPatch(i + 1, j + 1));
 			}
-			else 
+			else
 			{
 				patchp->setNeighborPatch(NORTHEAST, NULL);
 			}
@@ -1043,25 +1042,25 @@ void LLSurface::createPatchData()
 			{
 				patchp->setNeighborPatch(NORTHWEST, getPatch(i - 1, j + 1));
 			}
-			else 
+			else
 			{
 				patchp->setNeighborPatch(NORTHWEST, NULL);
 			}
 
-			if (i > 0  &&  j > 0) 
+			if (i > 0  &&  j > 0)
 			{
 				patchp->setNeighborPatch(SOUTHWEST, getPatch(i - 1, j - 1));
 			}
-			else 
+			else
 			{
 				patchp->setNeighborPatch(SOUTHWEST, NULL);
 			}
 
-			if (i < mPatchesPerEdge - 1 && j > 0) 
+			if (i < mPatchesPerEdge - 1 && j > 0)
 			{
 				patchp->setNeighborPatch(SOUTHEAST, getPatch(i + 1, j - 1));
 			}
-			else 
+			else
 			{
 				patchp->setNeighborPatch(SOUTHEAST, NULL);
 			}
@@ -1112,13 +1111,13 @@ LLSurfacePatch *LLSurface::getPatch(const S32 x, const S32 y) const
 		return NULL;
 	}
 
-	return mPatchList + x + y*mPatchesPerEdge;
+	return mPatchList + x + y * mPatchesPerEdge;
 }
 
 void LLSurface::dirtyAllPatches()
 {
 	S32 i;
-	for (i = 0; i < mNumberOfPatches; i++)
+	for (i = 0; i < mNumberOfPatches; ++i)
 	{
 		mPatchList[i].dirtyZ();
 	}
@@ -1174,8 +1173,9 @@ BOOL LLSurface::generateWaterTexture(const F32 x, const F32 y,
 	S32 tex_height = mWaterTexturep->getHeight();
 	S32 tex_comps = mWaterTexturep->getComponents();
 	S32 tex_stride = tex_width * tex_comps;
-	LLPointer<LLImageRaw> raw = new LLImageRaw(tex_width, tex_height, tex_comps);
-	U8 *rawp = raw->getData();
+	LLPointer<LLImageRaw> raw = new LLImageRaw(tex_width, tex_height,
+											   tex_comps);
+	U8* rawp = raw->getData();
 
 	F32 scale = 256.f * getMetersPerGrid() / (F32)tex_width;
 	F32 scale_inv = 1.f / scale;
@@ -1198,16 +1198,17 @@ BOOL LLSurface::generateWaterTexture(const F32 x, const F32 y,
 
 	LLVector3d origin_global = from_region_handle(getRegion()->getHandle());
 
-	// OK, for now, just have the composition value equal the height at the point.
+	// OK, for now, just have the composition value equal the height at the
+	// point.
 	LLVector3 location;
 	LLColor4U coloru;
 
 	const F32 WATER_HEIGHT = getWaterHeight();
 
 	S32 i, j, offset;
-	for (j = y_begin; j < y_end; j++)
+	for (j = y_begin; j < y_end; ++j)
 	{
-		for (i = x_begin; i < x_end; i++)
+		for (i = x_begin; i < x_end; ++i)
 		{
 			//F32 nv[2];
 			//nv[0] = i/256.f;
@@ -1234,8 +1235,8 @@ BOOL LLSurface::generateWaterTexture(const F32 x, const F32 y,
 			{
 				// Want non-linear curve for transparency gradient
 				coloru = MAX_WATER_COLOR;
-				const F32 frac = 1.f - 2.f/(2.f - (height - WATER_HEIGHT));
-				S32 alpha = 64 + llround((255-64)*frac);
+				const F32 frac = 1.f - 2.f / (2.f - (height - WATER_HEIGHT));
+				S32 alpha = 64 + llround((255 - 64) * frac);
 
 				alpha = llmin(llround((F32)MAX_WATER_COLOR.mV[3]), alpha);
 				alpha = llmax(64, alpha);
@@ -1254,6 +1255,7 @@ BOOL LLSurface::generateWaterTexture(const F32 x, const F32 y,
 		mWaterTexturep->createGLTexture(0, raw);
 	}
 
-	mWaterTexturep->setSubImage(raw, x_begin, y_begin, x_end - x_begin, y_end - y_begin);
+	mWaterTexturep->setSubImage(raw, x_begin, y_begin, x_end - x_begin,
+								y_end - y_begin);
 	return TRUE;
 }
