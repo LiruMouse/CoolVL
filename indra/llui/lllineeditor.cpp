@@ -115,6 +115,8 @@ LLLineEditor::LLLineEditor(const std::string& name,
 	mCommitOnFocusLost(TRUE),
 	mRevertOnEsc(TRUE),
 	mKeystrokeCallback(keystroke_callback),
+	mScrolledCallback(NULL),
+	mScrolledCallbackData(NULL),
 	mIsSelecting(FALSE),
 	mSelectionStart(0),
 	mSelectionEnd(0),
@@ -1340,8 +1342,7 @@ void LLLineEditor::cut()
 			rollback.doRollback(this);
 			reportBadKeystroke();
 		}
-		else
-		if (mKeystrokeCallback)
+		else if (mKeystrokeCallback)
 		{
 			mKeystrokeCallback(this, mCallbackUserData);
 		}
