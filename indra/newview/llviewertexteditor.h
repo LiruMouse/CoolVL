@@ -35,7 +35,6 @@
 
 #include "lltexteditor.h"
 
-
 //
 // Classes
 //

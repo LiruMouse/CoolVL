@@ -1,11 +1,11 @@
-/** 
+/**
  * @file lllineeditor.cpp
  * @brief LLLineEditor base class
  *
  * $LicenseInfo:firstyear=2001&license=viewergpl$
- * 
+ *
  * Copyright (c) 2001-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -33,28 +33,27 @@
 // Text editor widget to let users enter a single line.
 
 #include "linden_common.h"
- 
+
 #include "lllineeditor.h"
 
-#include "lltexteditor.h"
-#include "llmath.h"
+#include "llbutton.h"
+#include "llclipboard.h"
+#include "llcontrol.h"
+#include "llfasttimer.h"
+#include "llfocusmgr.h"
 #include "llfontgl.h"
 #include "llgl.h"
-#include "lltimer.h"
-#include "llmenugl.h"
-
-//#include "llclipboard.h"
-#include "llcontrol.h"
-#include "llbutton.h"
-#include "llfocusmgr.h"
 #include "llkeyboard.h"
+#include "llmath.h"
+#include "llmenugl.h"
 #include "llrect.h"
 #include "llresmgr.h"
+#include "llspellcheck.h"
 #include "llstring.h"
-#include "llwindow.h"
+#include "lltimer.h"
 #include "llui.h"
 #include "lluictrlfactory.h"
-#include "llclipboard.h"
+#include "llwindow.h"
 
 //
 // Imported globals
@@ -88,55 +87,61 @@ static LLRegisterWidget<LLLineEditor> r1("line_editor");
 //
 // Member functions
 //
- 
-LLLineEditor::LLLineEditor(const std::string& name, const LLRect& rect,
-						   const std::string& default_text, const LLFontGL* font,
+
+LLLineEditor::LLLineEditor(const std::string& name,
+						   const LLRect& rect,
+						   const std::string& default_text,
+						   const LLFontGL* font,
 						   S32 max_length_bytes,
-						   void (*commit_callback)(LLUICtrl* caller, void* user_data),
-						   void (*keystroke_callback)(LLLineEditor* caller, void* user_data),
-						   void (*focus_lost_callback)(LLFocusableElement* caller, void* user_data),
+						   void (*commit_callback)(LLUICtrl* caller,
+												   void* user_data),
+						   void (*keystroke_callback)(LLLineEditor* caller,
+													  void* user_data),
+						   void (*focus_lost_callback)(LLFocusableElement* caller,
+													   void* user_data),
 						   void* userdata,
 						   LLLinePrevalidateFunc prevalidate_func,
 						   LLViewBorder::EBevel border_bevel,
 						   LLViewBorder::EStyle border_style,
 						   S32 border_thickness)
-	:
-		LLUICtrl(name, rect, TRUE, commit_callback, userdata, FOLLOWS_TOP | FOLLOWS_LEFT),
-		mPopupMenuHandle(),
-		mMaxLengthBytes(max_length_bytes),
-		mCursorPos(0),
-		mScrollHPos(0),
-		mTextPadLeft(0),
-		mTextPadRight(0),
-		mCommitOnFocusLost(TRUE),
-		mRevertOnEsc(TRUE),
-		mKeystrokeCallback(keystroke_callback),
-		mIsSelecting(FALSE),
-		mSelectionStart(0),
-		mSelectionEnd(0),
-		mLastSelectionX(-1),
-		mLastSelectionY(-1),
-		mLastSelectionStart(-1),
-		mLastSelectionEnd(-1),
-		mPrevalidateFunc(prevalidate_func),
-		mCursorColor(		LLUI::sColorsGroup->getColor("TextCursorColor")),
-		mFgColor(			LLUI::sColorsGroup->getColor("TextFgColor")),
-		mReadOnlyFgColor(	LLUI::sColorsGroup->getColor("TextFgReadOnlyColor")),
-		mTentativeFgColor(	LLUI::sColorsGroup->getColor("TextFgTentativeColor")),
-		mWriteableBgColor(	LLUI::sColorsGroup->getColor("TextBgWriteableColor")),
-		mReadOnlyBgColor(	LLUI::sColorsGroup->getColor("TextBgReadOnlyColor")),
-		mFocusBgColor(		LLUI::sColorsGroup->getColor("TextBgFocusColor")),
-		mBorderThickness(border_thickness),
-		mIgnoreArrowKeys(FALSE),
-		mIgnoreTab(TRUE),
-		mDrawAsterixes(FALSE),
-		mHandleEditKeysDirectly(FALSE),
-		mSelectAllonFocusReceived(FALSE),
-		mPassDelete(FALSE),
-		mReadOnly(FALSE),
-		mHaveHistory(FALSE),
-		mImage(sImage),
-		mReplaceNewlinesWithSpaces(TRUE)
+:	LLUICtrl(name, rect, TRUE, commit_callback, userdata,
+			 FOLLOWS_TOP | FOLLOWS_LEFT),
+	mPopupMenuHandle(),
+	mMaxLengthBytes(max_length_bytes),
+	mCursorPos(0),
+	mScrollHPos(0),
+	mTextPadLeft(0),
+	mTextPadRight(0),
+	mCommitOnFocusLost(TRUE),
+	mRevertOnEsc(TRUE),
+	mKeystrokeCallback(keystroke_callback),
+	mIsSelecting(FALSE),
+	mSelectionStart(0),
+	mSelectionEnd(0),
+	mLastSelectionX(-1),
+	mLastSelectionY(-1),
+	mLastSelectionStart(-1),
+	mLastSelectionEnd(-1),
+	mPrevalidateFunc(prevalidate_func),
+	mCursorColor(LLUI::sColorsGroup->getColor("TextCursorColor")),
+	mFgColor(LLUI::sColorsGroup->getColor("TextFgColor")),
+	mReadOnlyFgColor(LLUI::sColorsGroup->getColor("TextFgReadOnlyColor")),
+	mTentativeFgColor(LLUI::sColorsGroup->getColor("TextFgTentativeColor")),
+	mWriteableBgColor(LLUI::sColorsGroup->getColor("TextBgWriteableColor")),
+	mReadOnlyBgColor(LLUI::sColorsGroup->getColor("TextBgReadOnlyColor")),
+	mFocusBgColor(LLUI::sColorsGroup->getColor("TextBgFocusColor")),
+	mBorderThickness(border_thickness),
+	mIgnoreArrowKeys(FALSE),
+	mIgnoreTab(TRUE),
+	mDrawAsterixes(FALSE),
+	mHandleEditKeysDirectly(FALSE),
+	mSelectAllonFocusReceived(FALSE),
+	mPassDelete(FALSE),
+	mReadOnly(FALSE),
+	mHaveHistory(FALSE),
+	mImage(sImage),
+	mReplaceNewlinesWithSpaces(TRUE),
+	mSpellCheck(FALSE)
 {
 	llassert(max_length_bytes > 0);
 
@@ -164,25 +169,34 @@ LLLineEditor::LLLineEditor(const std::string& name, const LLRect& rect,
 
 	// Scalable UI somehow made these rectangles off-by-one.
 	// I don't know why. JC
-	LLRect border_rect(0, getRect().getHeight()-1, getRect().getWidth()-1, 0);
-	mBorder = new LLViewBorder(std::string("line ed border"), border_rect, border_bevel, border_style, mBorderThickness);
+	LLRect border_rect(0, getRect().getHeight() - 1,
+					   getRect().getWidth() - 1, 0);
+	mBorder = new LLViewBorder(std::string("line ed border"), border_rect,
+							   border_bevel, border_style, mBorderThickness);
 	addChild(mBorder);
-	mBorder->setFollows(FOLLOWS_LEFT|FOLLOWS_RIGHT|FOLLOWS_TOP|FOLLOWS_BOTTOM);
+	mBorder->setFollows(FOLLOWS_LEFT | FOLLOWS_RIGHT | FOLLOWS_TOP | FOLLOWS_BOTTOM);
 
-	if (! sImage)
+	if (!sImage)
 	{
 		sImage = LLUI::getUIImage("sm_rounded_corners_simple.tga");
 	}
 	mImage = sImage;
 
-	// Context menu
+	// Context menu.
+	// *TODO: translate
 	LLMenuGL* menu = new LLMenuGL("line_editor_context_menu");
-	menu->append(new LLMenuItemCallGL("Select All", context_selectall, context_enable_selectall, this));
+	menu->append(new LLMenuItemCallGL("Select All", context_selectall,
+									   context_enable_selectall, this));
 	menu->appendSeparator("sep1");
-	menu->append(new LLMenuItemCallGL("Cut", context_cut, context_enable_cut, this));
-	menu->append(new LLMenuItemCallGL("Copy", context_copy, context_enable_copy, this));
-	menu->append(new LLMenuItemCallGL("Paste", context_paste, context_enable_paste, this));
-	menu->append(new LLMenuItemCallGL("Delete", context_delete, context_enable_delete, this));
+	menu->append(new LLMenuItemCallGL("Cut", context_cut,
+									  context_enable_cut, this));
+	menu->append(new LLMenuItemCallGL("Copy", context_copy,
+									  context_enable_copy, this));
+	menu->append(new LLMenuItemCallGL("Paste", context_paste,
+									  context_enable_paste, this));
+	menu->append(new LLMenuItemCallGL("Delete", context_delete,
+									  context_enable_delete, this));
+	menu->appendSeparator("spell_sep");
 	menu->setCanTearOff(FALSE);
 	menu->setVisible(FALSE);
 	mPopupMenuHandle = menu->getHandle();
@@ -213,11 +227,11 @@ void LLLineEditor::onFocusLost()
 {
 	// The call to updateAllowLanguageInput()
 	// when loosing the keyboard focus *may*
-	// indirectly invoke handleUnicodeCharHere(), 
+	// indirectly invoke handleUnicodeCharHere(),
 	// so it must be called before onCommit.
 	updateAllowingLanguageInput();
 
-	if (mCommitOnFocusLost && mText.getString() != mPrevText) 
+	if (mCommitOnFocusLost && mText.getString() != mPrevText)
 	{
 		onCommit();
 	}
@@ -294,7 +308,7 @@ void LLLineEditor::setMaxTextLength(S32 max_text_length)
 {
 	S32 max_len = llmax(0, max_text_length);
 	mMaxLengthBytes = max_len;
-} 
+}
 
 void LLLineEditor::setTextPadding(S32 left, S32 right)
 {
@@ -318,9 +332,11 @@ void LLLineEditor::setText(const LLStringExplicit &new_text)
 						((mSelectionStart == 0 && mSelectionEnd == len) ||
 						 (mSelectionStart == len && mSelectionEnd == 0));
 
-	// Do safe truncation so we don't split multi-byte characters
-	// also consider entire string selected when mSelectAllonFocusReceived is set on an empty, focused line editor
-	all_selected = all_selected || (len == 0 && hasFocus() && mSelectAllonFocusReceived);
+	// Do safe truncation so we don't split multi-byte characters. Also
+	// consider entire string selected when mSelectAllonFocusReceived is set on
+	// an empty, focused line editor.
+	all_selected = all_selected ||
+				   (len == 0 && hasFocus() && mSelectAllonFocusReceived);
 
 	std::string truncated_utf8 = new_text;
 	if (truncated_utf8.size() > (U32)mMaxLengthBytes)
@@ -347,8 +363,9 @@ void LLLineEditor::setText(const LLStringExplicit &new_text)
 	mPrevText = mText;
 }
 
-// Picks a new cursor position based on the actual screen size of text being drawn.
-void LLLineEditor::setCursorAtLocalPos(S32 local_mouse_x)
+// Picks a new cursor position based on the actual screen size of text being
+// drawn.
+S32 LLLineEditor::calculateCursorFromMouse(S32 local_mouse_x)
 {
 	const llwchar* wtext = mText.getWString().c_str();
 	LLWString asterix_text;
@@ -356,18 +373,21 @@ void LLLineEditor::setCursorAtLocalPos(S32 local_mouse_x)
 	{
 		for (S32 i = 0; i < mText.length(); i++)
 		{
-			asterix_text += '*';
+			asterix_text += (llwchar) 0x2022L;
 		}
 		wtext = asterix_text.c_str();
 	}
 
-	S32 cursor_pos =
-		mScrollHPos + 
-		mGLFont->charFromPixelOffset(
-			wtext, mScrollHPos,
-			(F32)(local_mouse_x - mMinHPixels),
-			(F32)(mMaxHPixels - mMinHPixels + 1)); // min-max range is inclusive
-	setCursor(cursor_pos);
+	return mScrollHPos +
+		   mGLFont->charFromPixelOffset(wtext, mScrollHPos,
+										(F32)(local_mouse_x - mMinHPixels),
+										(F32)(mMaxHPixels - mMinHPixels + 1)); // min-max range is inclusive
+
+}
+
+void LLLineEditor::setCursorAtLocalPos(S32 local_mouse_x)
+{
+	setCursor(calculateCursorFromMouse(local_mouse_x));
 }
 
 void LLLineEditor::setCursor(S32 pos)
@@ -378,12 +398,20 @@ void LLLineEditor::setCursor(S32 pos)
 	S32 pixels_after_scroll = findPixelNearestPos();
 	if (pixels_after_scroll > mMaxHPixels)
 	{
-		S32 width_chars_to_left = mGLFont->getWidth(mText.getWString().c_str(), 0, mScrollHPos);
-		S32 last_visible_char = mGLFont->maxDrawableChars(mText.getWString().c_str(), llmax(0.f, (F32)(mMaxHPixels - mMinHPixels + width_chars_to_left))); 
-		S32 min_scroll = mGLFont->firstDrawableChar(mText.getWString().c_str(), (F32)(mMaxHPixels - mMinHPixels - UI_LINEEDITOR_CURSOR_THICKNESS - UI_LINEEDITOR_H_PAD), mText.length(), getCursor());
+		S32 width_chars_to_left = mGLFont->getWidth(mText.getWString().c_str(),
+													0, mScrollHPos);
+		S32 last_visible_char = mGLFont->maxDrawableChars(mText.getWString().c_str(),
+														  llmax(0.f,
+																(F32)(mMaxHPixels - mMinHPixels + width_chars_to_left)));
+		S32 min_scroll = mGLFont->firstDrawableChar(mText.getWString().c_str(),
+													(F32)(mMaxHPixels - mMinHPixels - UI_LINEEDITOR_CURSOR_THICKNESS - UI_LINEEDITOR_H_PAD),
+													mText.length(),
+													getCursor());
 		if (old_cursor_pos == last_visible_char)
 		{
-			mScrollHPos = llmin(mText.length(), llmax(min_scroll, mScrollHPos + SCROLL_INCREMENT_ADD));
+			mScrollHPos = llmin(mText.length(),
+								llmax(min_scroll,
+									  mScrollHPos + SCROLL_INCREMENT_ADD));
 		}
 		else
 		{
@@ -394,7 +422,9 @@ void LLLineEditor::setCursor(S32 pos)
 	{
 		if (old_cursor_pos == mScrollHPos)
 		{
-			mScrollHPos = llmax(0, llmin(getCursor(), mScrollHPos - SCROLL_INCREMENT_DEL));
+			mScrollHPos = llmax(0,
+								llmin(getCursor(),
+									  mScrollHPos - SCROLL_INCREMENT_DEL));
 		}
 		else
 		{
@@ -526,13 +556,117 @@ BOOL LLLineEditor::context_enable_delete(void* data)
 	return (line && line->canDoDelete());
 }
 
+void LLLineEditor::spell_correct(void* data)
+{
+	SpellMenuBind* menu_bind = (SpellMenuBind*)data;
+	LLLineEditor* line = menu_bind->mOrigin;
+	if (menu_bind && line)
+	{
+		LL_DEBUGS("SpellCheck") << menu_bind->mMenuItem->getName()
+								<< " : " << menu_bind->mOrigin->getName()
+								<< " : " << menu_bind->mWord << LL_ENDL;
+		line->spellReplace(menu_bind);
+	}
+}
+
+void LLLineEditor::spell_show(void * data)
+{
+	SpellMenuBind* menu_bind = (SpellMenuBind*)data;
+	LLLineEditor* line = menu_bind->mOrigin;
+
+	if (menu_bind && line)
+	{
+		BOOL show = (menu_bind->mWord == "Show Misspellings");
+		LLSpellCheck::instance().setShowMisspelled(show);
+	}
+}
+
+void LLLineEditor::spell_add(void* data)
+{
+	SpellMenuBind* menu_bind = (SpellMenuBind*)data;
+	if (menu_bind)
+	{
+		LLSpellCheck::instance().addToCustomDictionary(menu_bind->mWord);
+		menu_bind->mOrigin->mPrevSpelledText.erase();	// make it update
+	}
+}
+
+void LLLineEditor::spell_ignore(void* data)
+{
+	SpellMenuBind* menu_bind = (SpellMenuBind*)data;
+	if (menu_bind)
+	{
+		LLSpellCheck::instance().addToIgnoreList(menu_bind->mWord);
+		menu_bind->mOrigin->mPrevSpelledText.erase();	// make it update
+	}
+}
+
+std::vector<S32> LLLineEditor::getMisspelledWordsPositions()
+{
+	std::vector<S32> bad_words_pos;
+    const LLWString& text = mText.getWString();
+	std::string selected_word;
+	S32 word_start = 0;
+	S32 word_end = mSpellCheckStart;
+	S32 true_end;
+
+	while (word_end < mSpellCheckEnd)
+	{
+		if (LLWStringUtil::isPartOfLexicalWord(text[word_end]))
+		{
+			// Select the word under the cursor
+			while (word_end > 0 &&
+				   LLWStringUtil::isPartOfLexicalWord(text[word_end - 1]))
+			{
+				word_end--;
+			}
+			if (text[word_end] == L'\'')
+			{
+				// Do not coun't "'" at the start of a word
+				word_end++;
+			}
+			word_start = word_end;
+			while (word_end < (S32)text.length() &&
+				   LLWStringUtil::isPartOfLexicalWord(text[word_end]))
+			{
+				word_end++;
+			}	
+			if (text[word_end - 1] == L'\'')
+			{
+				// Do not coun't "'" at the end of a word
+				true_end = word_end - 1;
+			}
+			else
+			{
+				true_end = word_end;
+			}
+			if (true_end > word_start + 2)	// Do not bother for 2 or less characters words
+			{
+				std::string part(text.begin(), text.end());
+				selected_word = part.substr(word_start, true_end - word_start);
+
+				if (!LLSpellCheck::instance().checkSpelling(selected_word))
+				{	
+					// misspelled word here
+					bad_words_pos.push_back(word_start);
+					bad_words_pos.push_back(true_end);
+				}
+			}
+		}
+		word_end++;
+	}
+
+	return bad_words_pos;
+}
+
 BOOL LLLineEditor::handleDoubleClick(S32 x, S32 y, MASK mask)
 {
 	setFocus(TRUE);
 
 	if (mSelectionEnd == 0 && mSelectionStart == mText.length())
 	{
-		// if everything is selected, handle this as a normal click to change insertion point
+		// if everything is selected, handle this as a normal click to change
+		// insertion point
 		handleMouseDown(x, y, mask);
 	}
 	else
@@ -542,27 +676,30 @@ BOOL LLLineEditor::handleDoubleClick(S32 x, S32 y, MASK mask)
 		BOOL doSelectAll = TRUE;
 
 		// Select the word we're on
-		if (LLTextEditor::isPartOfWord(wtext[mCursorPos]))
+		if (LLWStringUtil::isPartOfWord(wtext[mCursorPos]))
 		{
 			S32 old_selection_start = mLastSelectionStart;
 			S32 old_selection_end = mLastSelectionEnd;
 
 			// Select word the cursor is over
-			while (mCursorPos > 0 && LLTextEditor::isPartOfWord(wtext[mCursorPos-1]))
+			while (mCursorPos > 0 &&
+				   LLWStringUtil::isPartOfWord(wtext[mCursorPos - 1]))
 			{	// Find the start of the word
 				mCursorPos--;
 			}
 			startSelection();
 
-			while (mCursorPos < (S32)wtext.length() && LLTextEditor::isPartOfWord(wtext[mCursorPos]))
+			while (mCursorPos < (S32)wtext.length() &&
+				   LLWStringUtil::isPartOfWord(wtext[mCursorPos]))
 			{	// Find the end of the word
 				mCursorPos++;
 			}
 			mSelectionEnd = mCursorPos;
 
-			// If nothing changed, then the word was already selected.  Select the whole line.
-			doSelectAll = (old_selection_start == mSelectionStart) &&  
-						  (old_selection_end   == mSelectionEnd);
+			// If nothing changed, then the word was already selected. Select
+			// the whole line.
+			doSelectAll = old_selection_start == mSelectionStart &&
+						  old_selection_end == mSelectionEnd;
 		}
 
 		if (doSelectAll)
@@ -572,9 +709,9 @@ BOOL LLLineEditor::handleDoubleClick(S32 x, S32 y, MASK mask)
 	}
 
 	// We don't want handleMouseUp() to "finish" the selection (and thereby
-	// set mSelectionEnd to where the mouse is), so we finish the selection 
+	// set mSelectionEnd to where the mouse is), so we finish the selection
 	// here.
-	mIsSelecting = FALSE;  
+	mIsSelecting = FALSE;
 
 	// delay cursor flashing
 	mKeystrokeTimer.reset();
@@ -588,12 +725,11 @@ BOOL LLLineEditor::handleDoubleClick(S32 x, S32 y, MASK mask)
 BOOL LLLineEditor::handleMouseDown(S32 x, S32 y, MASK mask)
 {
 	// Check first whether the "clear search" button wants to deal with this.
-	if (childrenHandleMouseDown(x, y, mask) != NULL) 
+	if (childrenHandleMouseDown(x, y, mask) != NULL)
 	{
 		return TRUE;
 	}
-	if (mSelectAllonFocusReceived
-		&& gFocusMgr.getKeyboardFocus() != this)
+	if (mSelectAllonFocusReceived && gFocusMgr.getKeyboardFocus() != this)
 	{
 		setFocus(TRUE);
 	}
@@ -680,9 +816,106 @@ BOOL LLLineEditor::handleRightMouseDown(S32 x, S32 y, MASK mask)
 {
 	setFocus(TRUE);
 
+	S32 word_start = 0;
+	S32 word_len = 0;
+	S32 pos = calculateCursorFromMouse(x);
+
 	LLMenuGL* menu = (LLMenuGL*)mPopupMenuHandle.get();
 	if (menu)
 	{
+		SpellMenuBind* menu_bind;
+		LLMenuItemCallGL* menu_item;
+
+		// Remove old suggestions
+		for (S32 i = 0; i < (S32)mSuggestionMenuItems.size(); i++)
+		{
+			menu_bind = mSuggestionMenuItems[i];
+			if (menu_bind)
+			{
+				menu_item = menu_bind->mMenuItem;
+				menu->remove(menu_item);
+				menu_item->die();
+				//delete menu_bind->mMenuItem;
+				//menu_bind->mMenuItem = NULL;
+				delete menu_bind;
+			}
+		}
+		mSuggestionMenuItems.clear();
+
+		// Not read-only, spell_check="true" in xui and spell checking enabled
+		bool spell_check = !mReadOnly && mSpellCheck &&
+							LLSpellCheck::instance().getSpellCheck();
+		menu->setItemVisible("spell_sep", spell_check);
+		if (spell_check)
+		{
+			// search for word matches
+			bool is_word_part = getWordBoundriesAt(pos, &word_start, &word_len);
+			if (is_word_part)
+			{
+				const LLWString& text = mText.getWString();
+				std::string part(text.begin(), text.end());
+				std::string selected_word = part.substr(word_start, word_len);
+				if (!LLSpellCheck::instance().checkSpelling(selected_word))
+				{
+					// misspelled word here
+					std::vector<std::string> suggestions;
+					S32 count = LLSpellCheck::instance().getSuggestions(selected_word,
+																		suggestions);
+					for (S32 i = 0; i < count; i++)
+					{
+						menu_bind = new SpellMenuBind;
+						menu_bind->mOrigin = this;
+						menu_bind->mWord = suggestions[i];
+						menu_bind->mWordPositionEnd = word_start + word_len;
+						menu_bind->mWordPositionStart = word_start;
+						menu_item = new LLMenuItemCallGL(menu_bind->mWord,
+														 spell_correct,
+														 NULL, menu_bind);
+						menu_bind->mMenuItem = menu_item;
+						mSuggestionMenuItems.push_back(menu_bind);
+						menu->append(menu_item);
+					}
+					menu_bind = new SpellMenuBind;
+					menu_bind->mOrigin = this;
+					menu_bind->mWord = selected_word;
+					menu_bind->mWordPositionEnd = word_start + word_len;
+					menu_bind->mWordPositionStart = word_start;
+					menu_item = new LLMenuItemCallGL("Add Word", spell_add,
+													 NULL, menu_bind);
+					menu_bind->mMenuItem = menu_item;
+					mSuggestionMenuItems.push_back(menu_bind);
+					menu->append(menu_item);
+
+					menu_bind = new SpellMenuBind;
+					menu_bind->mOrigin = this;
+					menu_bind->mWord = selected_word;
+					menu_bind->mWordPositionEnd = word_start + word_len;
+					menu_bind->mWordPositionStart = word_start;
+					menu_item = new LLMenuItemCallGL("Ignore Word", spell_ignore,
+													 NULL, menu_bind);
+					menu_bind->mMenuItem = menu_item;
+					mSuggestionMenuItems.push_back(menu_bind);
+					menu->append(menu_item);
+				}
+			}
+
+			menu_bind = new SpellMenuBind;
+			menu_bind->mOrigin = this;
+			if (LLSpellCheck::instance().getShowMisspelled())
+			{
+				menu_bind->mWord = "Hide Misspellings";
+			}
+			else
+			{
+				menu_bind->mWord = "Show Misspellings";
+			}
+			menu_item = new LLMenuItemCallGL(menu_bind->mWord, spell_show,
+											 NULL, menu_bind);
+			menu_bind->mMenuItem = menu_item;
+			mSuggestionMenuItems.push_back(menu_bind);
+			menu->append(menu_item);
+		}
+
 		menu->buildDrawLabels();
 		menu->updateParent(LLMenuGL::sMenuContainer);
 		LLMenuGL::showPopup(this, menu, x, y);
@@ -696,7 +929,7 @@ BOOL LLLineEditor::handleHover(S32 x, S32 y, MASK mask)
 	// Check first whether the "clear search" button wants to deal with this.
 	if (!hasMouseCapture())
 	{
-		if (childrenHandleHover(x, y, mask) != NULL) 
+		if (childrenHandleHover(x, y, mask) != NULL)
 		{
 			return TRUE;
 		}
@@ -720,8 +953,7 @@ BOOL LLLineEditor::handleHover(S32 x, S32 y, MASK mask)
 				// Scroll to the left
 				mScrollHPos = llclamp(mScrollHPos - increment, 0, mText.length());
 			}
-			else
-			if (x > mMaxHPixels && mCursorPos < (S32)mText.length())
+			else if (x > mMaxHPixels && mCursorPos < (S32)mText.length())
 			{
 				// If scrolling one pixel would make a difference...
 				S32 pixels_after_scrolling_one_char = findPixelNearestPos(1);
@@ -756,7 +988,7 @@ BOOL LLLineEditor::handleHover(S32 x, S32 y, MASK mask)
 
 BOOL LLLineEditor::handleMouseUp(S32 x, S32 y, MASK mask)
 {
-	BOOL	handled = FALSE;
+	BOOL handled = FALSE;
 
 	if (hasMouseCapture())
 	{
@@ -765,7 +997,7 @@ BOOL LLLineEditor::handleMouseUp(S32 x, S32 y, MASK mask)
 	}
 
 	// Check first whether the "clear search" button wants to deal with this.
-	if (!handled && childrenHandleMouseUp(x, y, mask) != NULL) 
+	if (!handled && childrenHandleMouseUp(x, y, mask) != NULL)
 	{
 		return TRUE;
 	}
@@ -796,7 +1028,6 @@ void LLLineEditor::removeChar()
 	if (getCursor() > 0)
 	{
 		mText.erase(getCursor() - 1, 1);
-
 		setCursor(getCursor() - 1);
 	}
 	else
@@ -863,7 +1094,7 @@ void LLLineEditor::setSelection(S32 start, S32 end)
 
 	mIsSelecting = TRUE;
 
-	// JC, yes, this seems odd, but I think you have to presume a 
+	// JC, yes, this seems odd, but I think you have to presume a
 	// selection dragged from the end towards the start.
 	mSelectionStart = llclamp(end, 0, len);
 	mSelectionEnd = llclamp(start, 0, len);
@@ -883,7 +1114,7 @@ S32 LLLineEditor::prevWordPos(S32 cursorPos) const
 	{
 		cursorPos--;
 	}
-	while (cursorPos > 0 && LLTextEditor::isPartOfWord(wtext[cursorPos - 1]))
+	while (cursorPos > 0 && LLWStringUtil::isPartOfWord(wtext[cursorPos - 1]))
 	{
 		cursorPos--;
 	}
@@ -893,15 +1124,86 @@ S32 LLLineEditor::prevWordPos(S32 cursorPos) const
 S32 LLLineEditor::nextWordPos(S32 cursorPos) const
 {
 	const LLWString& wtext = mText.getWString();
-	while (cursorPos < getLength() && LLTextEditor::isPartOfWord(wtext[cursorPos]))
+	while (cursorPos < getLength() && LLWStringUtil::isPartOfWord(wtext[cursorPos]))
 	{
 		cursorPos++;
-	} 
+	}
 	while (cursorPos < getLength() && wtext[cursorPos] == ' ')
 	{
 		cursorPos++;
 	}
 	return cursorPos;
+}
+
+BOOL LLLineEditor::getWordBoundriesAt(const S32 at, S32* word_begin,
+									  S32* word_length) const
+{
+	const LLWString& wtext = mText.getWString();
+	S32 pos = at;
+	S32 start;
+	if (LLWStringUtil::isPartOfLexicalWord(wtext[pos]))
+	{
+		while (pos > 0 && LLWStringUtil::isPartOfLexicalWord(wtext[pos - 1]))
+		{
+			pos--;
+		}
+		if (wtext[pos] == L'\'')
+		{
+			// Do not coun't "'" at the start of a word
+			pos++;
+		}
+		start = pos;
+		while (pos < (S32)wtext.length() &&
+			   LLWStringUtil::isPartOfLexicalWord(wtext[pos]))
+		{
+			pos++;
+		}
+		if (wtext[pos - 1] == L'\'')
+		{
+			// Do not coun't "'" at the end of a word
+			pos--;
+		}
+
+		if (start >= pos)
+		{
+			return FALSE;
+		}
+
+		*word_begin = start;
+		*word_length = pos - start;
+		return TRUE;
+	}
+	return FALSE;
+}
+
+void LLLineEditor::spellReplace(SpellMenuBind* data)
+{
+	if (data)
+	{
+		S32 length = data->mWordPositionEnd - data->mWordPositionStart;
+		mText.erase(data->mWordPositionStart, length);
+		insert(data->mWord, data->mWordPositionStart);
+		mCursorPos += data->mWord.length() - length;
+	}
+}
+
+void LLLineEditor::insert(std::string what, S32 where)
+{
+	LLLineEditorRollback rollback(this);
+	LLWString clean_string(utf8str_to_wstring(what));
+	LLWStringUtil::replaceTabsWithSpaces(clean_string, 4);
+	mText.insert(where, clean_string);
+	// See if we should move over the cursor acordingly
+	// Validate new string and rollback the if needed.
+	if (mPrevalidateFunc && !mPrevalidateFunc(mText.getWString()))
+	{
+		rollback.doRollback(this);
+		reportBadKeystroke();
+	}
+	else if (mKeystrokeCallback)
+	{
+		mKeystrokeCallback(this, mCallbackUserData);
+	}
 }
 
 BOOL LLLineEditor::handleSelectionKey(KEY key, MASK mask)
@@ -953,14 +1255,14 @@ BOOL LLLineEditor::handleSelectionKey(KEY key, MASK mask)
 
 		case KEY_PAGE_DOWN:
 		case KEY_END:
+		{
+			S32 len = mText.length();
+			if (len)
 			{
-				S32 len = mText.length();
-				if (len)
-				{
-					extendSelection(len);
-				}
-				break;
+				extendSelection(len);
 			}
+			break;
+		}
 
 		default:
 			handled = FALSE;
@@ -989,7 +1291,7 @@ BOOL LLLineEditor::handleSelectionKey(KEY key, MASK mask)
 		// take selection to 'primary' clipboard
 		updatePrimary();
 	}
- 
+
 	return handled;
 }
 
@@ -1057,7 +1359,7 @@ void LLLineEditor::copy()
 
 BOOL LLLineEditor::canPaste() const
 {
-	return !mReadOnly && gClipboard.canPasteString(); 
+	return !mReadOnly && gClipboard.canPasteString();
 }
 
 void LLLineEditor::paste()
@@ -1092,7 +1394,7 @@ void LLLineEditor::pasteHelper(bool is_primary)
 		{
 			paste = gClipboard.getPastePrimaryWString();
 		}
-		else 
+		else
 		{
 			paste = gClipboard.getPasteWString();
 		}
@@ -1108,15 +1410,19 @@ void LLLineEditor::pasteHelper(bool is_primary)
 				deleteSelection();
 			}
 
-			// Clean up string (replace tabs and returns and remove characters that our fonts don't support.)
+			// Clean up string (replace tabs and returns and remove characters
+			// that our fonts don't support.)
 			LLWString clean_string(paste);
 			LLWStringUtil::replaceTabsWithSpaces(clean_string, 1);
 			//clean_string = wstring_detabify(paste, 1);
-			LLWStringUtil::replaceChar(clean_string, '\n', mReplaceNewlinesWithSpaces ? ' ' : 182); // 182 == paragraph character
+			LLWStringUtil::replaceChar(clean_string, '\n',
+									   mReplaceNewlinesWithSpaces ? ' '
+																  : 182); // 182 == paragraph character
 
 			// Insert the string
 
-			// Check to see that the size isn't going to be larger than the max number of bytes
+			// Check to see that the size isn't going to be larger than the max
+			// number of bytes
 			U32 available_bytes = mMaxLengthBytes - wstring_utf8_length(mText);
 
 			if (available_bytes < (U32) wstring_utf8_length(clean_string))
@@ -1129,9 +1435,8 @@ void LLLineEditor::pasteHelper(bool is_primary)
 				//and check to see how large (in bytes) each symbol is.
 				while (total_bytes <= available_bytes)
 				{
-					//while we still have available bytes
-					//"accept" the current symbol and check the size
-					//of the next one
+					// while we still have available bytes "accept" the current
+					// symbol and check the size of the next one
 					current_symbol = clean_string[++wchars_that_fit];
 					total_bytes += wchar_utf8_length(current_symbol);
 				}
@@ -1139,20 +1444,18 @@ void LLLineEditor::pasteHelper(bool is_primary)
 				clean_string = clean_string.substr(0, wchars_that_fit);
 				reportBadKeystroke();
 			}
- 
+
 			mText.insert(getCursor(), clean_string);
 			setCursor(getCursor() + (S32)clean_string.length());
 			deselect();
 
 			// Validate new string and rollback the if needed.
-			BOOL need_to_rollback = (mPrevalidateFunc && !mPrevalidateFunc(mText.getWString()));
-			if (need_to_rollback)
+			if (mPrevalidateFunc && !mPrevalidateFunc(mText.getWString()))
 			{
 				rollback.doRollback(this);
 				reportBadKeystroke();
 			}
-			else
-			if (mKeystrokeCallback)
+			else if (mKeystrokeCallback)
 			{
 				mKeystrokeCallback(this, mCallbackUserData);
 			}
@@ -1167,13 +1470,14 @@ void LLLineEditor::copyPrimary()
 	{
 		S32 left_pos = llmin(mSelectionStart, mSelectionEnd);
 		S32 length = llabs(mSelectionStart - mSelectionEnd);
-		gClipboard.copyFromPrimarySubstring(mText.getWString(), left_pos, length);
+		gClipboard.copyFromPrimarySubstring(mText.getWString(), left_pos,
+											length);
 	}
 }
 
 BOOL LLLineEditor::canPastePrimary() const
 {
-	return !mReadOnly && gClipboard.canPastePrimaryString(); 
+	return !mReadOnly && gClipboard.canPastePrimaryString();
 }
 
 void LLLineEditor::updatePrimary()
@@ -1207,8 +1511,7 @@ BOOL LLLineEditor::handleSpecialKey(KEY key, MASK mask)
 			{
 				deleteSelection();
 			}
-			else
-			if (0 < getCursor())
+			else if (0 < getCursor())
 			{
 				removeChar();
 			}
@@ -1244,15 +1547,16 @@ BOOL LLLineEditor::handleSpecialKey(KEY key, MASK mask)
 
 	case KEY_LEFT:
 		if (mIgnoreArrowKeys && mask == MASK_NONE)
+		{
 			break;
+		}
 		if ((mask & MASK_ALT) == 0)
 		{
 			if (hasSelection())
 			{
 				setCursor(llmin(getCursor() - 1, mSelectionStart, mSelectionEnd));
 			}
-			else
-			if (0 < getCursor())
+			else if (0 < getCursor())
 			{
 				S32 cursorPos = getCursor() - 1;
 				if (mask & MASK_CONTROL)
@@ -1278,8 +1582,7 @@ BOOL LLLineEditor::handleSpecialKey(KEY key, MASK mask)
 			{
 				setCursor(llmax(getCursor() + 1, mSelectionStart, mSelectionEnd));
 			}
-			else
-			if (getCursor() < mText.length())
+			else if (getCursor() < mText.length())
 			{
 				S32 cursorPos = getCursor() + 1;
 				if (mask & MASK_CONTROL)
@@ -1362,8 +1665,7 @@ BOOL LLLineEditor::handleSpecialKey(KEY key, MASK mask)
 			}
 			handled = TRUE;
 		}
-		else
-		if (MASK_CONTROL & mask)
+		else if (MASK_CONTROL & mask)
 		{
 			if ('C' == key)
 			{
@@ -1377,8 +1679,7 @@ BOOL LLLineEditor::handleSpecialKey(KEY key, MASK mask)
 				}
 				handled = TRUE;
 			}
-			else
-			if ('V' == key)
+			else if ('V' == key)
 			{
 				if (canPaste())
 				{
@@ -1390,8 +1691,7 @@ BOOL LLLineEditor::handleSpecialKey(KEY key, MASK mask)
 				}
 				handled = TRUE;
 			}
-			else
-			if ('X' == key)
+			else if ('X' == key)
 			{
 				if (canCut())
 				{
@@ -1410,8 +1710,8 @@ BOOL LLLineEditor::handleSpecialKey(KEY key, MASK mask)
 
 BOOL LLLineEditor::handleKeyHere(KEY key, MASK mask)
 {
-	BOOL	handled = FALSE;
-	BOOL	selection_modified = FALSE;
+	BOOL handled = FALSE;
+	BOOL selection_modified = FALSE;
 
 	// Key presses are not being passed to the Popup menu.
 	// A proper fix is non-trivial so instead just close the menu.
@@ -1445,11 +1745,8 @@ BOOL LLLineEditor::handleKeyHere(KEY key, MASK mask)
 			mKeystrokeTimer.reset();
 
 			// Most keystrokes will make the selection box go away, but not all will.
-			if (!selection_modified &&
-				KEY_SHIFT != key &&
-				KEY_CONTROL != key &&
-				KEY_ALT != key &&
-				KEY_CAPSLOCK)
+			if (!selection_modified && KEY_SHIFT != key &&
+				KEY_CONTROL != key && KEY_ALT != key && KEY_CAPSLOCK)
 			{
 				deselect();
 			}
@@ -1490,7 +1787,7 @@ BOOL LLLineEditor::handleUnicodeCharHere(llwchar uni_char)
 		return FALSE;
 	}
 
-	BOOL	handled = FALSE;
+	BOOL handled = FALSE;
 
 	if (gFocusMgr.getKeyboardFocus() == this && getVisible() && !mReadOnly)
 	{
@@ -1529,8 +1826,9 @@ BOOL LLLineEditor::handleUnicodeCharHere(llwchar uni_char)
 		{
 			if (mKeystrokeCallback)
 			{
-				// HACK! The only usage of this callback doesn't do anything with the character.
-				// We'll have to do something about this if something ever changes! - Doug
+				// HACK! The only usage of this callback doesn't do anything
+				// with the character. We'll have to do something about this if
+				// something ever changes! - Doug
 				mKeystrokeCallback(this, mCallbackUserData);
 			}
 		}
@@ -1540,7 +1838,8 @@ BOOL LLLineEditor::handleUnicodeCharHere(llwchar uni_char)
 
 BOOL LLLineEditor::canDoDelete() const
 {
-	return (!mReadOnly && (!mPassDelete || (hasSelection() || (getCursor() < mText.length()))));
+	return !mReadOnly &&
+			(!mPassDelete || hasSelection() || getCursor() < mText.length());
 }
 
 void LLLineEditor::doDelete()
@@ -1561,8 +1860,7 @@ void LLLineEditor::doDelete()
 		}
 
 		// Validate new string and rollback the if needed.
-		BOOL need_to_rollback = (mPrevalidateFunc && !mPrevalidateFunc(mText.getWString()));
-		if (need_to_rollback)
+		if (mPrevalidateFunc && !mPrevalidateFunc(mText.getWString()))
 		{
 			rollback.doRollback(this);
 			reportBadKeystroke();
@@ -1572,6 +1870,80 @@ void LLLineEditor::doDelete()
 			if (mKeystrokeCallback)
 			{
 				mKeystrokeCallback(this, mCallbackUserData);
+			}
+		}
+	}
+}
+
+void LLLineEditor::drawMisspelled(LLRect background)
+{
+	LLFastTimer t(LLFastTimer::FTM_RENDER_SPELLCHECK);
+
+	if (!mReadOnly && mSpellCheck && hasFocus())
+	{
+		S32 elapsed = (S32)mSpellTimer.getElapsedTimeF32();
+		S32 keystroke = (S32)mKeystrokeTimer.getElapsedTimeF32();
+		// Do not bother checking if the text didn't change in a while and
+		// fire a spell checking only once a second while typing.
+		if (keystroke < 2 && (elapsed & 1))
+		{
+			LLFastTimer t(LLFastTimer::FTM_SPELLCHECK_CHECK_WORDS);
+
+			S32 new_start_spell = mScrollHPos;
+			S32 cursorloc = calculateCursorFromMouse(mMaxHPixels);
+			S32 new_end_spell = (S32)mText.length() > cursorloc ? cursorloc
+																: (S32)mText.length();
+			if (isSpellDirty() || new_start_spell != mSpellCheckStart ||
+				new_end_spell != mSpellCheckEnd)
+			{
+				mSpellCheckStart = new_start_spell;
+				mSpellCheckEnd = new_end_spell;
+				resetSpellDirty();
+				mMisspellLocations = getMisspelledWordsPositions();
+			}
+		}
+
+		if (LLSpellCheck::instance().getShowMisspelled())
+		{
+			LLFastTimer t(LLFastTimer::FTM_SPELLCHECK_HIGHLIGHT);
+
+			const S32 bottom = background.mBottom;
+			const S32 maxw = getRect().getWidth();
+
+			const S32 misspells = (S32)mMisspellLocations.size();
+
+			S32 wstart;
+			S32 wend;
+
+			for (S32 i = 0; i < misspells; i++)
+			{
+				{
+					LLFastTimer t(LLFastTimer::FTM_SPELL_WORD_BOUNDARIES);
+
+					wstart = findPixelNearestPos(mMisspellLocations[i++] - getCursor());
+					wend = findPixelNearestPos(mMisspellLocations[i] - getCursor());
+					if (wend > maxw)
+					{
+						wend = maxw;
+					}
+					if (wstart > maxw)
+					{
+						wstart = maxw;
+					}
+				}
+				{
+					LLFastTimer t(LLFastTimer::FTM_SPELL_WORD_UNDERLINE);
+
+					// Draw the zig zag line
+					gGL.color4ub(255, 0, 0, 200);
+					while (wstart < wend)
+					{
+						gl_line_2d(wstart, bottom - 1, wstart + 3, bottom + 2);
+						gl_line_2d(wstart + 3, bottom + 2, wstart + 6,
+								   bottom - 1);
+						wstart += 6;
+					}
+				}
 			}
 		}
 	}
@@ -1602,9 +1974,12 @@ void LLLineEditor::draw()
 #if 0 // for when we're ready for image art.
 	if (hasFocus())
 	{
-		mImage->drawBorder(0, 0, getRect().getWidth(), getRect().getHeight(), gFocusMgr.getFocusColor(), gFocusMgr.getFocusFlashWidth());
+		mImage->drawBorder(0, 0, getRect().getWidth(), getRect().getHeight(),
+						   gFocusMgr.getFocusColor(),
+						   gFocusMgr.getFocusFlashWidth());
 	}
-	mImage->draw(getLocalRect(), mReadOnly ? mReadOnlyBgColor : mWriteableBgColor);
+	mImage->draw(getLocalRect(), mReadOnly ? mReadOnlyBgColor
+										   : mWriteableBgColor);
 #else // the old programmer art.
 	// drawing solids requires texturing be disabled
 	{
@@ -1658,7 +2033,8 @@ void LLLineEditor::draw()
 			if (preedit_right > mScrollHPos)
 			{
 				S32 preedit_pixels_left = findPixelNearestPos(llmax(preedit_left, mScrollHPos) - getCursor());
-				S32 preedit_pixels_right = llmin(findPixelNearestPos(preedit_right - getCursor()), background.mRight);
+				S32 preedit_pixels_right = llmin(findPixelNearestPos(preedit_right - getCursor()),
+												 background.mRight);
 				if (preedit_pixels_left >= background.mRight)
 				{
 					break;
@@ -1666,18 +2042,18 @@ void LLLineEditor::draw()
 				if (mPreeditStandouts[i])
 				{
 					gl_rect_2d(preedit_pixels_left + PREEDIT_STANDOUT_GAP,
-						background.mBottom + PREEDIT_STANDOUT_POSITION,
-						preedit_pixels_right - PREEDIT_STANDOUT_GAP - 1,
-						background.mBottom + PREEDIT_STANDOUT_POSITION - PREEDIT_STANDOUT_THICKNESS,
-						(text_color * PREEDIT_STANDOUT_BRIGHTNESS + bg_color * (1 - PREEDIT_STANDOUT_BRIGHTNESS)).setAlpha(1.0f));
+							   background.mBottom + PREEDIT_STANDOUT_POSITION,
+							   preedit_pixels_right - PREEDIT_STANDOUT_GAP - 1,
+							   background.mBottom + PREEDIT_STANDOUT_POSITION - PREEDIT_STANDOUT_THICKNESS,
+							   (text_color * PREEDIT_STANDOUT_BRIGHTNESS + bg_color * (1 - PREEDIT_STANDOUT_BRIGHTNESS)).setAlpha(1.0f));
 				}
 				else
 				{
 					gl_rect_2d(preedit_pixels_left + PREEDIT_MARKER_GAP,
-						background.mBottom + PREEDIT_MARKER_POSITION,
-						preedit_pixels_right - PREEDIT_MARKER_GAP - 1,
-						background.mBottom + PREEDIT_MARKER_POSITION - PREEDIT_MARKER_THICKNESS,
-						(text_color * PREEDIT_MARKER_BRIGHTNESS + bg_color * (1 - PREEDIT_MARKER_BRIGHTNESS)).setAlpha(1.0f));
+							   background.mBottom + PREEDIT_MARKER_POSITION,
+							   preedit_pixels_right - PREEDIT_MARKER_GAP - 1,
+							   background.mBottom + PREEDIT_MARKER_POSITION - PREEDIT_MARKER_THICKNESS,
+							   (text_color * PREEDIT_MARKER_BRIGHTNESS + bg_color * (1 - PREEDIT_MARKER_BRIGHTNESS)).setAlpha(1.0f));
 				}
 			}
 		}
@@ -1705,65 +2081,70 @@ void LLLineEditor::draw()
 		if (select_left > mScrollHPos)
 		{
 			// unselected, left side
-			rendered_text = mGLFont->render(
-				mText, mScrollHPos,
-				rendered_pixels_right, text_bottom,
-				text_color,
-				LLFontGL::LEFT, LLFontGL::BOTTOM,
-				LLFontGL::NORMAL,
-				select_left - mScrollHPos,
-				mMaxHPixels - llround(rendered_pixels_right),
-				&rendered_pixels_right);
+			rendered_text = mGLFont->render(mText, mScrollHPos,
+											rendered_pixels_right, text_bottom,
+											text_color, LLFontGL::LEFT,
+											LLFontGL::BOTTOM, LLFontGL::NORMAL,
+											select_left - mScrollHPos,
+											mMaxHPixels - llround(rendered_pixels_right),
+											&rendered_pixels_right);
 		}
 
-		if (rendered_pixels_right < (F32)mMaxHPixels && rendered_text < text_len)
+		if (rendered_pixels_right < (F32)mMaxHPixels &&
+			rendered_text < text_len)
 		{
-			LLColor4 color(1.f - bg_color.mV[0], 1.f - bg_color.mV[1], 1.f - bg_color.mV[2], 1.f);
+			LLColor4 color(1.f - bg_color.mV[0], 1.f - bg_color.mV[1],
+						   1.f - bg_color.mV[2], 1.f);
 			// selected middle
-			S32 width = mGLFont->getWidth(mText.getWString().c_str(), mScrollHPos + rendered_text, select_right - mScrollHPos - rendered_text);
+			S32 width = mGLFont->getWidth(mText.getWString().c_str(),
+										  mScrollHPos + rendered_text,
+										  select_right - mScrollHPos - rendered_text);
 			width = llmin(width, mMaxHPixels - llround(rendered_pixels_right));
-			gl_rect_2d(llround(rendered_pixels_right), cursor_top, llround(rendered_pixels_right)+width, cursor_bottom, color);
+			gl_rect_2d(llround(rendered_pixels_right), cursor_top,
+					   llround(rendered_pixels_right) + width,
+					   cursor_bottom, color);
 
-			rendered_text += mGLFont->render(
-				mText, mScrollHPos + rendered_text,
-				rendered_pixels_right, text_bottom,
-				LLColor4(1.f - text_color.mV[0], 1.f - text_color.mV[1], 1.f - text_color.mV[2], 1),
-				LLFontGL::LEFT, LLFontGL::BOTTOM,
-				LLFontGL::NORMAL,
-				select_right - mScrollHPos - rendered_text,
-				mMaxHPixels - llround(rendered_pixels_right),
-				&rendered_pixels_right);
+			rendered_text += mGLFont->render(mText, mScrollHPos + rendered_text,
+											 rendered_pixels_right, text_bottom,
+											 LLColor4(1.f - text_color.mV[0],
+													  1.f - text_color.mV[1],
+													  1.f - text_color.mV[2],
+													  1),
+											 LLFontGL::LEFT, LLFontGL::BOTTOM,
+											 LLFontGL::NORMAL,
+											 select_right - mScrollHPos - rendered_text,
+											 mMaxHPixels - llround(rendered_pixels_right),
+											 &rendered_pixels_right);
 		}
 
-		if (rendered_pixels_right < (F32)mMaxHPixels && rendered_text < text_len)
+		if (rendered_pixels_right < (F32)mMaxHPixels &&
+			rendered_text < text_len)
 		{
 			// unselected, right side
-			mGLFont->render(
-				mText, mScrollHPos + rendered_text,
-				rendered_pixels_right, text_bottom,
-				text_color,
-				LLFontGL::LEFT, LLFontGL::BOTTOM,
-				LLFontGL::NORMAL,
-				S32_MAX,
-				mMaxHPixels - llround(rendered_pixels_right),
-				&rendered_pixels_right);
+			mGLFont->render(mText, mScrollHPos + rendered_text,
+							rendered_pixels_right, text_bottom, text_color,
+							LLFontGL::LEFT, LLFontGL::BOTTOM, LLFontGL::NORMAL,
+							S32_MAX,
+							mMaxHPixels - llround(rendered_pixels_right),
+							&rendered_pixels_right);
 		}
 	}
 	else
 	{
-		mGLFont->render(
-			mText, mScrollHPos, 
-			rendered_pixels_right, text_bottom,
-			text_color,
-			LLFontGL::LEFT, LLFontGL::BOTTOM,
-			LLFontGL::NORMAL,
-			S32_MAX,
-			mMaxHPixels - llround(rendered_pixels_right),
-			&rendered_pixels_right);
+		mGLFont->render(mText, mScrollHPos, rendered_pixels_right, text_bottom,
+						text_color, LLFontGL::LEFT, LLFontGL::BOTTOM,
+						LLFontGL::NORMAL, S32_MAX,
+						mMaxHPixels - llround(rendered_pixels_right),
+						&rendered_pixels_right);
 	}
 #if 0 // for when we're ready for image art.
 	mBorder->setVisible(FALSE); // no more programmatic art.
 #endif
+
+	if (LLSpellCheck::instance().getSpellCheck())
+	{
+		drawMisspelled(background);
+	}
 
 	// If we're editing...
 	if (gFocusMgr.getKeyboardFocus() == this)
@@ -1786,31 +2167,36 @@ void LLLineEditor::draw()
 					cursor_right = cursor_left + llmax(wswidth, width);
 				}
 				// Use same color as text for the Cursor
-				gl_rect_2d(cursor_left, cursor_top,
-					cursor_right, cursor_bottom, text_color);
-				if (LL_KIM_OVERWRITE == gKeyboard->getInsertMode() && !hasSelection())
+				gl_rect_2d(cursor_left, cursor_top, cursor_right,
+						   cursor_bottom, text_color);
+				if (LL_KIM_OVERWRITE == gKeyboard->getInsertMode() &&
+					!hasSelection())
 				{
-					mGLFont->render(mText, getCursor(), (F32)(cursor_left + UI_LINEEDITOR_CURSOR_THICKNESS / 2), text_bottom, 
-						LLColor4(1.f - text_color.mV[0], 1.f - text_color.mV[1], 1.f - text_color.mV[2], 1),
-						LLFontGL::LEFT, LLFontGL::BOTTOM,
-						LLFontGL::NORMAL,
-						1);
+					mGLFont->render(mText, getCursor(),
+									(F32)(cursor_left + UI_LINEEDITOR_CURSOR_THICKNESS / 2),
+									text_bottom,
+									LLColor4(1.f - text_color.mV[0],
+											 1.f - text_color.mV[1],
+											 1.f - text_color.mV[2], 1),
+									LLFontGL::LEFT, LLFontGL::BOTTOM,
+									LLFontGL::NORMAL, 1);
 				}
 
 				// Make sure the IME is in the right place
-				S32 pixels_after_scroll = findPixelNearestPos();	// RCalculcate for IME position
+				// RCalculcate for IME position
+				S32 pixels_after_scroll = findPixelNearestPos();
 				LLRect screen_pos = getScreenRect();
-				LLCoordGL ime_pos(screen_pos.mLeft + pixels_after_scroll, screen_pos.mTop - UI_LINEEDITOR_V_PAD);
+				LLCoordGL ime_pos(screen_pos.mLeft + pixels_after_scroll,
+								  screen_pos.mTop - UI_LINEEDITOR_V_PAD);
 
-				ime_pos.mX = (S32) (ime_pos.mX * LLUI::sGLScaleFactor.mV[VX]);
-				ime_pos.mY = (S32) (ime_pos.mY * LLUI::sGLScaleFactor.mV[VY]);
+				ime_pos.mX = (S32)(ime_pos.mX * LLUI::sGLScaleFactor.mV[VX]);
+				ime_pos.mY = (S32)(ime_pos.mY * LLUI::sGLScaleFactor.mV[VY]);
 				getWindow()->setLanguageTextInput(ime_pos);
 			}
 		}
 
-		//draw label if no text is provided
-		//but we should draw it in a different color
-		//to give indication that it is not text you typed in
+		// Draw label if no text is provided but we should draw it in a
+		// different color to give indication that it is not text you typed in
 		if (0 == mText.length() && mReadOnly)
 		{
 			mGLFont->render(mLabel.getWString(), 0,
@@ -1836,12 +2222,9 @@ void LLLineEditor::draw()
 		// draw label if no text provided
 		if (0 == mText.length())
 		{
-			mGLFont->render(mLabel.getWString(), 0,
-							mMinHPixels, (F32)text_bottom,
-							label_color,
-							LLFontGL::LEFT,
-							LLFontGL::BOTTOM,
-							LLFontGL::NORMAL,
+			mGLFont->render(mLabel.getWString(), 0, mMinHPixels,
+							(F32)text_bottom, label_color,
+							LLFontGL::LEFT, LLFontGL::BOTTOM, LLFontGL::NORMAL,
 							S32_MAX,
 							mMaxHPixels - llround(rendered_pixels_right),
 							&rendered_pixels_right, FALSE);
@@ -1860,8 +2243,8 @@ void LLLineEditor::draw()
 S32 LLLineEditor::findPixelNearestPos(const S32 cursor_offset) const
 {
 	S32 dpos = getCursor() - mScrollHPos + cursor_offset;
-	S32 result = mGLFont->getWidth(mText.getWString().c_str(), mScrollHPos, dpos) + mMinHPixels;
-	return result;
+	return mMinHPixels + mGLFont->getWidth(mText.getWString().c_str(),
+										   mScrollHPos, dpos);
 }
 
 void LLLineEditor::reportBadKeystroke()
@@ -1903,7 +2286,7 @@ void LLLineEditor::setFocus(BOOL new_state)
 	{
 		selectAll();
 		// We don't want handleMouseUp() to "finish" the selection (and thereby
-		// set mSelectionEnd to where the mouse is), so we finish the selection 
+		// set mSelectionEnd to where the mouse is), so we finish the selection
 		// here.
 		mIsSelecting = FALSE;
 	}
@@ -1940,7 +2323,7 @@ void LLLineEditor::setFocus(BOOL new_state)
 	}
 }
 
-//virtual 
+//virtual
 void LLLineEditor::setRect(const LLRect& rect)
 {
 	LLUICtrl::setRect(rect);
@@ -1949,8 +2332,8 @@ void LLLineEditor::setRect(const LLRect& rect)
 		LLRect border_rect = mBorder->getRect();
 		// Scalable UI somehow made these rectangles off-by-one.
 		// I don't know why. JC
-		border_rect.setOriginAndSize(border_rect.mLeft, border_rect.mBottom, 
-				rect.getWidth()-1, rect.getHeight()-1);
+		border_rect.setOriginAndSize(border_rect.mLeft, border_rect.mBottom,
+									 rect.getWidth()-1, rect.getHeight() - 1);
 		mBorder->setRect(border_rect);
 	}
 }
@@ -1961,10 +2344,11 @@ void LLLineEditor::setPrevalidate(BOOL (*func)(const LLWString &))
 	updateAllowingLanguageInput();
 }
 
-// Limits what characters can be used to [1234567890.-] with [-] only valid in the first position.
-// Does NOT ensure that the string is a well-formed number--that's the job of post-validation--for
-// the simple reasons that intermediate states may be invalid even if the final result is valid.
-// 
+// Limits what characters can be used to [1234567890.-] with [-] only valid in
+// the first position. Does NOT ensure that the string is a well-formed number
+// (that's the job of post-validation) for the simple reasons that intermediate
+// states may be invalid even if the final result is valid.
+//
 // static
 BOOL LLLineEditor::prevalidateFloat(const LLWString &str)
 {
@@ -2059,9 +2443,10 @@ BOOL LLLineEditor::postvalidateFloat(const std::string &str)
 	return success;
 }
 
-// Limits what characters can be used to [1234567890-] with [-] only valid in the first position.
-// Does NOT ensure that the string is a well-formed number--that's the job of post-validation--for
-// the simple reasons that intermediate states may be invalid even if the final result is valid.
+// Limits what characters can be used to [1234567890-] with [-] only valid in
+// the first position. Does NOT ensure that the string is a well-formed number
+// (that's the job of post-validation) for the simple reasons that intermediate
+// states may be invalid even if the final result is valid.
 //
 // static
 BOOL LLLineEditor::prevalidateInt(const LLWString &str)
@@ -2214,7 +2599,8 @@ BOOL LLLineEditor::prevalidatePrintableNotPipe(const LLWString &str)
 			rv = FALSE;
 			break;
 		}
-		if (!(' ' == str[len] || LLStringOps::isAlnum((char)str[len]) || LLStringOps::isPunct((char)str[len])))
+		if (!(' ' == str[len] || LLStringOps::isAlnum((char)str[len]) ||
+			LLStringOps::isPunct((char)str[len])))
 		{
 			rv = FALSE;
 			break;
@@ -2272,7 +2658,8 @@ void LLLineEditor::setSelectAllonFocusReceived(BOOL b)
 	mSelectAllonFocusReceived = b;
 }
 
-void LLLineEditor::setKeystrokeCallback(void (*keystroke_callback)(LLLineEditor* caller, void* user_data))
+void LLLineEditor::setKeystrokeCallback(void (*keystroke_callback)(LLLineEditor* caller,
+										void* user_data))
 {
 	mKeystrokeCallback = keystroke_callback;
 }
@@ -2293,20 +2680,20 @@ LLXMLNodePtr LLLineEditor::getXML(bool save_children) const
 		std::string bevel;
 		switch (mBorder->getBevel())
 		{
-		default:
-		case LLViewBorder::BEVEL_NONE:	bevel = "none"; break;
-		case LLViewBorder::BEVEL_IN:	bevel = "in"; break;
-		case LLViewBorder::BEVEL_OUT:	bevel = "out"; break;
-		case LLViewBorder::BEVEL_BRIGHT:bevel = "bright"; break;
+			default:
+			case LLViewBorder::BEVEL_NONE:		bevel = "none"; break;
+			case LLViewBorder::BEVEL_IN:		bevel = "in"; break;
+			case LLViewBorder::BEVEL_OUT:		bevel = "out"; break;
+			case LLViewBorder::BEVEL_BRIGHT:	bevel = "bright"; break;
 		}
 		node->createChild("bevel_style", TRUE)->setStringValue(bevel);
 
 		std::string style;
 		switch (mBorder->getStyle())
 		{
-		default:
-		case LLViewBorder::STYLE_LINE:		style = "line"; break;
-		case LLViewBorder::STYLE_TEXTURE:	style = "texture"; break;
+			default:
+			case LLViewBorder::STYLE_LINE:		style = "line"; break;
+			case LLViewBorder::STYLE_TEXTURE:	style = "texture"; break;
 		}
 		node->createChild("border_style", TRUE)->setStringValue(style);
 
@@ -2370,8 +2757,8 @@ LLView* LLLineEditor::fromXML(LLXMLNodePtr node, LLView *parent, LLUICtrlFactory
 	LLUICtrlCallback commit_callback = NULL;
 
 	LLLineEditor* line_editor = new LLLineEditor(name,
-								rect, 
-								text, 
+								rect,
+								text,
 								font,
 								max_text_length,
 								commit_callback,
@@ -2402,6 +2789,11 @@ LLView* LLLineEditor::fromXML(LLXMLNodePtr node, LLView *parent, LLUICtrlFactory
 	if (node->getAttributeBOOL("commit_on_focus_lost", commit_on_focus_lost))
 	{
 		line_editor->setCommitOnFocusLost(commit_on_focus_lost);
+	}
+	BOOL spell_check = FALSE;
+	if (node->getAttributeBOOL("spell_check", spell_check))
+	{
+		line_editor->setSpellCheck(spell_check);
 	}
 
 	line_editor->setColorParameters(node);
@@ -2467,7 +2859,7 @@ void LLLineEditor::cleanupLineEditor()
 	sImage = NULL;
 }
 
-/* static */ 
+/* static */
 LLPointer<LLUIImage> LLLineEditor::parseImage(std::string name, LLXMLNodePtr from, LLPointer<LLUIImage> def)
 {
 	std::string xml_name;
@@ -2483,7 +2875,7 @@ void LLLineEditor::setColorParameters(LLXMLNodePtr node)
 	mImage = parseImage(std::string("image"), node, mImage);
 
 	LLColor4 color;
-	if (LLUICtrlFactory::getAttributeColor(node,"cursor_color", color)) 
+	if (LLUICtrlFactory::getAttributeColor(node,"cursor_color", color))
 	{
 		setCursorColor(color);
 	}
@@ -2568,14 +2960,16 @@ void LLLineEditor::resetPreedit()
 		mPreeditPositions.clear();
 
 		// Don't reset key stroke timer nor invoke keystroke callback,
-		// because a call to updatePreedit should be follow soon in 
-		// normal course of operation, and timer and callback will be 
-		// maintained there.  Doing so here made an odd sound.  (VWR-3410) 
+		// because a call to updatePreedit should be follow soon in
+		// normal course of operation, and timer and callback will be
+		// maintained there.  Doing so here made an odd sound.  (VWR-3410)
 	}
 }
 
 void LLLineEditor::updatePreedit(const LLWString &preedit_string,
-		const segment_lengths_t &preedit_segment_lengths, const standouts_t &preedit_standouts, S32 caret_position)
+								 const segment_lengths_t &preedit_segment_lengths,
+								 const standouts_t &preedit_standouts,
+								 S32 caret_position)
 {
 	// Just in case.
 	if (mReadOnly)
@@ -2591,7 +2985,8 @@ void LLLineEditor::updatePreedit(const LLWString &preedit_string,
 	mPreeditWString = preedit_string;
 	mPreeditPositions.resize(preedit_segment_lengths.size() + 1);
 	S32 position = insert_preedit_at;
-	for (segment_lengths_t::size_type i = 0; i < preedit_segment_lengths.size(); i++)
+	for (segment_lengths_t::size_type i = 0;
+		 i < preedit_segment_lengths.size(); i++)
 	{
 		mPreeditPositions[i] = position;
 		position += preedit_segment_lengths[i];
@@ -2599,7 +2994,8 @@ void LLLineEditor::updatePreedit(const LLWString &preedit_string,
 	mPreeditPositions.back() = position;
 	if (LL_KIM_OVERWRITE == gKeyboard->getInsertMode())
 	{
-		mPreeditOverwrittenWString.assign(LLWString(mText, insert_preedit_at, mPreeditWString.length()));
+		mPreeditOverwrittenWString.assign(LLWString(mText, insert_preedit_at,
+										  mPreeditWString.length()));
 		mText.erase(insert_preedit_at, mPreeditWString.length());
 	}
 	else
@@ -2621,7 +3017,8 @@ void LLLineEditor::updatePreedit(const LLWString &preedit_string,
 	}
 }
 
-BOOL LLLineEditor::getPreeditLocation(S32 query_offset, LLCoordGL *coord, LLRect *bounds, LLRect *control) const
+BOOL LLLineEditor::getPreeditLocation(S32 query_offset, LLCoordGL *coord,
+									  LLRect *bounds, LLRect *control) const
 {
 	if (control)
 	{
@@ -2646,7 +3043,7 @@ BOOL LLLineEditor::getPreeditLocation(S32 query_offset, LLCoordGL *coord, LLRect
 		return FALSE;
 	}
 
-	const S32 query = (query_offset >= 0 ? preedit_left_column + query_offset : getCursor());
+	const S32 query = query_offset >= 0 ? preedit_left_column + query_offset : getCursor();
 	if (query < mScrollHPos || query < preedit_left_column || query > preedit_right_column)
 	{
 		return FALSE;
@@ -2656,21 +3053,25 @@ BOOL LLLineEditor::getPreeditLocation(S32 query_offset, LLCoordGL *coord, LLRect
 	{
 		S32 query_local = findPixelNearestPos(query - getCursor());
 		S32 query_screen_x, query_screen_y;
-		localPointToScreen(query_local, getRect().getHeight() / 2, &query_screen_x, &query_screen_y);
-		LLUI::screenPointToGL(query_screen_x, query_screen_y, &coord->mX, &coord->mY);
+		localPointToScreen(query_local, getRect().getHeight() / 2,
+						   &query_screen_x, &query_screen_y);
+		LLUI::screenPointToGL(query_screen_x, query_screen_y, &coord->mX,
+							  &coord->mY);
 	}
 
 	if (bounds)
 	{
 		S32 preedit_left_local = findPixelNearestPos(llmax(preedit_left_column, mScrollHPos) - getCursor());
-		S32 preedit_right_local = llmin(findPixelNearestPos(preedit_right_column - getCursor()), getRect().getWidth() - mBorderThickness);
+		S32 preedit_right_local = llmin(findPixelNearestPos(preedit_right_column - getCursor()),
+										getRect().getWidth() - mBorderThickness);
 		if (preedit_left_local > preedit_right_local)
 		{
 			// Is this condition possible?
 			preedit_right_local = preedit_left_local;
 		}
 
-		LLRect preedit_rect_local(preedit_left_local, getRect().getHeight(), preedit_right_local, 0);
+		LLRect preedit_rect_local(preedit_left_local, getRect().getHeight(),
+								  preedit_right_local, 0);
 		LLRect preedit_rect_screen;
 		localRectToScreen(preedit_rect_local, &preedit_rect_screen);
 		LLUI::screenRectToGL(preedit_rect_screen, bounds);
@@ -2755,31 +3156,27 @@ LLWString LLLineEditor::getConvertedText() const
 	LLWStringUtil::trim(text);
 	if (!mReplaceNewlinesWithSpaces)
 	{
-		LLWStringUtil::replaceChar(text,182,'\n'); // Convert paragraph symbols back into newlines.
+		// Convert paragraph symbols back into newlines.
+		LLWStringUtil::replaceChar(text, 182, '\n');
 	}
 	return text;
 }
 
 static LLRegisterWidget<LLSearchEditor> r2("search_editor");
 
-LLSearchEditor::LLSearchEditor(const std::string& name, 
-		const LLRect& rect,
-		S32 max_length_bytes,
-		void (*search_callback)(const std::string& search_string, void* user_data),
-		void* userdata)
-	: 
-		LLUICtrl(name, rect, TRUE, NULL, userdata),
-		mSearchCallback(search_callback)
+LLSearchEditor::LLSearchEditor(const std::string& name,
+							   const LLRect& rect,
+							   S32 max_length_bytes,
+							   void (*search_callback)(const std::string& search_string,
+													   void* user_data),
+							   void* userdata)
+:	LLUICtrl(name, rect, TRUE, NULL, userdata),
+	mSearchCallback(search_callback)
 {
 	LLRect search_edit_rect(0, getRect().getHeight(), getRect().getWidth(), 0);
 	mSearchEdit = new LLLineEditor(std::string("search edit"),
-								   search_edit_rect,
-								   LLStringUtil::null,
-								   NULL,
-								   max_length_bytes,
-								   NULL,
-								   onSearchEdit,
-								   NULL,
+								   search_edit_rect, LLStringUtil::null, NULL,
+								   max_length_bytes, NULL, onSearchEdit, NULL,
 								   this);
 
 	mSearchEdit->setFollowsAll();
@@ -2789,15 +3186,12 @@ LLSearchEditor::LLSearchEditor(const std::string& name,
 
 	S32 btn_width = rect.getHeight(); // button is square, and as tall as search editor
 	LLRect clear_btn_rect(rect.getWidth() - btn_width, rect.getHeight(), rect.getWidth(), 0);
-	mClearSearchButton = new LLButton(std::string("clear search"), 
-								clear_btn_rect, 
-								std::string("icn_clear_lineeditor.tga"),
-								std::string("UIImgBtnCloseInactiveUUID"),
-								LLStringUtil::null,
-								onClearSearch,
-								this,
-								NULL,
-								LLStringUtil::null);
+	mClearSearchButton = new LLButton(std::string("clear search"),
+									  clear_btn_rect,
+									  std::string("icn_clear_lineeditor.tga"),
+									  std::string("UIImgBtnCloseInactiveUUID"),
+									  LLStringUtil::null, onClearSearch, this,
+									  NULL, LLStringUtil::null);
 	mClearSearchButton->setFollowsRight();
 	mClearSearchButton->setFollowsTop();
 	mClearSearchButton->setImageColor(LLUI::sColorsGroup->getColor("TextFgTentativeColor"));
@@ -2893,10 +3287,9 @@ LLView* LLSearchEditor::fromXML(LLXMLNodePtr node, LLView *parent, LLUICtrlFacto
 
 	std::string text = node->getValue().substr(0, max_text_length - 1);
 
-	LLSearchEditor* search_editor = new LLSearchEditor(name,
-								rect, 
-								max_text_length,
-								NULL, NULL);
+	LLSearchEditor* search_editor = new LLSearchEditor(name, rect,
+													   max_text_length,
+													   NULL, NULL);
 
 	std::string label;
 	if (node->getAttributeString("label", label))

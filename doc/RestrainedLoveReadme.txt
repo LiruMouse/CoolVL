@@ -2,7 +2,7 @@ This is the edited version of the original readme file by Marine Kelley.
 The file has been edited to take into account the improvements by Henri Beauchamp, as well as the Cool VL Viewer.
 
 -------------
-Version 2.08.03.23
+Version 2.08.03.24
 
 
 WHAT IS IT ?
@@ -155,6 +155,10 @@ Since v1.23d you may set the RestrainedLoveAddReplace advanced setting to TRUE s
 
 RELEASE NOTES:
 ---------------
+2.08.03.24 (@versionnum = 2080324) by Henri Beauchamp:
+- Changed: lifted the restrictions on @adjustheight to deal with tiny and giant mesh-based avatars.
+
+
 2.08.03.23 (@versionnum = 2080323) by Henri Beauchamp:
 - Inclusion of Marine Kelley's changes:
 	- changed: when @accepttp is in force, allow force-TPs, even when in busy mode.

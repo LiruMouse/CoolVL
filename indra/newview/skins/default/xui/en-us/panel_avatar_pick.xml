@@ -5,7 +5,7 @@
 	     width="290" />
 	<line_editor bottom_delta="-8" enabled="false" follows="left|top"
 	     font="SansSerif" height="20" left="10" name="given_name_editor"
-	     width="290" />
+	     width="290" spell_check="true" />
 	<text_editor enabled="false" follows="left|top" allow_html="true" parse_html="true"
 	     font="SansSerifSmall" height="100" left="10" max_length="1023"
 	     name="desc_editor" width="290" word_wrap="true" />

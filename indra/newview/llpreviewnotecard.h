@@ -133,6 +133,7 @@ protected:
 	static void		onPasteMenu(void* userdata);
 	static void		onSelectAllMenu(void* userdata);
 	static void		onDeselectMenu(void* userdata);
+	static void		onSpellCheckMenu(void* userdata);
 
 	static BOOL		hasChanged(void* userdata);
 	static BOOL		enableSaveLoadFile(void* userdata);
@@ -144,6 +145,8 @@ protected:
 	static BOOL		enablePasteMenu(void* userdata);
 	static BOOL		enableSelectAllMenu(void* userdata);
 	static BOOL		enableDeselectMenu(void* userdata);
+	static BOOL		enableSpellCheckMenu(void* userdata);
+	static BOOL		checkSpellCheckMenu(void* userdata);
 
 protected:
 	LLViewerTextEditor* mEditor;
@@ -156,6 +159,5 @@ protected:
 
 	static std::set<LLPreviewNotecard*> sList;
 };
-
 
 #endif // LL_LLPREVIEWNOTECARD_H

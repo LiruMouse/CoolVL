@@ -28,6 +28,7 @@ set(cmake_SOURCE_FILES
     FindCARes.cmake
     FindELFIO.cmake
     FindGooglePerfTools.cmake
+    FindHunSpell.cmake
     FindMono.cmake
     FindMT.cmake
     FindMySQL.cmake
@@ -41,6 +42,7 @@ set(cmake_SOURCE_FILES
     GStreamer010Plugin.cmake
     GooglePerfTools.cmake
     HACD.cmake
+    Hunspell.cmake
     JPEG.cmake
     LLAudio.cmake
     LLCharacter.cmake

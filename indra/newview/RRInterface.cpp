@@ -1539,11 +1539,13 @@ bool RRInterface::force(LLUUID object_uuid, std::string command, std::string opt
 					}
 				}
 			}
+#if 0	// With the new mesh avatars, larger values many be needed (for tiny avies, for example)
 			if (val > 1.0f) {
 				val = 1.0f;
 			} else if (val < -1.0f) {
 				val = -1.0f;
 			}
+#endif
 			gSavedSettings.setF32("AvatarOffsetZ", val);
 		}
 	} else if (command == "setgroup") {

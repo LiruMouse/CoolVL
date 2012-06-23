@@ -99,7 +99,7 @@ InstallPassword
 {}
 
 InstallVersion
-{1.26.4.12}
+{1.26.4.13}
 
 Language,ca
 {No}
@@ -568,6 +568,11 @@ File D3B0B50D-9A47-467F-934A-8124731C6FE3 -active No -name mime_types_linux.xml 
 File C9E20899-8078-444B-B0CC-CF68E4880793 -active No -name mime_types_mac.xml -parent F313216A-9099-4465-94F9-8F28502159D0
 File 274F0C27-3892-4F89-9A2A-165F8BC4813E -active Yes -name mime_types_windows.xml -parent F313216A-9099-4465-94F9-8F28502159D0
 File 283A7C01-BE64-4B40-B695-93199D73D473 -active Yes -name debug_tags.xml -parent F313216A-9099-4465-94F9-8F28502159D0
+File 15DB7557-A0D1-4919-B9FC-6268CC53E842 -active Yes -name dictionaries -type dir -parent F313216A-9099-4465-94F9-8F28502159D0
+File C3D1FA07-5B41-41B4-9CBD-900C96E7CB59 -active Yes -name en_us.aff -parent 15DB7557-A0D1-4919-B9FC-6268CC53E842
+File F9D6FA27-27A2-4A4B-9DBD-D4E9C7CB3E6B -active Yes -name en_us.dic -parent 15DB7557-A0D1-4919-B9FC-6268CC53E842
+File 4814B202-7F9A-46BC-B3F6-1F6C3C5726A9 -active Yes -name sl.dic -parent 15DB7557-A0D1-4919-B9FC-6268CC53E842
+File DC8B1AC8-DD79-424D-87DF-41821953E7BB -active Yes -name dict_list.xml -parent 15DB7557-A0D1-4919-B9FC-6268CC53E842
 File D23EF851-36A0-4733-BB03-DCA6F98A5F9E -active Yes -name character -type dir -parent 7B67B5DB-A2ED-41F9-9193-82BC34EADF2F
 File 77C37AAB-95B3-4A6F-9E34-2237AF4F0E82 -active Yes -name avatar_lad.xml -parent D23EF851-36A0-4733-BB03-DCA6F98A5F9E
 File C42BBCDF-A736-4368-8A43-F99DF39F6938 -active Yes -name attentions.xml -parent D23EF851-36A0-4733-BB03-DCA6F98A5F9E
@@ -1924,6 +1929,7 @@ File 02298333-9D63-481C-919D-A99C5F82A531 -active Yes -name glod.dll -parent 7B6
 File 03DADA3F-5A61-4F99-A71F-14CD0BDE45A6 -active Yes -name libcollada14dom22.dll -parent 7B67B5DB-A2ED-41F9-9193-82BC34EADF2F
 File 59429C30-48CB-4FD6-99B7-5CAA41210F94 -active Yes -name libtcmalloc_minimal.dll -parent 7B67B5DB-A2ED-41F9-9193-82BC34EADF2F
 File C7C1E657-EEDA-498D-A702-E6CF2E3059FD -active Yes -name windows-crash-logger.exe -parent 7B67B5DB-A2ED-41F9-9193-82BC34EADF2F
+File DA90AC89-7C76-4150-A5A2-EA614AAFE3CD -active Yes -name libhunspell.dll -parent 7B67B5DB-A2ED-41F9-9193-82BC34EADF2F
 Component C534F619-7737-408C-9AE4-16221BEC8C2D -active Yes -name {Default Component} -parent Components -platforms {FreeBSD-7-x86 Linux-x86 Linux-x86_64 MacOS-X MacOS-X-ppc Solaris-sparc Solaris-x86 Windows} -setup Install
 SetupType 6152CCF8-42C8-49B7-9C4D-337AF8F4C351 -active Yes -name Typical -parent SetupTypes -platforms {FreeBSD-7-x86 Linux-x86 Linux-x86_64 MacOS-X MacOS-X-ppc Solaris-sparc Solaris-x86 Windows} -setup Install
 SetupType 9BE97F6C-FBCB-44C2-A69E-F35B87DE5000 -active Yes -name Custom -parent SetupTypes -platforms {FreeBSD-7-x86 Linux-x86 Linux-x86_64 MacOS-X MacOS-X-ppc Solaris-sparc Solaris-x86 Windows} -setup Install
@@ -2625,7 +2631,7 @@ array set Properties {
 {<%InstallDir%>}
 
 4BD78D4C-6617-4C3F-8DC8-E11325B1ED0F,FileSize
-{75956929}
+{77099744}
 
 4BD78D4C-6617-4C3F-8DC8-E11325B1ED0F,Name
 {Program Files}

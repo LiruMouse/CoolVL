@@ -78,16 +78,16 @@ class LLMenuItemGL : public LLView
 {
 public:
 	// static functions to control the global color scheme.
-	static void setEnabledColor( const LLColor4& color ) { sEnabledColor = color; }
+	static void setEnabledColor(const LLColor4& color) { sEnabledColor = color; }
 	static const LLColor4& getEnabledColor() { return sEnabledColor; }
-	static void setDisabledColor( const LLColor4& color ) { sDisabledColor = color; }
+	static void setDisabledColor(const LLColor4& color) { sDisabledColor = color; }
 	static const LLColor4& getDisabledColor() { return sDisabledColor; }
-	static void setHighlightBGColor( const LLColor4& color ) { sHighlightBackground = color; }
+	static void setHighlightBGColor(const LLColor4& color) { sHighlightBackground = color; }
 	static const LLColor4& getHighlightBGColor() { return sHighlightBackground; }
-	static void setHighlightFGColor( const LLColor4& color ) { sHighlightForeground = color; }
+	static void setHighlightFGColor(const LLColor4& color) { sHighlightForeground = color; }
 	static const LLColor4& getHighlightFGColor() { return sHighlightForeground; }
 
-	LLMenuItemGL( const std::string& name, const std::string& label, KEY key = KEY_NONE, MASK = MASK_NONE );
+	LLMenuItemGL(const std::string& name, const std::string& label, KEY key = KEY_NONE, MASK = MASK_NONE);
 	virtual ~LLMenuItemGL() {};
 
 	virtual void setValue(const LLSD& value) { setLabel(value.asString()); }
@@ -102,7 +102,7 @@ public:
 
 	void setJumpKey(KEY key);
 	KEY getJumpKey() const { return mJumpKey; }
-	
+
 	// set the font used by this item.
 	void setFont(const LLFontGL* font) { mFont = font; }
 	const LLFontGL* getFont() const { return mFont; }
@@ -110,8 +110,8 @@ public:
 	U8 getFontStyle() const { return mStyle; }
 
 	// returns the height in pixels for the current font.
-	virtual U32 getNominalHeight( void ) const;
-	
+	virtual U32 getNominalHeight(void) const;
+
 	// Marks item as not needing space for check marks or accelerator keys
 	virtual void setBriefItem(BOOL brief) { mBriefItem = brief; }
 	virtual BOOL isBriefItem() const { return mBriefItem; }
@@ -121,9 +121,9 @@ public:
 	BOOL getAllowKeyRepeat() const { return mAllowKeyRepeat; }
 
 	// change the label
-	void setLabel( const LLStringExplicit& label ) { mLabel = label; }	
-	std::string getLabel( void ) const { return mLabel.getString(); }
-	virtual BOOL setLabelArg( const std::string& key, const LLStringExplicit& text );
+	void setLabel(const LLStringExplicit& label) { mLabel = label; }
+	std::string getLabel(void) const { return mLabel.getString(); }
+	virtual BOOL setLabelArg(const std::string& key, const LLStringExplicit& text);
 
 	// Get the parent menu for this item
 	virtual class LLMenuGL*	getMenu();
@@ -131,7 +131,7 @@ public:
 	// returns the normal width of this control in pixels - this is
 	// used for calculating the widest item, as well as for horizontal
 	// arrangement.
-	virtual U32 getNominalWidth( void ) const;
+	virtual U32 getNominalWidth(void) const;
 
 	// buildDrawLabel() - constructs the string used during the draw()
 	// function. This reduces the overall string manipulation, but can
@@ -142,30 +142,30 @@ public:
 	// reflect the wrong value. If this ever becomes an issue, there
 	// are ways to fix this.
 	// Returns the enabled state of the item.
-	virtual void buildDrawLabel( void );
+	virtual void buildDrawLabel(void);
 
 	// for branching menu items, bring sub menus up to root level of menu hierarchy
-	virtual void updateBranchParent( LLView* parentp ){};
-	
-	// doIt() - do the primary funcationality of the menu item.
-	virtual void doIt( void );
+	virtual void updateBranchParent(LLView* parentp){};
 
-	virtual void setHighlight( BOOL highlight );
+	// doIt() - do the primary funcationality of the menu item.
+	virtual void doIt(void);
+
+	virtual void setHighlight(BOOL highlight);
 	virtual BOOL getHighlight() const { return mHighlight; }
 
 	// determine if this represents an active sub-menu
-	virtual BOOL isActive( void ) const { return FALSE; }
+	virtual BOOL isActive(void) const { return FALSE; }
 
 	// determine if this represents an open sub-menu
-	virtual BOOL isOpen( void ) const { return FALSE; }
+	virtual BOOL isOpen(void) const { return FALSE; }
 
 	virtual void setEnabledSubMenus(BOOL enable){};
 
 	// LLView Functionality
-	virtual BOOL handleKeyHere( KEY key, MASK mask );
-	virtual BOOL handleMouseDown( S32 x, S32 y, MASK mask );
-	virtual BOOL handleMouseUp( S32 x, S32 y, MASK mask );
-	virtual void draw( void );
+	virtual BOOL handleKeyHere(KEY key, MASK mask);
+	virtual BOOL handleMouseDown(S32 x, S32 y, MASK mask);
+	virtual BOOL handleMouseUp(S32 x, S32 y, MASK mask);
+	virtual void draw(void);
 
 	BOOL getHover() const { return mGotHover; }
 
@@ -177,7 +177,7 @@ protected:
 
 	// This function appends the character string representation of
 	// the current accelerator key and mask to the provided string.
-	void appendAcceleratorString( std::string& st ) const;
+	void appendAcceleratorString(std::string& st) const;
 
 	KEY mAcceleratorKey;
 	MASK mAcceleratorMask;
@@ -214,7 +214,6 @@ private:
 	KEY mJumpKey;
 };
 
-
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Class LLMenuItemCallGL
 //
@@ -226,14 +225,14 @@ class LLMenuItemCallGL : public LLMenuItemGL, public LLOldEvents::LLObservable
 {
 public:
 	// normal constructor
-	LLMenuItemCallGL( const std::string& name,
+	LLMenuItemCallGL(const std::string& name,
  					  menu_callback clicked_cb, 
 					  enabled_callback enabled_cb = NULL,
 					  void* user_data = NULL, 
 					  KEY key = KEY_NONE, MASK mask = MASK_NONE,
 					  BOOL enabled = TRUE,
 					  on_disabled_callback on_disabled_cb = NULL);
-	LLMenuItemCallGL( const std::string& name,
+	LLMenuItemCallGL(const std::string& name,
 					  const std::string& label,
  					  menu_callback clicked_cb, 
 					  enabled_callback enabled_cb = NULL,
@@ -243,7 +242,7 @@ public:
 					  on_disabled_callback on_disabled_cb = NULL);
 
 	// constructor for when you want to trap the arrange method.
-	LLMenuItemCallGL( const std::string& name,
+	LLMenuItemCallGL(const std::string& name,
 					  const std::string& label,
 					  menu_callback clicked_cb,
 					  enabled_callback enabled_cb,
@@ -252,7 +251,7 @@ public:
 					  KEY key = KEY_NONE, MASK mask = MASK_NONE,
 					  BOOL enabled = TRUE,
 					  on_disabled_callback on_disabled_c = NULL);
-	LLMenuItemCallGL( const std::string& name,
+	LLMenuItemCallGL(const std::string& name,
 					  menu_callback clicked_cb,
 					  enabled_callback enabled_cb,
 					  label_callback label_cb,
@@ -263,7 +262,6 @@ public:
 	virtual LLXMLNodePtr getXML(bool save_children = true) const;
 
 	virtual std::string getType() const	{ return "call"; }
-
 
 	void setEnabledControl(std::string enabled_control, LLView *context);
 	void setVisibleControl(std::string enabled_control, LLView *context);
@@ -277,20 +275,19 @@ public:
 	void* getUserData() const { return mUserData; }
 
 	// called to rebuild the draw label
-	virtual void buildDrawLabel( void );
+	virtual void buildDrawLabel(void);
 
 	// doIt() - do the primary funcationality of the menu item.
-	virtual void doIt( void );
+	virtual void doIt(void);
 
 	virtual BOOL handleAcceleratorKey(KEY key, MASK mask);
 
 	//virtual void draw();
 
-
 private:
 	menu_callback			mCallback;
 	// mEnabledCallback should return TRUE if the item should be enabled
-	enabled_callback		mEnabledCallback;	
+	enabled_callback		mEnabledCallback;
 	label_callback			mLabelCallback;
 	void*					mUserData;
 	on_disabled_callback	mOnDisabledCallback;
@@ -310,43 +307,44 @@ class LLMenuItemCheckGL
 :	public LLMenuItemCallGL
 {
 public:
-	LLMenuItemCheckGL( const std::string& name, 
+	LLMenuItemCheckGL(const std::string& name, 
 					   const std::string& label,
 					   menu_callback callback,
 					   enabled_callback enabled_cb,
 					   check_callback check,
 					   void* user_data,
-					   KEY key = KEY_NONE, MASK mask = MASK_NONE );
-	LLMenuItemCheckGL( const std::string& name, 
+					   KEY key = KEY_NONE, MASK mask = MASK_NONE);
+	LLMenuItemCheckGL(const std::string& name, 
 					   menu_callback callback,
 					   enabled_callback enabled_cb,
 					   check_callback check,
 					   void* user_data,
-					   KEY key = KEY_NONE, MASK mask = MASK_NONE );
-	LLMenuItemCheckGL( const std::string& name, 
+					   KEY key = KEY_NONE, MASK mask = MASK_NONE);
+	LLMenuItemCheckGL(const std::string& name, 
 					   const std::string& label,
 					   menu_callback callback,
 					   enabled_callback enabled_cb,
 					   std::string control_name,
 					   LLView *context,
 					   void* user_data,
-					   KEY key = KEY_NONE, MASK mask = MASK_NONE );
+					   KEY key = KEY_NONE, MASK mask = MASK_NONE);
 	virtual LLXMLNodePtr getXML(bool save_children = true) const;
 
 	void setCheckedControl(std::string checked_control, LLView *context);
+
+	void setCheckCallback(check_callback callback) { mCheckCallback = callback; };
 
 	virtual void setValue(const LLSD& value);
 
 	virtual std::string getType() const	{ return "check"; }
 
 	// called to rebuild the draw label
-	virtual void buildDrawLabel( void );
+	virtual void buildDrawLabel(void);
 
 private:
 	check_callback mCheckCallback;
 	BOOL mChecked;
 };
-
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Class LLMenuItemToggleGL
@@ -358,13 +356,13 @@ private:
 class LLMenuItemToggleGL : public LLMenuItemGL
 {
 public:
-	LLMenuItemToggleGL( const std::string& name, const std::string& label,
+	LLMenuItemToggleGL(const std::string& name, const std::string& label,
 						BOOL* toggle, 
-						KEY key = KEY_NONE, MASK mask = MASK_NONE );
+						KEY key = KEY_NONE, MASK mask = MASK_NONE);
 
-	LLMenuItemToggleGL( const std::string& name,
+	LLMenuItemToggleGL(const std::string& name,
 						BOOL* toggle, 
-						KEY key = KEY_NONE, MASK mask = MASK_NONE );
+						KEY key = KEY_NONE, MASK mask = MASK_NONE);
 
 	// there is no getXML() because we cannot reference the toggled global variable by XML
 	// use LLMenuItemCheckGL instead.
@@ -372,18 +370,17 @@ public:
 	virtual std::string getType() const	{ return "toggle"; }
 
 	// called to rebuild the draw label
-	virtual void buildDrawLabel( void );
+	virtual void buildDrawLabel(void);
 
 	// doIt() - do the primary funcationality of the menu item.
-	virtual void doIt( void );
+	virtual void doIt(void);
 
 	// LLView Functionality
-	//virtual void draw( void );
+	//virtual void draw(void);
 
 private:
 	BOOL* mToggle;
 };
-
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Class LLMenuGL
@@ -396,73 +393,74 @@ private:
 // it in the appendMenu() method.
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class LLMenuGL 
-:	public LLUICtrl
+class LLMenuGL : public LLUICtrl
 // TODO: The menu and menu item classes share a great deal of functionality and perhaps should be united.
 // I think it may make the most sense to make LLMenuGL be a subclass of LLMenuItemGL. -MG
 {
 	// let branching menu items use my protected traversal methods
 	friend class LLMenuItemBranchGL;
 public:
-	LLMenuGL( const std::string& name, const std::string& label, LLHandle<LLFloater> parent_floater = LLHandle<LLFloater>());
-	LLMenuGL( const std::string& label, LLHandle<LLFloater> parent_floater = LLHandle<LLFloater>() );
-	virtual ~LLMenuGL( void );
+	LLMenuGL(const std::string& name, const std::string& label, LLHandle<LLFloater> parent_floater = LLHandle<LLFloater>());
+	LLMenuGL(const std::string& label, LLHandle<LLFloater> parent_floater = LLHandle<LLFloater>());
+	virtual ~LLMenuGL(void);
 	virtual LLXMLNodePtr getXML(bool save_children = true) const;
 	static LLView* fromXML(LLXMLNodePtr node, LLView *parent, LLUICtrlFactory *factory);
 
 	void parseChildXML(LLXMLNodePtr child, LLView *parent, LLUICtrlFactory *factory);
 
-
 	// LLView Functionality
-	virtual BOOL handleUnicodeCharHere( llwchar uni_char );
-	virtual BOOL handleHover( S32 x, S32 y, MASK mask );
-	virtual void draw( void );
+	virtual BOOL handleUnicodeCharHere(llwchar uni_char);
+	virtual BOOL handleHover(S32 x, S32 y, MASK mask);
+	virtual void draw(void);
 	virtual void drawBackground(LLMenuItemGL* itemp, LLColor4& color);
 	virtual void setVisible(BOOL visible);
 
 	virtual BOOL handleAcceleratorKey(KEY key, MASK mask);
 
 	LLMenuGL* getChildMenuByName(const std::string& name, BOOL recurse) const;
-	
+
 	BOOL clearHoverItem();
 
 	// return the name label
-	const std::string& getLabel( void ) const { return mLabel.getString(); }
+	const std::string& getLabel(void) const { return mLabel.getString(); }
 	void setLabel(const LLStringExplicit& label) { mLabel = label; }
 
 	// background colors
-	static void setDefaultBackgroundColor( const LLColor4& color ) { sDefaultBackgroundColor = color; }
-	void setBackgroundColor( const LLColor4& color ) { mBackgroundColor = color; }
+	static void setDefaultBackgroundColor(const LLColor4& color) { sDefaultBackgroundColor = color; }
+	void setBackgroundColor(const LLColor4& color) { mBackgroundColor = color; }
 	const LLColor4& getBackgroundColor() const { return mBackgroundColor; }
-	void setBackgroundVisible( BOOL b )	{ mBgVisible = b; }
+	void setBackgroundVisible(BOOL b)	{ mBgVisible = b; }
 	void setCanTearOff(BOOL tear_off, LLHandle<LLFloater> parent_floater_handle = LLHandle<LLFloater>());
 
 	// Add the menu item to this menu.
-	virtual BOOL append( LLMenuItemGL* item );
+	virtual BOOL append(LLMenuItemGL* item);
+
+	// Remove a menu item from this menu.
+	virtual BOOL remove(LLMenuItemGL* item);
 
 	// *NOTE:Mani - appendNoArrange() should be removed when merging to skinning/viewer2.0
 	// Its added as a fix to a viewer 1.23 bug that has already been address by skinning work.
-	virtual BOOL appendNoArrange( LLMenuItemGL* item ); 
+	virtual BOOL appendNoArrange(LLMenuItemGL* item); 
 
 	// add a separator to this menu
-	virtual BOOL appendSeparator( const std::string &separator_name = LLStringUtil::null );
+	virtual BOOL appendSeparator(const std::string &separator_name = LLStringUtil::null);
 
 	// add a menu - this will create a cascading menu
-	virtual BOOL appendMenu( LLMenuGL* menu );
+	virtual BOOL appendMenu(LLMenuGL* menu);
 
 	// for branching menu items, bring sub menus up to root level of menu hierarchy
-	virtual void updateParent( LLView* parentp );
+	virtual void updateParent(LLView* parentp);
 
 	// setItemEnabled() - pass the name and the enable flag for a
 	// menu item. TRUE will make sure it's enabled, FALSE will disable
 	// it.
-	void setItemEnabled( const std::string& name, BOOL enable ); 
-	
+	void setItemEnabled(const std::string& name, BOOL enable); 
+
 	// propagate message to submenus
 	void setEnabledSubMenus(BOOL enable);
 
-	void setItemVisible( const std::string& name, BOOL visible);
-	
+	void setItemVisible(const std::string& name, BOOL visible);
+
 	// sets the left,bottom corner of menu, useful for popups
 	void setLeftAndBottom(S32 left, S32 bottom);
 
@@ -476,10 +474,10 @@ public:
 	// adjust the child rects to fit. This is called automatically
 	// when you add items. *FIX: We may need to deal with visibility
 	// arrangement.
-	virtual void arrange( void );
+	virtual void arrange(void);
 
 	// remove all items on the menu
-	void empty( void );
+	void empty(void);
 
 	// Rearrange the components, and do the right thing if the menu doesn't
 	// fit in the bounds.
@@ -488,7 +486,7 @@ public:
 	void			setItemLastSelected(LLMenuItemGL* item);	// must be in menu
 	U32				getItemCount();				// number of menu items
 	LLMenuItemGL*	getItem(S32 number);		// 0 = first item
-	LLMenuItemGL*	getHighlightedItem();				
+	LLMenuItemGL*	getHighlightedItem();
 
 	LLMenuItemGL*	highlightNextItem(LLMenuItemGL* cur_item, BOOL skip_disabled = TRUE);
 	LLMenuItemGL*	highlightPrevItem(LLMenuItemGL* cur_item, BOOL skip_disabled = TRUE);
@@ -503,9 +501,9 @@ public:
 	static void showPopup(LLView* spawning_view, LLMenuGL* menu, S32 x, S32 y);
 
 	// Whether to drop shadow menu bar 
-	void setDropShadowed( const BOOL shadowed );
+	void setDropShadowed(const BOOL shadowed);
 
-	void setParentMenuItem( LLMenuItemGL* parent_menu_item ) { mParentMenuItem = parent_menu_item; }
+	void setParentMenuItem(LLMenuItemGL* parent_menu_item) { mParentMenuItem = parent_menu_item; }
 	LLMenuItemGL* getParentMenuItem() const { return mParentMenuItem; }
 
 	void setTornOff(BOOL torn_off);
@@ -520,7 +518,7 @@ public:
 	static BOOL getKeyboardMode() { return sKeyboardMode; }
 
 	static class LLMenuHolderGL* sMenuContainer;
-	
+
 protected:
 	void createSpilloverBranch();
 	void cleanupSpilloverBranch();
@@ -556,8 +554,6 @@ private:
 	KEY				mJumpKey;
 }; // end class LLMenuGL
 
-
-
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Class LLMenuItemBranchGL
 //
@@ -568,8 +564,8 @@ private:
 class LLMenuItemBranchGL : public LLMenuItemGL
 {
 public:
-	LLMenuItemBranchGL( const std::string& name, const std::string& label, LLHandle<LLView> branch,
-						KEY key = KEY_NONE, MASK mask = MASK_NONE );
+	LLMenuItemBranchGL(const std::string& name, const std::string& label, LLHandle<LLView> branch,
+						KEY key = KEY_NONE, MASK mask = MASK_NONE);
 
 	virtual ~LLMenuItemBranchGL();
 
@@ -585,17 +581,17 @@ public:
 	virtual BOOL addToAcceleratorList(std::list <LLKeyBinding*> *listp);
 
 	// called to rebuild the draw label
-	virtual void buildDrawLabel( void );
+	virtual void buildDrawLabel(void);
 
 	// doIt() - do the primary funcationality of the menu item.
-	virtual void doIt( void );
+	virtual void doIt(void);
 
 	virtual BOOL handleKey(KEY key, MASK mask, BOOL called_from_parent);
 	virtual BOOL handleUnicodeChar(llwchar uni_char, BOOL called_from_parent);
 
 	// set the hover status (called by it's menu) and if the object is
 	// active. This is used for behavior transfer.
-	virtual void setHighlight( BOOL highlight );
+	virtual void setHighlight(BOOL highlight);
 
 	virtual BOOL handleKeyHere(KEY key, MASK mask);
 
@@ -605,10 +601,10 @@ public:
 
 	LLMenuGL *getBranch() const { return (LLMenuGL*)(mBranch.get()); }
 
-	virtual void updateBranchParent( LLView* parentp );
+	virtual void updateBranchParent(LLView* parentp);
 
 	// LLView Functionality
-	virtual void onVisibilityChange( BOOL curVisibilityIn );
+	virtual void onVisibilityChange(BOOL curVisibilityIn);
 
 	virtual void draw();
 
@@ -621,8 +617,6 @@ public:
 private:
 	LLHandle<LLView> mBranch;
 }; // end class LLMenuItemBranchGL
-
-
 
 //-----------------------------------------------------------------------------
 // class LLPieMenu
@@ -643,21 +637,21 @@ public:
 	// LLView Functionality
 	// can't set visibility directly, must call show or hide
 	virtual void setVisible(BOOL visible);
-	
-	virtual BOOL handleHover( S32 x, S32 y, MASK mask );
-	virtual BOOL handleMouseDown( S32 x, S32 y, MASK mask );
+
+	virtual BOOL handleHover(S32 x, S32 y, MASK mask);
+	virtual BOOL handleMouseDown(S32 x, S32 y, MASK mask);
 	virtual BOOL handleRightMouseDown(S32 x, S32 y, MASK mask);
-	virtual BOOL handleRightMouseUp( S32 x, S32 y, MASK mask );
-	virtual BOOL handleMouseUp( S32 x, S32 y, MASK mask );
+	virtual BOOL handleRightMouseUp(S32 x, S32 y, MASK mask);
+	virtual BOOL handleMouseUp(S32 x, S32 y, MASK mask);
 	virtual void draw();
 	virtual void drawBackground(LLMenuItemGL* itemp, LLColor4& color);
 
 	virtual BOOL append(LLMenuItemGL* item);
-	virtual BOOL appendSeparator( const std::string &separator_name = LLStringUtil::null );
+	virtual BOOL appendSeparator(const std::string &separator_name = LLStringUtil::null);
 
 	BOOL appendPieMenu(LLPieMenu *menu);
 
-	virtual void arrange( void );
+	virtual void arrange(void);
 
 	// Display the menu centered on this point on the screen.
 	void show(S32 x, S32 y, BOOL mouse_down);
@@ -683,7 +677,6 @@ private:
 	BOOL			mRightMouseDown;
 };
 
-
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Class LLMenuBarGL
 //
@@ -693,7 +686,7 @@ private:
 class LLMenuBarGL : public LLMenuGL
 {
 public:
-	LLMenuBarGL( const std::string& name );
+	LLMenuBarGL(const std::string& name);
 	virtual ~LLMenuBarGL();
 	virtual LLXMLNodePtr getXML(bool save_children = true) const;
 	static LLView* fromXML(LLXMLNodePtr node, LLView *parent, LLUICtrlFactory *factory);
@@ -706,18 +699,18 @@ public:
 
 	// rearrange the child rects so they fit the shape of the menu
 	// bar.
-	virtual void arrange( void );
+	virtual void arrange(void);
 	virtual void draw();
 	virtual BOOL jumpKeysActive();
 
 	// add a vertical separator to this menu
-	virtual BOOL appendSeparator( const std::string &separator_name = LLStringUtil::null );
+	virtual BOOL appendSeparator(const std::string &separator_name = LLStringUtil::null);
 
 	// add a menu - this will create a drop down menu.
-	virtual BOOL appendMenu( LLMenuGL* menu );
+	virtual BOOL appendMenu(LLMenuGL* menu);
 
 	// LLView Functionality
-	virtual BOOL handleHover( S32 x, S32 y, MASK mask );
+	virtual BOOL handleHover(S32 x, S32 y, MASK mask);
 
 	// Returns x position of rightmost child, usually Help menu
 	S32 getRightmostMenuEdge();
@@ -749,8 +742,8 @@ public:
 
 	// LLView functionality
 	virtual void draw();
-	virtual BOOL handleMouseDown( S32 x, S32 y, MASK mask );
-	virtual BOOL handleRightMouseDown( S32 x, S32 y, MASK mask );
+	virtual BOOL handleMouseDown(S32 x, S32 y, MASK mask);
+	virtual BOOL handleRightMouseDown(S32 x, S32 y, MASK mask);
 
 	virtual const LLRect getMenuRect() const { return getLocalRect(); }
 	virtual BOOL hasVisibleMenu() const;
@@ -800,7 +793,7 @@ private:
 class LLMenuItemTearOffGL : public LLMenuItemGL
 {
 public:
-	LLMenuItemTearOffGL( LLHandle<LLFloater> parent_floater_handle = LLHandle<LLFloater>());
+	LLMenuItemTearOffGL(LLHandle<LLFloater> parent_floater_handle = LLHandle<LLFloater>());
 
 	virtual LLXMLNodePtr getXML(bool save_children = true) const;
 	virtual std::string getType() const { return "tearoff_menu"; }
@@ -812,7 +805,6 @@ public:
 private:
 	LLHandle<LLFloater> mParentHandle;
 };
-
 
 // *TODO: this is currently working, so finish implementation
 class LLEditMenuHandlerMgr

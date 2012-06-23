@@ -64,13 +64,11 @@ public:
 		BELOW
 	} EPreferredPosition;
 
-	LLComboBox(
-		const std::string& name, 
-		const LLRect &rect,
-		const std::string& label,
-		void (*commit_callback)(LLUICtrl*, void*) = NULL,
-		void *callback_userdata = NULL
-		);
+	LLComboBox(const std::string& name,
+			   const LLRect &rect,
+			   const std::string& label,
+			   void (*commit_callback)(LLUICtrl*, void*) = NULL,
+			   void *callback_userdata = NULL);
 	virtual ~LLComboBox(); 
 
 	// LLView interface

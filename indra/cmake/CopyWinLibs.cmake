@@ -29,6 +29,7 @@ set(debug_files
     libaprutil-1.dll
     libapriconv-1.dll
     libcollada14dom22-d.dll
+    libhunspell.dll
     glod.dll
     openjpegd.dll
     libtcmalloc_minimal-debug.dll
@@ -217,6 +218,7 @@ set(release_files
     libaprutil-1.dll
     libapriconv-1.dll
     libcollada14dom22.dll
+    libhunspell.dll
     glod.dll
     openjpeg.dll
     libtcmalloc_minimal.dll

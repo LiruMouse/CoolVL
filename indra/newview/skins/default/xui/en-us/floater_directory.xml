@@ -27,7 +27,7 @@
 			</text>
 			<line_editor bevel_style="in" border_style="line" border_thickness="1" bottom="-24"
 			     follows="left|top" font="SansSerif" height="18" left_delta="38"
-			     max_length="63" mouse_opaque="true" name="name" width="128" />
+			     max_length="63" mouse_opaque="true" name="name" spell_check="true" width="128" />
 			<button bottom="-26" follows="left|top" font="SansSerif" halign="center" height="20"
 			     label="Search" label_selected="Search" left_delta="136" mouse_opaque="true"
 			     name="Search" width="70" />
@@ -79,7 +79,7 @@
 			</text>
 			<line_editor bevel_style="in" border_style="line" border_thickness="1" bottom="-24"
 			     commit_on_focus_lost="false" enabled="true" follows="top|left|right"
-			     font="SansSerif" handle_edit_keys_directly="false" height="18"
+			     font="SansSerif" handle_edit_keys_directly="false" spell_check="true" height="18"
 			     label="Search" left_delta="56" max_length="254" mouse_opaque="true"
 			     name="search_editor" select_all_on_focus_received="false"
 			     select_on_focus="false" tab_group="1" tool_tip="Search Second Life"
@@ -189,7 +189,7 @@
 				Find:
 			</text>
 			<line_editor bevel_style="in" border_style="line" border_thickness="1" bottom="-24"
-			     follows="left|right|top" font="SansSerif" height="18" left="56"
+			     follows="left|right|top" font="SansSerif" height="18" left="56" spell_check="true"
 			     max_length="63" mouse_opaque="true" name="name" width="160" />
 			<check_box bottom="-22" control_name="ShowPGClassifieds" follows="right|top"
 			     font="SansSerifSmall" height="16" initial_value="true"
@@ -283,7 +283,7 @@
 				Find:
 			</text>
 			<line_editor bevel_style="in" border_style="line" border_thickness="1" bottom="-24"
-			     follows="left|right|top" font="SansSerif" height="18" left="56"
+			     follows="left|right|top" font="SansSerif" height="18" left="56" spell_check="true"
 			     max_length="63" mouse_opaque="true" name="event_search_text" width="160" />
 			<radio_group bottom="-40" draw_border="false" follows="right|top" height="40" left="560"
 			     mouse_opaque="true" name="date_mode" width="300">
@@ -538,7 +538,7 @@ To buy direct, visit the land and click on the place name in the title bar.
 				Find:
 			</text>
 			<line_editor bevel_style="in" border_style="line" border_thickness="1" bottom="-24"
-			     follows="left|right|top" font="SansSerif" height="18" left="56"
+			     follows="left|right|top" font="SansSerif" height="18" left="56" spell_check="true"
 			     max_length="63" mouse_opaque="true" name="name" width="160" />
 			<check_box bottom="-22" control_name="ShowPGSims" follows="right|top"
 			     font="SansSerifSmall" height="16" initial_value="true"
@@ -682,7 +682,7 @@ To buy direct, visit the land and click on the place name in the title bar.
         Find:
       </text>
 	  <line_editor bevel_style="in" border_style="line" border_thickness="1" bottom="-24"
-			     follows="left|right|top" font="SansSerif" height="18" left="56"
+			     follows="left|right|top" font="SansSerif" height="18" left="56" spell_check="true"
 			     max_length="63" mouse_opaque="true" name="name" width="160" />
 		<button bottom="-48" follows="right|top" font="SansSerif" halign="center" height="20"
 			     label="Search" label_selected="Search" left="121" mouse_opaque="true"
@@ -729,7 +729,7 @@ To buy direct, visit the land and click on the place name in the title bar.
 				Find:
 			</text>
 			<line_editor bevel_style="in" border_style="line" border_thickness="1" bottom="-24"
-			     follows="left|top" font="SansSerif" height="18" left_delta="38"
+			     follows="left|top" font="SansSerif" height="18" left_delta="38" spell_check="true"
 			     max_length="63" mouse_opaque="true" name="name" width="200" />
 			<button bottom="-26" follows="left|top" font="SansSerif" halign="center" height="20"
 			     label="Search" label_selected="Search" left_delta="210" mouse_opaque="true"

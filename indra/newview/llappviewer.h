@@ -58,14 +58,14 @@ public:
 	//
 	// Main application logic
 	//
-	virtual bool init();			// Override to do application initialization
-	virtual bool cleanup();			// Override to do application cleanup
-	virtual bool mainLoop(); // Override for the application main loop.  Needs to at least gracefully notice the QUITTING state and exit.
+	virtual bool init();		// Override to do application initialization
+	virtual bool cleanup();		// Override to do application cleanup
+	virtual bool mainLoop();	// Override for the application main loop. Needs to at least gracefully notice the QUITTING state and exit.
 
 	// Application control
-	void forceQuit(); // Puts the viewer into 'shutting down without error' mode.
-	void requestQuit(); // Request a quit. A kinder, gentler quit.
-	void userQuit(); // The users asks to quit. Confirm, then requestQuit()
+	void forceQuit();	// Puts the viewer into 'shutting down without error' mode.
+	void requestQuit();	// Request a quit. A kinder, gentler quit.
+	void userQuit();	// The users asks to quit. Confirm, then requestQuit()
     void earlyExit(const std::string& name, 
 				   const LLSD& substitutions = LLSD()); // Display an error dialog and forcibly quit.
     void forceExit(S32 arg); // exit() immediately (after some cleanup).
@@ -95,9 +95,9 @@ public:
 	static LLTextureFetch* getTextureFetch() { return sTextureFetch; }
 
 	const std::string& getSerialNumber() { return mSerialNumber; }
-	
+
 	bool getPurgeCache() const { return mPurgeCache; }
-	
+
 	const std::string& getSecondLifeTitle() const; // The Second Life title.
 	const std::string& getWindowTitle() const; // The window display name.
 
@@ -118,7 +118,7 @@ public:
 	const std::string& getPlaceAvatarCap() const;	// OGPX TODO: ...as above...
 
 	void removeMarkerFile(bool leave_logout_marker = false);
-	
+
     // LLAppViewer testing helpers.
     // *NOTE: These will potentially crash the viewer. Only for debugging.
     virtual void forceErrorLLError();
@@ -220,7 +220,7 @@ private:
 	std::string mLogoutMarkerFileName;
 	apr_file_t* mLogoutMarkerFile; // A file created to indicate the app is running.
 
-	
+
 	LLOSInfo mSysOSInfo; 
 	bool mReportedCrash;
 

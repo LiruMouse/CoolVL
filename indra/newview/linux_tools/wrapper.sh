@@ -48,6 +48,9 @@ export LL_BAD_OPENAL_DRIVER=x
 ## Everything below this line is just for advanced troubleshooters.
 ##-------------------------------------------------------------------
 
+## - Uncomment to get a report on exit (success or crash and type of crash).
+#export LL_REPORT=x
+
 ## - For advanced debugging cases, you can run the viewer under the
 ##   control of another program, such as strace, gdb, or valgrind.  If
 ##   you're building your own viewer, bear in mind that the executable
@@ -86,11 +89,11 @@ if [ -x /usr/bin/lspci ] ; then
 	fi
 fi
 
-## unset proxy vars
-unset http_proxy https_proxy no_proxy HTTP_PROXY HTTPS_PROXY
-
 ## Nothing worth editing below this line.
 ##-------------------------------------------------------------------
+
+# unset proxy vars
+unset http_proxy https_proxy no_proxy HTTP_PROXY HTTPS_PROXY
 
 SCRIPTSRC=`readlink -f "$0" || echo "$0"`
 RUN_PATH=`dirname "${SCRIPTSRC}" || echo .`
@@ -164,9 +167,79 @@ if [ -f $GDB_INIT ] ; then
 	rm -f $GDB_INIT
 fi
 
-echo
-echo '*******************************************************'
-echo 'This is a BETA release of the Second Life linux client.'
-echo 'Thank you for testing!'
-echo 'Please see README-linux.txt before reporting problems.'
-echo
+if [ "$LL_WRAPPER" != "" ] || [ "$LL_REPORT" == "" ]; then
+	# Do not go farther if we were debugging or if reports are off
+	exit 0
+fi
+
+LOGS_DIR="$HOME/.secondlife/logs"
+
+# Try to find a X11 dialog (we could use 'which' to find the executables
+# but 'which' itself is not guaranteed to exist on the system...).
+DIALOG=""
+if [ -x /usr/bin/Xdialog ] || [ -x /usr/X11R6/bin/Xdialog ]; then
+	DIALOG="Xdialog"
+elif [ -x /usr/bin/zenity ] || [ -x /usr/X11R6/bin/zenity ]; then
+	DIALOG="zenity"
+elif [ -x /usr/bin/xmessage ] || [ -x /usr/X11R6/bin/xmessage ]; then
+	DIALOG="xmessage"
+fi
+
+# This function displays a report with Xdialog, zenity or xmessage when
+# present on the system, or via a simple echo on sdtout. It also presents
+# the stack trace log if it exists.
+function report() {
+	title='Cool VL Viewer report'
+	stacktrace=$LOGS_DIR/stack_trace.log
+	if [ "$DIALOG" == "Xdialog" ]; then
+		if [ -f $stacktrace ]; then
+			Xdialog --backtitle "$1" --no-cancel --textbox "$stacktrace" 0 0
+		else
+			Xdialog --title "$title" --msgbox "$1" 0 0
+		fi
+	elif [ "$DIALOG" == "zenity" ]; then
+		if [ -f $stacktrace ]; then
+			zenity --title="$1" --text-info --filename="$stacktrace"
+		else
+			zenity --title="$title" --info --text="$1"
+		fi
+	elif [ "$DIALOG" == "xmessage" ]; then
+		if [ -f $stacktrace ]; then
+			xmessage -center -file "$stacktrace" &
+		fi
+		xmessage -center "$1"
+	else
+		echo "$1"
+		if [ -f $stacktrace ]; then
+			echo "Stactrace:"
+			cat $stacktrace
+		fi
+	fi
+}
+
+if [ -f $LOGS_DIR/CoolVLViewer.logout_marker ]; then
+	report "A crash occurred during logout."
+elif [ -f $LOGS_DIR/CoolVLViewer.llerror_marker ]; then
+	report "A crash was triggered (llerrs) during the session due to an unrecoverable error."
+elif [ -f $LOGS_DIR/CoolVLViewer.error_marker ]; then
+	report "A crash occurred during the session."
+elif [ -f $LOGS_DIR/SecondLife.exec_marker ]; then
+	# Check to see if another session is still holding the exec marker.
+	# Note 1: in case of a viewer freeze we reach this point only after the
+	# user killed the session manually (via a 'kill' for example), so it is
+	# safe to assume our own session is not holding the exec marker any more.
+	# Note 2: if 'lsof' is not available on the system, this detection will
+	# not work, so we tell the user what we can...
+	if [ -x /usr/sbin/lsof ] || [ -x /usr/bin/lsof ] || [ -x /sbin/lsof ] || [ -x /bin/lsof ]; then
+		lsof | grep $LOGS_DIR/SecondLife.exec_marker &>/dev/null
+		if (( $? == 0 )); then
+			report "The session has terminated normally. Another session is still running."
+		else
+			report "The viewer froze during the session."
+		fi
+	else
+		report "The viewer froze during the session (or another session is still running)."
+	fi
+else
+	report "The session has terminated normally."
+fi

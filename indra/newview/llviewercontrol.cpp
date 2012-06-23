@@ -43,6 +43,7 @@
 #include "llkeyboard.h"
 #include "llparcel.h"
 #include "llrender.h"
+#include "llspellcheck.h"
 #include "llsys.h"
 #include "llversionviewer.h"
 
@@ -647,6 +648,14 @@ static bool handleNonBlockingFilePickerChanged(const LLSD& newvalue)
 	return true;
 }
 
+static bool handleSpellCheckChanged(const LLSD& newvalue)
+{
+	LLSpellCheck::instance().setSpellCheck(gSavedSettings.getBOOL("SpellCheck"));
+		LLSpellCheck::instance().setShowMisspelled(gSavedSettings.getBOOL("SpellCheckShow"));
+	LLSpellCheck::instance().setDictionary(gSavedSettings.getString("SpellCheckLanguage"));
+	return true;
+}
+
 ////////////////////////////////////////////////////////////////////////////
 
 void settings_setup_listeners()
@@ -830,4 +839,7 @@ void settings_setup_listeners()
 	gSavedSettings.getControl("CheesyBeacon")->getSignal()->connect(boost::bind(&handleCheesyBeaconChanged, _2));	
 	gSavedSettings.getControl("UseDebugMenus")->getSignal()->connect(boost::bind(&handleUseDebugMenusChanged, _2));	
 	gSavedSettings.getControl("NonBlockingFilePicker")->getSignal()->connect(boost::bind(&handleNonBlockingFilePickerChanged, _2));	
+	gSavedSettings.getControl("SpellCheck")->getSignal()->connect(boost::bind(&handleSpellCheckChanged, _2));
+	gSavedSettings.getControl("SpellCheckShow")->getSignal()->connect(boost::bind(&handleSpellCheckChanged, _2));
+	gSavedSettings.getControl("SpellCheckLanguage")->getSignal()->connect(boost::bind(&handleSpellCheckChanged, _2));
 }

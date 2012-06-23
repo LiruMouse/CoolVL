@@ -1451,6 +1451,25 @@
 				<key>column</key>
 					<string>tag</string>
 				<key>value</key>
+					<string>SpellCheck</string>
+				</map>
+				<map>
+				<key>column</key>
+					<string>references</string>
+				<key>value</key>
+					<string>llui/lllineeditor.cpp, llui/lltexteditor.cpp</string>
+				</map>
+	    	</array>
+		<key>id</key>
+			<integer>77</integer>
+		</map>
+		<map>
+		<key>columns</key>
+	    	<array>
+				<map>
+				<key>column</key>
+					<string>tag</string>
+				<key>value</key>
 					<string>Stats</string>
 				</map>
 				<map>
@@ -1461,7 +1480,7 @@
 				</map>
 	    	</array>
 		<key>id</key>
-			<integer>77</integer>
+			<integer>78</integer>
 		</map>
 		<map>
 		<key>columns</key>
@@ -1480,7 +1499,7 @@
 				</map>
 	    	</array>
 		<key>id</key>
-			<integer>78</integer>
+			<integer>79</integer>
 		</map>
 		<map>
 		<key>columns</key>
@@ -1499,7 +1518,7 @@
 				</map>
 	    	</array>
 		<key>id</key>
-			<integer>79</integer>
+			<integer>80</integer>
 		</map>
 		<map>
 		<key>columns</key>
@@ -1518,7 +1537,7 @@
 				</map>
 	    	</array>
 		<key>id</key>
-			<integer>80</integer>
+			<integer>81</integer>
 		</map>
 		<map>
 		<key>columns</key>
@@ -1537,7 +1556,7 @@
 				</map>
 	    	</array>
 		<key>id</key>
-			<integer>81</integer>
+			<integer>82</integer>
 		</map>
 		<map>
 		<key>columns</key>
@@ -1556,7 +1575,7 @@
 				</map>
 	    	</array>
 		<key>id</key>
-			<integer>82</integer>
+			<integer>83</integer>
 		</map>
 		<map>
 		<key>columns</key>
@@ -1575,7 +1594,7 @@
 				</map>
 	    	</array>
 		<key>id</key>
-			<integer>83</integer>
+			<integer>84</integer>
 		</map>
 		<map>
 		<key>columns</key>
@@ -1594,7 +1613,7 @@
 				</map>
 	    	</array>
 		<key>id</key>
-			<integer>84</integer>
+			<integer>85</integer>
 		</map>
 		<map>
 		<key>columns</key>
@@ -1613,7 +1632,7 @@
 				</map>
 	    	</array>
 		<key>id</key>
-			<integer>85</integer>
+			<integer>86</integer>
 		</map>
 		<map>
 		<key>columns</key>
@@ -1632,7 +1651,7 @@
 				</map>
 	    	</array>
 		<key>id</key>
-			<integer>86</integer>
+			<integer>87</integer>
 		</map>
 		<map>
 		<key>columns</key>
@@ -1651,7 +1670,7 @@
 				</map>
 	    	</array>
 		<key>id</key>
-			<integer>87</integer>
+			<integer>88</integer>
 		</map>
 		<map>
 		<key>columns</key>
@@ -1670,7 +1689,7 @@
 				</map>
 	    	</array>
 		<key>id</key>
-			<integer>88</integer>
+			<integer>89</integer>
 		</map>
 		<map>
 		<key>columns</key>
@@ -1689,7 +1708,7 @@
 				</map>
 	    	</array>
 		<key>id</key>
-			<integer>89</integer>
+			<integer>90</integer>
 		</map>
 		<map>
 		<key>columns</key>
@@ -1708,7 +1727,7 @@
 				</map>
 	    	</array>
 		<key>id</key>
-			<integer>90</integer>
+			<integer>91</integer>
 		</map>
 		<map>
 		<key>columns</key>
@@ -1727,7 +1746,7 @@
 				</map>
 	    	</array>
 		<key>id</key>
-			<integer>91</integer>
+			<integer>92</integer>
 		</map>
 		<map>
 		<key>columns</key>
@@ -1746,7 +1765,7 @@
 				</map>
 	    	</array>
 		<key>id</key>
-			<integer>92</integer>
+			<integer>93</integer>
 		</map>
 		<map>
 		<key>columns</key>
@@ -1765,7 +1784,7 @@
 				</map>
 	    	</array>
 		<key>id</key>
-			<integer>93</integer>
+			<integer>94</integer>
 		</map>
 		<map>
 		<key>columns</key>
@@ -1784,7 +1803,7 @@
 				</map>
 	    	</array>
 		<key>id</key>
-			<integer>94</integer>
+			<integer>95</integer>
 		</map>
 		<map>
 		<key>columns</key>
@@ -1803,7 +1822,7 @@
 				</map>
 	    	</array>
 		<key>id</key>
-			<integer>95</integer>
+			<integer>96</integer>
 		</map>
 		<map>
 		<key>columns</key>
@@ -1822,7 +1841,7 @@
 				</map>
 	    	</array>
 		<key>id</key>
-			<integer>96</integer>
+			<integer>97</integer>
 		</map>
 		<map>
 		<key>columns</key>
@@ -1841,7 +1860,7 @@
 				</map>
 	    	</array>
 		<key>id</key>
-			<integer>97</integer>
+			<integer>98</integer>
 		</map>
 		<map>
 		<key>columns</key>
@@ -1860,7 +1879,7 @@
 				</map>
 	    	</array>
 		<key>id</key>
-			<integer>98</integer>
+			<integer>99</integer>
 		</map>
 		<map>
 		<key>columns</key>
@@ -1879,7 +1898,7 @@
 				</map>
 	    	</array>
 		<key>id</key>
-			<integer>99</integer>
+			<integer>100</integer>
 		</map>
 	</array>
 </llsd>

@@ -42,6 +42,7 @@
 #include "llnotifications.h"
 #include "llresmgr.h"
 #include "llscrollbar.h"
+#include "llspellcheck.h"
 #include "lluictrlfactory.h"
 #include "llvfile.h"
 #include "roles_constants.h"
@@ -720,6 +721,12 @@ void LLPreviewNotecard::initMenu()
 	menuItem = getChild<LLMenuItemCallGL>("Search / Replace...");
 	menuItem->setMenuCallback(onSearchMenu, this);
 	menuItem->setEnabledCallback(NULL);
+
+	LLMenuItemCheckGL* item = getChild<LLMenuItemCheckGL>("Spell Check");
+	item->setMenuCallback(onSpellCheckMenu, this);
+	item->setEnabledCallback(enableSpellCheckMenu);
+	item->setCheckCallback(checkSpellCheckMenu);
+	item->setValue(FALSE);
 }
 
 //static
@@ -913,6 +920,16 @@ void LLPreviewNotecard::onDeselectMenu(void* userdata)
 }
 
 // static 
+void LLPreviewNotecard::onSpellCheckMenu(void* userdata)
+{
+	LLPreviewNotecard* self = (LLPreviewNotecard*)userdata;
+	if (self && self->mEditor)
+	{
+		self->mEditor->setSpellCheck(!self->mEditor->getSpellCheck());
+	}
+}
+
+// static 
 BOOL LLPreviewNotecard::enableUndoMenu(void* userdata)
 {
 	LLPreviewNotecard* self = (LLPreviewNotecard*)userdata;
@@ -1003,6 +1020,30 @@ BOOL LLPreviewNotecard::enableDeselectMenu(void* userdata)
 	if (self && self->mEditor)
 	{
 		return self->mEditor->canDeselect();
+	}
+	else
+	{
+		return FALSE;
+	}
+}
+
+// static 
+BOOL LLPreviewNotecard::enableSpellCheckMenu(void* userdata)
+{
+	return LLSpellCheck::instance().getSpellCheck();
+}
+
+// static 
+BOOL LLPreviewNotecard::checkSpellCheckMenu(void* userdata)
+{
+	LLPreviewNotecard* self = (LLPreviewNotecard*)userdata;
+	if (!LLSpellCheck::instance().getSpellCheck())
+	{
+		return FALSE;
+	}
+	if (self && self->mEditor)
+	{
+		return self->mEditor->getSpellCheck();
 	}
 	else
 	{

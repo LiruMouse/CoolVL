@@ -282,11 +282,9 @@ LLPanelLogin::LLPanelLogin(const LLRect &rect,
 	// childSetAction("quit_btn", onClickQuit, this);
 
 	std::string channel = gSavedSettings.getString("VersionChannelName");
-	std::string version = llformat("%d.%d.%d (%d)",
-		LL_VERSION_MAJOR,
-		LL_VERSION_MINOR,
-		LL_VERSION_PATCH,
-		LL_VERSION_BUILD);
+	std::string version = llformat("%d.%d.%d (%d)", LL_VERSION_MAJOR,
+								   LL_VERSION_MINOR, LL_VERSION_PATCH,
+								   LL_VERSION_BUILD);
 	LLTextBox* channel_text = getChild<LLTextBox>("channel_text");
 	channel_text->setTextArg("[CHANNEL]", channel);
 	channel_text->setTextArg("[VERSION]", version);

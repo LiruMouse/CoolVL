@@ -34,10 +34,16 @@
 
 #include "hbprefscool.h"
 
+#include "llbufferstream.h"
 #include "llcheckboxctrl.h"
 #include "llcombobox.h"
 #include "llcolorswatch.h"
+#include "lldir.h"
+#include "llhttpclient.h"
+#include "llnotifications.h"
 #include "llradiogroup.h"
+#include "llsdserialize.h"
+#include "llspellcheck.h"
 #include "llstring.h"
 #include "lltexteditor.h"
 #include "lluictrlfactory.h"
@@ -51,7 +57,7 @@ class HBPrefsCoolImpl : public LLPanel
 {
 public:
 	HBPrefsCoolImpl();
-	/*virtual*/ ~HBPrefsCoolImpl() { };
+	/*virtual*/ ~HBPrefsCoolImpl();
 
 	/*virtual*/ void refresh();
 	/*virtual*/ void draw();
@@ -59,7 +65,16 @@ public:
 	void apply();
 	void cancel();
 
+	void setDirty()								{ mIsDirty = true; }
+	static void setQueryActive(bool active);
+
+	std::string getDictName(const std::string& language);
+	std::string getDictLanguage(const std::string& name);
+
+	static HBPrefsCoolImpl* getInstance()		{ return sInstance; }
+
 private:
+	void refreshValues();
 	void refreshRestrainedLove(bool enable);
 	void updateRestrainedLoveUserProfile();
 
@@ -68,11 +83,20 @@ private:
 	static void onCommitCheckBoxSpeedRez(LLUICtrl* ctrl, void* user_data);
 	static void onCommitCheckBoxPrivateLookAt(LLUICtrl* ctrl, void* user_data);
 	static void onCommitCheckBoxAfterRestart(LLUICtrl* ctrl, void* user_data);
+	static void onCommitCheckBoxSpellCheck(LLUICtrl* ctrl, void* user_data);
 	static void onCommitUserProfile(LLUICtrl* ctrl, void* user_data);
 	static void onClickCustomBlackList(void* user_data);
-	void refreshValues();
+	static void onClickDownloadDict(void* user_data);
 
 private:
+	static HBPrefsCoolImpl* sInstance;
+	static S32 sQueries;
+
+	bool mIsDirty;
+
+	LLSD mDictsList;
+	std::set<std::string> mInstalledDicts;
+
 	bool mWatchBlackListFloater;
 	S32 mRestrainedLoveUserProfile;
 
@@ -114,6 +138,8 @@ private:
 	BOOL mAvatarPhysics;
 	BOOL mUseNewSLLoginPage;
 	BOOL mAllowMultipleViewers;
+	BOOL mSpellCheck;
+	BOOL mSpellCheckShow;
 	BOOL mRestrainedLove;
 	BOOL mRestrainedLoveNoSetEnv;
 	BOOL mRestrainedLoveAllowWear;
@@ -132,15 +158,77 @@ private:
 	U32 mFadeMouselookExitTip;
 	U32 mTimeFormat;
 	U32 mDateFormat;
+	std::string mSpellCheckLanguage;
 	std::string mHighlightNicknames;
 	LLColor4 mOwnNameChatColor;
 };
 
+class DictionaryDownload : public LLHTTPClient::Responder
+{
+	LOG_CLASS(DictionaryDownload);
+
+public:
+    DictionaryDownload(const std::string& dict_name)
+	:	mDictName(dict_name)
+	{
+		HBPrefsCoolImpl::setQueryActive(true);
+	}
+
+	void completedRaw(U32 status, const std::string& reason,
+					  const LLChannelDescriptors& channels,
+					  const LLIOPipe::buffer_ptr_t& buffer)
+    {
+		HBPrefsCoolImpl::setQueryActive(false);
+
+		if (status < 200 || status >= 300)
+		{
+			LLSD args;
+			args["NAME"] = mDictName;
+			args["STATUS"] = llformat("%d", status);
+			args["REASON"] = reason;
+			LLNotifications::instance().add("DownloadDictFailure", args);
+			return;
+		}
+
+		LLBufferStream inputstream(channels, buffer.get());
+		std::string filename;
+		filename = gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS,
+												  "dictionaries",
+												  mDictName.c_str());
+		llofstream outputstream(filename, std::ios::binary);
+		if (outputstream.is_open())
+		{
+			while (inputstream.good() && outputstream.good())
+			{
+				outputstream << inputstream.rdbuf();
+			}
+			outputstream.close();
+		}
+		else
+		{
+			LLSD args;
+			args["NAME"] = mDictName;
+			LLNotifications::instance().add("DictWriteFailure", args);
+		}
+	}
+
+private:
+	std::string mDictName;
+};
+
+HBPrefsCoolImpl* HBPrefsCoolImpl::sInstance = NULL;
+S32 HBPrefsCoolImpl::sQueries = 0;
+
 HBPrefsCoolImpl::HBPrefsCoolImpl()
 :	LLPanel(std::string("Cool Preferences Panel")),
-	mWatchBlackListFloater(false)
+	mWatchBlackListFloater(false),
+	mIsDirty(true)
 {
-	LLUICtrlFactory::getInstance()->buildPanel(this, "panel_preferences_cool.xml");
+	sInstance = this;
+
+	LLUICtrlFactory::getInstance()->buildPanel(this,
+											   "panel_preferences_cool.xml");
+
 	childSetCommitCallback("show_chat_button_check",			onCommitCheckBoxShowButton, this);
 	childSetCommitCallback("show_im_button_check",				onCommitCheckBoxShowButton, this);
 	childSetCommitCallback("show_friends_button_check",			onCommitCheckBoxShowButton, this);
@@ -160,10 +248,13 @@ HBPrefsCoolImpl::HBPrefsCoolImpl()
 	childSetCommitCallback("im_tabs_vertical_stacking_check",	onCommitCheckBoxAfterRestart, this);
 	childSetCommitCallback("use_old_statusbar_icons_check",		onCommitCheckBoxAfterRestart, this);
 	childSetCommitCallback("use_new_sl_login_page_check",		onCommitCheckBoxAfterRestart, this);
+	childSetCommitCallback("spell_check_check"			,		onCommitCheckBoxSpellCheck, this);
 	childSetCommitCallback("restrained_love_no_setenv_check",	onCommitCheckBoxAfterRestart, this);
 	childSetCommitCallback("restrained_love_untruncated_emotes_check", onCommitCheckBoxAfterRestart, this);
 	childSetCommitCallback("restrained_love_can_ooc_check",		onCommitCheckBoxAfterRestart, this);
 	childSetCommitCallback("user_profile",						onCommitUserProfile, this);
+
+	childSetAction("dict_download_button",						onClickDownloadDict, this);
 	childSetAction("custom_profile_button",						onClickCustomBlackList, this);
 
 	if (LLStartUp::getStartupState() != STATE_STARTED)
@@ -176,14 +267,139 @@ HBPrefsCoolImpl::HBPrefsCoolImpl()
 	refresh();
 }
 
+HBPrefsCoolImpl::~HBPrefsCoolImpl()
+{
+	sInstance = NULL;
+}
+
 void HBPrefsCoolImpl::draw()
 {
+	if (mIsDirty)
+	{
+		// First get the list of all installed dictionaries
+		mInstalledDicts.clear();
+		mInstalledDicts = LLSpellCheck::instance().getBaseDicts();
+
+		// Then get the list of all existing dictionaries
+		mDictsList.clear();
+		std::string dict_list;
+		dict_list = gDirUtilp->getExpandedFilename(LL_PATH_APP_SETTINGS,
+												   "dictionaries",
+												   "dict_list.xml");
+		llifstream inputstream(dict_list, std::ios::binary);
+		if (inputstream.is_open())
+		{
+			LLSDSerialize::fromXMLDocument(mDictsList, inputstream);
+			inputstream.close();
+		}
+		if (mDictsList.size() == 0)
+		{
+			llwarns << "Failure to load the list of all existing dictionaries."
+					<< llendl;
+		}
+
+		bool found_one = false;
+		std::string name = LLSpellCheck::instance().getCurrentDict();
+		std::string language;
+		S32 selection = -1;
+		LLComboBox* combo = getChild<LLComboBox>("installed_dicts_combo");
+		combo->removeall();
+		for (std::set<std::string>::iterator it = mInstalledDicts.begin();
+			 it != mInstalledDicts.end(); it++)
+		{
+			language = getDictLanguage(*it);
+			if (language.empty())
+			{
+				language = *it;
+			}
+			combo->add(language);
+			found_one = true;
+			if (*it == name)
+			{
+				selection = combo->getItemCount() - 1;
+			}
+		}
+		if (!found_one)
+		{
+			combo->add(LLStringUtil::null);
+		}
+		if (selection >= 0)
+		{
+			combo->setCurrentByIndex(selection);
+		}
+
+		found_one = false;
+		combo = getChild<LLComboBox>("download_dict_combo");
+		combo->removeall();
+		for (LLSD::array_const_iterator it = mDictsList.beginArray();
+			 it != mDictsList.endArray(); it++)
+		{
+			const LLSD& entry = *it;
+			name = entry["name"].asString();
+			if (name.empty())
+			{
+				llwarns << "Invalid dictionary list entry: no name." << llendl;
+				continue;
+			}
+			LLStringUtil::toLower(name);
+			if (!mInstalledDicts.count(name))
+			{
+				language = entry["language"].asString();
+				if (language.empty())
+				{
+					llwarns << "Invalid dictionary list entry. No language for: "
+							<< name << llendl;
+					language = name;
+				}
+				combo->add(language);
+				found_one = true;
+			}
+		}
+		if (!found_one)
+		{
+			combo->add(LLStringUtil::null);
+		}
+
+		bool visible = (sQueries == 0);
+		childSetVisible("download_dict_combo", visible);
+		childSetVisible("dict_download_button", visible);
+		childSetVisible("downloading", !visible);
+
+		mIsDirty = false;
+	}
 	if (mWatchBlackListFloater && !HBFloaterBlacklistRLV::instanceExists())
 	{
 		mWatchBlackListFloater = false;
 		updateRestrainedLoveUserProfile();
 	}
 	LLPanel::draw();
+}
+
+//static
+void HBPrefsCoolImpl::setQueryActive(bool active)
+{
+	if (active)
+	{
+		sQueries++;
+	}
+	else
+	{
+		sQueries--;
+		if (sQueries < 0)
+		{
+			llwarns << "Lost the count of the dictionary download queries !"
+					<< llendl;
+			sQueries = 0;
+		}
+		if (sQueries == 0)
+		{
+			LLNotifications::instance().add("DownloadDictFinished");
+		}
+	}
+	if (HBPrefsCoolImpl::getInstance())
+	{
+		HBPrefsCoolImpl::getInstance()->setDirty();
+	}
 }
 
 void HBPrefsCoolImpl::refreshRestrainedLove(bool enable)
@@ -283,6 +499,9 @@ void HBPrefsCoolImpl::refreshValues()
 	mUseNewSLLoginPage			= gSavedSettings.getBOOL("UseNewSLLoginPage");
 	mAllowMultipleViewers		= gSavedSettings.getBOOL("AllowMultipleViewers");
 	mFadeMouselookExitTip		= gSavedSettings.getU32("FadeMouselookExitTip");
+	mSpellCheck					= gSavedSettings.getBOOL("SpellCheck");
+	mSpellCheckShow				= gSavedSettings.getBOOL("SpellCheckShow");
+	mSpellCheckLanguage			= gSavedSettings.getString("SpellCheckLanguage");
 }
 
 void HBPrefsCoolImpl::updateRestrainedLoveUserProfile()
@@ -333,16 +552,8 @@ void HBPrefsCoolImpl::refresh()
 	LLWStringUtil::replaceChar(message, '^', '\n');
 	childSetText("send_im_message_editor", wstring_to_utf8str(message));
 
-	if (mSpeedRez)
-	{
-		childEnable("speed_rez_interval");
-		childEnable("speed_rez_seconds");
-	}
-	else
-	{
-		childDisable("speed_rez_interval");
-		childDisable("speed_rez_seconds");
-	}
+	childSetEnabled("speed_rez_interval", mSpeedRez);
+	childSetEnabled("speed_rez_seconds", mSpeedRez);
 
 	std::string format = gSavedSettings.getString("ShortTimeFormat");
 	if (format.find("%p") == -1)
@@ -381,6 +592,11 @@ void HBPrefsCoolImpl::refresh()
 	{
 		combo->setCurrentByIndex(mDateFormat);
 	}
+
+	childSetEnabled("spell_check_show_check", mSpellCheck);
+	childSetEnabled("installed_dicts_combo", mSpellCheck);
+	childSetEnabled("download_dict_combo", mSpellCheck);
+	childSetEnabled("dict_download_button", mSpellCheck);
 }
 
 void HBPrefsCoolImpl::cancel()
@@ -444,6 +660,9 @@ void HBPrefsCoolImpl::cancel()
 	gSavedSettings.setBOOL("UseNewSLLoginPage",			mUseNewSLLoginPage);
 	gSavedSettings.setBOOL("AllowMultipleViewers",		mAllowMultipleViewers);
 	gSavedSettings.setU32("FadeMouselookExitTip",		mFadeMouselookExitTip);
+	gSavedSettings.setBOOL("SpellCheck",				mSpellCheck);
+	gSavedSettings.setBOOL("SpellCheckShow",			mSpellCheckShow);
+	gSavedSettings.setString("SpellCheckLanguage",		mSpellCheckLanguage);
 }
 
 void HBPrefsCoolImpl::apply()
@@ -520,7 +739,46 @@ void HBPrefsCoolImpl::apply()
 	gSavedSettings.setString("RestrainedLoveSendimMessage",
 							 std::string(wstring_to_utf8str(message)));
 
+	combo = getChild<LLComboBox>("installed_dicts_combo");
+	std::string dict_name = getDictName(combo->getSelectedItemLabel());
+	if (!dict_name.empty())
+	{
+		gSavedSettings.setString("SpellCheckLanguage", dict_name);
+	}
+
 	refreshValues();
+}
+
+std::string HBPrefsCoolImpl::getDictName(const std::string& language)
+{
+	std::string result;
+	for (LLSD::array_const_iterator it = mDictsList.beginArray();
+		 it != mDictsList.endArray(); it++)
+	{
+		const LLSD& entry = *it;
+		if (entry["language"].asString() == language)
+		{
+			result = entry["name"].asString();
+			break;
+		}
+	}
+	return result;
+}
+
+std::string HBPrefsCoolImpl::getDictLanguage(const std::string& name)
+{
+	std::string result;
+	for (LLSD::array_const_iterator it = mDictsList.beginArray();
+		 it != mDictsList.endArray(); it++)
+	{
+		const LLSD& entry = *it;
+		if (entry["name"].asString() == name)
+		{
+			result = entry["language"].asString();
+			break;
+		}
+	}
+	return result;
 }
 
 //static
@@ -574,6 +832,20 @@ void HBPrefsCoolImpl::onCommitCheckBoxPrivateLookAt(LLUICtrl* ctrl, void* user_d
 	bool enabled = check->get();
 	self->childSetEnabled("private_look_at_limit", enabled);
 	self->childSetEnabled("private_look_at_limit_meters", enabled);
+}
+
+//static
+void HBPrefsCoolImpl::onCommitCheckBoxSpellCheck(LLUICtrl* ctrl, void* user_data)
+{
+	HBPrefsCoolImpl* self = (HBPrefsCoolImpl*)user_data;
+	LLCheckBoxCtrl* check = (LLCheckBoxCtrl*)ctrl;
+	if (!self || !check) return;
+
+	bool enabled = check->get();
+	self->childSetEnabled("spell_check_show_check", enabled);
+	self->childSetEnabled("installed_dicts_combo", enabled);
+	self->childSetEnabled("download_dict_combo", enabled);
+	self->childSetEnabled("dict_download_button", enabled);
 }
 
 //static
@@ -659,6 +931,29 @@ void HBPrefsCoolImpl::onClickCustomBlackList(void* user_data)
 	if (!self) return;
 	HBFloaterBlacklistRLV::showInstance();
 	self->mWatchBlackListFloater = true;
+}
+
+//static
+void HBPrefsCoolImpl::onClickDownloadDict(void* user_data)
+{
+	HBPrefsCoolImpl* self = (HBPrefsCoolImpl*)user_data;
+	if (self)
+	{
+		LLComboBox* combo = self->getChild<LLComboBox>("download_dict_combo");
+		if (combo)
+		{
+			std::string label = combo->getSelectedItemLabel();
+			if (!label.empty())
+			{
+				std::string dict_name = self->getDictName(label);
+				std::string url = gSavedSettings.getString("SpellCheckDictDownloadURL");
+				LLHTTPClient::get(url + dict_name + ".aff",
+								  new DictionaryDownload(dict_name + ".aff"));
+				LLHTTPClient::get(url + dict_name + ".dic",
+								  new DictionaryDownload(dict_name + ".dic"));
+			}
+		}
+	}
 }
 
 //---------------------------------------------------------------------------

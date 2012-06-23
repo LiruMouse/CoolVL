@@ -89,9 +89,9 @@ public:
 		// going full screen
 
 	// Always use this to set gStartupState so changes are logged
-	static void setStartupState( EStartupState state );
-	static EStartupState getStartupState() { return gStartupState; };
-	static std::string getStartupStateString() { return startupStateToString(gStartupState); };
+	static void setStartupState(EStartupState state);
+	static EStartupState getStartupState()		{ return gStartupState; }
+	static std::string getStartupStateString()	{ return startupStateToString(gStartupState); }
 
 	static void multimediaInit();
 		// Initialize LLViewerMedia multimedia engine.
@@ -99,18 +99,18 @@ public:
 	// outfit_folder_name can be a folder anywhere in your inventory, 
 	// but the name must be a case-sensitive exact match.
 	// gender_name is either "male" or "female"
-	static void loadInitialOutfit( const std::string& outfit_folder_name,
-								   const std::string& gender_name );
+	static void loadInitialOutfit(const std::string& outfit_folder_name,
+								  const std::string& gender_name);
 
 	// Load MD5 of user's password from local disk file.
 	static std::string loadPasswordFromDisk();
-	
+
 	// Record MD5 of user's password for subsequent login.
 	static void savePasswordToDisk(const std::string& hashed_password);
-	
+
 	// Delete the saved password local disk file.
 	static void deletePasswordFromDisk();
-	
+
 	static bool dispatchURL();
 		// if we have a SLURL or sim string ("Ahern/123/45") that started
 		// the viewer, dispatch it
@@ -127,6 +127,5 @@ private:
 	static std::string startupStateToString(EStartupState state);
 	static EStartupState gStartupState; // Do not set directly, use LLStartup::setStartupState
 };
-
 
 #endif // LL_LLSTARTUP_H

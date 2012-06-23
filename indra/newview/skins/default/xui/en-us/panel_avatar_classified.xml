@@ -6,7 +6,7 @@
 	<line_editor bottom_delta="-8" enabled="false" follows="left|top"
 	     font="SansSerif" height="20" left="10" name="given_name_editor"
 	     tool_tip="Name must begin with a letter or number, not punctuation."
-	     width="280" />
+	     width="280" spell_check="true" />
 	<text_editor enabled="false" follows="left|top"
 	     font="SansSerifSmall" height="70" left="10" max_length="1023"
 	     name="desc_editor" width="280" word_wrap="true" />

@@ -9,6 +9,7 @@ include(DirectX)
 include(ELFIO)
 include(FMOD)
 include(OPENAL)
+include(Hunspell)
 include(FindOpenGL)
 include(JsonCpp)
 include(LLAudio)
@@ -47,6 +48,7 @@ include_directories(
     ${ELFIO_INCLUDE_DIR}
     ${JSONCPP_INCLUDE_DIRS}
     ${GLOD_INCLUDE_DIR}
+    ${HUNSPELL_INCLUDE_DIR}
     ${LLAUDIO_INCLUDE_DIRS}
     ${LLCHARACTER_INCLUDE_DIRS}
     ${LLCOMMON_INCLUDE_DIRS}
@@ -1164,6 +1166,7 @@ set(viewer_APPSETTINGS_FILES
     )
 
 use_prebuilt_binary(artwork-common)
+use_prebuilt_binary(dictionaries)
 
 source_group("App Settings" FILES ${viewer_APPSETTINGS_FILES})
 
@@ -1363,6 +1366,7 @@ target_link_libraries(${VIEWER_BINARY_NAME}
     ${OPENGL_LIBRARIES}
     ${FMODWRAPPER_LIBRARY}
     ${GLOD_LIBRARIES}
+    ${HUNSPELL_LIBRARY}
     ${OPENGL_LIBRARIES}
     ${JSONCPP_LIBRARIES}
     ${SDL_LIBRARY}
@@ -1384,7 +1388,7 @@ if (LINUX)
         COMMAND eu-strip
         ARGS --strip-debug --remove-comment -o secondlife-stripped -f ${VIEWER_BINARY_NAME}.debug ${VIEWER_BINARY_NAME}
         DEPENDS ${VIEWER_BINARY_NAME}
-        COMMENT "Creating the stripped binary and the debug symbols file."
+        COMMENT "Creating the stripped binary and the debug symbols files."
         )
   else (EUSTRIP)
     add_custom_command(

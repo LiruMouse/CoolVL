@@ -1,11 +1,11 @@
-/** 
+/**
  * @file llfasttimerview.cpp
  * @brief LLFastTimerView class implementation
  *
  * $LicenseInfo:firstyear=2004&license=viewergpl$
- * 
+ *
  * Copyright (c) 2004-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -240,6 +240,11 @@ static struct ft_display_info ft_display_table[] =
 	{ LLFastTimer::FTM_RENDER_UI,			"  UI",					&LLColor4::cyan4, 1 },
 	{ LLFastTimer::FTM_RENDER_TIMER,		"   Timers",			&LLColor4::cyan5, 1,},
 	{ LLFastTimer::FTM_RENDER_FONTS,		"   Fonts",				&LLColor4::pink1, 0 },
+	{ LLFastTimer::FTM_RENDER_SPELLCHECK,	"   Mispell. Highlight",&LLColor4::magenta2, 0 },
+	{ LLFastTimer::FTM_SPELLCHECK_CHECK_WORDS,"    Find bad words",	&LLColor4::blue2, 0 },
+	{ LLFastTimer::FTM_SPELLCHECK_HIGHLIGHT,"    Draw highlights",	&LLColor4::orange3, 0 },
+	{ LLFastTimer::FTM_SPELL_WORD_BOUNDARIES,"     Words boundaries",&LLColor4::magenta4, 0 },
+	{ LLFastTimer::FTM_SPELL_WORD_UNDERLINE,"     Words underline",	&LLColor4::red3, 0 },
 	{ LLFastTimer::FTM_RESIZE_SCREEN_TEXTURE,"  Resize Screen Tex.",&LLColor4::red2, 0 },
 	{ LLFastTimer::FTM_GL_FINISH,			"  GL finish",			&blue7, 0 },
 	{ LLFastTimer::FTM_SWAP,				"  Swap",				&LLColor4::pink2, 0 },
@@ -360,7 +365,7 @@ BOOL LLFastTimerView::handleMouseDown(S32 x, S32 y, MASK mask)
 			return LLFloater::handleMouseDown(x, y, mask);
 		}
 	}
-	if (x < mBarRect.mLeft) 
+	if (x < mBarRect.mLeft)
 	{
 		S32 legend_index = getLegendIndex(y);
 		if (legend_index >= 0 && legend_index < FTV_DISPLAY_NUM)
@@ -458,7 +463,7 @@ BOOL LLFastTimerView::handleHover(S32 x, S32 y, MASK mask)
 			}
 		}
 	}
-	else if (x < mBarRect.mLeft) 
+	else if (x < mBarRect.mLeft)
 	{
 		S32 legend_index = getLegendIndex(y);
 		if (legend_index >= 0 && legend_index < FTV_DISPLAY_NUM)
@@ -473,7 +478,7 @@ BOOL LLFastTimerView::handleHover(S32 x, S32 y, MASK mask)
 BOOL LLFastTimerView::handleScrollWheel(S32 x, S32 y, S32 clicks)
 {
 	LLFastTimer::sPauseHistory = TRUE;
-	mScrollIndex = llclamp(mScrollIndex - clicks, 
+	mScrollIndex = llclamp(mScrollIndex - clicks,
 							0, llmin(LLFastTimer::sLastFrameIndex, (S32)LLFastTimer::FTM_HISTORY_NUM-MAX_VISIBLE_HISTORY));
 	return TRUE;
 }
@@ -1032,7 +1037,7 @@ void LLFastTimerView::draw()
 				y -= barh;
 		}
 
-		//draw line graph history
+		// Draw line graph history
 		{
 			gGL.getTexUnit(0)->unbind(LLTexUnit::TT_TEXTURE);
 			LLLocalClipRect clip(graph_rect);
@@ -1060,7 +1065,7 @@ void LLFastTimerView::draw()
 
 			x = graph_rect.mRight - LLFontGL::getFontMonospace()->getWidth(tdesc)-5;
 			y = graph_rect.mTop - ((S32)LLFontGL::getFontMonospace()->getLineHeight());
- 
+
 			LLFontGL::getFontMonospace()->renderUTF8(tdesc, 0, x, y, LLColor4::white,
 										 LLFontGL::LEFT, LLFontGL::TOP);
 

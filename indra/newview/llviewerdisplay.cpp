@@ -1,11 +1,11 @@
-/** 
+/**
  * @file llviewerdisplay.cpp
  * @brief LLViewerDisplay class implementation
  *
  * $LicenseInfo:firstyear=2004&license=viewergpl$
- * 
+ *
  * Copyright (c) 2004-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -116,7 +116,7 @@ void display_startup()
 	if (!gViewerWindow->getActive() || !gViewerWindow->mWindow->getVisible()
 		|| gViewerWindow->mWindow->getMinimized() || gNoRender)
 	{
-		return; 
+		return;
 	}
 
 	gPipeline.updateGL();
@@ -276,7 +276,7 @@ void display(BOOL rebuild, F32 zoom_factor, int subfield, BOOL for_snapshot)
 		stop_glerror();
 		gViewerWindow->returnEmptyPicks();
 		stop_glerror();
-		return; 
+		return;
 	}
 
 	gViewerWindow->checkSettings();
@@ -296,7 +296,7 @@ void display(BOOL rebuild, F32 zoom_factor, int subfield, BOOL for_snapshot)
 	// Logic for forcing window updates if we're in drone mode.
 	//
 
-	if (gNoRender) 
+	if (gNoRender)
 	{
 #if LL_WINDOWS
 		static F32 last_update_time = 0.f;
@@ -462,7 +462,7 @@ void display(BOOL rebuild, F32 zoom_factor, int subfield, BOOL for_snapshot)
 			gTeleportArrivalTimer.reset();
 			break;
 
-		default: 
+		default:
 			 break;
 		}
 	}
@@ -665,12 +665,11 @@ void display(BOOL rebuild, F32 zoom_factor, int subfield, BOOL for_snapshot)
 
 		LLSpatialGroup::sNoDelete = TRUE;
 		static LLCachedControl<bool> use_occlusion(gSavedSettings, "UseOcclusion");
-		LLPipeline::sUseOcclusion = 
-				((!gUseWireframe
+		LLPipeline::sUseOcclusion =	((!gUseWireframe
 //MK
 				|| (gRRenabled && gAgent.mRRInterface.mContainsDetach))
 //mk
-				&& LLFeatureManager::getInstance()->isFeatureAvailable("UseOcclusion") 
+				&& LLFeatureManager::getInstance()->isFeatureAvailable("UseOcclusion")
 				&& use_occlusion
 				&& gGLManager.mHasOcclusionQuery) ? 2 : 0;
 
@@ -709,7 +708,7 @@ void display(BOOL rebuild, F32 zoom_factor, int subfield, BOOL for_snapshot)
 
 		LLAppViewer::instance()->pingMainloopTimeout("Display:Swap");
 
-		{ 
+		{
 			{
  				LLFastTimer ftm(LLFastTimer::FTM_CLIENT_COPY);
 				LLVertexBuffer::clientCopy(0.016);
@@ -731,7 +730,7 @@ void display(BOOL rebuild, F32 zoom_factor, int subfield, BOOL for_snapshot)
 			if (!for_snapshot)
 			{
 				if (gFrameCount > 1)
-				{ //for some reason, ATI 4800 series will error out if you 
+				{ //for some reason, ATI 4800 series will error out if you
 				  //try to generate a shadow before the first frame is through
 					gPipeline.generateSunShadow(*LLViewerCamera::getInstance());
 				}
@@ -863,7 +862,7 @@ void display(BOOL rebuild, F32 zoom_factor, int subfield, BOOL for_snapshot)
 		//		LLRect floater_rect = frontmost_floaterp->getScreenRect();
 		//		// deflate by one pixel so rounding errors don't occlude outside of floater extents
 		//		floater_rect.stretch(-1);
-		//		LLRectf floater_3d_rect((F32)floater_rect.mLeft / (F32)gViewerWindow->getWindowWidth(), 
+		//		LLRectf floater_3d_rect((F32)floater_rect.mLeft / (F32)gViewerWindow->getWindowWidth(),
 		//								(F32)floater_rect.mTop / (F32)gViewerWindow->getWindowHeight(),
 		//								(F32)floater_rect.mRight / (F32)gViewerWindow->getWindowWidth(),
 		//								(F32)floater_rect.mBottom / (F32)gViewerWindow->getWindowHeight());
@@ -945,10 +944,10 @@ void display(BOOL rebuild, F32 zoom_factor, int subfield, BOOL for_snapshot)
 				gPipeline.mDeferredScreen.flush();
 				if (LLRenderTarget::sUseFBO)
 				{
-					LLRenderTarget::copyContentsToFramebuffer(gPipeline.mDeferredScreen, 0, 0, gPipeline.mDeferredScreen.getWidth(), 
-															  gPipeline.mDeferredScreen.getHeight(), 0, 0, 
-															  gPipeline.mDeferredScreen.getWidth(), 
-															  gPipeline.mDeferredScreen.getHeight(), 
+					LLRenderTarget::copyContentsToFramebuffer(gPipeline.mDeferredScreen, 0, 0, gPipeline.mDeferredScreen.getWidth(),
+															  gPipeline.mDeferredScreen.getHeight(), 0, 0,
+															  gPipeline.mDeferredScreen.getWidth(),
+															  gPipeline.mDeferredScreen.getHeight(),
 															  GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 				}
 			}
@@ -957,10 +956,10 @@ void display(BOOL rebuild, F32 zoom_factor, int subfield, BOOL for_snapshot)
 				gPipeline.mScreen.flush();
 				if (LLRenderTarget::sUseFBO)
 				{
-					LLRenderTarget::copyContentsToFramebuffer(gPipeline.mScreen, 0, 0, gPipeline.mScreen.getWidth(), 
-															  gPipeline.mScreen.getHeight(), 0, 0, 
-															  gPipeline.mScreen.getWidth(), 
-															  gPipeline.mScreen.getHeight(), 
+					LLRenderTarget::copyContentsToFramebuffer(gPipeline.mScreen, 0, 0, gPipeline.mScreen.getWidth(),
+															  gPipeline.mScreen.getHeight(), 0, 0,
+															  gPipeline.mScreen.getWidth(),
+															  gPipeline.mScreen.getHeight(),
 															  GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 				}
 			}
@@ -1305,14 +1304,14 @@ void renderCoordinateAxes()
 	gGL.end();
 }
 
-void draw_axes() 
+void draw_axes()
 {
 	LLGLSUIDefault gls_ui;
 	gGL.getTexUnit(0)->unbind(LLTexUnit::TT_TEXTURE);
 	// A vertical white line at origin
 	LLVector3 v = gAgent.getPositionAgent();
 	gGL.begin(LLRender::LINES);
-		gGL.color3f(1.0f, 1.0f, 1.0f); 
+		gGL.color3f(1.0f, 1.0f, 1.0f);
 		gGL.vertex3f(0.0f, 0.0f, 0.0f);
 		gGL.vertex3f(0.0f, 0.0f, 40.0f);
 	gGL.end();

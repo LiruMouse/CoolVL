@@ -272,7 +272,7 @@
 			     border_thickness="1" bottom_delta="-20" enabled="true" follows="left|top"
 			     font="SansSerifSmall" height="16" is_unicode="false" left="74"
 			     max_length="254" mouse_opaque="true" name="want_to_edit"
-			     width="330" />
+			     width="330" spell_check="true" />
 			<text bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
 			     bottom_delta="-26" drop_shadow_visible="true" follows="left|top"
 			     font="SansSerifSmall" h_pad="0" halign="right" height="16" left="4"
@@ -301,7 +301,7 @@
 			     border_thickness="1" bottom_delta="-20" enabled="true" follows="left|top"
 			     font="SansSerifSmall" height="16" is_unicode="false" left="74"
 			     max_length="254" mouse_opaque="true" name="skills_edit"
-			     width="330" />
+			     width="330" spell_check="true" />
 			<text bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
 			     bottom_delta="-30" drop_shadow_visible="true" follows="left|top"
 			     font="SansSerifSmall" h_pad="0" halign="right" height="16" left="4"
@@ -312,7 +312,7 @@
 			     border_thickness="1" bottom_delta="0" enabled="true" follows="left|top"
 			     font="SansSerifSmall" height="16" is_unicode="false" left="74"
 			     max_length="254" mouse_opaque="true" name="languages_edit"
-			     width="330" />
+			     width="330" spell_check="true" />
 		</panel>
 		<panel border="true" bottom="-482" follows="left|top|right|bottom" height="466"
 		     label="Picks" left="0" mouse_opaque="true" name="Picks" width="430">

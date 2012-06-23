@@ -21,6 +21,7 @@ include_directories(
     ${LLWINDOW_INCLUDE_DIRS}
     ${LLVFS_INCLUDE_DIRS}
     ${LLXML_INCLUDE_DIRS}
+    ${LIBS_PREBUILD_DIR}/include/hunspell
     )
 
 set(llui_SOURCE_FILES
@@ -56,6 +57,7 @@ set(llui_SOURCE_FILES
     llscrolllistctrl.cpp
     llslider.cpp
     llsliderctrl.cpp
+    llspellcheck.cpp
     llspinctrl.cpp
     llstyle.cpp
     lltabcontainer.cpp
@@ -112,6 +114,7 @@ set(llui_HEADER_FILES
     llscrolllistctrl.h
     llsliderctrl.h
     llslider.h
+    llspellcheck.h
     llspinctrl.h
     llstyle.h
     lltabcontainer.h

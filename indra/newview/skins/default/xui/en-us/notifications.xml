@@ -160,6 +160,36 @@ Status code: [STATUS]
 
   <notification
    icon="alertmodal.tga"
+   name="DownloadDictFailure"
+   type="alertmodal">
+Failed to retrieve the dictionnary: [NAME]
+Reason: [REASON]
+Status code: [STATUS]
+    <usetemplate
+     name="okbutton"
+     yestext="OK"/>
+  </notification>
+
+  <notification
+   icon="notifytip.tga"
+   name="DownloadDictFinished"
+   type="notifytip">
+The downloading of the additional dictionary is finished.
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
+   name="DictWriteFailure"
+   type="alertmodal">
+Failed to save the dictionnary: [NAME]
+File write error.
+    <usetemplate
+     name="okbutton"
+     yestext="OK"/>
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
    name="FloaterNotFound"
    type="alertmodal">
 Floater error: Could not find the following controls:
@@ -4382,10 +4412,22 @@ Visit the Second Life Support Web site?
    icon="alertmodal.tga"
    name="ConfirmQuit"
    type="alertmodal">
-Are you sure you want to quit?
+Are you sure you want to quit ?
     <usetemplate
      ignoretext="When quitting the viewer."
      name="okcancelignore"
+     notext="Continue"
+     yestext="Quit"/>
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
+   name="ConfirmQuitNotifications"
+   type="alertmodal">
+There are unacknowledged notifications !
+Are you sure you want to quit ?
+    <usetemplate
+     name="okcancelbuttons"
      notext="Continue"
      yestext="Quit"/>
   </notification>

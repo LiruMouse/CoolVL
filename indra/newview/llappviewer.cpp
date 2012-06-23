@@ -44,6 +44,7 @@
 #include "llpumpio.h"
 #include "llrender.h"
 #include "llsingleton.h"
+#include "llspellcheck.h"
 #include "llsys.h"
 #include "lltexteditor.h"
 #include "lluictrlfactory.h"
@@ -59,10 +60,12 @@
 #include "llfloaterjoystick.h"
 #include "llfloatersnapshot.h"
 #include "llgroupmgr.h"
+#include "llgroupnotify.h"
 #include "llimpanel.h"
 #include "llmarketplacefunctions.h"
 #include "llmimetypes.h"
 #include "llmutelist.h"
+#include "llnotify.h"
 #include "llstartup.h"
 #include "lltexturestats.h"
 #include "llurldispatcher.h"
@@ -84,7 +87,7 @@
 #include "boost/bind.hpp"
 
 #if LL_WINDOWS
-	#include "llwindebug.h"
+#	include "llwindebug.h"
 #endif
 
 #if LL_WINDOWS
@@ -492,6 +495,11 @@ static void settings_to_globals()
 	gShowObjectUpdates = gSavedSettings.getBOOL("ShowObjectUpdates");
 	LLWorldMapView::sMapScale = gSavedSettings.getF32("MapScale");
 	LLHoverView::sShowHoverTips = gSavedSettings.getBOOL("ShowHoverTips");
+
+	// Setup the spell checker
+	LLSpellCheck::instance().setSpellCheck(gSavedSettings.getBOOL("SpellCheck"));
+	LLSpellCheck::instance().setShowMisspelled(gSavedSettings.getBOOL("SpellCheckShow"));
+	LLSpellCheck::instance().setDictionary(gSavedSettings.getString("SpellCheckLanguage"));
 
 //MK
 	RRInterface::init();
@@ -3030,7 +3038,8 @@ static bool finish_quit(const LLSD& notification, const LLSD& response)
 	}
 	return false;
 }
-static LLNotificationFunctorRegistration finish_quit_reg("ConfirmQuit", finish_quit);
+static LLNotificationFunctorRegistration finish_quit_reg1("ConfirmQuit", finish_quit);
+static LLNotificationFunctorRegistration finish_quit_reg2("ConfirmQuitNotifications", finish_quit);
 
 void LLAppViewer::userQuit()
 {
@@ -3041,7 +3050,18 @@ void LLAppViewer::userQuit()
 	}
 	else
 	{
-		LLNotifications::instance().add("ConfirmQuit");
+		if (LLNotifyBox::getNotifyBoxCount() + LLGroupNotifyBox::getGroupNotifyBoxCount() > 0)
+		{
+			if (!LLNotifyBox::areNotificationsShown())
+			{
+				LLNotifyBox::setShowNotifications(TRUE);
+			}
+			LLNotifications::instance().add("ConfirmQuitNotifications");
+		}
+		else
+		{
+			LLNotifications::instance().add("ConfirmQuit");
+		}
 	}
 }
 

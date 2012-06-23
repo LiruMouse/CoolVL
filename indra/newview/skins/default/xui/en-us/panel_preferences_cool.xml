@@ -158,7 +158,7 @@
 				</combo_item>
 			</combo_box>
 		</panel>
-		<panel name="Chat/IM" label="Chat &amp; IM" border="true" mouse_opaque="true"
+		<panel name="Chat/IM" label="Chat, IM &amp; Text" border="true" mouse_opaque="true"
 		 left="1" bottom="-440" width="500" height="440" follows="left|top|right|bottom">
 			<view_border name="border4" bevel_style="none" border_thickness="1"
 			 left="10" bottom="-54" width="400" height="48" follows="left|top"/>
@@ -199,6 +199,44 @@
 			 label="Highlight posts containing any (4+ characters) word part of your display name"
 			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
 			 left="15" bottom_delta="-20" height="16" width="400" follows="left|top" />
+			<view_border name="border9" bevel_style="none" border_thickness="1"
+			 left="10" bottom_delta="-106" width="475" height="96" follows="left|top"/>
+			<check_box name="spell_check_check" control_name="SpellCheck"
+			 label="Spell checking in text and line editors"
+			 tool_tip="When spell checking is enabled, right-clicking on a misspelled word presents you with a menu containing suggestions for a replacement. This is the global setting (each line and text editor may have spell checking disabled, thus overriding this setting)."
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="72" width="370" height="16" follows="left|top" />
+			<check_box name="spell_check_show_check" control_name="SpellCheckShow"
+			 label="Highlight misspelled words in text"
+			 tool_tip="When this setting is enabled the misspelled words in the currently focused text or line editor are underlined with a red wave-like line. Note that this setting may also be toggled on and off via the context menu of the line and text editors which got spell checking enabled."
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
+			<text name="language_label" font="SansSerifSmall"
+			 left="15" bottom_delta="-25" width="140" height="20" follows="left|top">
+				Current spelling language:
+			</text>
+			<combo_box name="installed_dicts_combo" allow_text_entry="false"
+			 max_chars="64" enabled="true" mouse_opaque="true"
+			 tool_tip="Choose the dictionary to use for spell checking."
+			 left_delta="150" bottom_delta="3" width="230" height="18" follows="left|top" />
+			<text name="dictionary_label" font="SansSerifSmall"
+			 left="15" bottom_delta="-25" width="140" height="20" follows="left|top">
+				Get a new dictionary:
+			</text>
+			<text name="downloading" type="string" length="1" font="SansSerifSmall" text_color="white" visible="false"
+			 drop_shadow_visible="true" border_drop_shadow_visible="false" mouse_opaque="true"
+			 bg_visible="false" border_visible="false" h_pad="0" v_pad="0" halign="left"
+			 tool_tip="A dictionary is being downloaded. Note that this operation is asynchronous and will complete even if you close the preferences floater."
+			 left_delta="150" bottom_delta="0" width="300" height="20" follows="left|top">
+				Downloading a dictionary, please wait...
+			</text>
+			<combo_box name="download_dict_combo" allow_text_entry="false"
+			 max_chars="64" enabled="true" mouse_opaque="true"
+			 tool_tip="Choose a new dictionary to download."
+			 left_delta="0" bottom_delta="3" width="230" height="18" follows="left|top" />
+			<button name="dict_download_button" label="Download" font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 tool_tip="Click this button to download the chosen dictionary."
+			 left_delta="236" bottom_delta="-1" width="76" height="20" follows="left|top" />
 		</panel>
 		<panel name="Miscellaneous" label="Miscellaneous" border="true" mouse_opaque="true"
 		 left="1" bottom="-440" width="500" height="440" follows="left|top|right|bottom">
@@ -384,7 +422,7 @@
 			 left="10" bottom_delta="-24" width="460" height="16" follows="left|top">
 				Instant Messaging related options (require a restart to take effect):
 			</text>
-			<view_border name="border7" bevel_style="none" border_thickness="1"
+			<view_border name="border8" bevel_style="none" border_thickness="1"
 			 left="10" bottom_delta="-158" width="475" height="158" follows="left|top"/>
 			<text name="receive_im_text" type="string" length="1" enabled="true" mouse_opaque="true"
 			 bg_visible="false" border_visible="false" border_drop_shadow_visible="false"

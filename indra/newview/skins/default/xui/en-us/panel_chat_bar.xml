@@ -9,7 +9,7 @@
 	 font="SansSerif" enabled="true" hidden="false" mouse_opaque="true" tab_group="1"
 	 select_all_on_focus_received="false" select_on_focus="false" handle_edit_keys_directly="false"
 	 bevel_style="in" border_style="line" border_thickness="1"
-	 left_delta="72" bottom="-26" height="22" width="266" follows="left|right|bottom" />
+	 left_delta="72" bottom="-26" height="22" width="266" follows="left|right|bottom" spell_check="true" />
 	<flyout_button name="Say" label="Say" font="SansSerif"
 	 halign="center" list_position="above" enabled="true" hidden="false" mouse_opaque="true"
 	 right="-98" bottom="-28" height="24" width="68" follows="right|bottom"

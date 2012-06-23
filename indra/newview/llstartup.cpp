@@ -1093,9 +1093,9 @@ bool idle_startup()
 			// this might be a secondlife:///app/login URL
 			gLoginHandler.parseDirectLogin(LLStartUp::sSLURLCommand);
 		}
-		if (!gLoginHandler.getFirstName().empty()
-			|| !gLoginHandler.getLastName().empty()
-			|| !gLoginHandler.getWebLoginKey().isNull())
+		if (!gLoginHandler.getFirstName().empty() ||
+			!gLoginHandler.getLastName().empty() ||
+			!gLoginHandler.getWebLoginKey().isNull())
 		{
 			// We have at least some login information on a SLURL
 			firstname = gLoginHandler.getFirstName();
