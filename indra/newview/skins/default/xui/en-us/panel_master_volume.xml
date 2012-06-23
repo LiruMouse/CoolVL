@@ -1,0 +1,15 @@
+<panel bg_visible="false" border="false" border_visible="false" bottom="-34"
+     enabled="true" follows="left|top" hidden="false"
+     mouse_opaque="true" name="master_volume">
+	<button name="volume" control_name="ShowAudioVolume"
+	 label="" image_overlay="icn-overlay_volume-panel.tga"
+	 tool_tip="Master Volume Control, click for volume settings"
+	 left="2" bottom="-22" width="28" height="22" />
+<!--
+	<volume_slider control_name="AudioLevelMaster"
+	     bottom="-20" enabled="true" follows="left|top" height="17" hidden="false"
+	     increment="0.05" initial_val="0.5" left_delta="25" max_val="1" min_val="0"
+	     mouse_opaque="true" name="volume_slider" width="40"
+	     tool_tip="Change the volume using this slider" />
+-->
+</panel>

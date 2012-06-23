@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel border="true" bottom="-499" enabled="true" follows="left|top|right|bottom"
+    height="548" label="Text Chat" left="102" mouse_opaque="true" name="chat"
+    width="517">
+	<text name="text_box2" type="string" length="1" enabled="true" mouse_opaque="true"
+	 bg_visible="false" border_drop_shadow_visible="false" border_visible="false" drop_shadow_visible="true"
+	 font="SansSerifSmall" v_pad="0" h_pad="0" halign="left"
+	 bottom="-25" left="10" height="18" width="50" follows="left|top">
+		Text
+Color:
+	</text>
+	<color_swatch name="user" label="You" control_name="UserChatColor"
+	 enabled="true" mouse_opaque="true" can_apply_immediately="true"
+	 border_color="0.45098 0.517647 0.607843 1"
+	 tool_tip="Text color for your own chat"
+	 bottom_delta="-30" left="60" height="47" width="40" follows="left|top" />
+	<color_swatch name="agent" label="Others" control_name="AgentChatColor"
+	 enabled="true" mouse_opaque="true" can_apply_immediately="true"
+	 border_color="0.45098 0.517647 0.607843 1"
+	 tool_tip="Text color for other avatars' chat"
+	 bottom_delta="0" left_delta="48" height="47" width="40" follows="left|top" />
+	<color_swatch name="im" label="IM" control_name="IMChatColor"
+	 enabled="true" mouse_opaque="true" can_apply_immediately="true"
+	 border_color="0.45098 0.517647 0.607843 1"
+	 tool_tip="Text color for avatars' instant messages"
+	 bottom_delta="0" left_delta="48" height="47" width="40" follows="left|top"/>
+	<color_swatch name="system" label="System" control_name="SystemChatColor"
+	 enabled="true" mouse_opaque="true" can_apply_immediately="true"
+	 border_color="0.45098 0.517647 0.607843 1"
+	 tool_tip="Text color for system messages"
+	 bottom_delta="0" left_delta="48" height="47" width="40" follows="left|top"/>
+	<color_swatch name="script_error" label="Errors" control_name="ScriptErrorColor"
+	 enabled="true" mouse_opaque="true" can_apply_immediately="true"
+	 border_color="0.45098 0.517647 0.607843 1"
+	 tool_tip="Text color for script error messages"
+	 bottom_delta="0" left_delta="48" height="47" width="40" follows="left|top"/>
+	<color_swatch name="objects" label="Objects" control_name="ObjectChatColor"
+	 enabled="true" mouse_opaque="true" can_apply_immediately="true"
+	 border_color="0.45098 0.517647 0.607843 1"
+	 tool_tip="Text color for public chat from objects"
+	 bottom_delta="0" left_delta="48" height="47" width="40" follows="left|top"/>
+	<color_swatch name="direct" label="Direct" control_name="DirectChatColor"
+	 enabled="true" mouse_opaque="true" can_apply_immediately="true"
+	 border_color="0.45098 0.517647 0.607843 1"
+	 tool_tip="Text color for private chat from objects (object IMs and llRegionSayTo() direct messages)"
+	 bottom_delta="0" left_delta="48" height="47" width="40" follows="left|top"/>
+	<color_swatch name="owner" label="Owner" control_name="llOwnerSayChatColor"
+	 enabled="true" mouse_opaque="true" can_apply_immediately="true"
+	 border_color="0.45098 0.517647 0.607843 1"
+	 tool_tip="Text color for messages coming from your own objects (llOwnerSay() messages)"
+	 bottom_delta="0" left_delta="48" height="47" width="40" follows="left|top"/>
+	<color_swatch name="links" label="URLs" control_name="HTMLLinkColor"
+	 enabled="true" mouse_opaque="true" can_apply_immediately="true"
+	 border_color="0.45098 0.517647 0.607843 1"
+	 tool_tip="Links color (used on avatar names, object names and URLs)"
+	 bottom_delta="0" left_delta="48" height="47" width="40" follows="left|top"/>
+	<text name="text_box3" type="string" length="1" enabled="true" mouse_opaque="true"
+	 bg_visible="false" border_drop_shadow_visible="false" border_visible="false" drop_shadow_visible="true"
+	 font="SansSerifSmall" v_pad="0" h_pad="0" halign="left"
+	 bottom_delta="-25" left="10" height="16" width="90" follows="left|top">
+		Chat Console:
+	</text>
+	<spinner name="fade_chat_time" control_name="ChatPersistTime" enabled="true" mouse_opaque="true"
+	 min_val="2" max_val="60" increment="1" decimal_digits="0"
+	 label="Fade chat after" label_width="80"
+	 bottom_delta="0" left="104" height="16" width="125" follows="left|top" />
+	<text name="text_box4" type="string" length="1" enabled="true" mouse_opaque="true"
+	 bg_visible="false" border_drop_shadow_visible="false" border_visible="false" drop_shadow_visible="true"
+	 font="SansSerifSmall" v_pad="0" h_pad="0" halign="left"
+	 bottom_delta="0" left_delta="132" height="16" width="145" follows="left|top">
+		seconds and a maximum of
+	</text>
+	<spinner name="max_chat_count" control_name="ConsoleMaxLines" enabled="true" mouse_opaque="true"
+	 min_val="1" max_val="50" increment="1" decimal_digits="0"
+	 bottom_delta="0" left_delta="150" height="16" width="42" follows="left|top" />
+	<text name="text_box5" type="string" length="1" enabled="true" mouse_opaque="true"
+	 bg_visible="false" border_drop_shadow_visible="false" border_visible="false" drop_shadow_visible="true"
+	 font="SansSerifSmall" v_pad="0" h_pad="0" halign="left"
+	 bottom_delta="0" left_delta="50" height="16" width="50" follows="left|top">
+		lines
+	</text>
+	<slider name="console_opacity" label="Opacity" control_name="ConsoleBackgroundOpacity"
+	 show_text="true" can_edit_text="false" enabled="true" mouse_opaque="true"
+	 min_val="0" max_val="1" increment="0.05" decimal_digits="3"
+	 bottom_delta="-24" left="104" height="18" width="200" follows="left|top" />
+	<text name="text_box1" type="string" length="1" enabled="true" mouse_opaque="true"
+	 bg_visible="false" border_drop_shadow_visible="false" border_visible="false" drop_shadow_visible="true"
+	 font="SansSerifSmall" v_pad="0" h_pad="0" halign="left"
+	 bottom_delta="-24" left_delta="0" height="20" width="60" follows="left|top">
+		Font Size:
+	</text>
+	<radio_group name="chat_font_size" control_name="ChatFontSize"
+	 draw_border="false" enabled="true" mouse_opaque="true"
+	 bottom_delta="4" left_delta="70" height="16" width="250" follows="left|top" >
+		<radio_item type="string" length="1" bottom="-16" enabled="true" height="16" left_delta="0" mouse_opaque="true"
+		     name="radio" width="98">
+			Small
+		</radio_item>
+		<radio_item type="string" length="1" bottom="-16" enabled="true" height="16" left_delta="40" mouse_opaque="true"
+		     name="radio2" width="98">
+			Medium
+		</radio_item>
+		<radio_item type="string" length="1" bottom="-16" enabled="true" height="16" left_delta="40" mouse_opaque="true"
+		     name="radio3" width="98">
+			Large
+		</radio_item>
+	</radio_group>
+	<check_box name="chat_full_width_check" control_name="ChatFullWidth"
+	 radio_style="false" enabled="true" mouse_opaque="true"
+	 label="Use full screen width (requires a restart)" font="SansSerifSmall"
+	 bottom_delta="-22" left="100" height="16" width="400" follows="left|top" />
+	<check_box name="disable_messages_spacing_check" control_name="DisableMessagesSpacing"
+	 tool_tip="This setting allows to display messages in the chat console without any extra spacing between each individual message. It is unavailable and ignored when the boxed messages setting is enabled."
+	 radio_style="false" enabled="true" mouse_opaque="true"
+	 label="Disable extra spacing between messages" font="SansSerifSmall"
+	 bottom_delta="-20" left_delta="0" height="16" width="245" follows="left|top" />
+	<check_box name="console_box_per_message_check" control_name="ConsoleBoxPerMessage"
+	 tool_tip="When this setting is checked, each individual message in the chat console gets its own background box drawn, instead of a single box enclosing all the messages at once. However, this setting also forces the extra vertical spacing between messages."
+	 radio_style="false" enabled="true" mouse_opaque="true"
+	 label="Boxed messages" font="SansSerifSmall"
+	 bottom_delta="0" left_delta="255" height="16" width="145" follows="left|top" />
+	<text name="text_box7" type="string" length="1" enabled="true" mouse_opaque="true"
+	 bg_visible="false" border_drop_shadow_visible="false" border_visible="false" drop_shadow_visible="true"
+	 font="SansSerifSmall" v_pad="0" h_pad="0" halign="left"
+	 bottom_delta="-24" left="10" height="17" width="90" follows="left|top">
+		Bubble Chat:
+	</text>
+	<check_box name="bubble_text_chat" control_name="UseChatBubbles"
+     radio_style="false" enabled="true" mouse_opaque="true"
+	 label="Show chat bubbles" font="SansSerifSmall"
+	 tool_tip="Note that enabling the bubble chat disables the chatting avatars' echo on the console"
+	 bottom_delta="0" left="100" height="16" width="200" follows="left|top" />
+	<slider name="bubble_chat_opacity" label="Opacity" control_name="ChatBubbleOpacity" enabled="true" mouse_opaque="true"
+	 min_val="0" max_val="1" increment="0.05" decimal_digits="3" can_edit_text="false" show_text="true"
+	 tool_tip="Note that this setting is the same as the Avatar Names Opacity in the General preferences"
+	 bottom_delta="-20" left_delta="4" height="16" width="200" follows="left|top" />
+	<text name="text_box8" type="string" length="1" enabled="true" mouse_opaque="true"
+	 bg_visible="false" border_drop_shadow_visible="false" border_visible="false" drop_shadow_visible="true"
+	 font="SansSerifSmall" v_pad="0" h_pad="0" halign="left"
+	 bottom_delta="20" left_delta="155" height="16" width="75" follows="left|top">
+		Bubble color:
+	</text>
+	<color_swatch name="background" label="" control_name="BackgroundChatColor"
+	 enabled="true" mouse_opaque="true" can_apply_immediately="true"
+	 border_color="0.45098 0.517647 0.607843 1"
+	 bottom_delta="-32" left_delta="80" height="47" width="40" follows="left|top" />
+	<text name="text_box6" type="string" length="1" enabled="true" mouse_opaque="true"
+	 bg_visible="false" border_drop_shadow_visible="false" border_visible="false" drop_shadow_visible="true"
+	 font="SansSerifSmall" v_pad="0" h_pad="0" halign="left"
+	 bottom_delta="-15" left="10" height="18" width="90" follows="left|top">
+		Chat Options:
+	</text>
+	<check_box name="close_chat_on_return_check" control_name="CloseChatOnReturn"
+	 radio_style="false" enabled="true" mouse_opaque="true"
+	 label="Close chat bar after hitting return" font="SansSerifSmall"
+	 bottom_delta="0" left="100" height="16" width="400" follows="left|top" />
+	<check_box name="play_typing_animation_check" control_name="PlayTypingAnim"
+	 radio_style="false" enabled="true" mouse_opaque="true"
+	 label="Play the typing animation when you type in chat" font="SansSerifSmall"
+	 tool_tip="This setting applies only to your own avatar"
+	 bottom_delta="-20" left_delta="0" height="16" width="400" follows="left|top" />
+	<check_box name="play_typing_sound_check" control_name="PlayTypingSound"
+	 radio_style="false" enabled="true" mouse_opaque="true"
+     label="Play the typing sound when an avatar types in chat" font="SansSerifSmall"
+	 tool_tip="This setting applies to all avatars, including yours"
+	 bottom_delta="-20" left_delta="0" height="16" width="400" follows="left|top" />
+	<check_box name="show_typing_info_check" control_name="ShowTypingInfo"
+	 radio_style="false" enabled="true" mouse_opaque="true"
+     label="Show &quot;Typing&quot; in name bubbles when avatars type" font="SansSerifSmall"
+	 tool_tip="This setting allows you to know whether a resident is typing or not, regardless of the fact that they disabled their typing anim. However some text clients do not send the &quot;typing in chat&quot; info, while a few viewers may be configured so not to send it. Note that this setting is irrelevant in bubble chat mode (for which &quot;...&quot; appears while a resident types)."
+	 bottom_delta="-20" left_delta="0" height="16" width="400" follows="left|top" />
+	<text name="text_box11" type="string" length="1" enabled="true" mouse_opaque="true"
+	 bg_visible="false" border_drop_shadow_visible="false" border_visible="false" drop_shadow_visible="true"
+	 font="SansSerifSmall" v_pad="0" h_pad="0" halign="left"
+	 tool_tip="When you emit chat and emotes (with either the &quot;Whisper&quot;, &quot;Say&quot; or &quot;Shout&quot; buttons) your avatar normally plays an animation (whisper anim, or &quot;say&quot; anim (nodding of the head), or shout anim). You may disable or change this behaviour with this setting. Disabling it entirely might be a good idea when your avatar is sitting on an object making it play a low priority animation and the whisper/say/shout anim overrides it. This setting applies to your avatar only."
+	 bottom_delta="-18" left="104" height="16" width="300" follows="left|top">
+		Play the whisper/say/shout animation:
+	</text>
+	<radio_group name="objects_link" control_name="PlayChatAnims"
+	 draw_border="true" enabled="true" mouse_opaque="true"
+	 bottom_delta="-20" left_delta="8" height="20" width="370" follows="left|top">
+		<radio_item name="always" type="string" length="1" enabled="true" mouse_opaque="true"
+		 bottom_delta="0" left_delta="5" height="18" width="48" follows="left|top">
+			Never
+		</radio_item>
+		<radio_item name="non_emotes" type="string" length="1" enabled="true" mouse_opaque="true"
+		 tool_tip="Play the anim only when the text is not an emote or contains quotes"
+		 bottom_delta="0" left_delta="45" height="18" width="48" follows="left|top">
+			Not for pure emotes
+		</radio_item>
+		<radio_item name="never" type="string" length="1" enabled="true" mouse_opaque="true"
+		 bottom_delta="0" left_delta="70" height="18" width="48" follows="left|top">
+			Always
+		</radio_item>
+	</radio_group>
+	<check_box name="show_timestamps_check" control_name="ChatShowTimestamps"
+	 radio_style="false" enabled="true" mouse_opaque="true"
+	 label="Show timestamps in Local Chat" font="SansSerifSmall"
+	 bottom_delta="-22" left="100" height="16" width="400" follows="left|top" />
+	<text name="text_box9" type="string" length="1" enabled="true" mouse_opaque="true"
+	 bg_visible="false" border_drop_shadow_visible="false" border_visible="false" drop_shadow_visible="true"
+	 font="SansSerifSmall" v_pad="0" h_pad="0" halign="left"
+	 tool_tip="The link shown on object names allows you to click on that name to open the Object Information floater, which in turn gives you the name of the owner (with a link to their profile), the object position (with a link to the map) and presents you with muting options"
+	 bottom_delta="-18" left="104" height="16" width="300" follows="left|top">
+		Show links on chatting object names in chat history for:
+	</text>
+	<radio_group name="objects_link" control_name="LinksForChattingObjects"
+	 draw_border="true" enabled="true" mouse_opaque="true"
+	 bottom_delta="-20" left_delta="8" height="20" width="370" follows="left|top">
+		<radio_item name="no_object" type="string" length="1" enabled="true" mouse_opaque="true"
+		 bottom_delta="0" left_delta="5" height="18" width="48" follows="left|top">
+			No object
+		</radio_item>
+		<radio_item name="others_objects" type="string" length="1" enabled="true" mouse_opaque="true"
+		 bottom_delta="0" left_delta="45" height="18" width="48" follows="left|top">
+			Others' objects
+		</radio_item>
+		<radio_item name="anyones_objects" type="string" length="1" enabled="true" mouse_opaque="true"
+		 bottom_delta="0" left_delta="70" height="18" width="48" follows="left|top">
+			Anyone's objects
+		</radio_item>
+	</radio_group>
+<!--
+	<text name="text_box10" type="string" length="1" enabled="true" mouse_opaque="true"
+	 bg_visible="false" border_drop_shadow_visible="false" border_visible="false" drop_shadow_visible="true"
+	 font="SansSerifSmall" v_pad="0" h_pad="0" halign="left"
+	 bottom_delta="-26" left="10" height="17" width="90" follows="left|top">
+		Translate Chat:
+	</text>
+	<check_box name="translate_chat" control_name="TranslateChat"
+	 radio_style="false" enabled="true" mouse_opaque="true"
+	 label="Use machine translation into:" font="SansSerifSmall"
+	 tool_tip="Use machine translation while chatting (powered by Google). Note that Google announced that they would close down their translation service on the 1st December 2011, at which date this feature will stop working."
+	 bottom_delta="0" left="100" height="16" width="180" follows="left|top" />
+
+	<combo_box name="translate_language_combobox"
+	 allow_text_entry="true" max_chars="135" enabled="true" mouse_opaque="true"
+	 bottom_delta="0" left_delta="180" height="16" width="146" follows="left|top">
+		<combo_item type="string" length="1" enabled="true" name="System Default Language" value="default">
+			System Default
+		</combo_item>
+		<combo_item type="string" length="1" enabled="true" name="English" value="en">
+			English
+		</combo_item>		
+		<combo_item type="string" length="1" enabled="true" name="Danish" value="da">
+			Dansk (Danish)
+		</combo_item>
+		<combo_item type="string" length="1" enabled="true" name="Deutsch(German)" value="de">
+			Deutsch (German)
+		</combo_item>
+		<combo_item type="string" length="1" enabled="true" name="Spanish" value="es">
+			Español (Spanish)
+		</combo_item>
+		<combo_item type="string" length="1" enabled="true" name="French" value="fr">
+			Français (French)
+		</combo_item>
+		<combo_item type="string" length="1" enabled="true" name="Italian" value="it">
+			Italiano (Italian)
+		</combo_item>
+		<combo_item type="string" length="1" enabled="true" name="Hungarian" value="hu">
+			Magyar (Hungarian)
+		</combo_item>
+		<combo_item type="string" length="1" enabled="true" name="Dutch" value="nl">
+			Nederlands (Dutch)
+		</combo_item>
+		<combo_item type="string" length="1" enabled="true" name="Polish" value="pl">
+			Polski (Polish)
+		</combo_item>
+		<combo_item type="string" length="1" enabled="true" name="Portugese" value="pt">
+			Portugués (Portuguese)
+		</combo_item>
+ 		<combo_item type="string" length="1" enabled="true" name="Russian" value="ru">
+ 			Русский (Russian)
+ 		</combo_item>
+		<combo_item type="string" length="1" enabled="true" name="Turkish" value="tr">
+			Türkçe (Turkish)
+		</combo_item>
+ 		<combo_item type="string" length="1" enabled="true" name="Ukrainian" value="uk">
+ 			Українська (Ukrainian)
+ 		</combo_item>
+		<combo_item type="string" length="1" enabled="true" name="Chinese" value="zh">
+			中文 (简体) (Chinese)
+		</combo_item>
+		<combo_item type="string" length="1" enabled="true" name="(Japanese)" value="ja">
+			日本語 (Japanese)
+		</combo_item>
+		<combo_item type="string" length="1" enabled="true" name="(Korean)" value="ko">
+			한국어 (Korean)
+		</combo_item>
+	</combo_box>
+-->
+	<text name="text_box12" type="string" length="1" enabled="true" mouse_opaque="true"
+	 bg_visible="false" border_drop_shadow_visible="false" border_visible="false" drop_shadow_visible="true"
+	 font="SansSerifSmall" v_pad="0" h_pad="0" halign="left"
+	 bottom_delta="-30" left="10" height="16" width="90" follows="left|top">
+		Chat logging:
+	</text>	
+	<text name="text_box13" type="string" length="1" enabled="true" mouse_opaque="true"
+	 bg_visible="false" border_drop_shadow_visible="false" border_visible="false" drop_shadow_visible="true"
+	 font="SansSerifSmall" v_pad="0" h_pad="0" halign="left"
+	 bottom_delta="0" left="104" height="16" width="300" follows="left|top">
+		Please see the "IM &amp; Logs" tab.
+	</text>	
+</panel>

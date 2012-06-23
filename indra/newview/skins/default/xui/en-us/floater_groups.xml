@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater bottom="-371" can_close="true" can_drag_on_left="false" can_minimize="true"
+ can_resize="true" can_tear_off="false" enabled="true" follows="left|top"
+ height="300" hidden="false" left="280" min_height="200" min_width="275"
+ rect_control="FloaterGroupsRect"
+ mouse_opaque="true" name="groups" title="Groups" width="280">
+	<text name="groupdesc" font="SansSerifSmall" length="1" enabled="true" mouse_opaque="false"
+	 h_pad="0" halign="left" tab_stop="false" v_pad="0" drop_shadow_visible="true"
+	 bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
+	 left="12" bottom="-36" width="248" height="16" follows="left|top">
+		Your currently active group is displayed in bold.
+	</text>
+	<scroll_list name="group list" enabled="true"  mouse_opaque="true"
+	 multi_select="false" tab_stop="true" column_padding="0"
+	 background_visible="true" draw_heading="true" draw_stripes="true" draw_border="true"
+	 left="12" bottom="-228" width="248" height="190" follows="left|top|right|bottom">
+		<column name="name" label="Group name" dynamicwidth="true" />
+		<column name="profile" image="ff_visible_online_button.tga" width="20" tool_tip="Group is visible in profile." />
+		<column name="chat" image="fg_chat_button.tga" width="20" tool_tip="Receive group chat." />
+		<column name="notices" image="fg_notices_button.tga" width="20" tool_tip="Receive group notices." />
+	</scroll_list>
+	<text name="groupcount" font="SansSerifSmall" length="1" enabled="true" mouse_opaque="false"
+	 h_pad="0" halign="left" tab_stop="false" v_pad="0" drop_shadow_visible="true"
+	 bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
+	 left="12" bottom="-246" width="248" height="16" follows="left|bottom">
+		You belong to [COUNT] groups (of [MAX] maximum).
+	</text>
+	<button name="Activate" label="Activate" font="SansSerif" mouse_opaque="true" enabled="false"
+	 left="8" bottom="-268" width="70" height="20" follows="left|bottom"/>
+	<button name="Info" label="Info" font="SansSerif" mouse_opaque="true"
+	 left_delta="74" bottom="-268" width="70" height="20" follows="left|bottom"/>
+	<button name="Titles..." label="Titles..." font="SansSerif" mouse_opaque="true"
+	 left_delta="74" bottom="-268" width="70" height="20" follows="left|bottom"/>
+	<button name="IM" label="IM" font="SansSerif" mouse_opaque="true"
+	 left_delta="74" bottom="-268" width="38" height="20" follows="left|bottom"/>
+	<button name="Leave" label="Leave" font="SansSerif" mouse_opaque="true"
+	 left="8" bottom="-292" width="70" height="20" follows="left|bottom"/>
+	<button name="Create" label="Create" font="SansSerif" mouse_opaque="true"
+	 left_delta="74" bottom="-292" width="70" height="20" follows="left|bottom"/>
+	<button name="Search..." label="Search..." font="SansSerif" mouse_opaque="true"
+	 left_delta="74" bottom="-292" width="70" height="20" follows="left|bottom"/>
+	<button name="OK" label="OK" font="SansSerif" mouse_opaque="true"
+	 left_delta="74" bottom="-292" width="38" height="20" follows="left|bottom"/>
+	<string name="none">
+		none
+	</string>
+</floater>

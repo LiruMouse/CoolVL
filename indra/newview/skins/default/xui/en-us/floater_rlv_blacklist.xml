@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater name="restrained love blacklist" title="RestrainedLove Black List"
+	can_close="true" can_drag_on_left="false" can_minimize="true" can_resize="false"
+	min_width="500" min_height="304" width="500" height="304">
+	<text name="info1" font="SansSerifSmall" mouse_opaque="true" halign="center"
+	 bottom_delta="-38" left="10" height="16" width="480" follows="left|right|top">
+		With this floater, you may prevent RestrainedLove from applying restrictions
+	</text>
+	<text name="info2" font="SansSerifSmall" mouse_opaque="true" halign="center"
+	 bottom_delta="-16" left="10" height="16" width="480" follows="left|right|top">
+		you do not want to be imposed on your avatar or on the use of your viewer. 
+	</text>
+	<text name="info4" font="SansSerifSmall" text_color="white" mouse_opaque="true" halign="center"
+	 bottom_delta="-16" left="10" height="16" width="480" follows="left|right|top">
+		The changes will only take effect after a viewer restart.
+	</text>
+	<check_box name="instantmessage" label="Forbid instant messaging restrictions"
+	 font="SansSerifSmall" mouse_opaque="true"  enabled="true" tool_tip=" "
+	 left="15" bottom_delta="-20" width="250" height="16" follows="left|top" />
+	<check_box name="channel" label="Forbid private channel restrictions"
+	 font="SansSerifSmall" mouse_opaque="true"  enabled="true" tool_tip=" "
+	 left_delta="260" bottom_delta="0" width="250" height="16" follows="left|top" />
+	<check_box name="sendchat" label="Forbid chat sending restrictions"
+	 font="SansSerifSmall" mouse_opaque="true"  enabled="true" tool_tip=" "
+	 left="15" bottom_delta="-20" width="250" height="16" follows="left|top" />
+	<check_box name="receivechat" label="Forbid chat receiving restrictions"
+	 font="SansSerifSmall" mouse_opaque="true"  enabled="true" tool_tip=" "
+	 left_delta="260" bottom_delta="0" width="250" height="16" follows="left|top" />
+	<check_box name="emote" label="Forbid emoting restrictions"
+	 font="SansSerifSmall" mouse_opaque="true"  enabled="true" tool_tip=" "
+	 left="15" bottom_delta="-20" width="250" height="16" follows="left|top" />
+	<check_box name="redirection" label="Forbid chat/emotes redirections"
+	 font="SansSerifSmall" mouse_opaque="true"  enabled="true" tool_tip=" "
+	 left_delta="260" bottom_delta="0" width="250" height="16" follows="left|top" />
+	<check_box name="move" label="Forbid movement restrictions"
+	 font="SansSerifSmall" mouse_opaque="true"  enabled="true" tool_tip=" "
+	 left="15" bottom_delta="-20" width="250" height="16" follows="left|top" />
+	<check_box name="sit" label="Forbid sitting restrictions"
+	 font="SansSerifSmall" mouse_opaque="true"  enabled="true" tool_tip=" "
+	 left_delta="260" bottom_delta="0" width="250" height="16" follows="left|top" />
+	<check_box name="teleport" label="Forbid teleport restrictions"
+	 font="SansSerifSmall" mouse_opaque="true"  enabled="true" tool_tip=" "
+	 left="15" bottom_delta="-20" width="250" height="16" follows="left|top" />
+	<check_box name="touch" label="Forbid touch restrictions"
+	 font="SansSerifSmall" mouse_opaque="true"  enabled="true" tool_tip=" "
+	 left_delta="260" bottom_delta="0" width="250" height="16" follows="left|top" />
+	<check_box name="inventory" label="Forbid inventory access restrictions"
+	 font="SansSerifSmall" mouse_opaque="true"  enabled="true" tool_tip=" "
+	 left="15" bottom_delta="-20" width="250" height="16" follows="left|top" />
+	<check_box name="inventorylock" label="Forbid inventory folders locking"
+	 font="SansSerifSmall" mouse_opaque="true"  enabled="true" tool_tip=" "
+	 left_delta="260" bottom_delta="0" width="250" height="16" follows="left|top" />
+	<check_box name="lock" label="Forbid worn items locking"
+	 font="SansSerifSmall" mouse_opaque="true"  enabled="true" tool_tip=" "
+	 left="15" bottom_delta="-20" width="250" height="16" follows="left|top" />
+	<check_box name="build" label="Forbid building restrictions"
+	 font="SansSerifSmall" mouse_opaque="true"  enabled="true" tool_tip=" "
+	 left_delta="260" bottom_delta="0" width="250" height="16" follows="left|top" />
+	<check_box name="attach" label="Forbid force-attach actions"
+	 font="SansSerifSmall" mouse_opaque="true"  enabled="true" tool_tip=" "
+	 left="15" bottom_delta="-20" width="250" height="16" follows="left|top" />
+	<check_box name="detach" label="Forbid force-detach actions"
+	 font="SansSerifSmall" mouse_opaque="true"  enabled="true" tool_tip=" "
+	 left_delta="260" bottom_delta="0" width="250" height="16" follows="left|top" />
+	<check_box name="name" label="Forbid names visibility restrictions"
+	 font="SansSerifSmall" mouse_opaque="true"  enabled="true" tool_tip=" "
+	 left="15" bottom_delta="-20" width="250" height="16" follows="left|top" />
+	<check_box name="location" label="Forbid location/map restrictions"
+	 font="SansSerifSmall" mouse_opaque="true"  enabled="true" tool_tip=" "
+	 left_delta="260" bottom_delta="0" width="250" height="16" follows="left|top" />
+	<check_box name="group" label="Forbid group restrictions"
+	 font="SansSerifSmall" mouse_opaque="true"  enabled="true" tool_tip=" "
+	 left="15" bottom_delta="-20" width="250" height="16" follows="left|top" />
+	<check_box name="debug" label="Forbid debug settings changes"
+	 font="SansSerifSmall" mouse_opaque="true"  enabled="true" tool_tip=" "
+	 left_delta="260" bottom_delta="0" width="250" height="16" follows="left|top" />
+	<button name="apply" label="OK" tool_tip="Apply the new settings and close the floater"
+	 enabled="true" mouse_opaque="true" font="SansSerif" halign="center"
+	 left="160" bottom="8" width="80" height="20" follows="left|top"/>
+	<button name="cancel" label="Cancel" tool_tip="Discard any change and close the floater"
+	 enabled="true" mouse_opaque="true" font="SansSerif" halign="center"
+	 left_delta="90" bottom="8" width="80" height="20" follows="left|top"/>
+	<string name="tool_tip_prefix">Check this box to blacklist the following commands:</string>
+</floater>

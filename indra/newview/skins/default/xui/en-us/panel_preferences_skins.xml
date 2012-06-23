@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel border="true" bottom="-409" enabled="true" follows="left|top|right|bottom"
+ height="408" label="Skins" left="102" mouse_opaque="true"
+ name="Skins panel" width="517">
+	<text type="string" length="1" bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
+	 bottom="-22" drop_shadow_visible="true" enabled="true" follows="left|top"
+	 font="SansSerifSmall" h_pad="0" halign="left" height="12" left="10"
+	 mouse_opaque="true" name="muting_text" v_pad="0" width="400">
+		Select a skin (requires a restart):
+	</text>
+	<radio_group name="skin_selection" draw_border="false"
+	 left="12" bottom="0" width="100" height="380" follows="top|left">
+		<radio_item bottom="-20" height="20" left="0" name="default" width="100" follows="top|left">
+			Default
+		</radio_item>
+		<radio_item bottom_delta="-68" height="20" left="0" name="silver" width="100" follows="top|left">
+			Silver
+		</radio_item>
+		<radio_item bottom_delta="-68" height="20" left="0" name="dark" width="100" follows="top|left">
+			Dark
+		</radio_item>
+	</radio_group>
+	<button name="classic_preview" label="" scale_image="true"
+	 tool_tip="The classic skin by Linden Lab"
+	 image_selected="skin_thumbnail_default.png" image_unselected="skin_thumbnail_default.png"
+	 image_hover_selected="skin_thumbnail_default.png" image_hover_unselected="skin_thumbnail_default.png"
+	 left="130" bottom="-160" width="298" height="130" follows="top|left" />
+	<button name="silver_preview" label="" scale_image="true"
+	 tool_tip="The Silver/Dazzle skin by Linden Lab"
+	 image_selected="skin_thumbnail_silver.png" image_hover_selected="skin_thumbnail_silver.png"
+	 image_unselected="skin_thumbnail_silver.png" image_hover_unselected="skin_thumbnail_silver.png"
+	 left="130" bottom_delta="-136" width="298" height="130" follows="top|left" />
+	<button name="dark_preview" label="" scale_image="true"
+	 tool_tip="The Dark skin by JB Kraft"
+	 image_selected="skin_thumbnail_dark.png" image_hover_selected="skin_thumbnail_dark.png"
+	 image_unselected="skin_thumbnail_dark.png" image_hover_unselected="skin_thumbnail_dark.png"
+	 left="130" bottom_delta="-136" width="298" height="130" follows="top|left" />
+</panel>

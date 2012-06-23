@@ -1,0 +1,689 @@
+/** 
+ * @file llfloatergroups.cpp
+ * @brief LLFloaterGroups class implementation
+ *
+ * $LicenseInfo:firstyear=2002&license=viewergpl$
+ * 
+ * Copyright (c) 2002-2009, Linden Research, Inc.
+ * 
+ * Second Life Viewer Source Code
+ * The source code in this file ("Source Code") is provided by Linden Lab
+ * to you under the terms of the GNU General Public License, version 2.0
+ * ("GPL"), unless you have obtained a separate licensing agreement
+ * ("Other License"), formally executed by you and Linden Lab.  Terms of
+ * the GPL can be found in doc/GPL-license.txt in this distribution, or
+ * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
+ * 
+ * There are special exceptions to the terms and conditions of the GPL as
+ * it is applied to this Source Code. View the full text of the exception
+ * in the file doc/FLOSS-exception.txt in this software distribution, or
+ * online at
+ * http://secondlifegrid.net/programs/open_source/licensing/flossexception
+ * 
+ * By copying, modifying or distributing this software, you acknowledge
+ * that you have read and understood your obligations described above,
+ * and agree to abide by those obligations.
+ * 
+ * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
+ * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
+ * COMPLETENESS OR PERFORMANCE.
+ * $/LicenseInfo$
+ */
+
+/*
+ * Shown from Edit -> Groups...
+ * Shows the agent's groups and allows the edit window to be invoked.
+ * Also overloaded to allow picking of a single group for assigning 
+ * objects and land to groups.
+ */
+
+#include "llviewerprecompiledheaders.h"
+
+#include "llfloatergroups.h"
+
+#include "llalertdialog.h"
+#include "llbutton.h"
+#include "llfocusmgr.h"
+#include "llscrolllistctrl.h"
+#include "lltextbox.h"
+#include "lluictrlfactory.h"
+#include "message.h"
+#include "roles_constants.h"
+
+#include "llagent.h"
+#include "llfloatergroupinfo.h"
+#include "hbfloatergrouptitles.h"
+#include "llfloaterdirectory.h"
+#include "llimview.h"
+#include "llmutelist.h"
+#include "llselectmgr.h"
+#include "llstartup.h"
+#include "llviewercontrol.h"
+#include "llviewerwindow.h"
+
+using namespace LLOldEvents;
+
+// static
+std::map<const LLUUID, LLFloaterGroupPicker*> LLFloaterGroupPicker::sInstances;
+
+// helper functions
+void init_group_list(LLFloater* self,
+					 LLScrollListCtrl* ctrl,
+					 const LLUUID& highlight_id,
+					 U64 powers_mask = GP_ALL_POWERS,
+					 bool with_checkboxes = false);
+
+///----------------------------------------------------------------------------
+/// Class LLFloaterGroupPicker
+///----------------------------------------------------------------------------
+
+// static
+LLFloaterGroupPicker* LLFloaterGroupPicker::findInstance(const LLSD& seed)
+{
+	instance_map_t::iterator found_it = sInstances.find(seed.asUUID());
+	if (found_it != sInstances.end())
+	{
+		return found_it->second;
+	}
+	return NULL;
+}
+
+// static
+LLFloaterGroupPicker* LLFloaterGroupPicker::createInstance(const LLSD &seed)
+{
+	LLFloaterGroupPicker* pickerp = new LLFloaterGroupPicker(seed);
+	LLUICtrlFactory::getInstance()->buildFloater(pickerp, "floater_choose_group.xml");
+	return pickerp;
+}
+
+LLFloaterGroupPicker::LLFloaterGroupPicker(const LLSD& seed)
+:	mSelectCallback(NULL),
+	mCallbackUserdata(NULL),
+	mPowersMask(GP_ALL_POWERS)
+{
+	mID = seed.asUUID();
+	sInstances.insert(std::make_pair(mID, this));
+}
+
+LLFloaterGroupPicker::~LLFloaterGroupPicker()
+{
+	sInstances.erase(mID);
+}
+
+void LLFloaterGroupPicker::setSelectCallback(void (*callback)(LLUUID, void*),
+											 void* userdata)
+{
+	mSelectCallback = callback;
+	mCallbackUserdata = userdata;
+}
+
+void LLFloaterGroupPicker::setPowersMask(U64 powers_mask)
+{
+	mPowersMask = powers_mask;
+	postBuild();
+}
+
+BOOL LLFloaterGroupPicker::postBuild()
+{
+	init_group_list((LLFloater*)this,
+					getChild<LLScrollListCtrl>("group list"),
+					gAgent.getGroupID(), mPowersMask);
+
+	childSetAction("OK", onBtnOK, this);
+
+	childSetAction("Cancel", onBtnCancel, this);
+
+	setDefaultBtn("OK");
+
+	childSetDoubleClickCallback("group list", onBtnOK);
+	childSetUserData("group list", this);
+
+	childEnable("OK");
+
+	return TRUE;
+}
+
+void LLFloaterGroupPicker::onBtnOK(void* userdata)
+{
+	LLFloaterGroupPicker* self = (LLFloaterGroupPicker*)userdata;
+	if (self) self->ok();
+}
+
+void LLFloaterGroupPicker::onBtnCancel(void* userdata)
+{
+	LLFloaterGroupPicker* self = (LLFloaterGroupPicker*)userdata;
+	if (self) self->close();
+}
+
+void LLFloaterGroupPicker::ok()
+{
+	LLCtrlListInterface* group_list = childGetListInterface("group list");
+	LLUUID group_id;
+	if (group_list)
+	{
+		group_id = group_list->getCurrentID();
+	}
+	if (mSelectCallback)
+	{
+		mSelectCallback(group_id, mCallbackUserdata);
+	}
+
+	close();
+}
+
+///----------------------------------------------------------------------------
+/// Class LLFloaterGroups
+///----------------------------------------------------------------------------
+
+LLFloaterGroups* LLFloaterGroups::sInstance = NULL;
+
+//LLEventListener
+//virtual
+bool LLFloaterGroups::handleEvent(LLPointer<LLEvent> event, const LLSD& userdata)
+{
+	if (event->desc() == "new group")
+	{
+		reset();
+		return true;
+	}
+	return false;
+}
+
+// Default constructor
+LLFloaterGroups::LLFloaterGroups() : LLFloater()
+{
+	sInstance = this;
+	LLUICtrlFactory::getInstance()->buildFloater(this, "floater_groups.xml");
+	gAgent.addListener(this, "new group");
+	gSavedSettings.setBOOL("ShowGroups", TRUE);
+}
+
+LLFloaterGroups::~LLFloaterGroups()
+{
+	gAgent.removeListener(this);
+	gFocusMgr.releaseFocusIfNeeded(this);
+	sInstance = NULL;
+	gSavedSettings.setBOOL("ShowGroups", FALSE);
+}
+
+LLFloaterGroups* LLFloaterGroups::show(void*)
+{
+	if (sInstance)
+	{
+		sInstance->open();	/*Flawfinder: ignore*/
+	}
+	else
+	{
+		LLFloaterGroups* self = new LLFloaterGroups;
+		self->open(); /*Flawfinder: ignore*/
+	}
+
+	return sInstance;
+}
+
+// static
+BOOL LLFloaterGroups::visible(void*)
+{
+	return sInstance && sInstance->getVisible();
+}
+
+// static
+void LLFloaterGroups::toggle(void*)
+{
+	if (sInstance)
+	{
+		sInstance->close();
+	}
+	else
+	{
+		show();
+	}
+}
+
+// clear the group list, and get a fresh set of info.
+void LLFloaterGroups::reset()
+{
+	if (!sInstance) return;
+	LLCtrlListInterface* group_list = childGetListInterface("group list");
+	if (group_list)
+	{
+		group_list->operateOnAll(LLCtrlListInterface::OP_DELETE);
+	}
+	childSetTextArg("groupcount", "[COUNT]", llformat("%d",gAgent.mGroups.count()));
+	childSetTextArg("groupcount", "[MAX]", llformat("%d", gMaxAgentGroups));
+
+	init_group_list((LLFloater*)this,
+					getChild<LLScrollListCtrl>("group list"),
+					gAgent.getGroupID(), GP_ALL_POWERS, true);
+	enableButtons();
+}
+
+BOOL LLFloaterGroups::postBuild()
+{
+	childSetCommitCallback("group list", onGroupList, this);
+
+	childSetTextArg("groupcount", "[COUNT]",
+					llformat("%d", gAgent.mGroups.count()));
+	childSetTextArg("groupcount", "[MAX]",
+					llformat("%d", gMaxAgentGroups));
+
+	init_group_list((LLFloater*)this,
+					getChild<LLScrollListCtrl>("group list"),
+					gAgent.getGroupID(), GP_ALL_POWERS, true);
+
+	childSetAction("Activate", onBtnActivate, this);
+
+	childSetAction("Info", onBtnInfo, this);
+
+	childSetAction("IM", onBtnIM, this);
+
+	childSetAction("Leave", onBtnLeave, this);
+
+	childSetAction("Create", onBtnCreate, this);
+
+	childSetAction("Search...", onBtnSearch, this);
+
+	childSetAction("Titles...", onBtnTitles, this);
+
+	childSetAction("OK", onBtnClose, this);
+
+	setDefaultBtn("IM");
+
+	childSetDoubleClickCallback("group list", onBtnIM);
+	childSetUserData("group list", this);
+
+	reset();
+
+	return TRUE;
+}
+
+void LLFloaterGroups::enableButtons()
+{
+	LLCtrlListInterface* group_list = childGetListInterface("group list");
+	LLUUID group_id;
+	if (group_list)
+	{
+		group_id = group_list->getCurrentID();
+	}
+
+	if (group_id != gAgent.getGroupID())
+	{
+		childEnable("Activate");
+	}
+	else
+	{
+		childDisable("Activate");
+	}
+	if (group_id.notNull())
+	{
+		childEnable("Info");
+		LLMuteList* ml = LLMuteList::getInstance();
+		childSetEnabled("IM", ml && !ml->isMuted(group_id, LLMute::flagTextChat));
+		childEnable("Leave");
+	}
+	else
+	{
+		childDisable("Info");
+		childDisable("IM");
+		childDisable("Leave");
+	}
+	if (gAgent.mGroups.count() < gMaxAgentGroups)
+	{
+		childEnable("Create");
+	}
+	else
+	{
+		childDisable("Create");
+	}
+}
+
+// static
+void LLFloaterGroups::onBtnCreate(void* userdata)
+{
+	LLFloaterGroups* self = (LLFloaterGroups*)userdata;
+	if (self) self->create();
+}
+
+// static
+void LLFloaterGroups::onBtnActivate(void* userdata)
+{
+	LLFloaterGroups* self = (LLFloaterGroups*)userdata;
+	if (self) self->activate();
+}
+
+// static
+void LLFloaterGroups::onBtnInfo(void* userdata)
+{
+	LLFloaterGroups* self = (LLFloaterGroups*)userdata;
+	if (self) self->info();
+}
+
+// static
+void LLFloaterGroups::onBtnIM(void* userdata)
+{
+	LLFloaterGroups* self = (LLFloaterGroups*)userdata;
+	if (self) self->startIM();
+}
+
+// static
+void LLFloaterGroups::onBtnLeave(void* userdata)
+{
+	LLFloaterGroups* self = (LLFloaterGroups*)userdata;
+	if (self) self->leave();
+}
+
+// static
+void LLFloaterGroups::onBtnSearch(void* userdata)
+{
+	LLFloaterGroups* self = (LLFloaterGroups*)userdata;
+	if (self) self->search();
+}
+
+// static
+void LLFloaterGroups::onBtnTitles(void* userdata)
+{
+	HBFloaterGroupTitles::show();
+}
+
+// static
+void LLFloaterGroups::onBtnClose(void* userdata)
+{
+	LLFloaterGroups* self = (LLFloaterGroups*)userdata;
+	if (self) self->close();
+}
+
+void LLFloaterGroups::create()
+{
+	llinfos << "LLFloaterGroups::create" << llendl;
+	LLFloaterGroupInfo::showCreateGroup(NULL);
+}
+
+void LLFloaterGroups::activate()
+{
+//MK
+	if (gRRenabled && gAgent.mRRInterface.contains ("setgroup"))
+	{
+		return;
+	}
+//mk
+	llinfos << "LLFloaterGroups::activate" << llendl;
+	LLCtrlListInterface* group_list = childGetListInterface("group list");
+	LLUUID group_id;
+	if (group_list)
+	{
+		group_id = group_list->getCurrentID();
+	}
+	LLMessageSystem* msg = gMessageSystem;
+	msg->newMessageFast(_PREHASH_ActivateGroup);
+	msg->nextBlockFast(_PREHASH_AgentData);
+	msg->addUUIDFast(_PREHASH_AgentID, gAgent.getID());
+	msg->addUUIDFast(_PREHASH_SessionID, gAgent.getSessionID());
+	msg->addUUIDFast(_PREHASH_GroupID, group_id);
+	gAgent.sendReliableMessage();
+}
+
+void LLFloaterGroups::info()
+{
+	llinfos << "LLFloaterGroups::info" << llendl;
+	LLCtrlListInterface* group_list = childGetListInterface("group list");
+	LLUUID group_id;
+	if (group_list && (group_id = group_list->getCurrentID()).notNull())
+	{
+		LLFloaterGroupInfo::showFromUUID(group_id);
+	}
+}
+
+void LLFloaterGroups::startIM()
+{
+	LLCtrlListInterface* group_list = childGetListInterface("group list");
+	LLUUID group_id;
+
+	if (gIMMgr && group_list &&
+		(group_id = group_list->getCurrentID()).notNull())
+	{
+		LLMuteList* ml = LLMuteList::getInstance();
+		LLGroupData group_data;
+		if (gAgent.getGroupData(group_id, group_data) &&
+			!(ml && ml->isMuted(group_id, "", LLMute::flagTextChat)))
+		{
+			gIMMgr->setFloaterOpen(TRUE);
+			gIMMgr->addSession(group_data.mName, IM_SESSION_GROUP_START,
+							   group_id);
+			make_ui_sound("UISndStartIM");
+		}
+		else
+		{
+			// Muted group
+			make_ui_sound("UISndInvalidOp");
+		}
+	}
+}
+
+void LLFloaterGroups::leave()
+{
+	llinfos << "LLFloaterGroups::leave" << llendl;
+	LLCtrlListInterface* group_list = childGetListInterface("group list");
+	LLUUID group_id;
+	if (group_list && (group_id = group_list->getCurrentID()).notNull())
+	{
+		S32 count = gAgent.mGroups.count();
+		S32 i;
+		for (i = 0; i < count; ++i)
+		{
+			if (gAgent.mGroups.get(i).mID == group_id)
+			{
+				break;
+			}
+		}
+		if (i < count)
+		{
+			LLSD args;
+			args["GROUP"] = gAgent.mGroups.get(i).mName;
+			LLSD payload;
+			payload["group_id"] = group_id;
+			LLNotifications::instance().add("GroupLeaveConfirmMember", args,
+											payload, callbackLeaveGroup);
+		}
+	}
+}
+
+void LLFloaterGroups::search()
+{
+	LLFloaterDirectory::showGroups();
+}
+
+// static
+bool LLFloaterGroups::callbackLeaveGroup(const LLSD& notification,
+										 const LLSD& response)
+{
+	S32 option = LLNotification::getSelectedOption(notification, response);
+	LLUUID group_id = notification["payload"]["group_id"].asUUID();
+	if (option == 0)
+	{
+		LLMessageSystem* msg = gMessageSystem;
+		msg->newMessageFast(_PREHASH_LeaveGroupRequest);
+		msg->nextBlockFast(_PREHASH_AgentData);
+		msg->addUUIDFast(_PREHASH_AgentID, gAgent.getID());
+		msg->addUUIDFast(_PREHASH_SessionID, gAgent.getSessionID());
+		msg->nextBlockFast(_PREHASH_GroupData);
+		msg->addUUIDFast(_PREHASH_GroupID, group_id);
+		gAgent.sendReliableMessage();
+	}
+	return false;
+}
+
+// static
+void LLFloaterGroups::onGroupList(LLUICtrl* ctrl, void* userdata)
+{
+	LLFloaterGroups* self = (LLFloaterGroups*)userdata;
+	if (!self)
+	{
+		return;
+	}
+
+	self->enableButtons();
+
+	LLScrollListCtrl* group_list;
+	group_list = (LLScrollListCtrl*)self->getChild<LLScrollListCtrl>("group list");
+	if (!group_list)
+	{
+		return;
+	}
+
+	LLScrollListItem* item = group_list->getFirstSelected();
+	if (!item)
+	{
+		return;
+	}
+
+	const LLUUID group_id =  item->getValue().asUUID();
+	if (group_id.isNull())
+	{
+		return;
+	}
+
+	LLGroupData group_data;
+	if (!gAgent.getGroupData(group_id, group_data))
+	{
+		return;
+	}
+
+	bool profile = item->getColumn(1)->getValue().asBoolean();
+	bool chat = item->getColumn(2)->getValue().asBoolean();
+	bool notices = item->getColumn(3)->getValue().asBoolean();
+	bool update_floaters = false;
+
+	LLMuteList* ml = LLMuteList::getInstance();
+	if (ml)		// Paranoia
+	{
+		bool muted = ml->isMuted(group_id, "", LLMute::flagTextChat);
+		if (muted == chat)
+		{
+			LLMute mute(group_id, group_data.mName, LLMute::GROUP);
+			if (chat)
+			{
+				if (muted)
+				{
+					ml->remove(mute, LLMute::flagTextChat);
+				}
+			}
+			else
+			{
+				if (!muted)
+				{
+					ml->add(mute, LLMute::flagTextChat);
+				}
+			}
+			update_floaters = true;
+		}
+	}
+
+	if ((bool)group_data.mListInProfile != profile ||
+		(bool)group_data.mAcceptNotices != notices)
+	{
+		gAgent.setUserGroupFlags(group_id, notices, profile);
+		// gAgent.setUserGroupFlags calls update_group_floaters()
+		update_floaters = false;
+	}
+
+	if (update_floaters)
+	{
+		update_group_floaters(group_id);
+	}
+}
+
+void init_group_list(LLFloater* self,
+					 LLScrollListCtrl* ctrl,
+					 const LLUUID& highlight_id,
+					 U64 powers_mask,
+					 bool with_checkboxes)
+{
+	S32 count = gAgent.mGroups.count();
+	LLUUID id;
+	LLCtrlListInterface* group_list = ctrl->getListInterface();
+	if (!group_list) return;
+
+	group_list->operateOnAll(LLCtrlListInterface::OP_DELETE);
+
+	LLMuteList* ml = LLMuteList::getInstance();
+
+	for (S32 i = 0; i < count; ++i)
+	{
+		id = gAgent.mGroups.get(i).mID;
+		LLGroupData* group_datap = &gAgent.mGroups.get(i);
+		if (!group_datap) continue;
+		if (powers_mask == GP_ALL_POWERS ||
+			(group_datap->mPowers & powers_mask) != 0)
+		{
+			std::string style = "NORMAL";
+			if (highlight_id == id)
+			{
+				style = "BOLD";
+			}
+
+			LLSD element;
+			element["id"] = id;
+			LLSD& name_column = element["columns"][0];
+			name_column["column"] = "name";
+			name_column["value"] = group_datap->mName;
+			name_column["font"] = "SANSSERIF";
+			name_column["font-style"] = style;
+
+			if (with_checkboxes)
+			{
+				LLSD& profile_column = element["columns"][1];
+				profile_column["column"] = "profile";
+				profile_column["type"] = "checkbox";
+				profile_column["value"] = group_datap->mListInProfile;
+
+				LLSD& chat_column = element["columns"][2];
+				chat_column["column"] = "chat";
+				chat_column["type"] = "checkbox";
+				chat_column["value"] = !(ml && ml->isMuted(id, "", LLMute::flagTextChat));
+
+				LLSD& notices_column = element["columns"][3];
+				notices_column["column"] = "notices";
+				notices_column["type"] = "checkbox";
+				notices_column["value"] = group_datap->mAcceptNotices;
+			}
+
+			group_list->addElement(element, ADD_SORTED);
+		}
+	}
+
+	// add "none" to list at top
+	{
+		std::string style = "NORMAL";
+		if (highlight_id.isNull())
+		{
+			style = "BOLD";
+		}
+		LLSD element;
+		element["id"] = LLUUID::null;
+
+		LLSD& name_column = element["columns"][0];
+		name_column["column"] = "name";
+		name_column["value"] = self->getString("none");
+		name_column["font"] = "SANSSERIF";
+		name_column["font-style"] = style;
+
+		if (with_checkboxes)
+		{
+			LLSD& profile_column = element["columns"][1];
+			profile_column["column"] = "profile";
+			profile_column["value"] = "";
+
+			LLSD& chat_column = element["columns"][2];
+			chat_column["column"] = "chat";
+			chat_column["value"] = "";
+
+			LLSD& notices_column = element["columns"][3];
+			notices_column["column"] = "notices";
+			notices_column["value"] = "";
+		}
+
+		group_list->addElement(element, ADD_TOP);
+	}
+
+	group_list->selectByValue(highlight_id);
+}

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel border="true" bottom="-409" enabled="true" follows="left|top|right|bottom"
+     height="408" label="Audio &amp; Video" left="102" mouse_opaque="true"
+     name="Media panel" width="517">
+	<text name="volume_text" type="string" length="1" enabled="true" mouse_opaque="true"
+	 bg_visible="false" border_drop_shadow_visible="false" border_visible="false" drop_shadow_visible="true"
+	 font="SansSerifSmall" v_pad="0" h_pad="0" halign="left"
+	 bottom="-30" left="10" height="18" width="130" follows="left|top" >
+		Volume:
+	</text>
+	<panel name="Volume Panel" label="Volume" filename="panel_audio.xml"
+	 border="true" enabled="true" mouse_opaque="true"
+	 bottom_delta="-158" left="138" height="180" width="260" follows="left|top" />
+	<text name="streaming_prefs_text" type="string" length="1" enabled="true" mouse_opaque="true"
+	 bg_visible="false" border_drop_shadow_visible="false" border_visible="false" drop_shadow_visible="true"
+	 font="SansSerifSmall" v_pad="0" h_pad="0" halign="left"
+	 bottom_delta="0" left="10" height="17" width="130" follows="left|top" >
+		Streaming Preferences:
+	</text>
+	<check_box name="streaming_music" control_name="AudioStreamingMusic"
+	 radio_style="false" enabled="true" mouse_opaque="true"
+	 label="Play Streaming Music When Available (uses more bandwidth)" font="SansSerifSmall"
+	 bottom_delta="0" left="142" height="16" width="350" follows="left|top" />
+	<check_box name="notify_stream_changes" control_name="NotifyStreamChanges"
+	 radio_style="false" enabled="true" mouse_opaque="true"
+	 label="Notify about streaming music title changes" font="SansSerifSmall"
+	 tool_tip="When using FMOD as the audio driver, you may check this box to get notified about parcel music title changes. Note that the currently playing music title is also reported when available in the tool tip of the music controls icon, on the bottom right of the viewer window."
+	 bottom_delta="-20" left_delta="20" height="16" width="330" follows="left|top" />
+	<check_box name="streaming_video" control_name="AudioStreamingVideo"
+	 radio_style="false" enabled="true" mouse_opaque="true"
+	 label="Play Streaming Media When Available (uses more bandwidth)" font="SansSerifSmall"
+	 bottom_delta="-24" left="142" height="16" width="350" follows="left|top" />
+	<check_box name="auto_streaming_video" control_name="ParcelMediaAutoPlayEnable"
+	 radio_style="false" enabled="true" mouse_opaque="true"
+	 label="Automatically play media" font="SansSerifSmall"
+	 bottom_delta="-20" left_delta="20" height="16" width="330" follows="left|top" />
+	<check_box name="media_enable_filter" control_name="MediaEnableFilter"
+	 radio_style="false" enabled="true" mouse_opaque="true"
+	 label="Parcel media and audio stream filtering" font="SansSerifSmall"
+	 tool_tip="This setting entitles you to allow/deny/whitelist/blacklist the servers for parcel audio and media streams. When the viewer connects to a media or streaming server, your IP is exposed and some people might use it to try and track you and make assumptions about what your alt avatars could be."
+	 bottom_delta="-24" left="142" height="16" width="350" follows="left|top" />
+	<check_box name="media_lookup_ip" control_name="MediaLookupIP"
+	 radio_style="false" enabled="true" mouse_opaque="true"
+	 label="Lookup IP address for filtered domains" font="SansSerifSmall"
+	 tool_tip="Enable IP lookups on media domains. This allows to defeat domain name changes of fixed IP servers that you already banned under another domain name. It however incurs short 'freezes' (1 second or so) on successful lookups (valid domains) and longer 'freezes' (10s or so) on failing lookups (invalid domain names, normally rare)."
+	 bottom_delta="-20" left_delta="20" height="16" width="350" follows="left|top" />
+	<text name="audio_prefs_text" type="string" length="1" enabled="true" mouse_opaque="true"
+	 bg_visible="false" border_drop_shadow_visible="false" border_visible="false" drop_shadow_visible="true"
+	 font="SansSerifSmall" v_pad="0" h_pad="0" halign="left"
+	 bottom_delta="-25" left="10" height="17" width="130" follows="left|top" >
+		Audio Preferences:
+	</text>
+	<check_box name="mute_when_minimized" control_name="MuteWhenMinimized"
+	 radio_style="false" enabled="true" mouse_opaque="true"
+	 label="Mute Audio When Window Minimized" font="SansSerifSmall"
+	 bottom_delta="0" left="142" height="16" width="330" follows="left|top" />
+	<slider name="Doppler Effect" label="Doppler Effect" control_name="AudioLevelDoppler"
+	 min_val="0" max_val="2" increment="0.1" decimal_digits="1" show_text="true"
+	 enabled="true" mouse_opaque="true" label_width="100"
+	 bottom_delta="-20" left="148" height="15" width="250" follows="left|top" />
+	<slider name="Rolloff Factor" label="Rolloff Factor" control_name="AudioLevelRolloff"
+	 min_val="0.1" max_val="2" increment="0.1" decimal_digits="1" show_text="true"
+	 enabled="true" mouse_opaque="true" label_width="105"
+	 bottom_delta="-20" left_delta="0" height="15" width="250" follows="left|top" />
+	<check_box name="enable_gesture_sounds" control_name="EnableGestureSounds"
+	 radio_style="false" enabled="true" mouse_opaque="true"
+	 label="Enable gesture sounds" font="SansSerifSmall"
+	 tool_tip="Unchecking this box allows to mute all sounds coming from gestures."
+	 bottom_delta="-24" left="142" height="16" width="330" follows="left|top" />
+</panel>

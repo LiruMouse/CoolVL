@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel name="chat" default_tab_group="1" enabled="true" hidden="false" mouse_opaque="true"
+ left="-1" bottom="24" height="29" width="512" follows="left|right|bottom">
+	<button name="History" label="History" font="SansSerif" halign="center"
+	 mouse_opaque="true" enabled="true" hidden="false"
+	 left="4" bottom="-28" height="24" width="68" follows="left|bottom"
+	 tool_tip="Click here to see what has been said" />
+	<line_editor name="Chat Editor" label="Click here to chat." max_length="1024"
+	 font="SansSerif" enabled="true" hidden="false" mouse_opaque="true" tab_group="1"
+	 select_all_on_focus_received="false" select_on_focus="false" handle_edit_keys_directly="false"
+	 bevel_style="in" border_style="line" border_thickness="1"
+	 left_delta="72" bottom="-26" height="22" width="266" follows="left|right|bottom" />
+	<flyout_button name="Say" label="Say" font="SansSerif"
+	 halign="center" list_position="above" enabled="true" hidden="false" mouse_opaque="true"
+	 right="-98" bottom="-28" height="24" width="68" follows="right|bottom"
+	 tool_tip="Press ENTER to say, CTRL ENTER to shout, SHIFT ENTER to whisper.">
+		<flyout_button_item value="shout" name="shout_item">
+			Shout
+		</flyout_button_item>
+		<flyout_button_item value="say" name="say_item">
+			Say
+		</flyout_button_item>
+		<flyout_button_item value="whisper" name="whisper_item">
+			Whisper
+		</flyout_button_item>
+	</flyout_button>
+	<combo_box name="Gesture" label="Gestures" max_chars="20" allow_text_entry="false"
+	 enabled="true" hidden="false" mouse_opaque="true"
+	 right="-4" bottom="-26" height="20" width="90" follows="right|bottom">
+	</combo_box>
+	<string name="gesture_label">Gestures</string>
+</panel>

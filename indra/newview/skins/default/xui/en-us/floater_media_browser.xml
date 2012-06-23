@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater can_close="true" can_drag_on_left="false" can_minimize="true" can_resize="true"
+ height="440" min_height="140" min_width="467" name="floater_about"
+ rect_control="FloaterMediaRect" title="Media Browser" width="820">
+	<layout_stack name="stack1"
+	 bottom="0" left="8" top="-22" width="804" follows="left|right|top|bottom">
+		<layout_panel name="nav_controls" auto_resize="false" user_resize="false"
+		 left="0" bottom="0" width="804" height="20">
+			<button name="back" label="Back" enabled="false"
+			 left="2" bottom="0" width="60" height="20" follows="left|top" />
+			<button name="forward" label="Forward" enabled="false"
+			 left_delta="64" bottom_delta="0" width="60" height="20" follows="left|top" />
+			<button name="reload" label="Reload" enabled="false"
+			 left_delta="64" bottom_delta="0" width="60" height="20" follows="left|top" />
+			<combo_box name="address" allow_text_entry="true" max_chars="255"
+			 left_delta="64" bottom_delta="0" width="556" height="20" follows="left|top|right" />
+			<text type="string" name="loading" font="SansSerifSmall" halign="left" length="1"
+			 visible="false" mouse_opaque="false" h_pad="0" v_pad="0" drop_shadow_visible="true"
+			 bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
+			 left_delta="0" bottom_delta="0" width="556" height="18" follows="left|top">
+				Loading...
+			</text>
+			<button name="go" label="Go" enabled="false"
+			 left_delta="560" bottom_delta="0" width="50" height="20" follows="right|top" />
+		</layout_panel>
+		<layout_panel name="time_controls" auto_resize="false" user_resize="false"
+		 left="0" bottom="0" width="804" height="20">
+			<button name="rewind" label="Rewind" enabled="true"
+			 left="2" bottom="0" width="60" height="20" follows="left|top" />
+			<button name="play" label="" scale_image="true" enabled="true"
+			 image_unselected="button_anim_play.tga" image_selected="button_anim_play_selected.tga"
+			 left_delta="64" bottom_delta="0" width="20" height="20" follows="left|top" />
+			<button name="pause" label="" scale_image="true" enabled="true"
+			 image_unselected="button_anim_pause.tga" image_selected="button_anim_pause_selected.tga"
+			 left_delta="0" bottom_delta="0" width="20" height="20" follows="left|top" />
+			<button name="stop" label="" scale_image="true" enabled="true"
+			 image_unselected="button_anim_stop.tga" image_selected="button_anim_stop_selected.tga"
+			 left_delta="22" bottom_delta="0" width="20" height="20" follows="left|top" />
+			<button name="seek" label="Seek" enabled="true"
+			 left_delta="24" bottom_delta="0" width="60" height="20" follows="left|top" />
+		</layout_panel>
+		<layout_panel name="browser_panel" auto_resize="true" user_resize="false"
+		 left="0" bottom="0" width="804" height="0">
+			<web_browser name="browser"
+			 left="2" top="0" bottom="0" width="800" follows="left|right|top|bottom" />
+		</layout_panel>
+		<layout_panel name="external_controls" auto_resize="false" user_resize="false"
+		 left="0" bottom="0" width="804" height="25">
+			<button name="open_browser" label="Open in system browser" enabled="true"
+			 tool_tip="Click to open now the current URL in your system browser."
+			 left="2" bottom="5" width="156" height="20" follows="bottom|left" />
+			<check_box name="open_always" label="Always" control_name="UseExternalBrowser"
+			 tool_tip="Check this option to always open future URLs in your system browser instead of in this floater (you can change your mind later, by unchecking the corresponding option in the Preference floater, Web sub-tab)."
+			 left_delta="160" bottom="5" width="75" height="20" follows="bottom|left" />
+			<button name="assign" label="Assign URL to Parcel" enabled="false"
+			 tool_tip="As a parcel owner or manager, you may assign the current URL as the default media for this parcel by clicking this button."
+			 left_delta="80"  bottom="5" width="150" height="20" follows="left|bottom" />
+			<button name="close" label="Close" enabled="true"
+			 left="-56" bottom="5" width="50" height="20" follows="bottom|right" />
+		</layout_panel>
+	</layout_stack>
+	<string name="home_page_url">
+		http://www.secondlife.com
+	</string>
+	<string name="support_page_url">
+		http://wiki.secondlife.com/wiki/Knowledge_Base
+	</string>
+	<string name="loading">
+		Loading...
+	</string>
+</floater>

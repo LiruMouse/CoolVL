@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel name="grids" label="Grids list" mouse_opaque="true" border="true" enabled="true"
+ left="10" top="20" width="517" height="440" follows="left|top|right|bottom">
+	<!-- Grids list -->
+	<text name="grid_selector_label" type="string" length="1" font="SansSerif"
+	 drop_shadow_visible="true" border_drop_shadow_visible="false"
+	 bg_visible="false" border_visible="false" h_pad="0" v_pad="0" halign="left"
+	 left="10" bottom="-28" width="100" height="20" follows="left|top">
+		Select a grid:
+	</text>
+	<scroll_list name="grid_selector" multi_select="false" sort_column="0"
+	 background_visible="true" draw_border="true" draw_stripes="true"
+	 left="10" bottom_delta="-340" width="150" height="340" follows="left|top">
+		<column label="Grid List" name="grid" />
+	</scroll_list>
+	<button name="update_button" label="Update Selected Grid"
+	 tool_tip="Click this button to update the parameters for the selected grid with the data provided in the fields on the right of this panel."
+	 font="SansSerif" halign="center" enabled="true" mouse_opaque="true"
+	 left="10" bottom_delta="-24" width="150" height="20" follows="left|top"/>
+	<button name="delete_button" label="Delete Selected Grid"
+	 tool_tip="Click this button to delete the selected grid from the list. Note that only the grids which name is not in bold can be deleted (the names in bold correspond to the default grids list of the viewer) and that if you delete a custom grid that is also listed in the default grids list, the entry in the latter will replace the entry you delete."
+	 font="SansSerif" halign="center" enabled="true" mouse_opaque="true"
+	 left="10" bottom_delta="-22" width="150" height="20" follows="left|top"/>
+	<button name="add_button" label="Add New Grid"
+	 tool_tip="Click this button to add a new grid to the list, using the data provided in the fields on the right of this panel."
+	 font="SansSerif" halign="center" enabled="true" mouse_opaque="true"
+	 left="10" bottom_delta="-22" width="150" height="20" follows="left|top"/>
+
+	<!-- Status line -->
+	<text name="retreiving" type="string" length="1" font="SansSerifSmall" text_color="white" visible="false"
+	 drop_shadow_visible="true" border_drop_shadow_visible="false" mouse_opaque="true"
+	 bg_visible="false" border_visible="false" h_pad="0" v_pad="0" halign="left"
+	 tool_tip="There is a one minute timeout for grid parameters retrieval."
+	 left="170" bottom="-24" width="320" height="16" follows="left|top">
+		STATUS: Retrieving the parameters, please wait...
+	</text>
+	<text name="domain" type="string" length="1" font="SansSerifSmall" visible="false"
+	 drop_shadow_visible="true" border_drop_shadow_visible="false" mouse_opaque="true"
+	 tool_tip="This domain name/grid id is used as a key in the grids list by the viewer and may also be used in the command line as a parameter to the --grid option as an alternative to the grid name."
+	 bg_visible="false" border_visible="false" h_pad="0" v_pad="0" halign="left"
+	 left="170" bottom_delta="0" width="320" height="16" follows="left|top">
+		Domain name/grid id: [DOMAIN]
+	</text>
+
+	<!-- Grid Parameters -->
+	<text name="login_uri_label" type="string" length="1" font="SansSerif"
+	 drop_shadow_visible="true" border_drop_shadow_visible="false"
+	 bg_visible="false" border_visible="false" h_pad="0" v_pad="0" halign="left"
+	 left="170" bottom_delta="-24" width="60" height="20" follows="left|top">
+		Login URI:
+	</text>
+	<line_editor name="login_uri_editor" label="&lt;required&gt;" max_length="255" mouse_opaque="true"
+	 tool_tip="The Login URI is a mandatory parameter that you should find on the grid website. Without it, the viewer cannot connect to the grid and even less retrieve the additional parameters. Once this field is filled, the 'Get Parameters' button below becomes available and you can auto-retrieve the rest of the grid parameters with it, provided the grid advertizes them."
+	 handle_edit_keys_directly="true" select_all_on_focus_received="true"
+	 font="SansSerifSmall" bevel_style="in" border_style="line" border_thickness="1"
+	 left_delta="64" bottom_delta="2" width="255" height="20" follows="left|top"/>
+	<check_box name="retrieved_loginuri_check" label="Prefer retrieved login URI"
+	 font="SansSerifSmall" control_name="PreferRetreivedLoginURI" mouse_opaque="true"
+	 tool_tip="The retrieved parameters may contain a different login URI. It is not unusual that grids advertize a login URI containing a domain name on their website and a login URI with an IP in their parameters. The IP allows for a slightly faster connection (no DNS lookup needed), but it may change more often than a domain name (if the grid moves to another server, for example). Also, should the domain name change for a grid, it is not unusual that the old domain stays available for a while (keeping the old login URI valid) but then the retrieved login URI will advertize the new domain, which you should adopt."
+	 left_delta="-2" bottom_delta="-20" width="200" height="16" follows="left|top" />
+	<button name="get_param_button" label="Get Parameters"
+	 tool_tip="Click this button to auto-retrieve the grid parameters, provided the grid advertizes them. The parameter fetching is asynchronous (meaning it won't block the UI) and would time out after 60s or so if the grid does not respond to the request."
+	 font="SansSerif" halign="center" enabled="true" mouse_opaque="true"
+	 left_delta="2" bottom_delta="-24" width="125" height="20" follows="left|top"/>
+	<button name="clear_param_button" label="Clear Parameters"
+	 tool_tip="Click this button to empty all the parameter fields below."
+	 font="SansSerif" halign="center" enabled="true" mouse_opaque="true"
+	 left_delta="130" bottom_delta="0" width="125" height="20" follows="left|top"/>
+
+	<text name="grid_name_label" type="string" length="1" font="SansSerif"
+	 drop_shadow_visible="true" border_drop_shadow_visible="false"
+	 bg_visible="false" border_visible="false" h_pad="0" v_pad="0" halign="left"
+	 left="170" bottom_delta="-30" width="60" height="20" follows="left|top">
+		Grid name:
+	</text>
+	<line_editor name="grid_name_editor" label="&lt;required&gt;" max_length="32" mouse_opaque="true"
+	 tool_tip="The Grid name field is used in the grid selection combo of the login screen as well as in the grids list on the left side of this panel. Together with the Login URI, it is the only mandatory parameter to add a new grid to the list and be able to connect to it. Please, also note that the saved logins and passwords info uses the grid name as a key: if you change that name for a grid you already connected to, the saved login info for that grid will be lost."
+	 handle_edit_keys_directly="true" select_all_on_focus_received="true"
+	 font="SansSerifSmall" bevel_style="in" border_style="line" border_thickness="1"
+	 left_delta="64" bottom_delta="2" width="255" height="20" follows="left|top"/>
+	<radio_group name="prefer_nickname_radio" control_name="PreferredGridName" draw_border="false"
+	 left_delta="-2" bottom_delta="-20" width="300" height="16" follows="left|top">
+		<radio_item name="0" left="0" bottom="-16" width="60" height="16"
+	 	 tool_tip="The advertized/retrieved parameters may contain both a grid name and a grid nickname. By checking this radio button you indicate that you want the 'Grid name' field above to keep a custom name for this grid instead of using the advertized name or nickname. It is best keeping the custom name when updating the parameters for an existing grid (else past logins info for that grid gets lost).">
+			Custom
+		</radio_item>
+		<radio_item name="1" left="65" bottom="-16" width="85" height="16"
+	 	 tool_tip="The advertized/retrieved parameters may contain both a grid name and a grid nickname. By checking this radio button you indicate that you want the 'Grid name' field above to retain the advertized Name.">
+			Official Name
+		</radio_item>
+		<radio_item name="2" left="160" bottom="-16" width="90" height="16"
+	 	 tool_tip="The advertized/retrieved parameters may contain both a grid name and a grid nickname. By checking this radio button you indicate that you want the 'Grid name' field above to retain the advertized Nickname.">
+			Off. Nickname
+		</radio_item>
+	</radio_group>
+	<text name="helper_uri_label" type="string" length="1" font="SansSerif"
+	 drop_shadow_visible="true" border_drop_shadow_visible="false"
+	 bg_visible="false" border_visible="false" h_pad="0" v_pad="0" halign="left"
+	 left="170" bottom_delta="-20" width="200" height="16" follows="left|top">
+		Helper URI:
+	</text>
+	<line_editor name="helper_uri_editor" max_length="255" mouse_opaque="true"
+	 tool_tip="The Helper URI is used for transactions on the grid (such as land transfers, for example). Without a helper URI, these transactions will be unavailable (some grids not implementing such transactions do not provide a Helper URI)."
+	 handle_edit_keys_directly="true" select_all_on_focus_received="true"
+	 font="SansSerifSmall" bevel_style="in" border_style="line" border_thickness="1"
+	 left_delta="0" bottom_delta="-20" width="320" height="20" follows="left|top"/>
+
+	<text name="login_page_label" type="string" length="1" font="SansSerif"
+	 drop_shadow_visible="true" border_drop_shadow_visible="false"
+	 bg_visible="false" border_visible="false" h_pad="0" v_pad="0" halign="left"
+	 left="170" bottom_delta="-28" width="200" height="16" follows="left|top">
+		Login page URL:
+	</text>
+	<line_editor name="login_page_editor" max_length="255" mouse_opaque="true"
+	 tool_tip="This is the URL used to display the welcome screen on the login panel. If it is left empty, the viewer will display its default login page for that grid."
+	 handle_edit_keys_directly="true" select_all_on_focus_received="true"
+	 font="SansSerifSmall" bevel_style="in" border_style="line" border_thickness="1"
+	 left_delta="0" bottom_delta="-20" width="320" height="20" follows="left|top"/>
+
+	<text name="website_label" type="string" length="1" font="SansSerif"
+	 drop_shadow_visible="true" border_drop_shadow_visible="false"
+	 bg_visible="false" border_visible="false" h_pad="0" v_pad="0" halign="left"
+	 left="170" bottom_delta="-28" width="200" height="16" follows="left|top">
+		Website URL:
+	</text>
+	<line_editor name="website_editor" max_length="255" mouse_opaque="true"
+	 tool_tip="When available, this URL is used by the viewer to point you to the grid website main page when appropriate."
+	 handle_edit_keys_directly="true" select_all_on_focus_received="true"
+	 font="SansSerifSmall" bevel_style="in" border_style="line" border_thickness="1"
+	 left_delta="0" bottom_delta="-20" width="320" height="20" follows="left|top"/>
+
+	<text name="support_label" type="string" length="1" font="SansSerif"
+	 drop_shadow_visible="true" border_drop_shadow_visible="false"
+	 bg_visible="false" border_visible="false" h_pad="0" v_pad="0" halign="left"
+	 left="170" bottom_delta="-28" width="200" height="16" follows="left|top">
+		Support URL:
+	</text>
+	<line_editor name="support_editor" max_length="255" mouse_opaque="true"
+	 tool_tip="When available, this URL is used by the viewer to point you to the support section of the grid website when appropriate."
+	 handle_edit_keys_directly="true" select_all_on_focus_received="true"
+	 font="SansSerifSmall" bevel_style="in" border_style="line" border_thickness="1"
+	 left_delta="0" bottom_delta="-20" width="320" height="20" follows="left|top"/>
+
+	<text name="new_account_label" type="string" length="1" font="SansSerif"
+	 drop_shadow_visible="true" border_drop_shadow_visible="false"
+	 bg_visible="false" border_visible="false" h_pad="0" v_pad="0" halign="left"
+	 left="170" bottom_delta="-28" width="200" height="16" follows="left|top">
+		New account registration URL:
+	</text>
+	<line_editor name="new_account_editor" max_length="255" mouse_opaque="true"
+	 tool_tip="When available, this URL is used for a 'Signup for account' link on the login screen."
+	 handle_edit_keys_directly="true" select_all_on_focus_received="true"
+	 font="SansSerifSmall" bevel_style="in" border_style="line" border_thickness="1"
+	 left_delta="0" bottom_delta="-20" width="320" height="20" follows="left|top"/>
+
+	<text name="forgotten_password_label" type="string" length="1" font="SansSerif"
+	 drop_shadow_visible="true" border_drop_shadow_visible="false"
+	 bg_visible="false" border_visible="false" h_pad="0" v_pad="0" halign="left"
+	 left="170" bottom_delta="-28" width="200" height="16" follows="left|top">
+		Forgotten password URL:
+	</text>
+	<line_editor name="forgotten_password_editor" max_length="255" mouse_opaque="true"
+	 tool_tip="When available, this URL is used for a 'Forgot your name or password' link on the login screen."
+	 handle_edit_keys_directly="true" select_all_on_focus_received="true"
+	 font="SansSerifSmall" bevel_style="in" border_style="line" border_thickness="1"
+	 left_delta="0" bottom_delta="-20" width="320" height="20" follows="left|top"/>
+</panel>

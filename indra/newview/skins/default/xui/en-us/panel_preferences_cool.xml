@@ -1,0 +1,410 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel name="cool" label="Cool features" mouse_opaque="true" border="true" enabled="true"
+ left="10" top="20" width="517" height="440" follows="left|top|right|bottom">
+	<tab_container name="Cool Prefs" label="Cool Prefs" tab_min_width="90" tab_position="top"
+	 left="0" bottom="0" width="500" height="440">
+		<panel name="User Interface" label="User Interface" border="true" mouse_opaque="true"
+		 left="1" bottom="-440" width="500" height="440" follows="left|top|right|bottom">
+			<view_border name="border1" bevel_style="none" border_thickness="1"
+			 bottom_delta="-70" left="10" height="60" width="470" follows="left|top"/>
+			<text name="toolbar_buttons" type="string" length="1" enabled="true" mouse_opaque="true"
+			 bg_visible="false" border_drop_shadow_visible="false" border_visible="false" drop_shadow_visible="true"
+			 font="SansSerifSmall" v_pad="0" h_pad="0" halign="left"
+			 bottom="-32" left="20" height="18" width="300" follows="left|top">
+				Show the following buttons in the toolbar:
+			</text>
+			<check_box name="show_chat_button_check" control_name="ShowChatButton" label="Chat"
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="-16" width="70" height="16" follows="left|top" />
+			<check_box name="show_im_button_check" control_name="ShowIMButton" label="IM"
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left_delta="75" bottom_delta="0" width="70" height="16" follows="left|top" />
+			<check_box name="show_friends_button_check" control_name="ShowFriendsButton" label="Friends"
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left_delta="75" bottom_delta="0" width="70" height="16" follows="left|top" />
+			<check_box name="show_group_button_check" control_name="ShowGroupsButton" label="Groups"
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left_delta="75" bottom_delta="0" width="70" height="16" follows="left|top" />
+			<check_box  name="show_fly_button_check" control_name="ShowFlyButton" label="Fly"
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left_delta="75" bottom_delta="0" width="70" height="16" follows="left|top" />
+			<check_box name="show_snapshot_button_check" control_name="ShowSnapshotButton" label="Snapshot"
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left_delta="75" bottom_delta="0" width="70" height="16" follows="left|top" />
+			<check_box name="show_search_button_check" control_name="ShowSearchButton" label="Search"
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="-18" width="70" height="16" follows="left|top" />
+			<check_box name="show_build_button_check" control_name="ShowBuildButton" label="Build"
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left_delta="75" bottom_delta="0" width="70" height="16" follows="left|top" />
+			<check_box name="show_radar_button_check" control_name="ShowRadarButton" label="Radar"
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left_delta="75" bottom_delta="0" width="70" height="16" follows="left|top" />
+			<check_box name="show_minimap_button_check" control_name="ShowMiniMapButton" label="Mini-Map"
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left_delta="75" bottom_delta="0" width="70" height="16" follows="left|top" />
+			<check_box name="show_map_button_check" control_name="ShowMapButton" label="Map"
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left_delta="75" bottom_delta="0" width="70" height="16" follows="left|top" />
+			<check_box name="show_inventory_button_check" control_name="ShowInventoryButton" label="Inventory"
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left_delta="75" bottom_delta="0" width="70" height="16" follows="left|top" />
+			<check_box name="hide_master_remote_check" control_name="HideMasterRemote"
+			 label="Hide the Master Remote volume control when useless"
+			 tool_tip="With this setting enabled, the small master volume button above the toolbar is automatically hidden when no voice, no media and no parcel music stream are present."
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="-28" width="400" height="16" follows="left|top" />
+			<spinner name="fade_mouselook_exit_tip" control_name="FadeMouselookExitTip"
+			 label="Fade mouselook mode exit tip/instruction after:"
+			 tool_tip="When entering mouselook mode, a 'Press SHIFT ESC to leave Mouselook' tip is displayed in the upper left corner of the screen. With this setting you can make the tip fade out after a number of seconds (minimum is 5s, with 0s meaning 'never fade out')."
+			 label_width="250" font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 decimal_digits="0" min_val="0" max_val="990" initial_val="0" increment="5"
+			 left="18" bottom_delta="-20" width="300" height="16" follows="left|top" />
+			<text name="private_look_at_limit_meters" type="string" length="1"
+			 enabled="true" mouse_opaque="true"
+			 bg_visible="false" border_visible="false" border_drop_shadow_visible="false"
+			 drop_shadow_visible="true" h_pad="0" v_pad="0" halign="left"
+			 left_delta="304" bottom_delta="0" width="160" height="16" follows="left|top">
+				seconds (0 = never fade out)
+			</text>
+			<check_box name="use_old_chat_history_check" control_name="UseOldChatHistory"
+			 label="Use the old style 'Chat history' window (requires a restart)"
+			 tool_tip="The old-style chat history does not have a chat input line, gesture combo and Say button (these are already present in the toolbar chat line), letting more room for the actual history."
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
+			<check_box name="im_tabs_vertical_stacking_check" control_name="IMTabsVerticalStacking"
+			 label="Stack IM tabs vertically (requires a restart)"
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
+			<check_box name="use_old_statusbar_icons_check" control_name="UseOldStatusBarIcons"
+			 label="Use the old, more readable, status bar icons (requires a restart)"
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
+			<check_box name="use_old_tracking_dots_check" control_name="UseOldTrackingDots"
+			 label="Use the old T-like tracking dots in the mini-map"
+			 tool_tip="With this setting activated, the tiny V-like avatar tracking dots in the mini-map are replaced with larger and more visible T-like dots (inverted T for avatars below your own avatar's altitude, and normal T for avatars above). Note that whether this setting is enabled or not, avatars at the same altitude as yours are represented by a round dot, and avatars with an unknown altitude are represented by a dash-like dot."
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
+			<spinner name="decimals_for_tools_spinner" control_name="DecimalsForTools"
+			 label="Decimals for Pos, Size and Rot parameters in the build tool:"
+			 label_width="315" font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 decimal_digits="0" min_val="0" max_val="5" initial_val="3" increment="1"
+			 left="18" bottom_delta="-20" width="350" height="16" follows="left|top" />
+			<check_box name="hide_teleport_progress_check" control_name="HideTeleportProgress"
+			 label="Hide the teleport progress screen"
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
+			<check_box name="use_new_sl_login_page_check" control_name="UseNewSLLoginPage"
+			 label="Use the new SL login screen (requires a restart)"
+			 tool_tip="Linden Lab introduced a new login page for their v3 viewer. The Cool VL Viewer may also use it, if you so wish..."
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
+			<view_border name="border2" bevel_style="none" border_thickness="1"
+			 left="10" bottom_delta="-95" width="385" height="90" follows="left|top"/>
+			<text name="minimized_floaters" type="string" length="1" enabled="true" mouse_opaque="true"
+			 bg_visible="false" border_drop_shadow_visible="false" border_visible="false" drop_shadow_visible="true"
+			 font="SansSerifSmall" v_pad="0" h_pad="0" halign="left"
+			 left="20" bottom_delta="65" width="300" height="18" follows="left|top">
+				Minimized floaters stacking on screen:
+			</text>
+			<check_box name="stack_minimized_top_to_bottom_check" control_name="StackMinimizedTopToBottom"
+			 label="Stack minimized floaters from top to bottom"
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="40" bottom_delta="-16" width="400" height="16" follows="left|top" />
+			<check_box name="stack_minimized_right_to_left_check" control_name="StackMinimizedRightToLeft"
+			 label="Stack minimized floaters from right to left"
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="40" bottom_delta="-20" width="400" height="16" follows="left|top" />
+			<spinner name="stack_screen_width_fraction_spinner" control_name="StackScreenWidthFraction"
+			 label="Fraction of the screen width to use for minimized floaters:   1/"
+			 label_width="320" font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 decimal_digits="0" min_val="1" max_val="10" initial_val="1" increment="1"
+			 left="20" bottom_delta="-20" width="360" height="16" follows="left|top" />
+			<view_border name="border3" bevel_style="none" border_thickness="1"
+			 left="10" bottom_delta="-60" width="460" height="40" follows="left|top"/>
+			<text name="time_format_text_box" type="string" length="1" font="SansSerifSmall"
+			 border_drop_shadow_visible="false" border_visible="false" drop_shadow_visible="true"
+			 bg_visible="false" h_pad="0" v_pad="0" halign="left" enabled="true" mouse_opaque="true"
+			 left="20" bottom_delta="18" width="80" height="10" follows="left|top">
+				Time format:
+			</text>
+			<combo_box name="time_format_combobox" allow_text_entry="false"
+			 max_chars="20" enabled="true" mouse_opaque="true"
+			 left_delta="80" bottom_delta="-6" width="130" height="18" follows="left|top">
+				<combo_item name="24hours" type="string" length="1" enabled="true" value="default">
+					24 hours clock
+				</combo_item>
+				<combo_item name="12hours" type="string" length="1" enabled="true" value="default">
+					12 hours clock
+				</combo_item>
+			</combo_box>
+			<text name="date_format_text_box" type="string" length="1" font="SansSerifSmall"
+			 border_drop_shadow_visible="false" border_visible="false" drop_shadow_visible="true"
+			 bg_visible="false" h_pad="0" v_pad="0" halign="left" enabled="true" mouse_opaque="true"
+			 left_delta="150" bottom_delta="6" width="80" height="10" follows="left|top">
+					Date format:
+			</text>
+			<combo_box name="date_format_combobox" allow_text_entry="false"
+			 max_chars="20" enabled="true" mouse_opaque="true"
+			 left_delta="80" bottom_delta="-6" width="130" height="18" follows="left|top">
+				<combo_item name="year_first" type="string" length="1" enabled="true" value="default">
+					YYYY-MM-DD
+				</combo_item>
+				<combo_item name="day_first" type="string" length="1" enabled="true" value="default">
+					DD/MM/YYYY
+				</combo_item>
+				<combo_item name="month_first" type="string" length="1" enabled="true" value="default">
+					MM/DD/YYYY
+				</combo_item>
+			</combo_box>
+		</panel>
+		<panel name="Chat/IM" label="Chat &amp; IM" border="true" mouse_opaque="true"
+		 left="1" bottom="-440" width="500" height="440" follows="left|top|right|bottom">
+			<view_border name="border4" bevel_style="none" border_thickness="1"
+			 left="10" bottom="-54" width="400" height="48" follows="left|top"/>
+			<check_box name="allow_mu_pose_check" control_name="AllowMUpose"
+			 label="Allow MU* pose style in chat and IM (with ':' as a synonymous to '/me ')"
+			 tool_tip="On MUCKs/MUXes/MUSHes/MUDs, to 'pose' or 'emote' you simply have to prefix your text with a colon (':'), while on IRC and in SL, you normally need to prefix your text with '/me '. It is of course faster and easier to type ':bows in greetings.' than '/me bows in greetings.'... With this setting activated, you can use either '/me ' or ':' to prefix your poses/emotes in both chat and IMs."
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="24" width="400" height="16" follows="left|top" />
+			<check_box name="auto_close_ooc_check" control_name="AutoCloseOOC"
+			 label="Auto-close OOC chat/IM (i.e. add '))' if not found and '((' was used)"
+			 tool_tip="By convention and in most MMORPG, text enclosed between double parenthesis is considered Out Of Character text (i.e. text exchanged between players (example: '((Sorry, phone, BRB))'), in contrast with In Character text exchanged between their characters/avatars for the actual role-play). With this setting activated, you can omit the closing double-parenthesis and the viewer will add it automatically for you."
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
+			<view_border name="border5" bevel_style="none" border_thickness="1"
+			 left="10" bottom_delta="-100" width="475" height="90" follows="left|top"/>
+			<check_box name="highlight_own_name_in_chat_check" control_name="HighlightOwnNameInChat"
+			 label="Highlight posts containing your own name/nicknames in chat"
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="66" width="370" height="16" follows="left|top" />
+			<check_box name="highlight_own_name_in_im_check" control_name="HighlightOwnNameInIM"
+			 label="Highlight posts containing your own name/nicknames in group IMs"
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="-20" width="370" height="16" follows="left|top" />
+			<text name="nickname_label" font="SansSerifSmall"
+			 left="15" bottom_delta="-25" width="60" height="20" follows="left|top">
+				Nicknames:
+			</text>
+			<line_editor name="highlight_nicknames_text" font="SansSerif" enabled="true" mouse_opaque="true"
+			 tool_tip="Enter a space or comma separated list of nicknames."
+			 bevel_style="in" border_style="line" border_thickness="1" word_wrap="false"
+			 max_length="512" handle_edit_keys_directly="true" select_all_on_focus_received="true"
+			 left_delta="70" bottom_delta="3" width="345" height="20" follows="left|top"/>
+			<color_swatch name="OwnNameChatColor" control_name="OwnNameChatColor" label="color"
+			 can_apply_immediately="true" border_color="0.45098 0.517647 0.607843 1" color="1 1 1 1"
+			 enabled="true" mouse_opaque="true"
+			 left="440" bottom_delta="0" width="36" height="50" follows="left|top" />
+			<check_box name="highlight_display_name_check" initial_value="false"
+			 label="Highlight posts containing any (4+ characters) word part of your display name"
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="-20" height="16" width="400" follows="left|top" />
+		</panel>
+		<panel name="Miscellaneous" label="Miscellaneous" border="true" mouse_opaque="true"
+		 left="1" bottom="-440" width="500" height="440" follows="left|top|right|bottom">
+			<check_box name="allow_multiple_viewers_check" control_name="AllowMultipleViewers"
+			 label="Allow multiple simultaneous viewer sessions"
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="-30" width="400" height="16" follows="left|top" />
+			<check_box name="speed_rez_check" control_name="SpeedRez"
+			 label="Enable speed-rezzing via draw distance stepping"
+			 tool_tip="When activated, this feature automatically reduces the draw distance to 32m before departure when you TP away (or when you log in) and increases it back progressively to its previous value on arrival. This allows the closest objects and avatars to get rezzed first and thus provides a (subjectively) speedier rezzing experience."
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
+			<spinner name="speed_rez_interval" control_name="SpeedRezInterval"
+			 label="Draw distance stepping interval:"
+			 tool_tip="This is the interval of time, in seconds, between each increase of the draw distance (the distance is doubled at each step, till it reaches the value it was set to before the TP or login). The default value is 20s; if your network is slow, you might want to use larger delays (25s or more), while with a fast network shorter delays (15s or less) are best."
+			 label_width="180" font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 decimal_digits="0" min_val="5" max_val="60" initial_val="20" increment="5"
+			 left="35" bottom_delta="-20" width="230" height="16" follows="left|top" />
+			<text name="speed_rez_seconds" type="string" length="1" font="SansSerifSmall"
+			 enabled="true" mouse_opaque="true"
+			 bg_visible="false" border_visible="false" border_drop_shadow_visible="false"
+			 drop_shadow_visible="true" h_pad="0" v_pad="0" halign="left"
+			 left="270" bottom_delta="0" width="100" height="16" follows="left|top">
+				seconds
+			</text>
+			<check_box name="preview_anim_in_world_check" control_name="PreviewAnimInWorld"
+			 label="Preview animations on the avatar instead on a dummy before uploading"
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
+			<check_box name="private_look_at_check" control_name="PrivateLookAt"
+			 label="Do not look at or point to objects beyond:"
+			 tool_tip="When this setting is enabled, hovering the mouse pointer on or editing an object that is beyond the configured distance does not make your avatar 'looking' or 'pointing' at it, thus not broadcasting this info to surrounding avatars' viewers. This defeats the 'ShowLookAt' and 'ShowPointAt' features/hacks that others could use to find out (or make wrong assumptions about) what you are 'looking at' (when it's most often just your mouse pointer hovering on some random object)."
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
+			<spinner name="private_look_at_limit" control_name="PrivateLookAtLimit"
+			 font="SansSerifSmall" label="" label_width="0" enabled="true" mouse_opaque="true"
+			 decimal_digits="0" min_val="5" max_val="100" initial_val="20" increment="5"
+			 left="270" bottom_delta="0" width="50" height="16" follows="left|top" />
+			<text name="private_look_at_limit_meters" type="string" length="1"
+			 enabled="true" mouse_opaque="true"
+			 bg_visible="false" border_visible="false" border_drop_shadow_visible="false"
+			 drop_shadow_visible="true" h_pad="0" v_pad="0" halign="left"
+			 left="325" bottom_delta="0" width="30" height="16" follows="left|top">
+				m
+			</text>
+			<check_box name="revoke_perms_on_stand_up_check" control_name="RevokePermsOnStandUp"
+			 label="On standing up, revoke permissions for the object your avatar was sitting on"
+			 tool_tip="When you sit on a scripted object, it automatically gains some permissions, such as being allowed to animate your avatar. Some buggy scripts do not properly detect the moment when you stand up and may, for example, wrongly keep animating your avatar. This setting prevents this from happening since then all permissions get automatically revoked when you stand up."
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
+			<check_box name="teleport_history_departure_check" control_name="TeleportHistoryDeparture"
+			 label="Log the TP departure locations into the Teleport History"
+			 tool_tip="The teleport history always logs the arrival location. With this setting you may as well log the departure location."
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
+			<check_box name="rez_with_land_group_check" control_name="RezWithLandGroup"
+			 label="Rez objects with land group when possible"
+			 tool_tip="Setting the proper land group on scripted objects is important since failing to do it might restrict the permissions of their scripts (for example, the rezzing permission if the parcel is set to allow only group members to rez). This setting automatically takes care of setting the rezzed objects group to the land group, provided you are a member of that land group."
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
+			<check_box name="fetch_inventory_on_login_check" control_name="FetchInventoryOnLogin"
+			 label="Automatically fetch the inventory in the background after login"
+			 tool_tip="This setting allows to transparently start caching the contents of your inventory after you log in, thus speeding up inventory operations later on. This setting is also automatically enabled when the RestrainedLove features are enabled."
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
+			<check_box name="no_multiple_shoes_check" control_name="NoMultipleShoes"
+			 label="Do not allow to wear more than one pair of shoes"
+			 tool_tip="While it is possible to wear more than one pair of shoes, it doesn't really make any sense and beside, only the last worn pair determines the shape of the shoes (heels height, platform height, toes width and thickness, etc...). With this setting checked, any 'Add' action on a shoes wearable will be interpreted as a 'Wear', thus replacing any already worn pair with the new one."
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
+			<check_box name="no_multiple_skirts_check" control_name="NoMultipleSkirts"
+			 label="Do not allow to wear more than one skirt"
+			 tool_tip="While it is possible to wear more than one skirt, given how rendering is currently impemented in (all) viewers, the length of the combination of worn skirts is determined by the shortest one, even if it is worn below longer skirts, making it a mess... With this setting checked, any 'Add' action on a skirt wearable will be interpreted as a 'Wear', thus replacing any already worn skirt with the new one."
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
+			<check_box name="no_multiple_physics_check" control_name="NoMultiplePhysics"
+			 label="Do not allow to wear more than one Physics layer"
+			 tool_tip="While it is possible to wear more than one Physics, only the last worn one is actually taken into account. With this setting checked, any 'Add' action on a Physics wearable will be interpreted as a 'Wear', thus replacing any already worn Physics with the new one."
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
+			<check_box name="avatar_physics_check" control_name="AvatarPhysics"
+			 label="Enable avatar physics (read carefully the tooltip for this setting)"
+			 tool_tip="This setting allows to turn Avatar Physics on (note that even when your avatar is wearing a Physics wearable, Avatar Physics stays off unless this setting is on). Beware: this feature requires a lot of viewer side calculations: it can cause a frame rate slow down, especially in crowded areas. Also, when on and using a Physics wearable on your avatar, the latter may fail to render properly for users of older viewers (v1.23, Snowglobe, etc)..."
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
+		</panel>
+		<panel name="RestrainedLove" label="RestrainedLove" border="true" mouse_opaque="true"
+		 left="1" bottom="-440" width="500" height="440" follows="left|top|right|bottom">
+			<check_box name="restrained_love_check" control_name="RestrainedLove"
+			 label="RestrainedLove mode (requires a restart)"
+			 tool_tip="RestrainedLove allows scripts in your *own* objects to take control on some features of the viewer, and in particular restrict what you can do with it in given situations. This is used by many BDSM scripted toys to try and improve your role-play experience, but may also be used by other scripted objects not related with BDSM (for example, by a scripted outfit manager)."
+			 font="SansSerifSmall" mouse_opaque="true"  enabled="true"
+			 left="15" bottom_delta="-30" width="400" height="16" follows="left|top" />
+			<text name="user_profile_text" font="SansSerifSmall" mouse_opaque="true" halign="left"
+			 bottom_delta="-20" left="10" height="16" width="65" follows="left|right|top"
+			 tool_tip="This setting allows to set the RestrainedLoveBlacklist variable with preset black lists matching each user profile. You may also set a custom profile by clicking on the corresponding button, in which case no radio button will be checked here. Note that user profile changes will only be taken into account after a viewer restart.">
+				User Profile:
+			</text>
+			<radio_group name="user_profile" draw_border="false"
+			 left_delta="70" bottom_delta="0" height="20" width="340" follows="left|top">
+				<radio_item name="personna_player" bottom="-20" left="0" height="20" width="140"
+				 tool_tip="Persona-players are people who consider they make one with their avatar (their avatar is bearing their own persona, even if they don't share the same appearance or even gender). For them, IC (In Character) and OOC (Out Of Character) do not really mean anything (they are both IC and OOC at the same time when they play). They enjoy being restricted in the same way as their avatar and even further. RestrainedLove was primarily designed for persona-players. With this setting checked, no RestrainedLove command will be blacklisted.">
+					BDSM Persona-Player
+				</radio_item>
+				<radio_item name="role_player" bottom="-20" left="140" height="20" width="120"
+				 tool_tip="Role-players are people who consider that, while their avatar may share some of their own traits, it is just a character (like the character in a novel) that they use to play a role. For them, IC (In Character) and OOC (Out Of Character) are two, entirely different things just like the writer of the novel (their OOC self), and a character in the novel (their IC self). They do not want to be restricted as a player (no OOC restrictions), but enjoy seeing their avatar restricted as a part of and as an enhancement to the role-play.">
+					BDSM Role-Player
+				</radio_item>
+				<radio_item name="non_bdsm" bottom="-20" left="260" height="20" width="80"
+				 tool_tip="If you are not into BDSM and yet wish to benefit from some features RestrainedLove can offer to you, such as allowing scripts to change what your avatar is wearing, or to redirect your chat (used by emoters), or to TP you automatically (used by teleporting gates), but don't wish to get restricted in what you can do in any way, then this profile is for you !">
+					Non-BDSM
+				</radio_item>
+				<radio_item name="custom" bottom="-20" left="340" height="20" width="60" visible="false"
+				 tool_tip="Choose this setting to compose your own profile by selecting individual blacklist categories yourself.">
+					Custom
+				</radio_item>
+			</radio_group>
+			<button name="custom_profile_button" label="Custom" font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 tool_tip="Click this button to open the custom blacklist floater that will entitle you to blacklist groups of RestrainedLove commands."
+			 left_delta="344" bottom_delta="-1" width="64" height="20" follows="left|top" />
+			<check_box name="restrained_love_no_setenv_check" control_name="RestrainedLoveNoSetEnv"
+			 label="Ignore @setenv commands (requires a restart)"
+			 tool_tip="The @setenv commands are used to change the Windlight settings in your viewer. They can potentially get you into troubles if your graphics card and/or driver can't cope with Windlight shaders (if you must keep the 'Atmospheric shaders' off in the 'Graphics' settings tab for the viewer to function properly or fast enough, it is likely the case). In this latter case, it is recommended that you check this setting."
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="-19" width="260" height="16" follows="left|top" />
+			<text name="rlv_inventory_text" type="string" length="1" enabled="true" mouse_opaque="true"
+			 bg_visible="false" border_visible="false" border_drop_shadow_visible="false"
+			 drop_shadow_visible="true" h_pad="0" v_pad="0" halign="left"
+			 left="10" bottom_delta="-16" width="460" height="16" follows="left|top">
+				Inventory related options:
+			</text>
+			<view_border name="border6" bevel_style="none" border_thickness="1"
+			 left="10" bottom_delta="-64" width="415" height="64" follows="left|top"/>
+			<check_box name="restrained_love_allow_wear_check" control_name="RestrainedLoveAllowWear"
+			 label="Allow Wear and Add to/Replace Outfit in inventrory"
+			 tool_tip="When this setting is checked and unless @defaultwear is in force, the 'Wear', 'Add to Outfit' and 'Replace Outfit' commands are made available in the inventory context menus even when an attachment has been locked on your avatar. Such commands may cause locked attachments to get kicked off your avatar, but RestrainedLove would then (attempt to) reattach them after a delay (see the auto-reattach delay setting below). If you don't want to risk getting your locked attachments accidentally detached (a few old ones may break when they are), or if the asset server is being too laggy to allow auto-reattach to work properly, you may want to un-check this setting."
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="42" width="400" height="16" follows="left|top" />
+			<spinner name="restrained_love_reattach_delay" control_name="RestrainedLoveReattachDelay"
+			 label="Auto-reattach delay for accidentally kicked locked items:"
+			 tool_tip="This is the delay after which RestrainedLove will attempt to reattach any locked attachment that got accidentally kicked off your avatar. The delay must be long enough to allow the item that got the attachment kicked to rez before auto-reattach is attempted, and for the sim to properly send the state (scripts states, especially) of the accidentally kicked attachment to the asset server before it is reattached (else, bad things can happen, like scripts forgetting last actions, recolored/resized prims forgetting their new color/position, etc). SL used to be extremely lazy (and laggy) with attachments rezzing/saving and 15s was a safe setting in the past. Knowadays, things have much improved and 10s should suffice in most cases."
+			 label_width="300" font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 decimal_digits="0" min_val="5" max_val="30" initial_val="0" increment="5"
+			 left="18" bottom_delta="-20" width="350" height="16" follows="left|top" />
+			<text name="restrained_love_reattach_delay_seconds" type="string" length="1"
+			 enabled="true" mouse_opaque="true"
+			 bg_visible="false" border_visible="false" border_drop_shadow_visible="false"
+			 drop_shadow_visible="true" h_pad="0" v_pad="0" halign="left"
+			 left_delta="354" bottom_delta="0" width="160" height="16" follows="left|top">
+				seconds
+			</text>
+			<check_box name="restrained_love_forbid_give_to_rlv_check" control_name="RestrainedLoveForbidGiveToRLV"
+			 label="Forbid giving items to the #RLV/ 'shared' inventory folder."
+			 tool_tip="RestrainedLove devices may give you a sub-folder that would go into your #RLV/ 'shared' inventory folder and once this sub-folder accepted, they would most probably force-wear the items it contains onto your avatar (many 'transformation' devices proceed in this way). While you *always* can refuse such an inventory offer with the usual Accept/Decline permission dialog of the viewer, you may also want to force the viewer to put such accepted offers elsewhere so that items are not force-worn on your avatar once accepted. With this setting checked, the offered folder would go at the root of your inventory instead of inside #RLV/."
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
+			<text name="rlv_chat_text" type="string" length="1" enabled="true" mouse_opaque="true"
+			 bg_visible="false" border_visible="false" border_drop_shadow_visible="false"
+			 drop_shadow_visible="true" h_pad="0" v_pad="0" halign="left"
+			 left="10" bottom_delta="-24" width="460" height="16" follows="left|top">
+				Chat related options:
+			</text>
+			<view_border name="border7" bevel_style="none" border_thickness="1"
+			 left="10" bottom_delta="-64" width="415" height="64" follows="left|top"/>
+			<check_box name="restrained_love_show_ellipsis_check" control_name="RestrainedLoveShowEllipsis"
+			 label="Show '...' for muted text when deafened"
+			 tool_tip="When your avatar is deafened and can't hear chat, a '...' ellipsis is printed in chat instead. If you don't wish to see this ellipsis, you may un-check this setting."
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="42" width="400" height="16" follows="left|top" />
+			<check_box name="restrained_love_untruncated_emotes_check" control_name="RestrainedLoveUntruncatedEmotes"
+			 label="Untruncated emotes (requires a restart)"
+			 tool_tip="By default, and to prevent 'cheating' (by faking chat with emotes), RestrainedLove truncates emotes to a small amount of characters when your avatar is prevented from chatting. This is a huge impairement for true role-players who won't try and cheat but instead want to enjoy posing long emotes during their RP. While many RestrainedLove toys use '@emote=add' to lift such an annoying restriction, some don't. If you are a true role-player and don't want your emotes to be truncated when your avatar's chatting ability is restricted, you can check this setting."
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
+			<check_box name="restrained_love_can_ooc_check" control_name="RestrainedLoveCanOoc"
+			 label="OOC chat always allowed (requires a restart)"
+			 tool_tip="Out Of Character chat (i.e. text enclosed between double parenthesis) is normally always allowed, even when chat is restricted/muted by RestrainedLove. By disabling this setting, you may further restrict your ability to communicate with others by preventing OOC chat to go through when chat is restricted. Only the hardcore persona-players may wish to disable this setting..."
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
+			<text name="rlv_im_text" type="string" length="1" enabled="true" mouse_opaque="true"
+			 bg_visible="false" border_visible="false" border_drop_shadow_visible="false"
+			 drop_shadow_visible="true" h_pad="0" v_pad="0" halign="left"
+			 left="10" bottom_delta="-24" width="460" height="16" follows="left|top">
+				Instant Messaging related options (require a restart to take effect):
+			</text>
+			<view_border name="border7" bevel_style="none" border_thickness="1"
+			 left="10" bottom_delta="-158" width="475" height="158" follows="left|top"/>
+			<text name="receive_im_text" type="string" length="1" enabled="true" mouse_opaque="true"
+			 bg_visible="false" border_visible="false" border_drop_shadow_visible="false"
+			 drop_shadow_visible="true" h_pad="0" v_pad="0" halign="left"
+			 left="18" bottom_delta="138" width="450" height="16" follows="left|top">
+				Message shown to people trying to IM you while you are forbidden to receive IMs:
+			</text>
+			<text_editor name="receive_im_message_editor" type="string" length="1" embedded_items="false"
+			 font="SansSerifSmall" max_length="255" word_wrap="true" enabled="true" mouse_opaque="true"
+			 left_delta="0" bottom_delta="-54" width="458" height="54" follows="left|top" />
+			<text name="send_im_text" type="string" length="1" enabled="true" mouse_opaque="true"
+			 bg_visible="false" border_visible="false" border_drop_shadow_visible="false"
+			 drop_shadow_visible="true" h_pad="0" v_pad="0" halign="left"
+			 left_delta="0" bottom_delta="-22" width="460" height="16" follows="left|top">
+				Message shown to people when you try to IM them while you are forbidden to send IMs:
+			</text>
+			<text_editor name="send_im_message_editor" type="string" length="1" embedded_items="false"
+			 font="SansSerifSmall" max_length="255" word_wrap="true" enabled="true" mouse_opaque="true"
+			 left_delta="0" bottom_delta="-54" width="458" height="54" follows="left|top" />
+		</panel>
+	</tab_container>
+	<string name="when_logged_in">THIS SETTING CAN ONLY BE CHANGED ONCE LOGGED IN.</string>
+</panel>

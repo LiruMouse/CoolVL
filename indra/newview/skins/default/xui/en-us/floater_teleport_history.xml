@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater name="teleporthistory" title="Teleport History" rect_control="FloaterTeleportHistoryRect"
+	can_close="true" can_drag_on_left="false" can_minimize="true" can_resize="true"
+	min_width="550" min_height="150" width="550" height="200">
+	<scroll_list name="places_list" can_resize="true" multi_select="false"
+		background_visible="true" draw_border="true" draw_stripes="true" draw_heading="true"
+		height="150" width="530" bottom_delta="-170" top="10" left="10" follows="left|top|right|bottom">
+		<column name="type" label="" width="10" tool_tip="Departure or Arrival flag" />
+		<column name="parcel" label="Parcel" dynamicwidth="true" />
+		<column name="region" label="Region" width="145" />
+		<column name="position" label="Position" width="90" />
+		<column name="timestamp" label="Timestamp" width="125" />
+		<!--Hidden fields, used as storage for prebuilt strings, please keep at width 0-->
+		<column name="slurl" label="" width="0" />
+		<column name="simstring" label="" width="0" />
+	</scroll_list>
+	<button name="teleport" label="Teleport" tool_tip="Teleport to the selected location"
+		enabled="false" mouse_opaque="true" font="SansSerif" halign="center"
+		height="20" width="70" bottom_delta="-24" left="10" follows="left|bottom"
+	/>
+	<button name="show_on_map" label="Show on map" tool_tip="Open and center the map on the selected location."
+		enabled="false" mouse_opaque="true" font="SansSerif" halign="center"
+		height="20" width="100" bottom_delta="0" left_delta="75" follows="left|bottom"
+	/>
+	<button name="copy_slurl" label="Copy SLURL to clipboard" tool_tip="Copy the selected location as a SLURL into the clipboard."
+		enabled="false" mouse_opaque="true" font="SansSerif" halign="center"
+		height="20" width="155" bottom_delta="0" left_delta="105" follows="left|bottom"
+	/>
+	<button name="clear" label="Clear history" tool_tip="Clear the teleport history."
+		enabled="true" mouse_opaque="true" font="SansSerif" halign="center"
+		height="20" width="120" bottom_delta="0" right="-80" follows="right|bottom"
+	/>
+	<button name="close" label="Close" tool_tip="Close this floater."
+		enabled="true" mouse_opaque="true" font="SansSerif" halign="center"
+		height="20" width="65" bottom_delta="0" right="-10" follows="right|bottom"
+	/>
+</floater>

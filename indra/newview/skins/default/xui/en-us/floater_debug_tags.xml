@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater name="debug tags" title="Debug Tags" rect_control="FloaterDebugTagsRect"
+ can_close="true" can_drag_on_left="false" can_minimize="true" can_resize="true"
+ min_width="500" min_height="200" width="500" height="200">
+	<scroll_list name="tags_list" can_resize="true" multi_select="false"
+	 background_visible="true" draw_border="true" draw_stripes="true" draw_heading="true"
+	 height="163" width="480" bottom_delta="-188" top="10" left="10" follows="left|top|right|bottom">
+		<column name="active" label="" width="16" tool_tip="Check the box to activate the corresponding debug messages." />
+		<column name="tag" label="Available Debug Tags" width="150"/>
+		<column name="references" label="Reference source file(s)" dynamicwidth="true" />
+	</scroll_list>
+</floater>

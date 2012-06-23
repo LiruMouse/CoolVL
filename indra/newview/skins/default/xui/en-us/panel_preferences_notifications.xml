@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel border="true" bottom="0" height="500" label="Notifications" left="0" name="notifications"
+     title="Notifications" width="400">
+	<text name="dont_show_label"
+	 bottom_delta="-22" left="10" height="16" width="150" follows="top|left">
+		Do not show these popups:
+	</text>
+	<scroll_list name="disabled_popups"
+	 bottom_delta="-70" height="85" left="165" width="320" follows="top|left" />
+	<button name="enable_popup" label="Enable selected popup"
+	 bottom_delta="20" left="10" width="150" height="20" follows="top|left" />
+	<button name="reset_dialogs_btn" label="Enable all popups"
+	 tool_tip="Enable all of the optional popups and &apos;first time use&apos; notifications."
+	 bottom_delta="-20" left_delta="0" height="20" width="150" follows="top|left" />
+	<text name="show_label"
+	 bottom_delta="-25" left="10" height="16" width="150" follows="top|left">
+		Show these popups:
+	</text>
+	<scroll_list name="enabled_popups"
+	 bottom_delta="-70" height="85" left="165" width="320" follows="top|left" />
+	<button name="disable_popup" label="Disable selected popup"
+	 bottom_delta="20" left="10" width="150" height="20" follows="top|left" />
+	<button name="skip_dialogs_btn" label="Disable all popups"
+	 tool_tip="Disable all of the optional popups and &apos;first time use&apos; notifications."
+	 bottom_delta="-20" left="10" height="20" width="150" follows="top|left"/>
+	<text name="text_box2" type="string" length="1" enabled="true" mouse_opaque="false"
+	 bg_visible="false" border_drop_shadow_visible="false" border_visible="false" drop_shadow_visible="true"
+	 font="SansSerifSmall" v_pad="0" h_pad="0" halign="left"
+	 bottom_delta="-30" left="10" height="18" width="110" follows="left|top">
+		Inventory offers:
+	</text>
+   	<check_box name="show_in_inventory" control_name="ShowInInventory"
+	 radio_style="false" enabled="true" mouse_opaque="true"
+	 label="Automatically show newly accepted objects in inventory" font="SansSerifSmall"
+	 bottom_delta="0" left="130" height="16" width="270" follows="left|top" />
+	<text name="text_box2" type="string" length="1" enabled="true" mouse_opaque="false"
+	 bg_visible="false" border_drop_shadow_visible="false" border_visible="false" drop_shadow_visible="true"
+	 font="SansSerifSmall" v_pad="0" h_pad="0" halign="left"
+	 bottom_delta="-20" left="134" height="18" width="270" follows="left|top">
+		Offers of notecards, textures and landmarks:
+	</text>
+	<check_box name="accept_new_inventory" control_name="AutoAcceptNewInventory"
+	 radio_style="false" enabled="true" mouse_opaque="true"
+	 label="Automatically accept" font="SansSerifSmall"
+	 bottom_delta="-16" left="150" height="16" width="150" follows="left|top"/>
+	<check_box name="accept_new_inventory" control_name="RejectNewInventoryWhenBusy"
+	 radio_style="false" enabled="true" mouse_opaque="true"
+	 label="Automatically reject when busy" font="SansSerifSmall"
+	 tool_tip="When this option is checked, any inventory offer sent to you while you are set Busy will be automatically rejected. Please note that this is a dangerous option, since the sender might not be properly notified their offer was rejected and lead them to believe it was accepted when it actually was rejected..."
+	 bottom_delta="0" left_delta="150" height="16" width="150" follows="left|top"/>
+	<check_box name="show_new_inventory" control_name="ShowNewInventory"
+	 radio_style="false" enabled="true" mouse_opaque="true"
+	 label="Automatically open/view after accepting" font="SansSerifSmall"
+	 bottom_delta="-18" left="150" height="16" width="270"  follows="left|top" />
+	<text name="text_box2" type="string" length="1" enabled="true" mouse_opaque="false"
+	 bg_visible="false" border_drop_shadow_visible="false" border_visible="false" drop_shadow_visible="true"
+	 font="SansSerifSmall" v_pad="0" h_pad="0" halign="left"
+	 bottom_delta="-22" left="10" height="18" width="110" follows="left|top">
+		Notifications:
+	</text>
+	<check_box name="notify_money_change" control_name="NotifyMoneyChange"
+	 radio_style="false" enabled="true" mouse_opaque="true"
+	 label="Notify when Linden dollars (L$) are spent or received" font="SansSerifSmall"
+	 tool_tip="When this option is checked, a blue dialog shows each time you spend or receive money."
+	 bottom_delta="0" left="130" height="16" width="300" follows="left|top"/>
+	<check_box name="notify_server_version" control_name="NotifyServerVersion"
+	 radio_style="false" enabled="true" mouse_opaque="true"
+	 label="Notify about sim server version changes when changing region" font="SansSerifSmall"
+	 tool_tip="In Second Life, there may be up to 4 or more different versions of servers in production on the grid... These notifications can therefore get annoying and are hardly useful (if needed, you can always get the server version from the Help -> About floater)"
+	 bottom_delta="-20" left_delta="0" height="16" width="300" follows="left|top" />
+	<check_box name="online_friends_notifications" control_name="ChatOnlineNotification"
+	 radio_style="false" enabled="true" mouse_opaque="true"
+	 label="Show online/offline friends notifications" font="SansSerifSmall"
+	 bottom_delta="-20" left_delta="0" height="16" width="300" follows="left|top" />
+	<check_box name="hide_notifications_in_chat" control_name="HideNotificationsInChat"
+	 radio_style="false" enabled="true" mouse_opaque="true"
+	 label="Do not echo/log notify tips in chat" font="SansSerifSmall"
+	 tool_tip="The notify tips are those blue notifications appearing for a few seconds at the bottom right of the viewer window. They don't carry critical information"
+	 bottom_delta="-20" left_delta="0" height="16" width="300" follows="left|top" />
+	<check_box name="script_errors_as_chat" control_name="ScriptErrorsAsChat"
+	 radio_style="false" enabled="true" mouse_opaque="true"
+	 label="Show script errors and warnings in chat" font="SansSerifSmall"
+	 tool_tip="Script errors are logged into the Script/Warning floater (Tool -> Show Script Warning/Error Window) but may also be logged in chat via this setting"
+	 bottom_delta="-20" left_delta="0" height="16" width="300" follows="left|top" />
+	<check_box name="teleport_history_in_chat" control_name="TeleportHistoryInChat"
+	 radio_style="false" enabled="true" mouse_opaque="true"
+	 label="Notify &amp; log the TP departure locations in the Chat History" font="SansSerifSmall"
+	 tool_tip="There is a persistent teleport history (View -> Teleport History). However, this history might get cleared, and it keeps the departure locations only as an option (see the Cool features tab, Miscellaneous options). You may therefore still want to keep a log of your teleport departure locations in the chat history"
+	 bottom_delta="-20" left_delta="0" height="16" width="300" follows="left|top" />
+	<text name="text_box2" type="string" length="1" enabled="true" mouse_opaque="false"
+	 bg_visible="false" border_drop_shadow_visible="false" border_visible="false" drop_shadow_visible="true"
+	 font="SansSerifSmall" v_pad="0" h_pad="0" halign="left"
+	 bottom_delta="-22" left="10" height="17" width="110" follows="left|top">
+		Audio notifications:
+	</text>
+	<spinner name="L$ Change Threshold" control_name="UISndMoneyChangeThreshold"
+	 label="L$ Change Threshold" label_width="150" enabled="true" mouse_opaque="true"
+	 tool_tip="Minimum change in your money balance required to trigger a money received or money spent UI sound"
+	 min_val="0" max_val="10000" increment="10" decimal_digits="0"
+	 bottom_delta="0" left="134" height="16" width="220" follows="left|top" />
+	<spinner name="Health Reduction Threshold" control_name="UISndHealthReductionThreshold"
+	 label="Health Reduction Threshold" label_width="150" enabled="true" mouse_opaque="true"
+	 tool_tip="Minimum reduction of your avatar health required to trigger a &quot;ouch!&quot; UI sound"
+	 min_val="0" max_val="101" increment="10" decimal_digits="0"
+	 bottom_delta="-20" left_delta="0" height="16" width="220" follows="left|top" />
+</panel>

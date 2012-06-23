@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater name="region_debug_console" title="Region Debug Console"
+ can_close="true" can_minimize="true" can_resize="true"
+ min_height="200" min_width="300" height="404" width="600">
+	<text_editor name="region_debug_console_output" type="string" length="1" max_length="65536"
+	 left="10" bottom_delta="-376" height="356" width="576" follows="left|top|right|bottom"
+	 font="Monospace" show_line_numbers="false" word_wrap="true" track_bottom="true" enabled="false">
+	</text_editor>
+	<line_editor name="region_debug_console_input" border_style="line" border_thickness="1" max_length="127"
+	 bottom_delta="-22" height="19" width="576" follows="left|right|bottom" font="SansSerif" />
+</floater>

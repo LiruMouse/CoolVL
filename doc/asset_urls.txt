@@ -1,0 +1,4 @@
+SLASSET_ART=http://sldev.free.fr/sources/slviewer-artwork-cool_vl_viewer-12600.zip
+SLASSET_LIBS_DARWIN=http://sldev.free.fr/sources/slviewer-all-plateforms-libs-viewer-1.23.tar.gz
+SLASSET_LIBS_LINUXI386=http://sldev.free.fr/sources/slviewer-all-plateforms-libs-viewer-1.23.tar.gz
+SLASSET_LIBS_WIN32=http://sldev.free.fr/sources/slviewer-all-plateforms-libs-viewer-1.23.tar.gz

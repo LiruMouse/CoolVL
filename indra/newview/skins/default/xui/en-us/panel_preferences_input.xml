@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel border="true" bottom="-409" enabled="true" follows="left|top|right|bottom"
+     height="408" label="Input &amp; Camera" left="102" mouse_opaque="true"
+     name="Input panel" width="517">
+	<text name="input_options" type="string" length="1" enabled="true" mouse_opaque="true"
+	 bg_visible="false" border_drop_shadow_visible="false" border_visible="false" drop_shadow_visible="true"
+	 font="SansSerifSmall" v_pad="0" h_pad="0" halign="left"
+	 bottom_delta="-20" left="10" height="16" width="200" follows="left|top">
+		Input Controls:
+	</text>
+	<view_border name="im_border" bevel_style="none" border_thickness="1"
+	 bottom_delta="-160" left="10" height="160" width="477" follows="left|top"/>
+	<text name="keyboard_options" type="string" length="1" enabled="true" mouse_opaque="true"
+	 bg_visible="false" border_drop_shadow_visible="false" border_visible="false" drop_shadow_visible="true"
+	 font="SansSerifSmall" v_pad="0" h_pad="0" halign="left"
+	 bottom_delta="134" left="20" height="16" width="110" follows="left|top">
+		Keyboard Options:
+	</text>
+	<check_box name="automatic_fly" label="Auto fly/land on holding PgUp/PgDown (or up/down controls)" control_name="AutomaticFly"
+	 radio_style="false" enabled="true" mouse_opaque="true" font="SansSerifSmall"
+	 bottom_delta="0" left="135" height="16" width="370" follows="left|top" />
+	<check_box name="arrow_keys_move_avatar_check" control_name="ArrowKeysMoveAvatar"
+	 radio_style="false" enabled="true" mouse_opaque="true"
+	 label="Arrow keys always move avatar, even when typing in chat bar" font="SansSerifSmall"
+	 tool_tip="When this setting is checked, the arrow keys always move the avatar around even when some text is already typed in the chat bar, but then you cannot move the cursor in the text of the chat bar with the left and right keys, which can be a nuisance when correcting typos (you yet still can position the cursor with the mouse)"
+	 bottom_delta="-20" left_delta="0" height="16" width="400" follows="left|top" />
+	<text name="mouse_options" type="string" length="1" enabled="true" mouse_opaque="true"
+	 bg_visible="false" border_drop_shadow_visible="false" border_visible="false" drop_shadow_visible="true"
+	 font="SansSerifSmall" v_pad="0" h_pad="0" halign="left"
+	 bottom_delta="-24" left="20" height="17" width="110" follows="left|top">
+		Mouse Options:
+	</text>
+	<radio_group bottom_delta="-36" draw_border="false" follows="top|left" height="54" left="135"
+	 name="double_click_action" width="480" control_name="DoubleClickAction">
+		<radio_item bottom="-54" height="18" left="0" name="dc_no_operation" width="370" 
+		 tool_tip="With this option selected, in-world double-clicks will have no effect (unless you click on a touch-script object, of course).">
+			Do nothing on in-world double-click
+		</radio_item>
+		<radio_item bottom="-18" height="18" left="0" name="dc_auto_pilot" width="370" 
+		 tool_tip="If this option is selected, each time you double-click in-world on the floor, the viewer will attempt to auto-pilot your avatar to the clicked location.">
+			Auto-pilot to double-clicked in-world location
+		</radio_item>
+		<radio_item bottom="-36" height="18" left="0" name="dc_teleport" width="370" 
+		 tool_tip="If this option is selected, each time you double-click in-world, the viewer will attempt to teleport your avatar to the clicked location.">
+			Teleport to double-clicked in-world location
+		</radio_item>
+	</radio_group>
+	<check_box name="double_click_scripted_object_check" control_name="DoubleClickScriptedObject"
+	 radio_style="false" enabled="true" mouse_opaque="true"
+	 label="Auto-pilot or Teleport to double-clicked script-touch objects" font="SansSerifSmall"
+	 tool_tip="When this setting is checked, double-clicks on script-touch objects (scripted objects with a touch event) also trigger an auto-pilot or teleport action (as set above). This can be an annoyance since some scripted objects might use double-clicks for their own benefit (and you won't want to go/TP to the object each time you use their double-click feature), and even for simple touch scripted object it will trigger their touch action twice on auto-pilot/TP double-click requests."
+	 bottom_delta="-20" left_delta="0" height="16" width="400" follows="left|top" />
+	<text name="joystick_options" type="string" length="1" enabled="true" mouse_opaque="true"
+	 bg_visible="false" border_drop_shadow_visible="false" border_visible="false" drop_shadow_visible="true"
+	 font="SansSerifSmall" v_pad="0" h_pad="0" halign="left"
+	 bottom_delta="-28" left="20" height="17" width="110" follows="left|top">
+		Joystick:
+	</text>
+	<button name="joystick_setup_button" label="Joystick Setup" font="SansSerif" mouse_opaque="true"
+	 bottom_delta="0" left="138" height="20" width="120" follows="left|top" />
+	<text name="camera_options" type="string" length="1" enabled="true" mouse_opaque="true"
+	 bg_visible="false" border_drop_shadow_visible="false" border_visible="false" drop_shadow_visible="true"
+	 font="SansSerifSmall" v_pad="0" h_pad="0" halign="left"
+	 bottom_delta="-28" left="10" height="16" width="200" follows="left|top">
+		Camera Controls:
+	</text>
+	<view_border name="im_border" bevel_style="none" border_thickness="1"
+	 bottom_delta="-233" left="10" height="233" width="477" follows="left|top"/>
+	<text name="camera_options" type="string" length="1" enabled="true" mouse_opaque="true"
+	 bg_visible="false" border_drop_shadow_visible="false" border_visible="false" drop_shadow_visible="true"
+	 font="SansSerifSmall" v_pad="0" h_pad="0" halign="left"
+	 bottom_delta="207" left="20" height="17" width="110" follows="left|top">
+		Camera Options:
+	</text>
+	<slider name="camera_fov" label="View Angle" control_name="CameraAngle"
+	 enabled="true" mouse_opaque="true" min_val=".17" max_val="2.97" increment=".025" show_text="false"
+	 bottom_delta="0" left="138" height="16" width="330" label_width="195" follows="left|top" />
+	<slider name="camera_offset_scale" label="Follow Distance" control_name="CameraOffsetScale" 
+	 enabled="true" mouse_opaque="true" min_val=".5" max_val="3" increment=".025" show_text="false"
+	 bottom_delta="-20" left_delta="0" height="16" width="330" label_width="195" follows="left|top" />
+	<slider name="camera_to_pelvis_max_rot" label="Head/Pelvis Max Rotation Deviation" control_name="CameraToPelvisRotDeviation" 
+	 tool_tip="While your avatar is standing, using the right and left controls first changes the camera rotation (as well as the avatar head so that it faces the new focus point) and once the 'Head/Pelvis Max Rotation' threshold is reached, the controls then move the avatar, rotating its pelvis to stay below that threshold value. Reducing this threshold allows more accurate rotation movements of your avatar but makes its head movements a tad less 'natural' while rotating in a standing position."
+	 enabled="true" mouse_opaque="true" min_val="2" max_val="60" increment=".025" show_text="false"
+	 bottom_delta="-20" left_delta="0" height="16" width="330" label_width="195" follows="left|top" />
+	<check_box name="camera_ignore_collisions" label="Do not move the camera out of objects on collision" control_name="CameraIgnoreCollisions"
+	 tool_tip="When the following-up position of the camera would cause the latter to collide with or enter an object, the camera is normally automatically 'pushed' towards the avatar till the surface of the colliding object is behind it. This may cause spurious zoom-in/zoom-out camera movements when colliding with transparent objects or with objects which bounding box is much larger than their actual, visible size (this is the case with many sculpties, for example). Checking this setting prevents the automatic move to happen, letting you the responsibility to zoom-in yourself (with the mouse scroll wheel, for example) and as you deem appropriate."
+	 radio_style="false" enabled="true" mouse_opaque="true" font="SansSerifSmall"
+	 bottom_delta="-20" left="135" height="16" width="370" follows="left|top" />
+	<check_box name="edit_camera_movement" label="Automatic Edit Camera Movement" control_name="EditCameraMovement"
+	 radio_style="false" enabled="true" mouse_opaque="true" font="SansSerifSmall"
+	 tool_tip="Use automatic camera positioning when entering and exiting edit mode"
+	 bottom_delta="-20" left_delta="0" height="16" width="370" follows="left|top" />
+	<check_box name="edit_camera_movement" label="Automatic Appearance Camera Movement" control_name="AppearanceCameraMovement"
+	 radio_style="false" enabled="true" mouse_opaque="true" font="SansSerifSmall"
+	 tool_tip="Use automatic camera positioning while in avatar appearance edit mode"
+	 bottom_delta="-20" left_delta="0" height="16" width="370" follows="left|top" />
+	<check_box name="front_camera_on_sit" label="Automatically switch to front camera view on sitting" control_name="SitCameraFrontView"
+	 radio_style="false" enabled="true" mouse_opaque="true" font="SansSerifSmall"
+	 tool_tip="Automatically switch the camera to the front view when your avatar sits down on an object, and automatically disable the front view on standing up."
+	 bottom_delta="-20" left_delta="0" height="16" width="370" follows="left|top" />
+	<text name="mouselook_options" type="string" length="1" enabled="true" mouse_opaque="true"
+	 bg_visible="false" border_drop_shadow_visible="false" border_visible="false" drop_shadow_visible="true"
+	 font="SansSerifSmall" v_pad="0" h_pad="0" halign="left"
+	 bottom_delta="-24" left="20" height="17" width="110" follows="left|top">
+		Mouselook Options:
+	</text>
+	<slider name="mouse_sensitivity" label="Mouse Sensitivity" control_name="MouseSensitivity"
+	 enabled="true" mouse_opaque="true" min_val="0.25" max_val="15" increment="0.25" show_text="false"
+	 bottom_delta="0" left="138" height="16" width="330" label_width="195" follows="left|top" />
+	<check_box name="invert_mouse" label="Invert Mouse" control_name="InvertMouse"
+	 radio_style="false" enabled="true" mouse_opaque="true" font="SansSerifSmall"
+	 bottom_delta="-20" left="135" height="16" width="370" follows="left|top" />
+	<check_box name="use_max_rot_in_mouselook" label="Use the above Head/Pelvis Max Deviation in mouselook" control_name="MouseLookUseRotDeviation"
+	 tool_tip="When this this setting is enabled, the 'Head/Pelvis Max Rotation' threshold set by the slider above is also taken into account in Mouselook mode instead of using the default (and large) threshold value: this makes your avatar rotate sooner when moving the mouselook camera left and right."
+	 radio_style="false" enabled="true" mouse_opaque="true" font="SansSerifSmall"
+	 bottom_delta="-20" left="135" height="16" width="370" follows="left|top" />
+	<check_box name="avatar_in_mouselook" label="Show Avatar in Mouselook" control_name="FirstPersonAvatarVisible"
+	 radio_style="false" enabled="true" mouse_opaque="true" font="SansSerifSmall"
+	 bottom_delta="-20" left_delta="0" height="16" width="370" follows="left|top" />
+</panel>

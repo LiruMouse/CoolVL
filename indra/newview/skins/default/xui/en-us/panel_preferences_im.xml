@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel border="true" bottom="-409" enabled="true" follows="left|top|right|bottom"
+     height="408" label="IM &amp; Logs" left="102" mouse_opaque="true" name="im"
+     width="517">
+	<text type="string" length="1" bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
+	     bottom="-20" drop_shadow_visible="true" enabled="true" follows="left|top"
+	     font="SansSerifSmall" h_pad="0" halign="left" height="16" left="10"
+	     mouse_opaque="false" name="text_box20" v_pad="0" width="100">
+		Instant Messaging:
+	</text>
+	<view_border name="im_border" bevel_style="none" border_thickness="1"
+	 bottom_delta="-182" left="10" height="182" width="477" follows="left|top"/>
+	<text type="string" length="1" bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
+	     bottom_delta="160" drop_shadow_visible="true" enabled="true" follows="left|top"
+	     font="SansSerifSmall" h_pad="0" halign="left" height="16" left="20"
+	     mouse_opaque="false" name="text_box" v_pad="0" width="100">
+		Online Status:
+	</text>
+	<check_box bottom_delta="0" enabled="true" follows="left|top" font="SansSerifSmall"
+	     height="16" initial_value="false"
+	     label="Only my Friends and Groups can see when I am online"
+	     left="120" mouse_opaque="true" name="online_visibility" radio_style="false"
+	     width="350" />
+	<text type="string" length="1" bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
+	     bottom_delta="-25" drop_shadow_visible="true" enabled="true" follows="left|top"
+	     font="SansSerifSmall" h_pad="0" halign="left" height="16" left="20"
+	     mouse_opaque="false" name="text_box2" v_pad="0" width="100">
+		IM Options:
+	</text>
+	<string name="log_in_to_change">
+		log in to change
+	</string>
+	<check_box bottom_delta="0" enabled="true" follows="left|top" font="SansSerifSmall"
+	     height="16" initial_value="false" label="Send IM to Email ([EMAIL])"
+	     left="120" mouse_opaque="true" name="send_im_to_email" radio_style="false"
+	     width="350" />
+	<check_box bottom_delta="-20" enabled="true" follows="left|top"
+	     font="SansSerifSmall" height="16" initial_value="false"
+	     label="Include IM in chat console" left_delta="0" mouse_opaque="true"
+	     name="include_im_in_chat_console" radio_style="false" width="300" />
+	<check_box bottom_delta="-20" enabled="true" follows="left|top"
+	     font="SansSerifSmall" height="16" initial_value="false"
+	     label="Show timestamps in IM" left_delta="0" mouse_opaque="true"
+	     name="show_timestamps_check" radio_style="false" width="300" />
+	<text type="string" length="1" bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
+	     bottom_delta="-38" drop_shadow_visible="true" enabled="true" follows="left|top"
+	     font="SansSerifSmall" h_pad="0" halign="left" height="32" left="20"
+	     mouse_opaque="false" name="text_box3" v_pad="0" width="100">
+		Busy Mode
+Response:
+	</text>
+	<button bottom_delta="12" follows="left|top" font="SansSerif" label="?"
+	 tool_tip="Click for info about the auto-response message"
+	 left_delta="76" name="busy_response_help" height="18" width="18" />
+	<string name="help_text">
+The Busy Mode auto-response is sent in reply to new IM sessions initiated by others while you are set Busy.
+The auto-response message is prefixed with 'Busy mode auto-response: '.
+
+If you check the 'Also for Away' option, then the busy mode auto-response message is sent as well in reply to new IM sessions initiated by others while you are set Away.
+In this case however, the auto-response message is prefixed with 'Away mode auto-response: '.
+	</string>
+	<check_box bottom_delta="-36" enabled="true"
+	     tool_tip="When this box is checked, the Busy Mode auto-response is also sent in reply to new IM sessions initiated by others while you are set Away. In this case, the auto-response message is prefixed with 'Away mode auto-response: '."
+	     follows="left|top" font="SansSerifSmall" height="16"
+	     initial_value="false" label="Also for Away" left="12"
+	     mouse_opaque="true" name="busy_response_when_away" radio_style="false"
+	     width="80" />
+	<text_editor type="string" length="1" bottom_delta="-26" embedded_items="false" enabled="true" follows="left|top"
+	     font="SansSerifSmall" height="80" left="120" max_length="255"
+	     mouse_opaque="true" name="busy_response" width="355" word_wrap="true" />
+	<text type="string" length="1" bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
+	     bottom_delta="-32" drop_shadow_visible="true" enabled="true" follows="left|top"
+	     font="SansSerifSmall" h_pad="0" halign="left" height="16" left="10"
+	     mouse_opaque="false" name="text_box21" v_pad="0" width="100">
+		Logging Options:
+	</text>
+	<view_border name="im_border" bevel_style="none" border_thickness="1"
+	 bottom_delta="-210" left="10" height="210" width="477" follows="left|top"/>
+	<text type="string" length="1" bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
+	     bottom_delta="190" drop_shadow_visible="true" enabled="true" follows="left|top"
+	     font="SansSerifSmall" h_pad="0" halign="left" height="16" left="20"
+	     mouse_opaque="false" name="text_box4" v_pad="0" width="100">
+		IM Logging
+	</text>
+	<check_box bottom_delta="0" enabled="true"
+	     follows="left|top" font="SansSerifSmall" height="16"
+	     initial_value="false" label="Save a log of Instant Messages on my computer" left="120"
+	     mouse_opaque="true" name="log_instant_messages" radio_style="false"
+	     width="300" />
+	<check_box bottom_delta="-20" enabled="true"
+	     follows="left|top" font="SansSerifSmall" height="16"
+	     initial_value="false" label="Show timestamps in IM log" left_delta="20"
+	     mouse_opaque="true" name="log_instant_messages_timestamp" radio_style="false"
+	     width="217" />
+	<check_box bottom_delta="-20" enabled="true" follows="left|top"
+	     font="SansSerifSmall" height="16" initial_value="false"
+	     label="Show the end of last IM conversation" left_delta="0" mouse_opaque="true"
+	     name="log_show_history" radio_style="false" width="217" />
+	<text type="string" length="1" bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
+	     bottom_delta="-20" drop_shadow_visible="true" enabled="true" follows="left|top"
+	     font="SansSerifSmall" h_pad="0" halign="left" height="16" left="20"
+	     mouse_opaque="false" name="text_box22" v_pad="0" width="100">
+		Chat Logging:
+	</text>
+	<check_box bottom_delta="0" enabled="true" follows="left|top"
+	     font="SansSerifSmall" height="16" initial_value="false" label="Save a log of Local Chat on my computer"
+	     left="120" mouse_opaque="true" name="log_chat" radio_style="false"
+	     width="300" />
+	<check_box bbottom_delta="-20" enabled="true" follows="left|top"
+	     font="SansSerifSmall" height="16" initial_value="false"
+	     label="Show timestamps in Local Chat log" left_delta="20" mouse_opaque="true"
+	     name="log_chat_timestamp" radio_style="false" width="217" />
+	<check_box bottom_delta="-20" enabled="true" follows="left|top"
+	     font="SansSerifSmall" height="16" initial_value="false"
+	     label="Show incoming IM in Local Chat log" left_delta="0" mouse_opaque="true"
+	     name="log_chat_IM" radio_style="false" width="217" />
+	<text type="string" length="1" bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
+	     bottom_delta="-20" drop_shadow_visible="true" enabled="true" follows="left|top"
+	     font="SansSerifSmall" h_pad="0" halign="left" height="16" left="20"
+	     mouse_opaque="false" name="text_box22" v_pad="0" width="100">
+		Logging Options:
+	</text>
+	<check_box bottom_delta="0" enabled="true" follows="left|top"
+	     font="SansSerifSmall" height="16" initial_value="false"
+	     label="Include date with timestamps" left="120" mouse_opaque="true"
+	     name="log_date_timestamp" radio_style="false" width="300" />
+	<check_box bottom_delta="-20" enabled="true" follows="left|top"
+	     font="SansSerifSmall" height="16" initial_value="false"
+	     label="Include seconds with timestamps" left_delta="0" mouse_opaque="true"
+	     name="log_seconds_timestamp" radio_style="false" width="300" />
+	<check_box bottom_delta="-20" enabled="true" follows="left|top"
+	     font="SansSerifSmall" height="16" initial_value="false"
+	     label="Append date to log filename" left_delta="0" mouse_opaque="true"
+	     name="logfile_name_datestamp" radio_style="false" width="300" />
+	<button bottom_delta="-24" follows="left|top" font="SansSerif" halign="center"
+	     height="20" label="Change Path" label_selected="Change Path" left="20"
+	     mouse_opaque="true" name="log_path_button" width="95" />
+	<line_editor border_drop_shadow_visible="false" border_visible="false" bottom_delta="2"
+	     drop_shadow_visible="true" enabled="false" follows="top|left|right"
+	     font="SansSerifSmall" halign="left" height="19" left="124"
+	     max_length="254" mouse_opaque="false" name="log_path_string" width="370" />
+</panel>

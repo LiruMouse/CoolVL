@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater name="avatar_texture_debug" title="Avatar Textures"
+ can_close="true" can_drag_on_left="false" can_minimize="true" can_resize="false"
+ height="764" width="960">
+	<text name="baked_label" bottom="-40" height="16" left="10" width="80">
+		Baked Textures
+	</text>
+	<text name="composite_label" bottom="-40" height="16" left="116" width="120">
+		Composite Textures
+	</text>
+
+	<button name="Dump" label="Dump IDs to Console" font="SansSerif"
+	 halign="center" mouse_opaque="true"
+	 bottom="-45" left="-160" height="20" width="150" />
+
+	<button name="Rebake" label="Rebake" font="SansSerif"
+	 halign="center" mouse_opaque="true"
+	 bottom_delta="-24" left="-160" height="20" width="150" />
+
+	<texture_picker name="hair-baked" label="Baked Hair"
+	 bottom_delta="-88" left="10" height="115" width="96" />
+
+	<texture_picker name="hair_grain" label="Hair"
+	 bottom_delta="0" left_delta="105" height="115" width="96" />
+
+	<texture_picker name="hair_alpha" label="Hair Alpha"
+	 bottom_delta="0" left_delta="105" height="115" width="96" />
+
+	<texture_picker name="eyes-baked" label="Baked Eyes"
+	 bottom_delta="-120" left="10" height="115" width="96" />
+
+	<texture_picker name="eyes_iris" label="Eyes"
+	 bottom_delta="0" left_delta="105" height="115" width="96" />
+
+	<texture_picker name="eyes_alpha" label="Eyes Alpha"
+	 bottom_delta="0" left_delta="105" height="115" width="96" />
+
+	<texture_picker name="head-baked" label="Baked Head"
+	 bottom_delta="-120" left="10" height="115" width="96" />
+
+	<texture_picker name="head_bodypaint" label="Head Bodypaint"
+	 bottom_delta="0" left_delta="105" height="115" width="96" />
+
+	<texture_picker name="head_alpha" label="Head Alpha"
+	 bottom_delta="0" left_delta="105" height="115" width="96" />
+
+	<texture_picker name="head_tattoo" label="Head Tattoo"
+	 bottom_delta="0" left_delta="105" height="115" width="96" />
+
+	<texture_picker name="upper-baked" label="Baked Upper Body"
+	 bottom_delta="-120" left="10" height="115" width="96" />
+
+	<texture_picker name="upper_bodypaint" label="Upper Bodypaint"
+	 bottom_delta="0" left_delta="105" height="115" width="96" />
+
+	<texture_picker name="upper_alpha" label="Upper Alpha"
+	 bottom_delta="0" left_delta="105" height="115" width="96" />
+
+	<texture_picker name="upper_tattoo" label="Upper Tattoo"
+	 bottom_delta="0" left_delta="105" height="115" width="96" />
+
+	<texture_picker name="upper_undershirt" label="Undershirt"
+	 bottom_delta="0" left_delta="105" height="115" width="96" />
+
+	<texture_picker name="upper_gloves" label="Gloves"
+	 bottom_delta="0" left_delta="105" height="115" width="96" />
+
+	<texture_picker name="upper_shirt" label="Shirt"
+	 bottom_delta="0" left_delta="105" height="115" width="96" />
+
+	<texture_picker name="upper_jacket" label="Upper Jacket"
+	 bottom_delta="0" left_delta="105" height="115" width="96" />
+
+	<texture_picker name="lower-baked" label="Baked Lower Body"
+	 bottom_delta="-120" left="10" height="115" width="96" />
+
+	<texture_picker name="lower_bodypaint" label="Lower Bodypaint"
+	 bottom_delta="0" height="115" left_delta="105" width="96" />
+
+	<texture_picker name="lower_alpha" label="Lower Alpha"
+	 bottom_delta="0" height="115" left_delta="105" width="96" />
+
+	<texture_picker name="lower_tattoo" label="Lower Tattoo"
+	 bottom_delta="0" height="115" left_delta="105" width="96" />
+
+	<texture_picker name="lower_underpants" label="Underpants"
+	 bottom_delta="0" left_delta="105" height="115" width="96" />
+
+	<texture_picker name="lower_socks" label="Socks"
+	 bottom_delta="0" left_delta="105" height="115" width="96" />
+
+	<texture_picker name="lower_shoes" label="Shoes"
+	 bottom_delta="0" left_delta="105" height="115" width="96" />
+
+	<texture_picker name="lower_jacket" label="Lower Jacket"
+	 bottom_delta="0" left_delta="105" height="115" width="96" />
+
+	<texture_picker name="lower_pants" label="Pants"
+	 bottom_delta="0" left_delta="105" height="115" width="96" />
+
+	<texture_picker name="skirt-baked" label="Baked Skirt"
+	 bottom_delta="-120" left="10" height="115" width="96" />
+
+	<texture_picker name="skirt" label="Skirt"
+	 bottom_delta="0" left_delta="105" height="115" width="96" />
+</floater>
