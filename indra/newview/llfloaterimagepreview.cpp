@@ -754,9 +754,15 @@ BOOL LLImagePreviewAvatar::render()
 		// make sure alpha=0 shows avatar material color
 		LLGLDisable no_blend(GL_BLEND);
 
-		LLDrawPoolAvatar *avatarPoolp = (LLDrawPoolAvatar *)avatarp->mDrawable->getFace(0)->getPool();
-		
-		avatarPoolp->renderAvatars(avatarp);  // renders only one avatar
+		LLFace* facep = avatarp->mDrawable->getFace(0);
+		if (facep)	// Paranoia
+		{
+			LLDrawPoolAvatar* avatarPoolp = (LLDrawPoolAvatar*)facep->getPool();
+			if (avatarPoolp)	// More paranoia !
+			{
+				avatarPoolp->renderAvatars(avatarp);  // renders only one avatar
+			}
+		}
 	}
 
 	gGL.color4f(1,1,1,1);

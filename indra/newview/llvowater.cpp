@@ -137,14 +137,18 @@ LLDrawable *LLVOWater::createDrawable(LLPipeline *pipeline)
 BOOL LLVOWater::updateGeometry(LLDrawable *drawable)
 {
 	LLFastTimer ftm(LLFastTimer::FTM_UPDATE_WATER);
-	LLFace *face;
+	LLFace* face;
 
 	if (drawable->getNumFaces() < 1)
 	{
-		LLDrawPoolWater *poolp = (LLDrawPoolWater*) gPipeline.getPool(LLDrawPool::POOL_WATER);
+		LLDrawPoolWater* poolp = (LLDrawPoolWater*)gPipeline.getPool(LLDrawPool::POOL_WATER);
 		drawable->addFace(poolp, NULL);
 	}
 	face = drawable->getFace(0);
+	if (!face)
+	{
+		llerrs << "Could not add a new face !" << llendl;
+	}
 
 //	LLVector2 uvs[4];
 //	LLVector3 vtx[4];

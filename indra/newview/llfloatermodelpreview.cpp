@@ -5324,7 +5324,7 @@ BOOL LLModelPreview::render()
 	glClear(GL_DEPTH_BUFFER_BIT);
 
 	LLRect preview_rect = mFMP->getChildView("preview_panel")->getRect();
-	F32 aspect = (F32) preview_rect.getWidth()/preview_rect.getHeight();
+	F32 aspect = (F32) preview_rect.getWidth() / preview_rect.getHeight();
 
 	LLViewerCamera* camera = LLViewerCamera::getInstance();
 	camera->setAspect(aspect);
@@ -5356,7 +5356,7 @@ BOOL LLModelPreview::render()
 
 	LLQuaternion av_rot = camera_rot;
 	camera->setOriginAndLookAt(target_pos +
-								(LLVector3(mCameraDistance, 0.f, 0.f) + offset) * av_rot,	// camera
+							   (LLVector3(mCameraDistance, 0.f, 0.f) + offset) * av_rot,	// camera
 							   LLVector3::z_axis,											// up
 							   target_pos);													// point of interest
 

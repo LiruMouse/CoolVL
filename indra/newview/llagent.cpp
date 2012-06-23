@@ -5132,11 +5132,6 @@ void LLAgent::setGodLevel(U8 god_level)
 	mAgentAccess->setGodLevel(god_level);
 }
 
-void LLAgent::setAOTransition()
-{
-	mAgentAccess->setTransition();
-}
-
 const LLAgentAccess& LLAgent::getAgentAccess()
 {
 	return *mAgentAccess;
@@ -6494,20 +6489,8 @@ void LLAgent::sendAgentSetAppearance()
 	msg->addUUIDFast(_PREHASH_SessionID, getSessionID());
 
 	// Correct for the collision tolerance (to make it look like the agent is
-	// actually walking on the ground/object). Also allow correcting X and Y
-	// for the bounding box for micro or macro avatars (even though it won't
-	// affect animations)
+	// actually walking on the ground/object).
 	LLVector3 body_size = gAgentAvatarp->mBodySize;
-	body_size.mV[VX] += gSavedSettings.getF32("AvatarOffsetX");
-	if (body_size.mV[VX] < 0.01f)
-	{
-		body_size.mV[VX] = 0.01f;
-	}
-	body_size.mV[VY] += gSavedSettings.getF32("AvatarOffsetY");
-	if (body_size.mV[VY] < 0.01f)
-	{
-		body_size.mV[VY] = 0.01f;
-	}
 	body_size.mV[VZ] += gSavedSettings.getF32("AvatarOffsetZ");
 	msg->addVector3Fast(_PREHASH_Size, body_size);
 

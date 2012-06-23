@@ -98,10 +98,10 @@
 				</text>
 				<combo_box name="lod_source_high" follows="top|left"
 				 left_delta="65" bottom_delta="0" width="135" height="20">
-					<combo_item id="Load from file" value="Load from file">
+					<combo_item name="Load from file" value="Load from file">
 						Load from file
 					</combo_item>
-					<combo_item id="Generate" value="Generate">
+					<combo_item name="Generate" value="Generate">
 						Generate
 					</combo_item>
 				</combo_box>
@@ -113,10 +113,10 @@
 				 left_delta="125" bottom_delta="0" width="70" height="20"/>
 				<combo_box name="lod_mode_high" follows="top|left" visible="false"
 				 left="215" bottom_delta="0" width="135" height="20">
-					<combo_item id="Triangle Limit" value="Triangle Limit">
+					<combo_item name="Triangle Limit" value="Triangle Limit">
 						Triangle Limit
 					</combo_item>
-					<combo_item id="Error Threshold" value="Error Threshold">
+					<combo_item name="Error Threshold" value="Error Threshold">
 						Error Threshold
 					</combo_item>
 				</combo_box>
@@ -145,13 +145,13 @@
 				</text>
 				<combo_box name="lod_source_medium" follows="top|left"
 				 left_delta="65" bottom_delta="0" width="135" height="20">
-					<combo_item id="Load from file" value="Load from file">
+					<combo_item name="Load from file" value="Load from file">
 						Load from file
 					</combo_item>
-					<combo_item id="Generate" value="Generate">
+					<combo_item name="Generate" value="Generate">
 						Generate
 					</combo_item>
-					<combo_item id="Use LoD above" value="Use LoD above">
+					<combo_item name="Use LoD above" value="Use LoD above">
 						Use LoD above
 					</combo_item>
 				</combo_box>
@@ -163,10 +163,10 @@
 				 left_delta="125" bottom_delta="0" width="70" height="20"/>
 				<combo_box name="lod_mode_medium" follows="top|left"
 				 left="215" bottom_delta="0" width="135" height="20">
-					<combo_item id="Triangle Limit" value="Triangle Limit">
+					<combo_item name="Triangle Limit" value="Triangle Limit">
 						Triangle Limit
 					</combo_item>
-					<combo_item id="Error Threshold" value="Error Threshold">
+					<combo_item name="Error Threshold" value="Error Threshold">
 						Error Threshold
 					</combo_item>
 				</combo_box>
@@ -195,13 +195,13 @@
 				</text>
 				<combo_box name="lod_source_low" follows="top|left"
 				 left_delta="65" bottom_delta="0" width="135" height="20">
-					<combo_item id="Load from file" value="Load from file">
+					<combo_item name="Load from file" value="Load from file">
 						Load from file
 					</combo_item>
-					<combo_item id="Generate" value="Generate">
+					<combo_item name="Generate" value="Generate">
 						Generate
 					</combo_item>
-					<combo_item id="Use LoD above" value="Use LoD above">
+					<combo_item name="Use LoD above" value="Use LoD above">
 						Use LoD above
 					</combo_item>
 				</combo_box>
@@ -213,10 +213,10 @@
 				 left_delta="125" bottom_delta="0" width="70" height="20"/>
 				<combo_box name="lod_mode_low" follows="top|left"
 				 left="215" bottom_delta="0" width="135" height="20">
-					<combo_item id="Triangle Limit" value="Triangle Limit">
+					<combo_item name="Triangle Limit" value="Triangle Limit">
 						Triangle Limit
 					</combo_item>
-					<combo_item id="Error Threshold" value="Error Threshold">
+					<combo_item name="Error Threshold" value="Error Threshold">
 						Error Threshold
 					</combo_item>
 				</combo_box>
@@ -245,13 +245,13 @@
 				</text>
 				<combo_box name="lod_source_lowest" follows="top|left"
 				 left_delta="65" bottom_delta="0" width="135" height="20">
-					<combo_item id="Load from file" value="Load from file">
+					<combo_item name="Load from file" value="Load from file">
 						Load from file
 					</combo_item>
-					<combo_item id="Generate" value="Generate">
+					<combo_item name="Generate" value="Generate">
 						Generate
 					</combo_item>
-					<combo_item id="Use LoD above" value="Use LoD above">
+					<combo_item name="Use LoD above" value="Use LoD above">
 						Use LoD above
 					</combo_item>
 				</combo_box>
@@ -263,10 +263,10 @@
 				 left_delta="125" bottom_delta="0" width="70" height="20"/>
 				<combo_box name="lod_mode_lowest" follows="top|left"
 				 left="215" bottom_delta="0" width="135" height="20">
-					<combo_item id="Triangle Limit" value="Triangle Limit">
+					<combo_item name="Triangle Limit" value="Triangle Limit">
 						Triangle Limit
 					</combo_item>
-					<combo_item id="Error Threshold" value="Error Threshold">
+					<combo_item name="Error Threshold" value="Error Threshold">
 						Error Threshold
 					</combo_item>
 				</combo_box>

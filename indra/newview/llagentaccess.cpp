@@ -39,8 +39,7 @@ LLAgentAccess::LLAgentAccess(LLControlGroup& savedSettings) :
 	mSavedSettings(savedSettings),
 	mAccess(SIM_ACCESS_PG),
 	mAdminOverride(false),
-	mGodLevel(GOD_NOT),
-	mAOTransition(false)
+	mGodLevel(GOD_NOT)
 {
 }
 
@@ -161,14 +160,3 @@ void LLAgentAccess::setMaturity(char text)
 {
 	mAccess = LLAgentAccess::convertTextToMaturity(text);
 }
-
-void LLAgentAccess::setTransition()
-{
-	mAOTransition = true;
-}
-
-bool LLAgentAccess::isInTransition() const
-{
-	return mAOTransition;
-}
-

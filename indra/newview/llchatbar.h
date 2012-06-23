@@ -71,6 +71,7 @@ public:
 	// Ignore arrow keys for chat bar
 	void		setIgnoreArrowKeys(BOOL b);
 
+	bool		hasTextEditor();
 	BOOL		inputEditorHasFocus();
 	std::string	getCurrentChat();
 

@@ -432,7 +432,7 @@ void LLViewerObject::dump() const
 	llinfos << "Velocity: " << getVelocity() << llendl;
 	if (mDrawable.notNull() && mDrawable->getNumFaces())
 	{
-		LLFacePool *poolp = mDrawable->getFace(0)->getPool();
+		LLFacePool* poolp = mDrawable->getFace(0)->getPool();
 		if (poolp)
 		{
 			llinfos << "Pool: " << poolp << llendl;
@@ -4247,7 +4247,11 @@ U32 LLViewerObject::getNumVertices() const
 		num_faces = mDrawable->getNumFaces();
 		for (i = 0; i < num_faces; i++)
 		{
-			num_vertices += mDrawable->getFace(i)->getGeomCount();
+			LLFace* facep = mDrawable->getFace(i);
+			if (facep)
+			{
+				num_vertices += facep->getGeomCount();
+			}
 		}
 	}
 	return num_vertices;
@@ -4262,7 +4266,11 @@ U32 LLViewerObject::getNumIndices() const
 		num_faces = mDrawable->getNumFaces();
 		for (i = 0; i < num_faces; i++)
 		{
-			num_indices += mDrawable->getFace(i)->getIndicesCount();
+			LLFace* facep = mDrawable->getFace(i);
+			if (facep)
+			{
+				num_indices += facep->getIndicesCount();
+			}
 		}
 	}
 	return num_indices;

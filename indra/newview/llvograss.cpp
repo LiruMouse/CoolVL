@@ -371,7 +371,7 @@ BOOL LLVOGrass::updateLOD()
 	{
 		if (mNumBlades)
 		{
-			mNumBlades = 0 ;
+			mNumBlades = 0;
 			gPipeline.markRebuild(mDrawable, LLDrawable::REBUILD_ALL, TRUE);
 		}
 		return TRUE ;
@@ -382,11 +382,15 @@ BOOL LLVOGrass::updateLOD()
 	}
 
 	LLFace* face = mDrawable->getFace(0);
+	if (!face)
+	{
+		return FALSE;
+	}
 
 	F32 tan_angle = 0.f;
 	S32 num_blades = 0;
 
-	tan_angle = (mScale.mV[0]*mScale.mV[1])/mDrawable->mDistanceWRTCamera;
+	tan_angle = (mScale.mV[0] * mScale.mV[1]) / mDrawable->mDistanceWRTCamera;
 	num_blades = llmin(GRASS_MAX_BLADES, lltrunc(tan_angle * 5));
 	num_blades = llmax(1, num_blades);
 	if (num_blades >= (mNumBlades << 1))
@@ -396,14 +400,14 @@ BOOL LLVOGrass::updateLOD()
 			mNumBlades <<= 1;
 		}
 
-		face->setSize(mNumBlades*8, mNumBlades*12);
+		face->setSize(mNumBlades * 8, mNumBlades * 12);
 		gPipeline.markRebuild(mDrawable, LLDrawable::REBUILD_ALL, TRUE);
 	}
 	else if (num_blades <= (mNumBlades >> 1))
 	{
 		while (mNumBlades > num_blades)
 		{
-			mNumBlades >>=1;
+			mNumBlades >>= 1;
 		}
 
 		face->setSize(mNumBlades*8, mNumBlades*12);
@@ -461,7 +465,11 @@ void LLVOGrass::plantBlades()
 		mDrawable->setNumFaces(1, NULL, getTEImage(0));
 	}
 		
-	LLFace *face = mDrawable->getFace(0);
+	LLFace* face = mDrawable->getFace(0);
+	if (!face)
+	{
+		return;
+	}
 
 	face->setTexture(getTEImage(0));
 	face->setState(LLFace::GLOBAL);
@@ -483,7 +491,7 @@ void LLVOGrass::getGeometry(S32 idx,
 							LLStrider<LLColor4U>& colorsp, 
 							LLStrider<U16>& indicesp)
 {
-	if (!mNumBlades)	//stop rendering grass
+	if (!mNumBlades)	// stop rendering grass
 	{
 		return;
 	}
@@ -498,7 +506,11 @@ void LLVOGrass::getGeometry(S32 idx,
 
 	LLColor4U color(255,255,255,255);
 
-	LLFace *face = mDrawable->getFace(idx);
+	LLFace* face = mDrawable->getFace(idx);
+	if (!face)
+	{
+		return;
+	}
 
 	F32 width  = sSpeciesTable[mSpecies]->mBladeSizeX;
 	F32 height = sSpeciesTable[mSpecies]->mBladeSizeY;

@@ -1,11 +1,11 @@
-/** 
+/**
  * @file llvopartgroup.cpp
  * @brief Group of particle systems
  *
  * $LicenseInfo:firstyear=2001&license=viewergpl$
- * 
+ *
  * Copyright (c) 2001-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -54,20 +54,19 @@ const F32 MAX_PART_LIFETIME = 120.f;
 
 extern U64 gFrameTime;
 
-LLVOPartGroup::LLVOPartGroup(const LLUUID &id, const LLPCode pcode, LLViewerRegion *regionp)
-	:	LLAlphaObject(id, pcode, regionp),
-		mViewerPartGroupp(NULL)
+LLVOPartGroup::LLVOPartGroup(const LLUUID &id, const LLPCode pcode,
+							 LLViewerRegion *regionp)
+:	LLAlphaObject(id, pcode, regionp),
+	mViewerPartGroupp(NULL)
 {
 	setNumTEs(1);
 	setTETexture(0, LLUUID::null);
 	mbCanSelect = FALSE;			// users can't select particle systems
 }
 
-
 LLVOPartGroup::~LLVOPartGroup()
 {
 }
-
 
 BOOL LLVOPartGroup::isActive() const
 {
@@ -75,12 +74,12 @@ BOOL LLVOPartGroup::isActive() const
 }
 
 F32 LLVOPartGroup::getBinRadius()
-{ 
-	return mScale.mV[0]*2.f;
+{
+	return mScale.mV[0] * 2.f;
 }
 
 void LLVOPartGroup::updateSpatialExtents(LLVector4a& newMin, LLVector4a& newMax)
-{		
+{
 	const LLVector3& pos_agent = getPositionAgent();
 	newMin.load3((pos_agent - mScale).mV);
 	newMax.load3((pos_agent + mScale).mV);
@@ -124,7 +123,8 @@ LLDrawable* LLVOPartGroup::createDrawable(LLPipeline *pipeline)
 	return mDrawable;
 }
 
- const F32 MAX_PARTICLE_AREA_SCALE = 0.02f; // some tuned constant, limits on how much particle area to draw
+// some tuned constant, limits on how much particle area to draw
+const F32 MAX_PARTICLE_AREA_SCALE = 0.02f;
 
 F32 LLVOPartGroup::getPartSize(S32 idx)
 {
@@ -141,12 +141,12 @@ LLVector3 LLVOPartGroup::getCameraPosition() const
 	return gAgent.getCameraPositionAgent();
 }
 
-BOOL LLVOPartGroup::updateGeometry(LLDrawable *drawable)
+BOOL LLVOPartGroup::updateGeometry(LLDrawable* drawable)
 {
 	LLFastTimer ftm(LLFastTimer::FTM_UPDATE_PARTICLES);
 
 	dirtySpatialGroup();
-	
+
 	S32 num_parts = mViewerPartGroupp->getCount();
 	LLFace *facep;
 	LLSpatialGroup* group = drawable->getSpatialGroup();
@@ -184,19 +184,19 @@ BOOL LLVOPartGroup::updateGeometry(LLDrawable *drawable)
 
 	F32 tot_area = 0;
 
-	F32 max_area = LLViewerPartSim::getMaxPartCount() * MAX_PARTICLE_AREA_SCALE; 
+	F32 max_area = LLViewerPartSim::getMaxPartCount() * MAX_PARTICLE_AREA_SCALE;
 	F32 pixel_meter_ratio = LLViewerCamera::getInstance()->getPixelMeterRatio();
 	pixel_meter_ratio *= pixel_meter_ratio;
 
 	LLViewerPartSim::checkParticleCount(mViewerPartGroupp->mParticles.size()) ;
 
-	S32 count=0;
+	S32 count = 0;
 	mDepth = 0.f;
-	S32 i = 0 ;
 	LLVector3 camera_agent = getCameraPosition();
-	for (i = 0 ; i < (S32)mViewerPartGroupp->mParticles.size(); i++)
+	for (S32 i = 0, particles = (S32)mViewerPartGroupp->mParticles.size();
+		 i < particles; i++)
 	{
-		const LLViewerPart *part = mViewerPartGroupp->mParticles[i];
+		const LLViewerPart* part = mViewerPartGroupp->mParticles[i];
 
 		LLVector3 part_pos_agent(part->mPosAgent);
 		LLVector3 at(part_pos_agent - camera_agent);
@@ -204,30 +204,33 @@ BOOL LLVOPartGroup::updateGeometry(LLDrawable *drawable)
 		F32 camera_dist_squared = at.lengthSquared();
 		F32 inv_camera_dist_squared;
 		if (camera_dist_squared > 1.f)
+		{
 			inv_camera_dist_squared = 1.f / camera_dist_squared;
+		}
 		else
+		{
 			inv_camera_dist_squared = 1.f;
+		}
 		F32 area = part->mScale.mV[0] * part->mScale.mV[1] * inv_camera_dist_squared;
 		tot_area = llmax(tot_area, area);
- 		
+
 		if (tot_area > max_area)
 		{
 			break;
 		}
-	
+
 		count++;
 
 		facep = drawable->getFace(i);
 		if (!facep)
 		{
-			llwarns << "No face found for index " << i << "!" << llendl;
 			continue;
 		}
 
 		facep->setTEOffset(i);
 		const F32 NEAR_PART_DIST_SQ = 5.f*5.f;  // Only discard particles > 5 m from the camera
 		const F32 MIN_PART_AREA = .005f*.005f;  // only less than 5 mm x 5 mm at 1 m from camera
-		
+
 		if (camera_dist_squared > NEAR_PART_DIST_SQ && area < MIN_PART_AREA)
 		{
 			facep->setSize(0, 0);
@@ -235,7 +238,7 @@ BOOL LLVOPartGroup::updateGeometry(LLDrawable *drawable)
 		}
 
 		facep->setSize(4, 6);
-		
+
 		facep->setViewerObject(this);
 
 		if (part->mFlags & LLPartData::LL_PART_EMISSIVE_MASK)
@@ -253,7 +256,7 @@ BOOL LLVOPartGroup::updateGeometry(LLDrawable *drawable)
 
 #ifdef MEDIA_ON_PRIM
 		//check if this particle texture is replaced by a parcel media texture.
-		if (part->mImagep.notNull() && part->mImagep->hasParcelMedia()) 
+		if (part->mImagep.notNull() && part->mImagep->hasParcelMedia())
 		{
 			part->mImagep->getParcelMedia()->addMediaToFace(facep) ;
 		}
@@ -263,12 +266,11 @@ BOOL LLVOPartGroup::updateGeometry(LLDrawable *drawable)
 		const F32 area_scale = 10.f; // scale area to increase priority a bit
 		facep->setVirtualSize(mPixelArea*area_scale);
 	}
-	for (i = count; i < drawable->getNumFaces(); i++)
+	for (S32 i = count, faces = drawable->getNumFaces(); i < faces; i++)
 	{
 		LLFace* facep = drawable->getFace(i);
 		if (!facep)
 		{
-			llwarns << "No face found for index " << i << "!" << llendl;
 			continue;
 		}
 		facep->setTEOffset(i);
@@ -282,23 +284,23 @@ BOOL LLVOPartGroup::updateGeometry(LLDrawable *drawable)
 
 void LLVOPartGroup::getGeometry(S32 idx,
 								LLStrider<LLVector3>& verticesp,
-								LLStrider<LLVector3>& normalsp, 
+								LLStrider<LLVector3>& normalsp,
 								LLStrider<LLVector2>& texcoordsp,
-								LLStrider<LLColor4U>& colorsp, 
+								LLStrider<LLColor4U>& colorsp,
 								LLStrider<U16>& indicesp)
 {
-	if (idx >= (S32) mViewerPartGroupp->mParticles.size())
+	if (idx >= (S32)mViewerPartGroupp->mParticles.size() ||
+		!mDrawable->getFace(idx))
 	{
 		return;
 	}
 
-	const LLViewerPart &part = *((LLViewerPart*) (mViewerPartGroupp->mParticles[idx]));
+	const LLViewerPart& part = *((LLViewerPart*) (mViewerPartGroupp->mParticles[idx]));
 
 	U32 vert_offset = mDrawable->getFace(idx)->getGeomIndex();
 
-	
 	LLVector3 part_pos_agent(part.mPosAgent);
-	LLVector3 camera_agent = getCameraPosition(); 
+	LLVector3 camera_agent = getCameraPosition();
 	LLVector3 at = part_pos_agent - camera_agent;
 	LLVector3 up;
 	LLVector3 right;
@@ -329,9 +331,8 @@ void LLVOPartGroup::getGeometry(S32 idx,
 	right *= 0.5f*part.mScale.mV[0];
 	up *= 0.5f*part.mScale.mV[1];
 
-
 	LLVector3 normal = -LLViewerCamera::getInstance()->getXAxis();
-		
+
 	*verticesp++ = part_pos_agent + up - right;
 	*verticesp++ = part_pos_agent - up - right;
 	*verticesp++ = part_pos_agent + up + right;
@@ -362,12 +363,13 @@ void LLVOPartGroup::getGeometry(S32 idx,
 }
 
 U32 LLVOPartGroup::getPartitionType() const
-{ 
-	return LLViewerRegion::PARTITION_PARTICLE; 
+{
+	return LLViewerRegion::PARTITION_PARTICLE;
 }
 
 LLParticlePartition::LLParticlePartition()
-:	LLSpatialPartition(LLDrawPoolAlpha::VERTEX_DATA_MASK, TRUE, GL_STREAM_DRAW_ARB)
+:	LLSpatialPartition(LLDrawPoolAlpha::VERTEX_DATA_MASK, TRUE,
+					   GL_STREAM_DRAW_ARB)
 {
 	mRenderPass = LLRenderPass::PASS_ALPHA;
 	mDrawableType = LLPipeline::RENDER_TYPE_PARTICLES;
@@ -376,8 +378,8 @@ LLParticlePartition::LLParticlePartition()
 	mLODPeriod = 1;
 }
 
-LLHUDParticlePartition::LLHUDParticlePartition() :
-	LLParticlePartition()
+LLHUDParticlePartition::LLHUDParticlePartition()
+:	LLParticlePartition()
 {
 	mDrawableType = LLPipeline::RENDER_TYPE_HUD_PARTICLES;
 	mPartitionType = LLViewerRegion::PARTITION_HUD_PARTICLE;
@@ -394,7 +396,7 @@ void LLParticlePartition::addGeometryCount(LLSpatialGroup* group, U32& vertex_co
 	for (LLSpatialGroup::element_iter i = group->getData().begin(); i != group->getData().end(); ++i)
 	{
 		LLDrawable* drawablep = *i;
-		
+
 		if (drawablep->isDead())
 		{
 			continue;
@@ -402,7 +404,7 @@ void LLParticlePartition::addGeometryCount(LLSpatialGroup* group, U32& vertex_co
 
 		LLAlphaObject* obj = (LLAlphaObject*) drawablep->getVObj().get();
 		obj->mDepth = 0.f;
-		
+
 		if (drawablep->isAnimating())
 		{
 			group->mBufferUsage = GL_STREAM_DRAW_ARB;
@@ -414,20 +416,20 @@ void LLParticlePartition::addGeometryCount(LLSpatialGroup* group, U32& vertex_co
 			drawablep->updateFaceSize(j);
 
 			LLFace* facep = drawablep->getFace(j);
-			if ( !facep || !facep->hasGeometry())
+			if (!facep || !facep->hasGeometry())
 			{
 				continue;
 			}
-			
+
 			count++;
 			facep->mDistance = (facep->mCenterLocal - camera_origin) * camera_at_axis;
 			obj->mDepth += facep->mDistance;
-			
+
 			mFaceList.push_back(facep);
 			vertex_count += facep->getGeomCount();
 			index_count += facep->getIndicesCount();
 		}
-		
+
 		obj->mDepth /= count;
 	}
 }
@@ -460,7 +462,7 @@ void LLParticlePartition::getGeometry(LLSpatialGroup* group)
 	buffer->getTexCoord0Strider(texcoordsp);
 	buffer->getIndexStrider(indicesp);
 
-	LLSpatialGroup::drawmap_elem_t& draw_vec = group->mDrawMap[mRenderPass];	
+	LLSpatialGroup::drawmap_elem_t& draw_vec = group->mDrawMap[mRenderPass];
 
 	for (std::vector<LLFace*>::iterator i = mFaceList.begin(); i != mFaceList.end(); ++i)
 	{
@@ -471,7 +473,7 @@ void LLParticlePartition::getGeometry(LLSpatialGroup* group)
 		facep->setVertexBuffer(buffer);
 		facep->setPoolType(LLDrawPool::POOL_ALPHA);
 		object->getGeometry(facep->getTEOffset(), verticesp, normalsp, texcoordsp, colorsp, indicesp);
-		
+
 		vertex_count += facep->getGeomCount();
 		index_count += facep->getIndicesCount();
 
@@ -499,7 +501,7 @@ void LLParticlePartition::getGeometry(LLSpatialGroup* group)
 			U32 count = facep->getIndicesCount();
 			LLDrawInfo* info = new LLDrawInfo(start, end, count, offset,
 											  facep->getTexture(),
-											  buffer, fullbright); 
+											  buffer, fullbright);
 			info->mExtents[0] = group->mObjectExtents[0];
 			info->mExtents[1] = group->mObjectExtents[1];
 			info->mVSize = vsize;
@@ -520,7 +522,7 @@ F32 LLParticlePartition::calcPixelArea(LLSpatialGroup* group, LLCamera& camera)
 
 U32 LLVOHUDPartGroup::getPartitionType() const
 {
-	return LLViewerRegion::PARTITION_HUD_PARTICLE; 
+	return LLViewerRegion::PARTITION_HUD_PARTICLE;
 }
 
 LLDrawable* LLVOHUDPartGroup::createDrawable(LLPipeline *pipeline)
@@ -533,6 +535,5 @@ LLDrawable* LLVOHUDPartGroup::createDrawable(LLPipeline *pipeline)
 
 LLVector3 LLVOHUDPartGroup::getCameraPosition() const
 {
-	return LLVector3(-1,0,0);
+	return LLVector3(-1, 0, 0);
 }
-

@@ -1966,7 +1966,7 @@ bool idle_startup()
 			// I think (hope?) the two protocols will differ significantly as OGP evolves.
 			//
 			// For now OGP skipping/omitting getting the following values: 
-			// udp_blacklist, first/lastname, ao_transition, start_location(home,lst), home, global-textures
+			// udp_blacklist, first/lastname, start_location(home,lst), home, global-textures
 			//
 			// At this point, we've gathered everything into LLUserAuth::getInstance()->mResult,
 			//   and we need to do similar things to what XMLRPC path does with the return from authenticate.
@@ -2264,16 +2264,14 @@ bool idle_startup()
 				int preferredMaturity = LLAgent::convertTextToMaturity(text[0]);
 				gSavedSettings.setU32("PreferredMaturity", preferredMaturity);
 			}
-			// During the AO transition, this flag will be true. Then the flag will
-			// go away. After the AO transition, this code and all the code that
-			// uses it can be deleted.
+			// During the AO transition, this flag was true. Transition is now
+			// over and all the related code was removed: let's log a warning
+			// should a grid still advertize it...
 			text = LLUserAuth::getInstance()->getResponse("ao_transition");
-			if (!text.empty())
+			if (text == "1")
 			{
-				if (text == "1")
-				{
-					gAgent.setAOTransition();
-				}
+				llwarns << "Adult Oriented transition flag advertized by the grid: this flag is no more used in the viewer and will be ignored !"
+						<< llendl;
 			}
 
 			text = LLUserAuth::getInstance()->getResponse("start_location");

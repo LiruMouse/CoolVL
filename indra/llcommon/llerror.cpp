@@ -1097,15 +1097,19 @@ namespace LLError
 					<< "(" << site.mLine << ") : ";
 		}
 
-	#if LL_WINDOWS
+#if LL_WINDOWS
 		// DevStudio: __FUNCTION__ already includes the full class name
-	#else
+#else
 		std::string class_name = className(site.mClassInfo);
 		if (class_name != "LLError::NoClassInfo")
 		{
+			if (class_name.find("(anonymous namespace)::") == 0)
+			{
+				class_name = class_name.substr(23);
+			}
 			prefix << class_name << "::";
 		}
-	#endif
+#endif
 		prefix << site.mFunction << ": ";
 
 		if (site.mPrintOnce)

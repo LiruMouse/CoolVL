@@ -25,21 +25,41 @@
 	     height="18" left="185" max_chars="20" mouse_opaque="true"
 	     name="windowsize combo" width="150">
 		<combo_item type="string" length="1" enabled="true" name="640x480" value="640 x 480">
-			640x480
-		</combo_item>
-		<combo_item type="string" length="1" enabled="true" name="800x600" value="800 x 600">
-			800x600 
+			640x480 (VGA)
 		</combo_item>
 		<combo_item type="string" length="1" enabled="true" name="720x480" value="720 x 480">
 			720x480 (NTSC)
 		</combo_item>
-		<combo_item type="string" length="1" enabled="true" name="768x576" value="768 x 576">
-			768x576 (PAL)
+		<combo_item type="string" length="1" enabled="true" name="720x576" value="720 x 576">
+			720x576 (PAL)
+		</combo_item>
+		<combo_item type="string" length="1" enabled="true" name="800x600" value="800 x 600">
+			800x600 (SVGA)
 		</combo_item>
 		<combo_item type="string" length="1" enabled="true" name="1024x768" value="1024 x 768">
-			1024x768
+			1024x768 (XGA)
 		</combo_item>
-
+		<combo_item type="string" length="1" enabled="true" name="1280x720" value="1280 x 720">
+			1280x720 (HD)
+		</combo_item>
+		<combo_item type="string" length="1" enabled="true" name="1280x800" value="1280 x 800">
+			1280x800 (WXGA)
+		</combo_item>
+		<combo_item type="string" length="1" enabled="true" name="1280x1024" value="1280 x 1024">
+			1280x1024 (SXGA)
+		</combo_item>
+		<combo_item type="string" length="1" enabled="true" name="1600x1200" value="1600 x 1200">
+			1600x1200 (UXGA)
+		</combo_item>
+		<combo_item type="string" length="1" enabled="true" name="1680x1050" value="1680 x 1050">
+			1680x1050 (WSXGA+)
+		</combo_item>
+		<combo_item type="string" length="1" enabled="true" name="1920x1080" value="1920 x 1080">
+			1920x1080 (FHD)
+		</combo_item>
+		<combo_item type="string" length="1" enabled="true" name="1920x1200" value="1920 x 1200">
+			1920x1200 (WUXGA)
+		</combo_item>
 	</combo_box>
 	<text type="string" length="1" bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
 	     bottom="-62" drop_shadow_visible="true" enabled="true" follows="left|top"
@@ -275,7 +295,7 @@
 	<slider bottom_delta="-22" can_edit_text="false" control_name="RenderVolumeLODFactor"
 	     decimal_digits="3" enabled="true" follows="left|top" height="16"
 	     increment="0.125" initial_val="160" label="  Objects:"
-	     label_width="140" left_delta="0" max_val="2" min_val="0"
+	     label_width="140" left_delta="0" max_val="3" min_val="0"
 	     mouse_opaque="true" name="ObjectMeshDetail" show_text="false" width="223" />
 	<slider bottom_delta="-20" can_edit_text="false" control_name="RenderFlexTimeFactor"
 	     decimal_digits="3" enabled="true" follows="left|top" height="16"

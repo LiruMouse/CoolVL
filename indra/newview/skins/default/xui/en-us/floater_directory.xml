@@ -1,52 +1,40 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<floater can_close="true" can_drag_on_left="false" can_minimize="true"
-     can_resize="true" height="570" min_height="570" min_width="780"
-     name="directory" rect_control="FloaterFindRect2" title="Search Second Life"
-     width="780">
-	<tab_container bottom="-570" follows="left|top|right|bottom" height="550" left="0"
-	     mouse_opaque="false" name="Directory Tabs" tab_position="top" width="780">
-		<panel border="true" bottom="-549" follows="left|top|right|bottom" height="533"
-		     label="All" left="1" mouse_opaque="false" name="find_all_old_panel" width="778">
-			<string name="searching_text">
-				Searching...
-			</string>
-			<string name="not_found_text">
-				None Found.
-			</string>
-			<button bottom="-533" follows="left|bottom" font="SansSerif" halign="center"
-			     height="20" label="&lt; Prev" label_selected="&lt; Prev" left="80"
-			     mouse_opaque="true" name="&lt; Prev" width="60" />
-			<button bottom="-533" follows="left|bottom" font="SansSerif" halign="center"
-			     height="20" label="Next &gt;" label_selected="Next &gt;"
-			     mouse_opaque="true" name="Next &gt;" width="60" />
-			<text bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
-			     bottom="-24" drop_shadow_visible="true" follows="left|top" font="SansSerif"
-			     h_pad="0" halign="left" height="16" left="4" mouse_opaque="true"
-			     name="find" v_pad="0" width="50">
+<floater name="directory" title="Search" rect_control="FloaterFindRect2"
+ can_close="true" can_drag_on_left="false" can_minimize="true" can_resize="true"
+ width="780" height="570" min_width="780" min_height="570">
+	<tab_container name="Directory Tabs" tab_position="top" mouse_opaque="false"
+	 left="0" bottom="-570" width="780" height="550" follows="left|top|right|bottom">
+		<panel name="find_all_old_panel" label="All" border="true" mouse_opaque="false"
+		 left="1" bottom="-549" width="778" height="533" follows="left|top|right|bottom">
+			<string name="searching_text">Searching...</string>
+			<string name="not_found_text">None Found.</string>
+			<text name="find" font="SansSerif" halign="left" mouse_opaque="true"
+			 bg_visible="false" border_visible="false"
+			 drop_shadow_visible="true" border_drop_shadow_visible="false"
+			 left="6" bottom="-24" width="40" height="16" follows="left|top">
 				Find:
 			</text>
-			<line_editor bevel_style="in" border_style="line" border_thickness="1" bottom="-24"
-			     follows="left|top" font="SansSerif" height="18" left_delta="38"
-			     max_length="63" mouse_opaque="true" name="name" spell_check="true" width="128" />
-			<button bottom="-26" follows="left|top" font="SansSerif" halign="center" height="20"
-			     label="Search" label_selected="Search" left_delta="136" mouse_opaque="true"
-			     name="Search" width="70" />
-			<check_box bottom="-22" control_name="ShowPGSearchAll" follows="left|top"
-			     font="SansSerifSmall" height="16" initial_value="true"
-			     label="PG content" left_delta="78" mouse_opaque="true"
-			     name="incpg" width="156" />
-			<check_box bottom="-22" control_name="ShowMatureSearchAll" follows="left|top"
-			     font="SansSerifSmall" height="16" initial_value="false"
-			     label="Mature content" left_delta="100" mouse_opaque="true"
-			     name="incmature" width="156" />
-			<check_box bottom="-22" control_name="ShowAdultSearchAll" follows="left|top"
-			     font="SansSerifSmall" height="16" initial_value="false"
-			     label="Adult content" left_delta="120" mouse_opaque="true"
-			     name="incadult" width="156" />
-			<scroll_list background_visible="true" bottom="-513" column_padding="0" draw_border="true"
-			     draw_heading="false" fg_disable_color="1, 1, 1, 1"
-			     follows="left|top|right|bottom" height="464" left="4" mouse_opaque="true"
-			     multi_select="false" name="results" search_column="1" width="339">
+			<line_editor name="name" label="Search" font="SansSerif" max_length="63"
+			 handle_edit_keys_directly="false" commit_on_focus_lost="false" tab_group="1"
+			 select_all_on_focus_received="false" select_on_focus="false"
+			 mouse_opaque="true" enabled="true" spell_check="true"
+			 bevel_style="in" border_style="line" border_thickness="1"
+			 left_delta="44" bottom_delta="0" width="210" height="18" follows="top|left|right" />
+			<button name="Search" label="Search" font="SansSerif" halign="center" mouse_opaque="true"
+			 left_delta="220" bottom_delta="-2" width="70" height="20" follows="right|top" />
+			<check_box name="incpg" label="PG content" font="SansSerifSmall" mouse_opaque="true"
+			 control_name="ShowPGSearchAll"
+			 left_delta="80" bottom_delta="0" width="110" height="16" follows="right|top" />
+			<check_box name="incmature" label="Mature content" font="SansSerifSmall" mouse_opaque="true"
+			 control_name="ShowMatureSearchAll"
+			 left_delta="120" bottom_delta="0" width="110" height="16" follows="right|top" />
+			<check_box name="incadult" label="Adult content" font="SansSerifSmall" mouse_opaque="true"
+			 control_name="ShowAdultSearchAll"
+			 left_delta="120" bottom_delta="0" width="110" height="16" follows="right|top" />
+			<scroll_list name="results" multi_select="false" search_column="1" mouse_opaque="true"
+			 draw_heading="true" draw_border="true"
+			 background_visible="true" fg_disable_color="1, 1, 1, 1" column_padding="0"
+			 left="4" bottom="-512" width="339" height="480" follows="left|top|right|bottom">
 				<column label="" name="icon" width="24" />
 				<column label="Name" name="name" width="235" />
 				<column label="Price" name="price" width="90" />
@@ -58,49 +46,38 @@
 				<column label="Online" name="online" width="90" />
 				<column label="Members" name="members" width="90" />
 			</scroll_list>
-			<text bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
-			     bottom_delta="-20" drop_shadow_visible="true" follows="left|bottom"
-			     font="SansSerifSmall" h_pad="0" halign="left" height="16" left="4"
-			     mouse_opaque="true" name="result_text" v_pad="0" width="328" />
+			<text name="result_text" font="SansSerifSmall" halign="left"
+			 bg_visible="false" drop_shadow_visible="true"
+			 border_drop_shadow_visible="false" border_visible="false"
+			 left="10" bottom_delta="-18" width="328" height="16" follows="left|bottom" />
+			<button name="Next &gt;" label="Next &gt;" font="SansSerif" halign="center" mouse_opaque="true"
+			 right="344" bottom="-532" width="80" height="20" follows="right|bottom" />
+			<button name="&lt; Prev" label="&lt; Prev" font="SansSerif" halign="center" mouse_opaque="true"
+			 right="258" bottom_delta="0" width="80" height="20" follows="right|bottom" />
 		</panel>
-		<panel border="true" bottom="-549" follows="left|top|right|bottom" height="533"
-		     label="All (web)" left="1" mouse_opaque="false" name="find_all_panel" width="778">
-			<string name="searching_text">
-				Searching...
-			</string>
-			<string name="not_found_text">
-				None Found.
-			</string>
-			<text bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
-			     bottom="-24" drop_shadow_visible="true" follows="left|top" font="SansSerif"
-			     h_pad="0" halign="left" height="16" left="4" mouse_opaque="true"
-			     name="find" v_pad="0" width="50">
+		<panel name="find_all_panel" label="All (web)" border="true" mouse_opaque="false"
+		 left="1" bottom="-549" width="778" height="533" follows="left|top|right|bottom">
+			<string name="searching_text">Searching...</string>
+			<string name="not_found_text">None Found.</string>
+			<string name="loading_text">Loading...</string>
+			<string name="done_text">Done</string>
+			<string name="redirect_404_url">http://secondlife.com/app/search/notfound.html</string>
+			<text name="find" font="SansSerif" halign="left" mouse_opaque="true"
+			 bg_visible="false" border_visible="false"
+			 drop_shadow_visible="true" border_drop_shadow_visible="false"
+			 left="6" bottom="-24" width="40" height="16" follows="left|top">
 				Find:
 			</text>
-			<line_editor bevel_style="in" border_style="line" border_thickness="1" bottom="-24"
-			     commit_on_focus_lost="false" enabled="true" follows="top|left|right"
-			     font="SansSerif" handle_edit_keys_directly="false" spell_check="true" height="18"
-			     label="Search" left_delta="56" max_length="254" mouse_opaque="true"
-			     name="search_editor" select_all_on_focus_received="false"
-			     select_on_focus="false" tab_group="1" tool_tip="Search Second Life"
-			     width="160" />
-			<button bottom="-26" follows="top|right" font="SansSerifSmall" height="20" label="Back"
-			     left="230" name="back_btn" width="70" />
-			<button bottom="-26" follows="top|right" font="SansSerifSmall" height="20"
-			     label="Forward" left="304" name="forward_btn" width="70" />
-			<button bottom="-48" follows="top|right" font="SansSerif" height="20"
-			     label="Search" left="121" name="search_btn" width="95" />
-			<combo_box allow_text_entry="false" bottom="-46" follows="right|top" height="18"
-			     left="230" max_chars="20" mouse_opaque="true" name="OldCategory"
-			     width="158">
-				<combo_item name="AnyCategory" value="All">
-					Any Category
-				</combo_item>
-				<combo_item name="Events" value="Events">
-					Events
-				</combo_item>
-				<combo_item name="Groups" value="Groups">
-					Groups
+			<line_editor name="search_editor" label="Search" font="SansSerif" max_length="254"
+			 handle_edit_keys_directly="false" commit_on_focus_lost="false" tab_group="1"
+			 select_all_on_focus_received="false" select_on_focus="false"
+			 mouse_opaque="true" enabled="true" spell_check="true"
+			 bevel_style="in" border_style="line" border_thickness="1"
+			 left_delta="44" bottom_delta="0" width="210" height="18" follows="top|left|right" />
+			<combo_box name="OldCategory" allow_text_entry="false" max_chars="20" mouse_opaque="true"
+			 left_delta="220" bottom_delta="0" width="158" height="18" follows="right|top">
+				<combo_item name="Everything" value="All">
+					Everything
 				</combo_item>
 				<combo_item name="People" value="People">
 					People
@@ -108,15 +85,21 @@
 				<combo_item name="Places" value="Places">
 					Places
 				</combo_item>
+				<combo_item name="Groups" value="Groups">
+					Groups
+				</combo_item>
+				<combo_item name="Events" value="Events">
+					Events
+				</combo_item>
 				<combo_item name="Wiki" value="Wiki">
 					Wiki
 				</combo_item>
 			</combo_box>
-			<combo_box allow_text_entry="false" bottom="-46" follows="right|top" height="18"
-			     left="230" max_chars="20" mouse_opaque="true" name="Category" visible="false"
-			     width="158">
-				<combo_item name="All" value="search">
-					All
+			<combo_box name="Category" allow_text_entry="false" max_chars="20"
+			 mouse_opaque="true" visible="false"
+			 left_delta="0" bottom_delta="0" width="158" height="18" follows="right|top">
+				<combo_item name="Everything" value="search">
+					Everything
 				</combo_item>
 				<combo_item name="People" value="search/people">
 					People
@@ -124,87 +107,70 @@
 				<combo_item name="Places" value="search/places">
 					Places
 				</combo_item>
-				<combo_item name="Events" value="search/events">
-					Events
-				</combo_item>
 				<combo_item name="Groups" value="search/groups">
 					Groups
 				</combo_item>
-				<combo_item name="Wiki" value="search/wiki">
-					Wiki
+				<combo_item name="Events" value="search/events">
+					Events
 				</combo_item>
-				<combo_item name="Destinations" value="destinations">
-					Destinations
+				<combo_item name="Destination Guide" value="destinations">
+					Destination Guide
+				</combo_item>
+				<combo_item name="Land &amp; Rentals" value="search/land">
+					Land &amp; Rentals
 				</combo_item>
 				<combo_item name="Classifieds" value="classifieds">
 					Classifieds
 				</combo_item>
+				<combo_item name="Support" value="support">
+					Support
+				</combo_item>
 			</combo_box>
-			<check_box bottom="-22" control_name="ShowPGSearchAll" follows="right|top"
-			     font="SansSerifSmall" height="16" initial_value="true"
-			     label="PG content" left="420" mouse_opaque="true"
-			     name="incpg" width="156" />
-			<check_box bottom="-40" control_name="ShowMatureSearchAll" follows="right|top"
-			     font="SansSerifSmall" height="16" initial_value="true"
-			     label="Mature content" left="420" mouse_opaque="true"
-			     name="incmature" width="156" />
-			<check_box bottom="-58" control_name="ShowAdultSearchAll" follows="right|top"
-			     font="SansSerifSmall" height="16" initial_value="false"
-			     label="Adult content" left="420" mouse_opaque="true"
-			     name="incadult" width="156" />
-			<check_box bottom="-40" control_name="UseNewSearch" follows="right|top"
-			     font="SansSerifSmall" height="16" initial_value="true"
-			     label="Use New Search" left="580" mouse_opaque="true"
-			     name="new_search" width="156" />
-			<button bottom="-22" enabled="true" follows="right|top" font="SansSerif"
-			     halign="center" height="18" label="?" label_selected="?" left="-25"
-			     mouse_opaque="true" name="?" width="18" />
-			<web_browser bottom="25" follows="top|left|bottom|right" font="SansSerifSmall" left="10"
-			     name="find_browser" right="-10" top="-60" />
-			<text bottom="5" follows="bottom|left" halign="left" height="16" left="10"
-			     name="status_text" width="150" />
-			<string name="loading_text">
-				Loading...
-			</string>
-			<string name="done_text">
-				Done
-			</string>
-			<string name="redirect_404_url">
-				http://secondlife.com/app/search/notfound.html
-			</string>
-    </panel>
-		<panel border="true" bottom="-549" follows="left|top|right|bottom" height="533"
-		     label="Classifieds" left="1" left_delta="68" mouse_opaque="false"
-		     name="classified_panel" width="778">
-			<string name="searching_text">
-				Searching...
-			</string>
-			<string name="not_found_text">
-				None Found.
-			</string>
-			<text bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
-			     bottom="-24" drop_shadow_visible="true" follows="left|top" font="SansSerif"
-			     h_pad="0" halign="left" height="16" left="4" mouse_opaque="true"
-			     name="find" v_pad="0" width="50">
+			<button name="search_btn" label="Search" font="SansSerif" mouse_opaque="true"
+			 left="48" bottom_delta="-24" width="68" height="20" follows="top|left" />
+			<button name="back_btn" label="Back" font="SansSerif" mouse_opaque="true"
+			 left_delta="72" bottom_delta="0" width="68" height="20" follows="top|left" />
+			<button name="forward_btn" label="Forward" font="SansSerif" mouse_opaque="true"
+			 left_delta="72" bottom_delta="0" width="68" height="20" follows="top|left" />
+			<check_box name="incpg" label="PG content" font="SansSerifSmall" mouse_opaque="true"
+			 control_name="ShowPGSearchAll"
+			 left="440" bottom="-20" width="120" height="16" follows="right|top" />
+			<check_box name="incmature" label="Mature content" font="SansSerifSmall" mouse_opaque="true"
+			 control_name="ShowMatureSearchAll"
+			 left_delta="0" bottom_delta="-16" width="120" height="16" follows="right|top" />
+			<check_box name="incadult" label="Adult content" font="SansSerifSmall" mouse_opaque="true"
+			 control_name="ShowAdultSearchAll"
+			 left_delta="0" bottom_delta="-16" width="120" height="16" follows="right|top" />
+			<check_box name="new_search" label="Use New Search" font="SansSerifSmall" mouse_opaque="true"
+			 control_name="UseNewSearch"
+			 left="580" bottom="-36" width="120" height="16" follows="right|top" />
+			<button name="?" label="?" font="SansSerif" halign="center" mouse_opaque="true"
+			 left="-25" bottom="-22" width="18" height="18" follows="right|top" />
+			<web_browser name="find_browser" font="SansSerifSmall"
+			 left="4" right="-6" top="-55" bottom="24" follows="top|left|bottom|right" />
+			<text name="status_text" font="SansSerifSmall" halign="left"
+			 bg_visible="false" drop_shadow_visible="true"
+			 border_drop_shadow_visible="false" border_visible="false"
+			 left="10" bottom_delta="-18" width="328" height="16" follows="left|bottom" />
+		</panel>
+		<panel name="classified_panel" label="Classifieds" border="true" mouse_opaque="false"
+		 left="1" bottom="-549" width="778" height="533" follows="left|top|right|bottom">
+			<string name="searching_text">Searching...</string>
+			<string name="not_found_text">None Found.</string>
+			<text name="find" font="SansSerif" halign="left" mouse_opaque="true"
+			 bg_visible="false" border_visible="false"
+			 drop_shadow_visible="true" border_drop_shadow_visible="false"
+			 left="6" bottom="-24" width="40" height="16" follows="left|top">
 				Find:
 			</text>
-			<line_editor bevel_style="in" border_style="line" border_thickness="1" bottom="-24"
-			     follows="left|right|top" font="SansSerif" height="18" left="56" spell_check="true"
-			     max_length="63" mouse_opaque="true" name="name" width="160" />
-			<check_box bottom="-22" control_name="ShowPGClassifieds" follows="right|top"
-			     font="SansSerifSmall" height="16" initial_value="true"
-			     label="PG content" left="420" mouse_opaque="true"
-			     name="incpg" width="156" />
-			<check_box bottom="-40" control_name="ShowMatureClassifieds" follows="right|top"
-			     font="SansSerifSmall" height="16" initial_value="true"
-			     label="Mature content" left="420" mouse_opaque="true"
-			     name="incmature" width="156" />
-			<check_box bottom="-58" control_name="ShowAdultClassifieds" follows="right|top"
-			     font="SansSerifSmall" height="16" initial_value="false"
-			     label="Adult content" left="420" mouse_opaque="true"
-			     name="incadult" width="156" />
-			<combo_box allow_text_entry="false" bottom="-46" follows="right|top" height="18" left="230"
-			     max_chars="20" mouse_opaque="true" name="Category" width="158">
+			<line_editor name="name" label="Search" font="SansSerif" max_length="63"
+			 handle_edit_keys_directly="false" commit_on_focus_lost="false" tab_group="1"
+			 select_all_on_focus_received="false" select_on_focus="false"
+			 mouse_opaque="true" enabled="true" spell_check="true"
+			 bevel_style="in" border_style="line" border_thickness="1"
+			 left_delta="44" bottom_delta="0" width="210" height="18" follows="top|left|right" />
+			<combo_box name="Category" allow_text_entry="false" max_chars="20" mouse_opaque="true"
+			 left_delta="220" bottom_delta="0" width="158" height="18" follows="right|top">
 				<combo_item name="AnyCategory" value="0">
 					Any Category
 				</combo_item>
@@ -236,89 +202,58 @@
 					Personal
 				</combo_item>
 			</combo_box>
-			<button bottom="-48" follows="right|top" font="SansSerif" halign="center" height="20"
-			     label="Browse" label_selected="Browse" left="121" mouse_opaque="true"
-			     name="Browse" width="95" />
-			<button bottom="-48" follows="right|top" font="SansSerif" halign="center" height="20"
-			     label="Search" label_selected="Search" left="121" mouse_opaque="true" name="Search"
-			     visible="false" width="95" />
-			<button bottom="-46" follows="right|top" font="SansSerif" halign="center" height="20"
-			     label="Place an Ad..." label_selected="Place an Ad..." left="630"
-			     mouse_opaque="true" name="Place an Ad..." width="145" />
-			<button bottom="-533" follows="left|bottom" font="SansSerif" halign="center"
-			     height="20" label="Delete" label_selected="Delete" left="80"
-			     mouse_opaque="true" name="Delete" width="80" />
-			<scroll_list background_visible="true" bottom="-510" column_padding="0" draw_border="true" 
-				 draw_heading="true" follows="left|top|right|bottom" height="450" left="4" 
-				 mouse_opaque="true" multi_select="false" name="results" search_column="2" width="339">
+			<button name="Browse" label="Browse" font="SansSerif" mouse_opaque="true"
+			 left="48" bottom_delta="-24" width="95" height="20" follows="top|left" />
+			<button name="Search" label="Search" font="SansSerif" mouse_opaque="true" visible="false"
+			 left_delta="0" bottom_delta="0" width="95" height="20" follows="top|left" />
+			<check_box name="incpg" label="PG content" font="SansSerifSmall" mouse_opaque="true"
+			 control_name="ShowPGClassifieds"
+			 left="440" bottom="-20" width="120" height="16" follows="right|top" />
+			<check_box name="incmature" label="Mature content" font="SansSerifSmall" mouse_opaque="true"
+			 control_name="ShowMatureClassifieds"
+			 left_delta="0" bottom_delta="-16" width="120" height="16" follows="right|top" />
+			<check_box name="incadult" label="Adult content" font="SansSerifSmall" mouse_opaque="true"
+			 control_name="ShowAdultClassifieds"
+			 left_delta="0" bottom_delta="-16" width="120" height="16" follows="right|top" />
+			<button name="Place an Ad..." label="Place an Ad..." font="SansSerif" halign="center" mouse_opaque="true"
+			 left="580" bottom="-36" width="130" height="20" follows="right|top" />
+			<scroll_list name="results" multi_select="false" search_column="2" mouse_opaque="true"
+			 draw_heading="true" draw_border="true" background_visible="true" column_padding="0"
+			 left="4" bottom="-512" width="339" height="460" follows="left|top|right|bottom">
 				<column label="" name="icon" width="24" />
 				<column label="" name="type" width="-1" />
 				<column label="Name" name="name" width="225" />
-				<column label="Price" name="price" width="55" />
+				<column label="Price" name="price" width="75" />
 			</scroll_list>
-			<text bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
-			     bottom_delta="-20" drop_shadow_visible="true" follows="left|bottom"
-			     font="SansSerifSmall" h_pad="0" halign="left" height="16" left="4"
-			     mouse_opaque="true" name="result_text" v_pad="0" width="80" />
-			<button bottom="-533" follows="right|bottom" font="SansSerif" halign="center"
-			     height="20" label="Next &gt;" label_selected="Next &gt;"
-			     mouse_opaque="true" name="Next &gt;" right="344" width="80" />
-			<button bottom_delta="0" follows="right|bottom" font="SansSerif" halign="center"
-			     height="20" label="&lt; Prev" label_selected="&lt; Prev"
-			     mouse_opaque="true" name="&lt; Prev" right="258" width="80" />
+			<text name="result_text" font="SansSerifSmall" halign="left"
+			 bg_visible="false" drop_shadow_visible="true"
+			 border_drop_shadow_visible="false" border_visible="false"
+			 left="10" bottom_delta="-18" width="328" height="16" follows="left|bottom" />
+			<button name="Delete" label="Delete" font="SansSerif" halign="center" mouse_opaque="true"
+			 left="92" bottom="-532" width="80" height="20" follows="left|bottom" />
+			<button name="Next &gt;" label="Next &gt;" font="SansSerif" halign="center" mouse_opaque="true"
+			 right="344" bottom="-532" width="80" height="20" follows="right|bottom" />
+			<button name="&lt; Prev" label="&lt; Prev" font="SansSerif" halign="center" mouse_opaque="true"
+			 right="258" bottom_delta="0" width="80" height="20" follows="right|bottom" />
 		</panel>
-		<panel border="true" bottom="-549" default_tab_group="1"
-		     follows="left|top|right|bottom" height="533" label="Events" left="1"
-		     mouse_opaque="false" name="events_panel" width="778">
-			<string name="searching_text">
-				Searching...
-			</string>
-			<string name="not_found_text">
-				None Found.
-			</string>
-			<text bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
-			     bottom="-24" drop_shadow_visible="true" follows="left|top" font="SansSerif"
-			     h_pad="0" halign="left" height="16" left="4" mouse_opaque="true"
-			     name="text2" v_pad="0" width="50">
+		<panel name="events_panel" label="Events" border="true" default_tab_group="1" mouse_opaque="false"
+		 left="1" bottom="-549" width="778" height="533" follows="left|top|right|bottom">
+			<string name="searching_text">Searching...</string>
+			<string name="not_found_text">None Found.</string>
+			<text name="find" font="SansSerif" halign="left" mouse_opaque="true"
+			 bg_visible="false" border_visible="false"
+			 drop_shadow_visible="true" border_drop_shadow_visible="false"
+			 left="6" bottom="-24" width="40" height="16" follows="left|top">
 				Find:
 			</text>
-			<line_editor bevel_style="in" border_style="line" border_thickness="1" bottom="-24"
-			     follows="left|right|top" font="SansSerif" height="18" left="56" spell_check="true"
-			     max_length="63" mouse_opaque="true" name="event_search_text" width="160" />
-			<radio_group bottom="-40" draw_border="false" follows="right|top" height="40" left="560"
-			     mouse_opaque="true" name="date_mode" width="300">
-				<radio_item bottom="-20" follows="left|top" height="20" left="0" mouse_opaque="true"
-				     name="current" width="174">
-					In-Progress and Upcoming
-				</radio_item>
-				<radio_item bottom_delta="-10" follows="left|top" height="20" left="0" mouse_opaque="true"
-				     name="date" width="56">
-					Date
-				</radio_item>
-			</radio_group>
-			<button bottom="-40" follows="right|top" font="SansSerif" halign="center" height="20"
-			     label="&lt;&lt;" label_selected="&lt;&lt;" left_delta="54"
-			     mouse_opaque="true" name="&lt;&lt;" tool_tip="Go back a day" width="24" />
-			<text bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
-			     bottom="-36" drop_shadow_visible="true" follows="right|top" font="SansSerif"
-			     h_pad="0" halign="center" height="14" left_delta="22" mouse_opaque="true"
-			     name="date_text" v_pad="0" width="48">
-				6/6
-			</text>
-			<button bottom="-40" follows="right|top" font="SansSerif" halign="center" height="20"
-			     label="&gt;&gt;" label_selected="&gt;&gt;" left_delta="50"
-			     mouse_opaque="true" name="&gt;&gt;" tool_tip="Go forward a day" width="24" />
-			<button bottom="-40" follows="right|top" font="SansSerif" halign="center" height="20"
-			     label="Today" label_selected="Today" left_delta="28" mouse_opaque="true"
-			     name="Today" tool_tip="Show today&apos;s events" width="60" />
-			<text bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
-			     bottom="-24" drop_shadow_visible="true" follows="left|top"
-			     font="SansSerifSmall" h_pad="0" halign="left" height="20" left="289"
-			     mouse_opaque="true" name="text" v_pad="0" width="90" visible="false">
-				Category:
-			</text>
-			<combo_box allow_text_entry="false" bottom="-46" follows="right|top" height="18" left="230"
-			     max_chars="20" mouse_opaque="true" name="category combo" width="158">
+			<line_editor name="event_search_text" label="Search" font="SansSerif" max_length="63"
+			 handle_edit_keys_directly="false" commit_on_focus_lost="false" tab_group="1"
+			 select_all_on_focus_received="false" select_on_focus="false"
+			 mouse_opaque="true" enabled="true" spell_check="true"
+			 bevel_style="in" border_style="line" border_thickness="1"
+			 left_delta="44" bottom_delta="0" width="210" height="18" follows="top|left|right" />
+			<combo_box name="category combo" allow_text_entry="false" max_chars="20" mouse_opaque="true"
+			 left_delta="220" bottom_delta="0" width="158" height="18" follows="right|top">
 				<combo_item name="All" value="0">
 					Any Category
 				</combo_item>
@@ -356,27 +291,53 @@
 					Miscellaneous
 				</combo_item>
 			</combo_box>
-			<check_box bottom="-22" control_name="ShowPGEvents" follows="right|top"
-			     font="SansSerifSmall" height="16" initial_value="true"
-			     label="PG content" left="420" mouse_opaque="true"
-			     name="incpg" width="156" />
-			<check_box bottom="-40" control_name="ShowMatureEvents" follows="right|top"
-			     font="SansSerifSmall" height="16" initial_value="true"
-			     label="Mature content" left="420" mouse_opaque="true"
-			     name="incmature" width="156" />
-			<check_box bottom="-58" control_name="ShowAdultEvents" follows="right|top"
-			     font="SansSerifSmall" height="16" initial_value="false"
-			     label="Adult content" left="420" mouse_opaque="true"
-			     name="incadult" width="156" />
-			<button bottom="-48" follows="right|top" font="SansSerif" halign="center" height="20"
-			     label="Search" label_selected="Search" left="121" mouse_opaque="true" name="Search"
-			     visible="true" width="95" />
-			<button bottom="-533" follows="left|bottom" font="SansSerif" halign="center"
-			     height="20" label="Delete" label_selected="Delete" left="80"
-			     mouse_opaque="true" name="Delete" width="80" />
-			<scroll_list background_visible="true" bottom="-510" column_padding="0" draw_border="true" draw_heading="true" 
-			     follows="left|top|right|bottom" height="450" left="4" mouse_opaque="true"
-			     multi_select="false" name="results" search_column="2" width="339">
+			<button name="Search" label="Search" font="SansSerif" mouse_opaque="true"
+			 left="48" bottom_delta="-24" width="95" height="20" follows="top|left" />
+			<check_box name="incpg" label="PG content" font="SansSerifSmall" mouse_opaque="true"
+			 control_name="ShowPGEvents"
+			 left="440" bottom="-20" width="120" height="16" follows="right|top" />
+			<check_box name="incmature" label="Mature content" font="SansSerifSmall" mouse_opaque="true"
+			 control_name="ShowMatureEvents"
+			 left_delta="0" bottom_delta="-16" width="120" height="16" follows="right|top" />
+			<check_box name="incadult" label="Adult content" font="SansSerifSmall" mouse_opaque="true"
+			 control_name="ShowAdultEvents"
+			 left_delta="0" bottom_delta="-16" width="120" height="16" follows="right|top" />
+			<radio_group name="date_mode" draw_border="false" mouse_opaque="true"
+			 left="560" bottom="-40" width="300" height="40" follows="right|top">
+				<radio_item bottom="-20" follows="left|top" height="20" left="0" mouse_opaque="true"
+					 name="current" width="174">
+					In-Progress and Upcoming
+				</radio_item>
+				<radio_item bottom_delta="-10" follows="left|top" height="20" left="0" mouse_opaque="true"
+					 name="date" width="56">
+					Date
+				</radio_item>
+			</radio_group>
+			<button name="&lt;&lt;" label="&lt;&lt;" font="SansSerif" halign="center" mouse_opaque="true"
+			 tool_tip="Go back a day"
+			 left_delta="54" bottom="-40" width="24" height="20" follows="right|top" />
+			<text name="date_text" font="SansSerif" halign="center"
+			 bg_visible="false" border_visible="false" h_pad="0" v_pad="0"
+			 border_drop_shadow_visible="false" drop_shadow_visible="true"
+			 left_delta="22" bottom="-36" width="48" height="14" follows="right|top">
+				6/6
+			</text>
+			<button name="&gt;&gt;" label="&gt;&gt;" font="SansSerif" halign="center" mouse_opaque="true"
+			 tool_tip="Go forward a day"
+			 left_delta="50" bottom="-40" width="24" height="20" follows="right|top" />
+			<button name="Today" label="Today" font="SansSerif" halign="center" mouse_opaque="true"
+			 tool_tip="Show today&apos;s events"
+			 left_delta="28" bottom="-40" width="60" height="20" follows="right|top" />
+			<text name="text" font="SansSerifSmall" halign="left" h_pad="0" v_pad="0" visible="false"
+			 bg_visible="false" border_visible="false" border_drop_shadow_visible="false" drop_shadow_visible="true"
+			 left="289" bottom="-24" width="90" height="20" follows="left|top">
+				Category:
+			</text>
+			<button name="Delete" label="Delete" font="SansSerif" halign="center" mouse_opaque="true"
+			 left="92" bottom="-532" width="80" height="20" follows="left|bottom" />
+			<scroll_list background_visible="true" bottom="-512" column_padding="0" draw_border="true" draw_heading="true"
+				 follows="left|top|right|bottom" height="460" left="4" mouse_opaque="true"
+				 multi_select="false" name="results" search_column="2" width="339">
 				<column label="" name="icon" width="24" />
 				<column label="" name="type" width="-1" />
 				<column dynamicwidth="true" label="Name" name="name" />
@@ -384,82 +345,70 @@
 				<column label="" name="event_id" width="-1" />
 				<column label="Time" name="time" width="-1" />
 			</scroll_list>
-			<text bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
-			     bottom_delta="-20" drop_shadow_visible="true" follows="left|bottom"
-			     font="SansSerifSmall" h_pad="0" halign="left" height="16" left="4"
-			     mouse_opaque="true" name="result_text" v_pad="0" width="80" />
-			<button bottom="-533" follows="right|bottom" font="SansSerif" halign="center"
-			     height="20" label="Next &gt;" label_selected="Next &gt;"
-			     mouse_opaque="true" name="Next &gt;" right="344" width="80" />
-			<button bottom_delta="0" follows="right|bottom" font="SansSerif" halign="center"
-			     height="20" label="&lt; Prev" label_selected="&lt; Prev"
-			     mouse_opaque="true" name="&lt; Prev" right="258" width="80" />
+			<text name="result_text" font="SansSerifSmall" halign="left"
+			 bg_visible="false" drop_shadow_visible="true"
+			 border_drop_shadow_visible="false" border_visible="false"
+			 left="10" bottom_delta="-18" width="328" height="16" follows="left|bottom" />
+			<button name="Next &gt;" label="Next &gt;" font="SansSerif" halign="center" mouse_opaque="true"
+			 right="344" bottom="-532" width="80" height="20" follows="right|bottom" />
+			<button name="&lt; Prev" label="&lt; Prev" font="SansSerif" halign="center" mouse_opaque="true"
+			 right="258" bottom_delta="0" width="80" height="20" follows="right|bottom" />
 		</panel>
-		<panel border="true" bottom="-549" follows="left|top|right|bottom" height="533"
-		     label="Showcase" left="1" mouse_opaque="false" name="showcase_panel"
-		     width="778">
-        <string name="searching_text">Searching...</string>
-        <string name="not_found_text">None Found.</string>
-        <button bottom="-30" follows="top|left" font="SansSerifSmall" height="20"
-          label="Back"
-          left="10"
-          name="back_btn" width="70" />
-        <button bottom_delta="0" follows="top|left" font="SansSerifSmall" height="20"
-          label="Forward" left_delta="75"
-          name="forward_btn" width="70" />
-        <!-- No mature content checkbox, showcase is all PG -->
-        <web_browser name="showcase_browser"
-          bottom="25"
-          follows="top|left|bottom|right"
-          font="SansSerifSmall"
-          left="10"
-          right="-10"
-          top="-40" />
-        <text bottom="5"
-          follows="bottom|left"
-          halign="left"
-          left="10"
-          width="150"
-          name="status_text"
-          height="16" />
-        <string name="loading_text">Loading...</string>
-        <string name="done_text">Done</string>
-        <string name="redirect_404_url">http://secondlife.com/app/search/notfound.html</string>
-        <string name="default_search_page">"http://secondlife.com/app/showcase/index.php?"</string>
-    </panel>
-		<panel border="true" bottom="-549" follows="left|top|right|bottom" height="533"
-		     label="Land Sales" left="1" mouse_opaque="false" name="land_sales_panel"
-		     width="778" default_tab_group="1">
-			<string name="searching_text">
-				Searching...
-			</string>
-			<string name="not_found_text">
-				None Found.
-			</string>
+		<panel name="showcase_panel" label="Showcase" border="true" mouse_opaque="false"
+		 left="1" bottom="-549" width="778" height="533" follows="left|top|right|bottom">
+			<string name="searching_text">Searching...</string>
+			<string name="not_found_text">None Found.</string>
+			<string name="loading_text">Loading...</string>
+			<string name="done_text">Done</string>
+			<string name="redirect_404_url">http://secondlife.com/app/search/notfound.html</string>
+			<string name="default_search_page">"http://secondlife.com/app/showcase/index.php?"</string>
+			<button name="back_btn" label="Back" font="SansSerifSmall"
+			 left="6" bottom="-24" width="70" height="20" follows="top|left" />
+			<button name="forward_btn" label="Forward" font="SansSerifSmall"
+			 left_delta="75" bottom_delta="0" width="70" height="20" follows="top|left" />
+			<web_browser name="showcase_browser" font="SansSerifSmall"
+			 left="4" right="-7" top="-30" bottom="24" follows="top|left|bottom|right" />
+			<text name="status_text" halign="left" font="SansSerifSmall"
+			 left="10" bottom="5" width="150" height="16" follows="bottom|left" />
+		</panel>
+		<panel name="land_sales_panel" label="Land Sales" border="true"
+		 default_tab_group="1" mouse_opaque="false"
+		 left="1" bottom="-549" width="778" height="533" follows="left|top|right|bottom">
+			<string name="searching_text">Searching...</string>
+			<string name="not_found_text">None Found.</string>
 			<string name="land_help_text">
 				Land can be bought direct for Linden Dollars (L$) or at auction for either L$ or US$.
 To buy direct, visit the land and click on the place name in the title bar.
 			</string>
-			<text bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
-			     bottom="-24" drop_shadow_visible="true" follows="left|top" font="SansSerif"
-			     h_pad="0" halign="left" height="16" left="4" mouse_opaque="true"
-			     name="find" v_pad="0" width="50">
+			<text name="find" font="SansSerif" halign="left" mouse_opaque="true"
+			 bg_visible="false" border_visible="false"
+			 drop_shadow_visible="true" border_drop_shadow_visible="false"
+			 left="6" bottom="-24" width="40" height="16" follows="left|top">
 				Find:
 			</text>
-			<check_box bottom="-22" control_name="ShowPGLand" follows="right|top"
-			     font="SansSerifSmall" height="16" initial_value="true"
-			     label="PG content" left="420" mouse_opaque="true"
-			     name="incpg" tab_group="7" width="156" />
-			<check_box bottom="-40" control_name="ShowMatureLand" follows="right|top"
-			     font="SansSerifSmall" height="16" initial_value="true"
-			     label="Mature content" left="420" mouse_opaque="true"
-			     name="incmature" tab_group="8" width="156" />
-			<check_box bottom="-58" control_name="ShowAdultLand" follows="right|top"
-			     font="SansSerifSmall" height="16" initial_value="false"
-			     label="Adult content" left="420" mouse_opaque="true"
-			     name="incadult" tab_group="9" width="156" />
-			<combo_box allow_text_entry="false" bottom="-46" follows="left|top|right" height="18" left="282"
-			     max_chars="20" mouse_opaque="true" name="type" tab_group="6" width="128">
+			<check_box name="pricecheck" label="Price &#8804;" font="SansSerifSmall"
+			 tab_group="1" control_name="FindLandPrice" mouse_opaque="true"
+			 left_delta="44" bottom_delta="0" width="80" height="16" follows="left|top" />
+			<line_editor name="priceedit" max_length="10" font="SansSerifSmall" mouse_opaque="true"
+			 bevel_style="in" border_style="line" border_thickness="1" tab_group="2"
+			 bottom_delta="0" left_delta="70" width="50" height="16" follows="left|top" />
+			<text name="L$" font="SansSerif" halign="left" bg_visible="false" border_visible="false"
+			 drop_shadow_visible="true" border_drop_shadow_visible="false"
+			 left_delta="55" bottom_delta="0" width="20" height="16" follows="left|top">
+				L$
+			</text>
+			<check_box name="areacheck" label="Area &#8805;" font="SansSerifSmall"
+			 tab_group="3" control_name="FindLandArea" mouse_opaque="true"
+			 left_delta="42" bottom_delta="0" width="80" height="16" follows="left|top" />
+			<line_editor name="areaedit" max_length="10" font="SansSerifSmall" mouse_opaque="true"
+			 bevel_style="in" border_style="line" border_thickness="1" tab_group="4"
+			 bottom_delta="0" left_delta="70" width="50"  height="16" follows="left|top" />
+			<text name="areacheck_symbol" font="SansSerif" halign="left" bg_visible="false" border_visible="false"
+			 left_delta="55" bottom_delta="0" width="20" height="16" follows="left|top">
+				m²
+			</text>
+			<combo_box name="type" allow_text_entry="false" max_chars="20" tab_group="6" mouse_opaque="true"
+			 left="50" bottom_delta="-24" height="20" width="160" follows="left|top">
 				<combo_item name="AllTypes" value="All Types">
 					All Types
 				</combo_item>
@@ -473,36 +422,21 @@ To buy direct, visit the land and click on the place name in the title bar.
 					For Sale - Estate
 				</combo_item>
 			</combo_box>
-			<check_box bottom="-24" control_name="FindLandPrice" follows="left|top"
-			     font="SansSerifSmall" height="16" initial_value="true"
-			     label="Price &#8804; " left="56" mouse_opaque="true" name="pricecheck"
-			     tab_group="1" width="88" />
-			<text bg_visible="false" border_drop_shadow_visible="false" border_visible="false" follows="left|top"
-			     bottom="-24" font="SansSerifSmall" halign="left" height="16" left="116" mouse_opaque="true"
-			     name="pricecheck_symbol" width="15">
-				L$
-			</text>
-			<check_box bottom_delta="-18" control_name="FindLandArea" follows="left|top"
-			     font="SansSerifSmall" height="16" initial_value="true"
-			     label="Area &#8805; " left="56" mouse_opaque="true" name="areacheck"
-			     tab_group="3" width="80" />
-			<text bg_visible="false" border_drop_shadow_visible="false" border_visible="false" follows="left|top"
-			     bottom="-42" font="SansSerifSmall" halign="left" height="16" left="170" mouse_opaque="true"
-			     name="areacheck_symbol" width="15">
-				m²
-			</text>
-			<line_editor bevel_style="in" border_style="line" border_thickness="1" bottom="-22"
-			     follows="left|top" font="SansSerifSmall" height="16" left="132"
-			     max_length="10" mouse_opaque="true" name="priceedit" tab_group="2" width="50" />
-			<line_editor bevel_style="in" border_style="line" border_thickness="1" bottom_delta="-18"
-			     follows="left|top" font="SansSerifSmall" height="16" left="117"
-			     max_length="10" mouse_opaque="true" name="areaedit" tab_group="4" width="50" />
-			<button bottom="-48" follows="left|top" font="SansSerif" halign="center" height="20"
-			     label="Search" label_selected="Search" left="208" mouse_opaque="true"
-			     name="Search" tab_group="5" width="70" />
-			<scroll_list background_visible="true" bottom="-510" column_padding="0" draw_border="true" draw_heading="true" 
-			     follows="left|top|right|bottom" height="450" left="4" mouse_opaque="true"
-			     multi_select="false" name="results" search_column="2" tab_group="10" width="387">
+			<button name="Search" label="Search" font="SansSerif" halign="center"
+			 tab_group="5" mouse_opaque="true"
+			 left_delta="170" bottom_delta="0" width="70" height="20" follows="left|top" />
+			<check_box name="incpg" label="PG content" font="SansSerifSmall" mouse_opaque="true"
+			 control_name="ShowPGLand"
+			 left="440" bottom="-20" width="120" height="16" follows="right|top" />
+			<check_box name="incmature" label="Mature content" font="SansSerifSmall" mouse_opaque="true"
+			 control_name="ShowMatureLand"
+			 left_delta="0" bottom_delta="-16" width="120" height="16" follows="right|top" />
+			<check_box name="incadult" label="Adult content" font="SansSerifSmall" mouse_opaque="true"
+			 control_name="ShowAdultLand"
+			 left_delta="0" bottom_delta="-16" width="120" height="16" follows="right|top" />
+			<scroll_list name="results" multi_select="false" search_column="2" tab_group="10" mouse_opaque="true"
+			 column_padding="0" draw_border="true" draw_heading="true" background_visible="true"
+			 left="4" bottom="-512" width="387" height="460" follows="left|top|right|bottom">
 				<column label="" name="icon" width="24" />
 				<column label="" name="type" width="-1" />
 				<column dynamicwidth="true" label="Name" name="name" />
@@ -511,49 +445,33 @@ To buy direct, visit the land and click on the place name in the title bar.
 				<column label="Area" name="area" width="50" />
 				<column label="L$/m²" name="per_meter" width="65" />
 			</scroll_list>
-			<text bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
-			     bottom_delta="-20" drop_shadow_visible="true" follows="left|bottom"
-			     font="SansSerifSmall" h_pad="0" halign="left" height="16" left="4"
-			     mouse_opaque="true" name="result_text" v_pad="0" width="328" />
-			<button bottom="-533" follows="right|bottom" font="SansSerif" halign="center"
-			     height="20" label="Next &gt;" label_selected="Next &gt;"
-			     mouse_opaque="true" name="Next &gt;" right="344" width="80" />
-			<button bottom_delta="0" follows="right|bottom" font="SansSerif" halign="center"
-			     height="20" label="&lt; Prev" label_selected="&lt; Prev"
-			     mouse_opaque="true" name="&lt; Prev" right="258" width="80" />
+			<text name="result_text" font="SansSerifSmall" halign="left"
+			 bg_visible="false" drop_shadow_visible="true"
+			 border_drop_shadow_visible="false" border_visible="false"
+			 left="10" bottom_delta="-18" width="328" height="16" follows="left|bottom" />
+			<button name="Next &gt;" label="Next &gt;" font="SansSerif" halign="center" mouse_opaque="true"
+			 right="390" bottom="-532" width="80" height="20" follows="right|bottom" />
+			<button name="&lt; Prev" label="&lt; Prev" font="SansSerif" halign="center" mouse_opaque="true"
+			 right="304" bottom_delta="0" width="80" height="20" follows="right|bottom" />
 		</panel>
-		<panel border="true" bottom="-549" follows="left|top|right|bottom" height="533"
-		     label="Places" left="1" mouse_opaque="false" name="places_panel"
-		     width="778">
-			<string name="searching_text">
-				Searching...
-			</string>
-			<string name="not_found_text">
-				None Found.
-			</string>
-			<text bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
-			     bottom="-24" drop_shadow_visible="true" follows="left|top" font="SansSerif"
-			     h_pad="0" halign="left" height="16" left="4" mouse_opaque="true"
-			     name="find" v_pad="0" width="50">
+		<panel name="places_panel" label="Places" border="true" mouse_opaque="false"
+		 left="1" bottom="-549" width="778" height="533" follows="left|top|right|bottom">
+			<string name="searching_text">Searching...</string>
+			<string name="not_found_text">None Found.</string>
+			<text name="find" font="SansSerif" halign="left" mouse_opaque="true"
+			 bg_visible="false" border_visible="false"
+			 drop_shadow_visible="true" border_drop_shadow_visible="false"
+			 left="6" bottom="-24" width="40" height="16" follows="left|top">
 				Find:
 			</text>
-			<line_editor bevel_style="in" border_style="line" border_thickness="1" bottom="-24"
-			     follows="left|right|top" font="SansSerif" height="18" left="56" spell_check="true"
-			     max_length="63" mouse_opaque="true" name="name" width="160" />
-			<check_box bottom="-22" control_name="ShowPGSims" follows="right|top"
-			     font="SansSerifSmall" height="16" initial_value="true"
-			     label="PG content" left="420" mouse_opaque="true"
-			     name="incpg" width="156" />
-			<check_box bottom="-40" control_name="ShowMatureSims" follows="right|top"
-			     font="SansSerifSmall" height="16" initial_value="true"
-			     label="Mature content" left="420" mouse_opaque="true"
-			     name="incmature" width="156" />
-			<check_box bottom="-58" control_name="ShowAdultSims" follows="right|top"
-			     font="SansSerifSmall" height="16" initial_value="false"
-			     label="Adult content" left="420" mouse_opaque="true"
-			     name="incadult" width="156" />
-			<combo_box allow_text_entry="false" bottom="-46" enabled="false" follows="right|top" height="18" left="230"
-			     max_chars="20" mouse_opaque="true" name="Category" width="128" visible="false">
+			<line_editor name="name" label="Search" font="SansSerif" max_length="63"
+			 handle_edit_keys_directly="false" commit_on_focus_lost="false" tab_group="1"
+			 select_all_on_focus_received="false" select_on_focus="false"
+			 mouse_opaque="true" enabled="true" spell_check="true"
+			 bevel_style="in" border_style="line" border_thickness="1"
+			 left_delta="44" bottom_delta="0" width="210" height="18" follows="top|left|right" />
+			<combo_box name="Category" allow_text_entry="false" max_chars="20" mouse_opaque="true"
+			 left_delta="220" bottom_delta="0" width="158" height="18" follows="right|top">
 				<combo_item name="AnyCategory" value="any">
 					Any Category
 				</combo_item>
@@ -594,187 +512,136 @@ To buy direct, visit the land and click on the place name in the title bar.
 					Rental
 				</combo_item>
 			</combo_box>
-			<!-- This is used only during the AO transition and can be deleted once the AO transition is
-			complete. It is identical to the combo box above except that it has the Adult category. 
-			You might also want to set it back to default visible and enabled. -->
-			<combo_box allow_text_entry="false" bottom="-46" enabled="false" follows="right|top" height="18" left="230"
-			     max_chars="20" mouse_opaque="true" name="Category_Adult" width="128" visible="false">
-				<combo_item name="AnyCategory" value="any">
-					Any Category
-				</combo_item>
-				<combo_item name="LindenLocation" value="linden">
-					Linden Location
-				</combo_item>
-				<combo_item name="Adult" value="adult">
-					Adult
-				</combo_item>
-				<combo_item name="Arts&amp;Culture" value="arts">
-					Arts &amp; Culture
-				</combo_item>
-				<combo_item name="Business" value="store">
-					Business
-				</combo_item>
-				<combo_item name="Educational" value="educational">
-					Educational
-				</combo_item>
-				<combo_item name="Gaming" value="game">
-					Gaming
-				</combo_item>
-				<combo_item name="Hangout" value="gather">
-					Hangout
-				</combo_item>
-				<combo_item name="NewcomerFriendly" value="newcomer">
-					Newcomer Friendly
-				</combo_item>
-				<combo_item name="Parks&amp;Nature" value="park">
-					Parks &amp; Nature
-				</combo_item>
-				<combo_item name="Residential" value="home">
-					Residential
-				</combo_item>
-				<combo_item name="Shopping" value="shopping">
-					Shopping
-				</combo_item>
-				<combo_item name="Other" value="other">
-					Other
-				</combo_item>
-				<combo_item name="Rental" value="rental">
-					Rental
-				</combo_item>
-			</combo_box>
-			<button bottom="-48" follows="right|top" font="SansSerif" halign="center" height="20"
-			     label="Search" label_selected="Search" left="121" mouse_opaque="true"
-			     name="Search" width="95" />
-			<scroll_list background_visible="true" bottom="-510" column_padding="0" draw_border="true"
-			     draw_heading="true" 
-			     
-			     follows="left|top|right|bottom" height="450" left="4" mouse_opaque="true"
-			     multi_select="false" name="results" search_column="2" width="339">
+			<button name="Search" label="Search" font="SansSerif" mouse_opaque="true"
+			 left="48" bottom_delta="-24" width="95" height="20" follows="top|left" />
+			<check_box name="incpg" label="PG content" font="SansSerifSmall" mouse_opaque="true"
+			 control_name="ShowPGSims"
+			 left="440" bottom="-20" width="120" height="16" follows="right|top" />
+			<check_box name="incmature" label="Mature content" font="SansSerifSmall" mouse_opaque="true"
+			 control_name="ShowMatureSims"
+			 left_delta="0" bottom_delta="-16" width="120" height="16" follows="right|top" />
+			<check_box name="incadult" label="Adult content" font="SansSerifSmall" mouse_opaque="true"
+			 control_name="ShowAdultSims"
+			 left_delta="0" bottom_delta="-16" width="120" height="16" follows="right|top" />
+			<scroll_list name="results"
+			 background_visible="true" bottom="-512" column_padding="0" draw_border="true"
+				 draw_heading="true" 
+				 
+				 follows="left|top|right|bottom" height="460" left="4" mouse_opaque="true"
+				 multi_select="false" search_column="2" width="339">
 				<column label="" name="icon" width="24" />
 				<column label="" name="type" width="-1" />
 				<column dynamicwidth="true" label="Name" name="name" />
 				<column label="Traffic" name="dwell" width="75" />
 			</scroll_list>
-			<text bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
-			     bottom_delta="-20" drop_shadow_visible="true" follows="left|bottom"
-			     font="SansSerifSmall" h_pad="0" halign="left" height="16" left="4"
-			     mouse_opaque="true" name="result_text" v_pad="0" width="328" />
-			<button bottom="-533" follows="left|bottom" font="SansSerif" halign="center"
-			     height="20" label="Next &gt;" label_selected="Next &gt;"
-			     mouse_opaque="true" name="Next &gt;" right="344" width="80" />
-			<button bottom_delta="0" follows="left|bottom" font="SansSerif" halign="center"
-			     height="20" label="&lt; Prev" label_selected="&lt; Prev"
-			     mouse_opaque="true" name="&lt; Prev" right="258" width="80" />
+			<text name="result_text" font="SansSerifSmall" halign="left"
+			 bg_visible="false" drop_shadow_visible="true"
+			 border_drop_shadow_visible="false" border_visible="false"
+			 left="10" bottom_delta="-18" width="328" height="16" follows="left|bottom" />
+			<button name="Next &gt;" label="Next &gt;" font="SansSerif" halign="center" mouse_opaque="true"
+			 right="344" bottom="-532" width="80" height="20" follows="right|bottom" />
+			<button name="&lt; Prev" label="&lt; Prev" font="SansSerif" halign="center" mouse_opaque="true"
+			 right="258" bottom_delta="0" width="80" height="20" follows="right|bottom" />
 		</panel>
-    <panel border="true" bottom="-549" follows="left|top|right|bottom" height="533"
-		     label="People" left="1" mouse_opaque="false" name="people_panel"
-		     width="778">
-			<string name="searching_text">
-				Searching...
-			</string>
-			<string name="not_found_text">
-				None Found.
-			</string>
-      <text bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
-			     bottom="-24" drop_shadow_visible="true" follows="left|top" font="SansSerif"
-			     h_pad="0" halign="left" height="16" left="4" mouse_opaque="true"
-			     name="find" v_pad="0" width="50">
-        Find:
-      </text>
-	  <line_editor bevel_style="in" border_style="line" border_thickness="1" bottom="-24"
-			     follows="left|right|top" font="SansSerif" height="18" left="56" spell_check="true"
-			     max_length="63" mouse_opaque="true" name="name" width="160" />
-		<button bottom="-48" follows="right|top" font="SansSerif" halign="center" height="20"
-			     label="Search" label_selected="Search" left="121" mouse_opaque="true"
-			     name="Search" width="95" />
-      <scroll_list background_visible="true" bottom="-510" column_padding="0" draw_border="true"
-			     draw_heading="true" 
-                               
-			     follows="left|top|right|bottom" height="450" left="4" mouse_opaque="true"
-			     multi_select="false" name="results" search_column="2" width="326">
-        <column label="" name="icon" width="24" />
-        <column label="" name="type" width="-1" />
-        <column label="Name" name="name" width="274" />
-      </scroll_list>
-			<text bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
-			     bottom_delta="-20" drop_shadow_visible="true" follows="left|bottom"
-			     font="SansSerifSmall" h_pad="0" halign="left" height="16" left="4"
-			     mouse_opaque="true" name="result_text" v_pad="0" width="328" />
-			<button bottom="-533" follows="left|bottom" font="SansSerif" halign="center"
-			     height="20" label="Next &gt;" label_selected="Next &gt;"
-			     mouse_opaque="true" name="Next &gt;" right="330" width="80" />
-      		<button bottom_delta="0" follows="left|bottom" font="SansSerif" halign="center"
-			     height="20" label="&lt; Prev" label_selected="&lt; Prev"
-			     mouse_opaque="true" name="&lt; Prev" right="244" width="80" />
-		</panel>
-		<panel border="true" bottom="-549" follows="left|top|right|bottom" height="533"
-		     label="Groups" left="1" mouse_opaque="false" name="groups_panel"
-		     width="778">
-			<string name="searching_text">
-				Searching...
-			</string>
-			<string name="not_found_text">
-				None Found.
-			</string>
-			<button bottom="-533" follows="left|bottom" font="SansSerif" halign="center"
-			     height="20" label="Next &gt;" label_selected="Next &gt;"
-			     mouse_opaque="true" name="Next &gt;" right="344" width="80" />
-			<button bottom_delta="0" follows="left|bottom" font="SansSerif" halign="center"
-			     height="20" label="&lt; Prev" label_selected="&lt; Prev"
-			     mouse_opaque="true" name="&lt; Prev" right="258" width="80" />
-			<text bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
-			     bottom="-24" drop_shadow_visible="true" follows="left|top" font="SansSerif"
-			     h_pad="0" halign="left" height="16" left="4" mouse_opaque="true"
-			     name="find" v_pad="0" width="50">
+		<panel name="people_panel" label="People" border="true" mouse_opaque="false"
+		 left="1" bottom="-549" width="778" height="533" follows="left|top|right|bottom">
+			<string name="searching_text">Searching...</string>
+			<string name="not_found_text">None Found.</string>
+			<text name="find" font="SansSerif" halign="left" mouse_opaque="true"
+			 bg_visible="false" border_visible="false"
+			 drop_shadow_visible="true" border_drop_shadow_visible="false"
+			 left="6" bottom="-24" width="40" height="16" follows="left|top">
 				Find:
 			</text>
-			<line_editor bevel_style="in" border_style="line" border_thickness="1" bottom="-24"
-			     follows="left|top" font="SansSerif" height="18" left_delta="38" spell_check="true"
-			     max_length="63" mouse_opaque="true" name="name" width="200" />
-			<button bottom="-26" follows="left|top" font="SansSerif" halign="center" height="20"
-			     label="Search" label_selected="Search" left_delta="210" mouse_opaque="true"
-			     name="Search" width="70" />
-			<check_box bottom="-46" control_name="ShowPGGroups" follows="left|top"
-			     font="SansSerifSmall" height="16" initial_value="true"
-			     label="PG content" left="4" mouse_opaque="true"
-			     name="incpg" width="204" />
-			<check_box bottom="-46" control_name="ShowMatureGroups" follows="left|top"
-			     font="SansSerifSmall" height="16" initial_value="true"
-			     label="Mature content" left_delta="90" mouse_opaque="true"
-			     name="incmature" width="204" />
-			<check_box bottom="-46" control_name="ShowAdultGroups" follows="left|top"
-			     font="SansSerifSmall" height="16" initial_value="false"
-			     label="Adult content" left_delta="110" mouse_opaque="true"
-			     name="incadult" width="204" />
-			<scroll_list background_visible="true" bottom="-513" column_padding="0" draw_border="true"
-			     draw_heading="true"
-			     follows="left|top|right|bottom" height="464" left="4" mouse_opaque="true"
-			     multi_select="false" name="results" search_column="2" width="339">
+			<line_editor name="name" label="Search" font="SansSerif" max_length="63"
+			 handle_edit_keys_directly="false" commit_on_focus_lost="false" tab_group="1"
+			 select_all_on_focus_received="false" select_on_focus="false"
+			 mouse_opaque="true" enabled="true" spell_check="true"
+			 bevel_style="in" border_style="line" border_thickness="1"
+			 left_delta="44" bottom_delta="0" width="210" height="18" follows="top|left|right" />
+			<button name="Search" label="Search" font="SansSerif" halign="center" mouse_opaque="true"
+			 left_delta="220" bottom_delta="-2" width="70" height="20" follows="right|top" />
+			<scroll_list name="results" multi_select="false" search_column="2" mouse_opaque="true"
+			 background_visible="true" column_padding="0" draw_border="true" draw_heading="true"
+			 left="4" bottom="-512" width="339" height="480" follows="left|top|right|bottom">
+				<column label="" name="icon" width="24" />
+				<column label="" name="type" width="-1" />
+				<column label="Name" name="name" width="274" />
+			</scroll_list>
+			<text name="result_text" font="SansSerifSmall" halign="left"
+			 bg_visible="false" drop_shadow_visible="true"
+			 border_drop_shadow_visible="false" border_visible="false"
+			 left="10" bottom_delta="-18" width="328" height="16" follows="left|bottom" />
+			<button name="Next &gt;" label="Next &gt;" font="SansSerif" halign="center" mouse_opaque="true"
+			 right="344" bottom="-532" width="80" height="20" follows="right|bottom" />
+			<button name="&lt; Prev" label="&lt; Prev" font="SansSerif" halign="center" mouse_opaque="true"
+			 right="258" bottom_delta="0" width="80" height="20" follows="right|bottom" />
+		</panel>
+		<panel border="true" bottom="-549" follows="left|top|right|bottom" height="533"
+			 label="Groups" left="1" mouse_opaque="false" name="groups_panel"
+			 width="778">
+			<string name="searching_text">
+				Searching...
+			</string>
+			<string name="not_found_text">
+				None Found.
+			</string>
+			<text name="find" font="SansSerif" halign="left" mouse_opaque="true"
+			 bg_visible="false" border_visible="false"
+			 drop_shadow_visible="true" border_drop_shadow_visible="false"
+			 left="6" bottom="-24" width="40" height="16" follows="left|top">
+				Find:
+			</text>
+			<line_editor name="name" label="Search" font="SansSerif" max_length="63"
+			 handle_edit_keys_directly="false" commit_on_focus_lost="false" tab_group="1"
+			 select_all_on_focus_received="false" select_on_focus="false"
+			 mouse_opaque="true" enabled="true" spell_check="true"
+			 bevel_style="in" border_style="line" border_thickness="1"
+			 left_delta="44" bottom_delta="0" width="210" height="18" follows="top|left|right" />
+			<button name="Search" label="Search" font="SansSerif" halign="center" mouse_opaque="true"
+			 left_delta="220" bottom_delta="-2" width="70" height="20" follows="right|top" />
+			<check_box name="incpg" label="PG content" font="SansSerifSmall" mouse_opaque="true"
+			 control_name="ShowPGGroups"
+			 left_delta="80" bottom_delta="0" width="110" height="16" follows="right|top" />
+			<check_box name="incmature" label="Mature content" font="SansSerifSmall" mouse_opaque="true"
+			 control_name="ShowMatureGroups"
+			 left_delta="120" bottom_delta="0" width="110" height="16" follows="right|top" />
+			<check_box name="incadult" label="Adult content" font="SansSerifSmall" mouse_opaque="true"
+			 control_name="ShowAdultGroups"
+			 left_delta="120" bottom_delta="0" width="110" height="16" follows="right|top" />
+			<scroll_list background_visible="true" bottom="-512" column_padding="0" draw_border="true"
+				 draw_heading="true"
+				 follows="left|top|right|bottom" height="480" left="4" mouse_opaque="true"
+				 multi_select="false" name="results" search_column="2" width="339">
 				<column label="" name="icon" sort="score" sort_ascending="false" width="24" />
 				<column label="" name="type" width="-1" />
 				<column dynamicwidth="true" label="Name" name="name" />
 				<column halign="left" label="Members" name="members" sort_ascending="false" width="100" />
 				<column label="" name="score" width="-1" />
 			</scroll_list>
-			<text bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
-			     bottom_delta="-20" drop_shadow_visible="true" follows="left|bottom"
-			     font="SansSerifSmall" h_pad="0" halign="left" height="16" left="4"
-			     mouse_opaque="true" name="result_text" v_pad="0" width="328" />
+			<text name="result_text" font="SansSerifSmall" halign="left"
+			 bg_visible="false" drop_shadow_visible="true"
+			 border_drop_shadow_visible="false" border_visible="false"
+			 left="10" bottom_delta="-18" width="328" height="16" follows="left|bottom" />
+			<button name="Next &gt;" label="Next &gt;" font="SansSerif" halign="center" mouse_opaque="true"
+			 right="344" bottom="-532" width="80" height="20" follows="right|bottom" />
+			<button name="&lt; Prev" label="&lt; Prev" font="SansSerif" halign="center" mouse_opaque="true"
+			 right="258" bottom_delta="0" width="80" height="20" follows="right|bottom" />
 		</panel>
 	</tab_container>
-	<panel bottom="-560" follows="right|top" height="470" left="340"
-	     name="classified_details_panel" width="440" />
-	<panel bottom="-560" follows="right|top" height="486" left="350" name="Panel Avatar"
-	     width="430" />
-	<panel bottom="-560" follows="right|top" height="470" left="340"
-	     name="event_details_panel" width="440" />
-	<panel bottom="-580" follows="right|top" height="515" left="350"
-	     name="group_details_panel_holder" width="430">
-		<panel bottom="0" follows="right|top" height="470" left="0" name="group_details_panel"
-		     width="430" />
+	<panel name="classified_details_panel" mouse_opaque="false"
+	 left="340" bottom="-544" width="440" height="470" follows="right|top" />
+	<panel name="Panel Avatar" mouse_opaque="false"
+	 left="350" bottom="-550" width="426" height="486" follows="right|top" />
+	<panel name="event_details_panel" mouse_opaque="false"
+	 left="340" bottom="-560" width="440" height="470" follows="right|top" />
+	<panel name="group_details_panel_holder" mouse_opaque="false"
+	 left="350" bottom="-580" width="430" height="515" follows="right|top">
+		<panel name="group_details_panel" mouse_opaque="false"
+		 left="0" bottom="0" width="430" height="470" follows="right|top" />
 	</panel>
-	<panel bottom="-560" follows="right|top" height="470" left="340"
-	     name="place_details_panel" width="440" />
-	<panel bottom="-560" follows="right|top" height="470" left="385"
-	     name="place_details_small_panel" width="395" />
+	<panel name="place_details_panel" mouse_opaque="false"
+	 left="340" bottom="-554" width="440" height="470" follows="right|top" />
+	<panel name="place_details_small_panel" mouse_opaque="false"
+	 left="385" bottom="-554" width="395" height="470" follows="right|top" />
 </floater>

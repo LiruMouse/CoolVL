@@ -309,49 +309,49 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
-    <key>AvatarOffsetX</key>
+    <key>AvatarDepth</key>
     <map>
       <key>Comment</key>
-      <string>Avatar X offset to the bounding box size</string>
+      <string>Avatar depth in meters, used for its bounding box</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
       <string>F32</string>
       <key>Value</key>
-      <real>0.0</real>
+      <real>0.45</real>
     </map>
-    <key>AvatarOffsetY</key>
+    <key>AvatarWidth</key>
     <map>
       <key>Comment</key>
-      <string>Avatar Y offset to the bounding box size</string>
+      <string>Avatar width in meters, used for its bounding box</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
       <string>F32</string>
       <key>Value</key>
-      <real>0.0</real>
+      <real>0.60</real>
     </map>
-    <key>AvatarOffsetZ</key>
+    <key>AvatarSizePersist</key>
     <map>
       <key>Comment</key>
-      <string>Avatar Z offset (used to adjust animation height)</string>
-      <key>Persist</key>
-      <integer>1</integer>
-      <key>Type</key>
-      <string>F32</string>
-      <key>Value</key>
-      <real>0.0</real>
-    </map>
-    <key>AvatarOffsetPersist</key>
-    <map>
-      <key>Comment</key>
-      <string>Whether Avatar offsets must persist or not over sessions</string>
+      <string>Whether the avatar's modified depth and width persist or not over sessions</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
       <real>0</real>
+    </map>
+    <key>AvatarOffsetZ</key>
+    <map>
+      <key>Comment</key>
+      <string>Avatar Z offset (used to adjust animation height)</string>
+      <key>Persist</key>
+      <integer>0</integer>
+      <key>Type</key>
+      <string>F32</string>
+      <key>Value</key>
+      <real>0.0</real>
     </map>
     <key>PreviewAnimInWorld</key>
     <map>

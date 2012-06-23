@@ -2014,11 +2014,18 @@ void LLVOAvatar::releaseMeshData()
 	if (mDrawable.notNull())
 	{
 		LLFace* facep = mDrawable->getFace(0);
-		facep->setSize(0, 0);
-		for (S32 i = mNumInitFaces; i < mDrawable->getNumFaces(); i++)
+		if (facep) 
 		{
-			facep = mDrawable->getFace(i);
 			facep->setSize(0, 0);
+			for (S32 i = mNumInitFaces, count = mDrawable->getNumFaces();
+				 i < count; i++)
+			{
+				facep = mDrawable->getFace(i);
+				if (facep)
+				{
+					facep->setSize(0, 0);
+				}
+			}
 		}
 	}
 
@@ -2093,26 +2100,34 @@ void LLVOAvatar::updateMeshData()
 														num_indices,
 														mAdjustedPixelArea);
 			}
-			if (num_vertices < 1)//skip empty meshes
+			if (num_vertices < 1)	// skip empty meshes
 			{
 				continue;
 			}
-			if (last_v_num > 0)//put the last inserted part into next vertex buffer.
+			if (last_v_num > 0)		// put the last inserted part into next vertex buffer.
 			{
 				num_vertices = last_v_num;
 				num_indices = last_i_num;
 				part_index--;
 			}
 
-			LLFace* facep;
+			LLFace* facep = NULL;
 			if (f_num < mDrawable->getNumFaces()) 
 			{
 				facep = mDrawable->getFace(f_num);
 			}
 			else
 			{
-				facep = mDrawable->addFace(mDrawable->getFace(0)->getPool(),
-										   mDrawable->getFace(0)->getTexture());
+				LLFace* facep0 = mDrawable->getFace(0);
+				if (facep0)	// Paranoia
+				{
+					facep = mDrawable->addFace(facep0->getPool(),
+											   facep0->getTexture());
+				}
+			}
+			if (!facep)
+			{
+				continue;
 			}
 
 			// resize immediately
@@ -2233,8 +2248,22 @@ void LLVOAvatar::computeBodySize()
 						   torso.mV[VZ] * pelvis_scale.mV[VZ]; 
 
 	// TODO -- measure the real depth and width
-	new_body_size.mV[VX] = DEFAULT_AGENT_DEPTH;
-	new_body_size.mV[VY] = DEFAULT_AGENT_WIDTH;
+	if (isSelf())
+	{
+		static LLCachedControl<F32> agent_depth(gSavedSettings, "AvatarDepth");
+		static LLCachedControl<F32> agent_width(gSavedSettings, "AvatarWidth");
+		// This value is normally further clamped server side between
+		// MIN_AGENT_DEPTH and MAX_AGENT_DEPTH
+		new_body_size.mV[VX] = llclamp((F32)agent_depth, 0.05f, 2.0f);
+		// This value is normally further clamped server side between
+		// MIN_AGENT_WIDTH and MAX_AGENT_WIDTH
+		new_body_size.mV[VY] = llclamp((F32)agent_width, 0.05f, 2.0f);
+	}
+	else
+	{
+		new_body_size.mV[VX] = DEFAULT_AGENT_DEPTH;
+		new_body_size.mV[VY] = DEFAULT_AGENT_WIDTH;
+	}
 
 	if (new_body_size != mBodySize)
 	{
@@ -4023,10 +4052,10 @@ U32 LLVOAvatar::renderSkinnedAttachments()
 				const LLDrawable* drawable = attached_object->mDrawable;
 				if (drawable)
 				{
-					for (S32 i = 0; i < drawable->getNumFaces(); ++i)
+					for (S32 i = 0, count = drawable->getNumFaces(); i < count; ++i)
 					{
 						LLFace* face = drawable->getFace(i);
-						if (face->isState(LLFace::RIGGED))
+						if (face && face->isState(LLFace::RIGGED))
 						{
 
 				}
@@ -4088,10 +4117,14 @@ U32 LLVOAvatar::renderSkinned(EAvatarRenderPass pass)
 			mNeedsSkin = FALSE;
 			mLastSkinTime = gFrameTimeSeconds;
 
-			LLVertexBuffer* vb = mDrawable->getFace(0)->getVertexBuffer();
-			if (vb)
+			face = mDrawable->getFace(0);
+			if (face)
 			{
-				vb->setBuffer(0);
+				LLVertexBuffer* vb = face->getVertexBuffer();
+				if (vb)
+				{
+					vb->setBuffer(0);
+				}
 			}
 		}
 	}
@@ -4415,7 +4448,8 @@ void LLVOAvatar::updateTextures()
 	mMaxPixelArea = 0.f;
 	mMinPixelArea = 99999999.f;
 	mHasGrey = FALSE; // debug
-	for (U32 texture_index = 0; texture_index < getNumTEs(); texture_index++)
+	for (U32 texture_index = 0, count = getNumTEs(); texture_index < count;
+		 texture_index++)
 	{
 		LLWearableType::EType wearable_type = LLVOAvatarDictionary::getTEWearableType((ETextureIndex)texture_index);
 		U32 num_wearables = gAgentWearables.getWearableCount(wearable_type);
@@ -6512,7 +6546,7 @@ void LLVOAvatar::updateMeshTextures()
 	if (gNoRender) return;
 
 	// if user has never specified a texture, assign the default
-	for (U32 i = 0; i < getNumTEs(); i++)
+	for (U32 i = 0, count = getNumTEs(); i < count; i++)
 	{
 		const LLViewerTexture* te_image = getImage(i, 0);
 		if (!te_image || te_image->getID().isNull() ||
@@ -8341,7 +8375,7 @@ BOOL LLVOAvatar::updateLOD()
 	BOOL res = updateJointLODs();
 
 	LLFace* facep = mDrawable->getFace(0);
-	if (!facep->getVertexBuffer())
+	if (facep && !facep->getVertexBuffer())
 	{
 		dirtyMesh(2);
 	}

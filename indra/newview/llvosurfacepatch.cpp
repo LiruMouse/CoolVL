@@ -296,11 +296,15 @@ void LLVOSurfacePatch::updateFaceSize(S32 idx)
 {
 	if (idx != 0)
 	{
-		llwarns << "Terrain partition requested invalid face!!!" << llendl;
+		llwarns << "Terrain partition requested invalid face !" << llendl;
 		return;
 	}
 
 	LLFace* facep = mDrawable->getFace(idx);
+	if (!facep)
+	{
+		return;
+	}
 
 	S32 num_vertices = 0;
 	S32 num_indices = 0;
@@ -321,50 +325,33 @@ BOOL LLVOSurfacePatch::updateLOD()
 }
 
 void LLVOSurfacePatch::getGeometry(LLStrider<LLVector3> &verticesp,
-								LLStrider<LLVector3> &normalsp,
-								LLStrider<LLColor4U> &colorsp,
-								LLStrider<LLVector2> &texCoords0p,
-								LLStrider<LLVector2> &texCoords1p,
-								LLStrider<U16> &indicesp)
+								   LLStrider<LLVector3> &normalsp,
+								   LLStrider<LLColor4U> &colorsp,
+								   LLStrider<LLVector2> &texCoords0p,
+								   LLStrider<LLVector2> &texCoords1p,
+								   LLStrider<U16> &indicesp)
 {
 	LLFace* facep = mDrawable->getFace(0);
+	if (!facep) return;
 
 	U32 index_offset = facep->getGeomIndex();
 
-	updateMainGeometry(facep, 
-					verticesp,
-					normalsp,
-					colorsp,
-					texCoords0p,
-					texCoords1p,
-					indicesp,
-					index_offset);
-	updateNorthGeometry(facep, 
-						verticesp,
-						normalsp,
-						colorsp,
-						texCoords0p,
-						texCoords1p,
-						indicesp,
-						index_offset);
-	updateEastGeometry(facep, 
-						verticesp,
-						normalsp,
-						colorsp,
-						texCoords0p,
-						texCoords1p,
-						indicesp,
-						index_offset);
+	updateMainGeometry(facep, verticesp, normalsp, colorsp, texCoords0p,
+					   texCoords1p, indicesp, index_offset);
+	updateNorthGeometry(facep, verticesp, normalsp, colorsp, texCoords0p,
+						texCoords1p, indicesp, index_offset);
+	updateEastGeometry(facep, verticesp, normalsp, colorsp, texCoords0p,
+					   texCoords1p, indicesp, index_offset);
 }
 
 void LLVOSurfacePatch::updateMainGeometry(LLFace *facep,
-										LLStrider<LLVector3> &verticesp,
-										LLStrider<LLVector3> &normalsp,
-										LLStrider<LLColor4U> &colorsp,
-										LLStrider<LLVector2> &texCoords0p,
-										LLStrider<LLVector2> &texCoords1p,
-										LLStrider<U16> &indicesp,
-										U32 &index_offset)
+										  LLStrider<LLVector3> &verticesp,
+										  LLStrider<LLVector3> &normalsp,
+										  LLStrider<LLColor4U> &colorsp,
+										  LLStrider<LLVector2> &texCoords0p,
+										  LLStrider<LLVector2> &texCoords1p,
+										  LLStrider<U16> &indicesp,
+										  U32 &index_offset)
 {
 	S32 i, j, x, y;
 
@@ -398,7 +385,9 @@ void LLVOSurfacePatch::updateMainGeometry(LLFace *facep,
 			{
 				x = i * render_stride;
 				y = j * render_stride;
-				mPatchp->eval(x, y, render_stride, verticesp.get(), normalsp.get(), texCoords0p.get(), texCoords1p.get());
+				mPatchp->eval(x, y, render_stride, verticesp.get(),
+							  normalsp.get(), texCoords0p.get(),
+							  texCoords1p.get());
 				*colorsp++ = LLColor4U::white;
 				verticesp++;
 				normalsp++;
@@ -885,7 +874,11 @@ void LLVOSurfacePatch::dirtyGeom()
 	if (mDrawable)
 	{
 		gPipeline.markRebuild(mDrawable, LLDrawable::REBUILD_ALL, TRUE);
-		mDrawable->getFace(0)->setVertexBuffer(NULL);
+		LLFace* facep = mDrawable->getFace(0);
+		if (facep)
+		{
+			facep->setVertexBuffer(NULL);
+		}
 		mDrawable->movePartition();
 	}
 }

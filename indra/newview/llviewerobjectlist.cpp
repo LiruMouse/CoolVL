@@ -1164,9 +1164,9 @@ void LLViewerObjectList::removeDrawable(LLDrawable* drawablep)
 		return;
 	}
 
-	for (S32 i = 0; i < drawablep->getNumFaces(); i++)
+	for (S32 i = 0, count = drawablep->getNumFaces(); i < count; i++)
 	{
-		LLFace* facep = drawablep->getFace(i) ;
+		LLFace* facep = drawablep->getFace(i);
 		if (facep)
 		{
 			LLViewerObject* objectp = facep->getViewerObject();
@@ -1607,129 +1607,133 @@ void LLViewerObjectList::renderObjectBounds(const LLVector3 &center)
 
 void LLViewerObjectList::generatePickList(LLCamera &camera)
 {
-		LLViewerObject* objectp;
-		// Reset all of the GL names to zero.
-		for (vobj_list_t::iterator iter = mObjects.begin(); iter != mObjects.end(); ++iter)
+	LLViewerObject* objectp;
+	// Reset all of the GL names to zero.
+	for (vobj_list_t::iterator iter = mObjects.begin(); iter != mObjects.end();
+		 ++iter)
+	{
+		objectp = *iter;
+		if (objectp)
 		{
-			objectp = *iter;
-			if (objectp)
-			{
-				objectp->mGLName = 0;
+			objectp->mGLName = 0;
+		}
+	}
+
+	mSelectPickList.clear();
+
+	std::vector<LLDrawable*> pick_drawables;
+
+	for (LLWorld::region_list_t::const_iterator iter = LLWorld::getInstance()->getRegionList().begin(); 
+		iter != LLWorld::getInstance()->getRegionList().end(); ++iter)
+	{
+		LLViewerRegion* region = *iter;
+		if (!region) continue;
+
+		for (U32 i = 0; i < LLViewerRegion::NUM_PARTITIONS; i++)
+		{
+			LLSpatialPartition* part = region->getSpatialPartition(i);
+			if (part)
+			{	
+				part->cull(camera, &pick_drawables, TRUE);
 			}
 		}
+	}
 
-		mSelectPickList.clear();
+	for (std::vector<LLDrawable*>::iterator iter = pick_drawables.begin();
+		iter != pick_drawables.end(); iter++)
+	{
+		LLDrawable* drawablep = *iter;
+		if (!drawablep) continue;
 
-		std::vector<LLDrawable*> pick_drawables;
-
-		for (LLWorld::region_list_t::const_iterator iter = LLWorld::getInstance()->getRegionList().begin(); 
-			iter != LLWorld::getInstance()->getRegionList().end(); ++iter)
+		LLViewerObject* last_objectp = NULL;
+		for (S32 face_num = 0, count = drawablep->getNumFaces();
+			 face_num < count; face_num++)
 		{
-			LLViewerRegion* region = *iter;
-			if (!region)
-				continue;
+			LLFace* facep = drawablep->getFace(face_num);
+			if (!facep) continue;
 
-			for (U32 i = 0; i < LLViewerRegion::NUM_PARTITIONS; i++)
+			LLViewerObject* objectp = facep->getViewerObject();
+			if (objectp && objectp != last_objectp)
 			{
-				LLSpatialPartition* part = region->getSpatialPartition(i);
-				if (part)
-				{	
-					part->cull(camera, &pick_drawables, TRUE);
-				}
+				mSelectPickList.insert(objectp);
+				last_objectp = objectp;
 			}
 		}
+	}
 
-		for (std::vector<LLDrawable*>::iterator iter = pick_drawables.begin();
-			iter != pick_drawables.end(); iter++)
+	LLHUDText::addPickable(mSelectPickList);
+
+	for (std::vector<LLCharacter*>::iterator iter = LLCharacter::sInstances.begin();
+		iter != LLCharacter::sInstances.end(); ++iter)
+	{
+		objectp = (LLVOAvatar*) *iter;
+		if (objectp && !objectp->isDead())
 		{
-			LLDrawable* drawablep = *iter;
-			if (!drawablep)
-				continue;
-
-			LLViewerObject* last_objectp = NULL;
-			for (S32 face_num = 0; face_num < drawablep->getNumFaces(); face_num++)
+			if (objectp->mDrawable.notNull() &&
+				objectp->mDrawable->isVisible())
 			{
-				LLViewerObject* objectp = drawablep->getFace(face_num)->getViewerObject();
+				mSelectPickList.insert(objectp);
+			}
+		}
+	}
 
-				if (objectp && objectp != last_objectp)
+	// add all hud objects to pick list
+	if (isAgentAvatarValid())
+	{
+		for (LLVOAvatar::attachment_map_t::iterator iter = gAgentAvatarp->mAttachmentPoints.begin(); 
+			 iter != gAgentAvatarp->mAttachmentPoints.end(); )
+		{
+			LLVOAvatar::attachment_map_t::iterator curiter = iter++;
+			LLViewerJointAttachment* attachmentp = curiter->second;
+			if (attachmentp->getIsHUDAttachment())
+			{
+				for (LLViewerJointAttachment::attachedobjs_vec_t::iterator attachment_iter = attachmentp->mAttachedObjects.begin();
+					 attachment_iter != attachmentp->mAttachedObjects.end();
+					 ++attachment_iter)
 				{
-					mSelectPickList.insert(objectp);
-					last_objectp = objectp;
-				}
-			}
-		}
-
-		LLHUDText::addPickable(mSelectPickList);
-
-		for (std::vector<LLCharacter*>::iterator iter = LLCharacter::sInstances.begin();
-			iter != LLCharacter::sInstances.end(); ++iter)
-		{
-			objectp = (LLVOAvatar*) *iter;
-			if (objectp && !objectp->isDead())
-			{
-				if (objectp->mDrawable.notNull() && objectp->mDrawable->isVisible())
-				{
-					mSelectPickList.insert(objectp);
-				}
-			}
-		}
-
-		// add all hud objects to pick list
-		if (isAgentAvatarValid())
-		{
-			for (LLVOAvatar::attachment_map_t::iterator iter = gAgentAvatarp->mAttachmentPoints.begin(); 
-				 iter != gAgentAvatarp->mAttachmentPoints.end(); )
-			{
-				LLVOAvatar::attachment_map_t::iterator curiter = iter++;
-				LLViewerJointAttachment* attachmentp = curiter->second;
-				if (attachmentp->getIsHUDAttachment())
-				{
-					for (LLViewerJointAttachment::attachedobjs_vec_t::iterator attachment_iter = attachmentp->mAttachedObjects.begin();
-						 attachment_iter != attachmentp->mAttachedObjects.end();
-						 ++attachment_iter)
+					if (LLViewerObject* objectp = (*attachment_iter))
 					{
-						if (LLViewerObject* objectp = (*attachment_iter))
+						mSelectPickList.insert(objectp);		
+						LLViewerObject::const_child_list_t& child_list = objectp->getChildren();
+						for (LLViewerObject::child_list_t::const_iterator iter = child_list.begin();
+							 iter != child_list.end(); iter++)
 						{
-							mSelectPickList.insert(objectp);		
-							LLViewerObject::const_child_list_t& child_list = objectp->getChildren();
-							for (LLViewerObject::child_list_t::const_iterator iter = child_list.begin();
-								 iter != child_list.end(); iter++)
+							LLViewerObject* childp = *iter;
+							if (childp)
 							{
-								LLViewerObject* childp = *iter;
-								if (childp)
-								{
-									mSelectPickList.insert(childp);
-								}
+								mSelectPickList.insert(childp);
 							}
 						}
 					}
 				}
 			}
 		}
+	}
 		
-		S32 num_pickables = (S32)mSelectPickList.size() + LLHUDIcon::getNumInstances();
+	S32 num_pickables = (S32)mSelectPickList.size() + LLHUDIcon::getNumInstances();
 
-		if (num_pickables != 0)
+	if (num_pickables != 0)
+	{
+		S32 step = (0x000fffff - GL_NAME_INDEX_OFFSET) / num_pickables;
+
+		std::set<LLViewerObject*>::iterator pick_it;
+		S32 i = 0;
+		for (pick_it = mSelectPickList.begin();
+			 pick_it != mSelectPickList.end(); )
 		{
-			S32 step = (0x000fffff - GL_NAME_INDEX_OFFSET) / num_pickables;
-
-			std::set<LLViewerObject*>::iterator pick_it;
-			S32 i = 0;
-			for (pick_it = mSelectPickList.begin(); pick_it != mSelectPickList.end();)
+			LLViewerObject* objp = *pick_it;
+			if (!objp || objp->isDead() || !objp->mbCanSelect)
 			{
-				LLViewerObject* objp = (*pick_it);
-				if (!objp || objp->isDead() || !objp->mbCanSelect)
-				{
-					mSelectPickList.erase(pick_it++);
-					continue;
-				}
-				
-				objp->mGLName = (i * step) + GL_NAME_INDEX_OFFSET;
-				i++;
-				++pick_it;
+				mSelectPickList.erase(pick_it++);
 			}
+			else
+			{
+				objp->mGLName = i++ * step + GL_NAME_INDEX_OFFSET;
+				pick_it++;
+			}
+		}
 
-			LLHUDIcon::generatePickIDs(i * step, step);
+		LLHUDIcon::generatePickIDs(i * step, step);
 	}
 }
 

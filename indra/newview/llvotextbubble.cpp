@@ -49,7 +49,8 @@
 #include "llvector4a.h"
 #include "llviewerregion.h"
 
-LLVOTextBubble::LLVOTextBubble(const LLUUID &id, const LLPCode pcode, LLViewerRegion *regionp)
+LLVOTextBubble::LLVOTextBubble(const LLUUID &id, const LLPCode pcode,
+							   LLViewerRegion *regionp)
 :	LLAlphaObject(id, pcode, regionp)
 {
 	setScale(LLVector3(1.5f, 1.5f, 0.25f));
@@ -65,19 +66,16 @@ LLVOTextBubble::LLVOTextBubble(const LLUUID &id, const LLPCode pcode, LLViewerRe
 	volume_params.setShear(0.f, 0.f);
 	setVolume(volume_params, 0);
 	mColor = LLColor4(1.0f, 0.0f, 0.0f, 1.f);
-	S32 i;
-	for (i = 0; i < getNumTEs(); i++)
+	for (S32 i = 0, count = getNumTEs(); i < count; i++)
 	{
 		setTEColor(i, mColor);
 		setTETexture(i, LLUUID(IMG_DEFAULT));
 	}
 }
 
-
 LLVOTextBubble::~LLVOTextBubble()
 {
 }
-
 
 BOOL LLVOTextBubble::isActive() const
 {
@@ -105,8 +103,7 @@ BOOL LLVOTextBubble::idleUpdate(LLAgent &agent, LLWorld	&world, const F64 &time)
 	{
 		return FALSE;
 	}
-	S32 i;
-	for (i = 0; i < getNumTEs(); i++)
+	for (S32 i = 0, count = getNumTEs(); i < count; i++)
 	{
 		setTEColor(i, color);
 		setTEFullbright(i, TRUE);
@@ -116,17 +113,16 @@ BOOL LLVOTextBubble::idleUpdate(LLAgent &agent, LLWorld	&world, const F64 &time)
 	return TRUE;
 }
 
-
 void LLVOTextBubble::updateTextures()
 {
 	// Update the image levels of all textures...
 
-	for (U32 i = 0; i < getNumTEs(); i++)
+	for (U32 i = 0, count = getNumTEs(); i < count; i++)
 	{
 		const LLTextureEntry *te = getTE(i);
 		F32 texel_area_ratio = fabs(te->mScaleS * te->mScaleT);
 		texel_area_ratio = llclamp(texel_area_ratio, .125f, 16.f);
-		LLViewerTexture *imagep = getTEImage(i);
+		LLViewerTexture* imagep = getTEImage(i);
 		if (imagep)
 		{
 			imagep->addTextureStats(mPixelArea / texel_area_ratio);
@@ -134,14 +130,13 @@ void LLVOTextBubble::updateTextures()
 	}
 }
 
-
 LLDrawable *LLVOTextBubble::createDrawable(LLPipeline *pipeline)
 {
 	pipeline->allocDrawable(this);
 	mDrawable->setLit(FALSE);
 	mDrawable->setRenderType(LLPipeline::RENDER_TYPE_VOLUME);
 	
-	for (U32 i = 0; i < getNumTEs(); i++)
+	for (U32 i = 0, count = getNumTEs(); i < count; i++)
 	{
 		LLViewerTexture *imagep;
 		const LLTextureEntry *texture_entry = getTE(i);
@@ -177,7 +172,9 @@ BOOL LLVOTextBubble::updateLOD()
 BOOL LLVOTextBubble::updateGeometry(LLDrawable *drawable)
 {
  	if (!(gPipeline.hasRenderType(LLPipeline::RENDER_TYPE_VOLUME)))
+	{
 		return TRUE;
+	}
 	
 	if (mVolumeChanged)
 	{
@@ -186,17 +183,23 @@ BOOL LLVOTextBubble::updateGeometry(LLDrawable *drawable)
 
 		LLPipeline::sCompiles++;
 
-		drawable->setNumFaces(getVolume()->getNumFaces(), drawable->getFace(0)->getPool(), getTEImage(0));
+		LLFace* facep = drawable->getFace(0);
+		if (facep)
+		{
+			drawable->setNumFaces(getVolume()->getNumFaces(), facep->getPool(),
+								  getTEImage(0));
+		}
 	}
 
-	LLMatrix4 identity4;
-	LLMatrix3 identity3;
-	for (S32 i = 0; i < drawable->getNumFaces(); i++)
+	for (S32 i = 0, count = drawable->getNumFaces(); i < count; i++)
 	{
-		LLFace *face = drawable->getFace(i);
-		face->setTEOffset(i);
-		face->setTexture(LLViewerFetchedTexture::sSmokeImagep);
-		face->setState(LLFace::FULLBRIGHT);
+		LLFace* face = drawable->getFace(i);
+		if (face)
+		{
+			face->setTEOffset(i);
+			face->setTexture(LLViewerFetchedTexture::sSmokeImagep);
+			face->setState(LLFace::FULLBRIGHT);
+		}
 	}
 
 	mVolumeChanged = FALSE;
@@ -208,6 +211,7 @@ BOOL LLVOTextBubble::updateGeometry(LLDrawable *drawable)
 void LLVOTextBubble::updateFaceSize(S32 idx)
 {
 	LLFace* face = mDrawable->getFace(idx);
+	if (!face) return;
 	
 	if (idx == 0 || idx == 2)
 	{
@@ -221,13 +225,13 @@ void LLVOTextBubble::updateFaceSize(S32 idx)
 }
 
 void LLVOTextBubble::getGeometry(S32 idx,
-								LLStrider<LLVector3>& verticesp,
-								LLStrider<LLVector3>& normalsp, 
-								LLStrider<LLVector2>& texcoordsp,
-								LLStrider<LLColor4U>& colorsp, 
-								LLStrider<U16>& indicesp) 
+								 LLStrider<LLVector3>& verticesp,
+								 LLStrider<LLVector3>& normalsp, 
+								 LLStrider<LLVector2>& texcoordsp,
+								 LLStrider<LLColor4U>& colorsp, 
+								 LLStrider<U16>& indicesp) 
 {
-	if (idx == 0 || idx == 2)
+	if (idx == 0 || idx == 2 || !mDrawable->getFace(idx))
 	{
 		return;
 	}

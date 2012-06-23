@@ -91,6 +91,7 @@ private:
 	static void onCommitCheckBoxAfterRestart(LLUICtrl* ctrl, void* user_data);
 	static void onClickCustomBlackList(void* user_data);
 	static void onClickDownloadDict(void* user_data);
+	static void onClickResetAvatarSize(void* user_data);
 
 private:
 	static HBPrefsCoolImpl* sInstance;
@@ -148,6 +149,7 @@ private:
 	BOOL mNoMultipleShoes;
 	BOOL mNoMultipleSkirts;
 	BOOL mNoMultiplePhysics;
+	BOOL mAvatarSizePersist;
 	BOOL mAvatarPhysics;
 	BOOL mRestrainedLove;
 	BOOL mRestrainedLoveNoSetEnv;
@@ -156,6 +158,8 @@ private:
 	BOOL mRestrainedLoveShowEllipsis;
 	BOOL mRestrainedLoveUntruncatedEmotes;
 	BOOL mRestrainedLoveCanOoc;
+	F32 mAvatarDepth;
+	F32 mAvatarWidth;
 	F32 mRenderAvatarPhysicsLODFactor;
 	U32 mFadeMouselookExitTip;
 	U32 mDecimalsForTools;
@@ -268,6 +272,7 @@ HBPrefsCoolImpl::HBPrefsCoolImpl()
 
 	childSetAction("dict_download_button",						onClickDownloadDict, this);
 	childSetAction("custom_profile_button",						onClickCustomBlackList, this);
+	childSetAction("reset_size_button",							onClickResetAvatarSize, this);
 
 	mTabContainer = getChild<LLTabContainer>("Cool Prefs");
 	LLPanel* tab = mTabContainer->getChild<LLPanel>("User Interface");
@@ -494,6 +499,9 @@ void HBPrefsCoolImpl::refreshValues()
 	mNoMultipleShoes					= gSavedSettings.getBOOL("NoMultipleShoes");
 	mNoMultipleSkirts					= gSavedSettings.getBOOL("NoMultipleSkirts");
 	mNoMultiplePhysics					= gSavedSettings.getBOOL("NoMultiplePhysics");
+	mAvatarDepth						= gSavedSettings.getF32("AvatarDepth");
+	mAvatarWidth						= gSavedSettings.getF32("AvatarWidth");
+	mAvatarSizePersist					= gSavedSettings.getBOOL("AvatarSizePersist");
 	mAvatarPhysics						= gSavedSettings.getBOOL("AvatarPhysics");
 	mRenderAvatarPhysicsLODFactor		= gSavedSettings.getF32("RenderAvatarPhysicsLODFactor");
 
@@ -676,7 +684,11 @@ void HBPrefsCoolImpl::cancel()
 	gSavedSettings.setBOOL("NoMultipleShoes",					mNoMultipleShoes);
 	gSavedSettings.setBOOL("NoMultipleSkirts",					mNoMultipleSkirts);
 	gSavedSettings.setBOOL("NoMultiplePhysics",					mNoMultiplePhysics);
+	gSavedSettings.setBOOL("AvatarSizePersist",					mAvatarSizePersist);
+	gSavedSettings.setF32("AvatarDepth",						mAvatarDepth);
+	gSavedSettings.setF32("AvatarWidth",						mAvatarWidth);
 	gSavedSettings.setBOOL("AvatarPhysics",						mAvatarPhysics);
+	gSavedSettings.setBOOL("AvatarSizePersist",					mAvatarSizePersist);
 	gSavedSettings.setF32("RenderAvatarPhysicsLODFactor",		mRenderAvatarPhysicsLODFactor);
 
 	// RestrainedLove
@@ -951,6 +963,22 @@ void HBPrefsCoolImpl::onClickDownloadDict(void* user_data)
 								  new DictionaryDownload(dict_name + ".dic"));
 			}
 		}
+	}
+}
+
+//static
+void HBPrefsCoolImpl::onClickResetAvatarSize(void* user_data)
+{
+	// Reset to the standard bounding box
+	LLControlVariable* controlp = gSavedSettings.getControl("AvatarDepth");
+	if (controlp)
+	{
+		controlp->resetToDefault(true);
+	}
+	controlp = gSavedSettings.getControl("AvatarWidth");
+	if (controlp)
+	{
+		controlp->resetToDefault(true);
 	}
 }
 

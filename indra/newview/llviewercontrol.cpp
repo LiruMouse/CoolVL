@@ -76,7 +76,7 @@
 #include "llviewertexturelist.h"
 #include "llviewerthrottle.h"
 #include "llviewerwindow.h"
-#include "llvoavatar.h"
+#include "llvoavatarself.h"
 #include "llvoiceclient.h"
 #include "llvosky.h"
 #include "llvosurfacepatch.h"
@@ -106,7 +106,6 @@ extern bool gUpdateDrawDistance;
 
 ////////////////////////////////////////////////////////////////////////////
 // Listeners
-
 
 static bool handleAllowSwappingChanged(const LLSD& newvalue)
 {
@@ -140,14 +139,16 @@ static bool handleTerrainDetailChanged(const LLSD& newvalue)
 	return true;
 }
 
-
 static bool handleSetShaderChanged(const LLSD& newvalue)
 {
-	// changing shader level may invalidate existing cached bump maps, as the shader type determines the format of the bump map it expects - clear and repopulate the bump cache
+	// changing shader level may invalidate existing cached bump maps, as the
+	// shader type determines the format of the bump map it expects - clear
+	// and repopulate the bump cache
 	gBumpImageList.destroyGL();
 	gBumpImageList.restoreGL();
 
-	// Enabling shader also changes the terrain detail to high, reflect that change here
+	// Enabling shader also changes the terrain detail to high, reflect that
+	// change here
 	if (gSavedSettings.getBOOL("VertexShaderEnable"))
 	{
 		// shaders enabled, set terrain detail to high
@@ -160,7 +161,7 @@ static bool handleSetShaderChanged(const LLSD& newvalue)
 
 static bool handleAvatarPhysicsLODChanged(const LLSD& newvalue)
 {
-	LLVOAvatar::sPhysicsLODFactor = (F32) newvalue.asReal();
+	LLVOAvatar::sPhysicsLODFactor = (F32)newvalue.asReal();
 	return true;
 }
 
@@ -197,8 +198,11 @@ static bool handleMeshMaxConcurrentRequestsChanged(const LLSD& newvalue)
 
 static bool handleReleaseGLBufferChanged(const LLSD& newvalue)
 {
-	// Disabled because it causes font corruption when changed during the session
-	//LLPipeline::sRenderFSAASamples = gSavedSettings.getU32("RenderFSAASamples");
+	// Disabled because it causes font corruption when changed during the
+	// session
+#if 0
+	LLPipeline::sRenderFSAASamples = gSavedSettings.getU32("RenderFSAASamples");
+#endif
 	if (gPipeline.isInit())
 	{
 		gPipeline.releaseGLBuffers();
@@ -216,31 +220,31 @@ static bool handleAnisotropicChanged(const LLSD& newvalue)
 
 static bool handleVolumeLODChanged(const LLSD& newvalue)
 {
-	LLVOVolume::sLODFactor = (F32) newvalue.asReal();
-	LLVOVolume::sDistanceFactor = 1.f-LLVOVolume::sLODFactor * 0.1f;
+	LLVOVolume::sLODFactor = (F32)newvalue.asReal();
+	LLVOVolume::sDistanceFactor = 1.f - LLVOVolume::sLODFactor * 0.1f;
 	return true;
 }
 
 static bool handleAvatarLODChanged(const LLSD& newvalue)
 {
-	LLVOAvatar::sLODFactor = (F32) newvalue.asReal();
+	LLVOAvatar::sLODFactor = (F32)newvalue.asReal();
 	return true;
 }
 
 static bool handleAvatarMaxVisibleChanged(const LLSD& newvalue)
 {
-	LLVOAvatar::sMaxVisible = (U32) newvalue.asInteger();
+	LLVOAvatar::sMaxVisible = (U32)newvalue.asInteger();
 	return true;
 }
 
 static bool handleTerrainLODChanged(const LLSD& newvalue)
 {
-		LLVOSurfacePatch::sLODFactor = (F32)newvalue.asReal();
-		//sqaure lod factor to get exponential range of [0,4] and keep
-		//a value of 1 in the middle of the detail slider for consistency
-		//with other detail sliders (see panel_preferences_graphics1.xml)
-		LLVOSurfacePatch::sLODFactor *= LLVOSurfacePatch::sLODFactor;
-		return true;
+	LLVOSurfacePatch::sLODFactor = (F32)newvalue.asReal();
+	// Square lod factor to get exponential range of [0, 4] and keep a value of
+	// 1 in the middle of the detail slider for consistency with other detail
+	// sliders (see panel_preferences_graphics1.xml)
+	LLVOSurfacePatch::sLODFactor *= LLVOSurfacePatch::sLODFactor;
+	return true;
 }
 
 static bool handleTreeLODChanged(const LLSD& newvalue)
@@ -262,7 +266,8 @@ static bool handleGammaChanged(const LLSD& newvalue)
 	{
 		gamma = 1.0f; // restore normal gamma
 	}
-	if (gViewerWindow && gViewerWindow->getWindow() && gamma != gViewerWindow->getWindow()->getGamma())
+	if (gViewerWindow && gViewerWindow->getWindow() &&
+		gamma != gViewerWindow->getWindow()->getGamma())
 	{
 		// Only save it if it's changed
 		if (!gViewerWindow->getWindow()->setGamma(gamma))
@@ -279,7 +284,8 @@ const F32 MIN_USER_FOG_RATIO = 0.5f;
 
 static bool handleFogRatioChanged(const LLSD& newvalue)
 {
-	F32 fog_ratio = llmax(MIN_USER_FOG_RATIO, llmin((F32) newvalue.asReal(), MAX_USER_FOG_RATIO));
+	F32 fog_ratio = llmax(MIN_USER_FOG_RATIO,
+						  llmin((F32)newvalue.asReal(), MAX_USER_FOG_RATIO));
 	gSky.setFogRatio(fog_ratio);
 	return true;
 }
@@ -349,9 +355,21 @@ static bool handleJoystickChanged(const LLSD& newvalue)
 	return true;
 }
 
+static bool handleAvatarSizeChanged(const LLSD& newvalue)
+{
+	if (isAgentAvatarValid())
+	{
+		gAgentAvatarp->computeBodySize();
+	}
+	return true;
+}
+
 static bool handleAvatarOffsetChanged(const LLSD& newvalue)
 {
-	gAgent.sendAgentSetAppearance();
+	if (isAgentAvatarValid())
+	{
+		gAgent.sendAgentSetAppearance();
+	}
 	return true;
 }
 
@@ -374,16 +392,17 @@ static bool handleAudioStreamMusicChanged(const LLSD& newvalue)
 {
 	if (gAudiop)
 	{
-		if ( newvalue.asBoolean() )
+		if (newvalue.asBoolean())
 		{
-			if (LLViewerParcelMgr::getInstance()->getAgentParcel()
-				&& !LLViewerParcelMgr::getInstance()->getAgentParcel()->getMusicURL().empty())
+			LLParcel* parcel;
+			parcel = LLViewerParcelMgr::getInstance()->getAgentParcel();
+			if (parcel && !parcel->getMusicURL().empty())
 			{
-				// if stream is already playing, don't call this
-				// otherwise music will briefly stop
-				if ( !gAudiop->isInternetStreamPlaying() )
+				// If stream is already playing, don't call this otherwise
+				// music will briefly stop
+				if (!gAudiop->isInternetStreamPlaying())
 				{
-					LLViewerParcelMedia::playStreamingMusic(LLViewerParcelMgr::getInstance()->getAgentParcel());
+					LLViewerParcelMedia::playStreamingMusic(parcel);
 				}
 			}
 		}
@@ -397,8 +416,9 @@ static bool handleAudioStreamMusicChanged(const LLSD& newvalue)
 
 static bool handleUseOcclusionChanged(const LLSD& newvalue)
 {
-	LLPipeline::sUseOcclusion = (newvalue.asBoolean() && gGLManager.mHasOcclusionQuery 
-		&& LLFeatureManager::getInstance()->isFeatureAvailable("UseOcclusion") && !gUseWireframe) ? 2 : 0;
+	LLPipeline::sUseOcclusion = (newvalue.asBoolean() && !gUseWireframe &&
+								 LLFeatureManager::getInstance()->isFeatureAvailable("UseOcclusion") &&
+								 gGLManager.mHasOcclusionQuery) ? 2 : 0;
 	return true;
 }
 
@@ -407,7 +427,6 @@ static bool handleUploadBakedTexOldChanged(const LLSD& newvalue)
 	LLPipeline::sForceOldBakedUpload = newvalue.asBoolean();
 	return true;
 }
-
 
 static bool handleNumpadControlChanged(const LLSD& newvalue)
 {
@@ -420,7 +439,9 @@ static bool handleNumpadControlChanged(const LLSD& newvalue)
 
 static bool handleWLSkyDetailChanged(const LLSD& newvalue)
 {
-	LLVOWLSky::sWLSkyDetail = llclamp((U32)newvalue.asInteger(), LLVOWLSky::MIN_SKY_DETAIL, LLVOWLSky::MAX_SKY_DETAIL);
+	LLVOWLSky::sWLSkyDetail = llclamp((U32)newvalue.asInteger(),
+									  LLVOWLSky::MIN_SKY_DETAIL,
+									  LLVOWLSky::MAX_SKY_DETAIL);
 	if (gSky.mVOWLSkyp.notNull())
 	{
 		gSky.mVOWLSkyp->updateGeometry(gSky.mVOWLSkyp->mDrawable);
@@ -814,8 +835,8 @@ void settings_setup_listeners()
 	gSavedSettings.getControl("AvatarAxisDeadZone3")->getSignal()->connect(boost::bind(&handleJoystickChanged, _2));
 	gSavedSettings.getControl("AvatarAxisDeadZone4")->getSignal()->connect(boost::bind(&handleJoystickChanged, _2));
 	gSavedSettings.getControl("AvatarAxisDeadZone5")->getSignal()->connect(boost::bind(&handleJoystickChanged, _2));
-	gSavedSettings.getControl("AvatarOffsetX")->getSignal()->connect(boost::bind(&handleAvatarOffsetChanged, _2));
-	gSavedSettings.getControl("AvatarOffsetY")->getSignal()->connect(boost::bind(&handleAvatarOffsetChanged, _2));
+	gSavedSettings.getControl("AvatarDepth")->getSignal()->connect(boost::bind(&handleAvatarSizeChanged, _2));
+	gSavedSettings.getControl("AvatarWidth")->getSignal()->connect(boost::bind(&handleAvatarSizeChanged, _2));
 	gSavedSettings.getControl("AvatarOffsetZ")->getSignal()->connect(boost::bind(&handleAvatarOffsetChanged, _2));
 	gSavedSettings.getControl("AvatarPhysics")->getSignal()->connect(boost::bind(&handleAvatarPhysicsChanged, _2));
 	gSavedSettings.getControl("BuildAxisScale0")->getSignal()->connect(boost::bind(&handleJoystickChanged, _2));

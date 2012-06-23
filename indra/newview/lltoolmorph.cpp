@@ -233,13 +233,20 @@ BOOL LLVisualParamHint::render()
 
 	if (gAgentAvatarp->mDrawable.notNull())
 	{
-		LLDrawPoolAvatar* avatarPoolp = (LLDrawPoolAvatar*)gAgentAvatarp->mDrawable->getFace(0)->getPool();
-		LLGLDepthTest gls_depth(GL_TRUE, GL_TRUE);
-		gGL.setAlphaRejectSettings(LLRender::CF_ALWAYS);
-		gGL.setSceneBlendType(LLRender::BT_REPLACE);
-		avatarPoolp->renderAvatars(gAgentAvatarp);  // renders only one avatar
-		gGL.setSceneBlendType(LLRender::BT_ALPHA);
-		gGL.setAlphaRejectSettings(LLRender::CF_DEFAULT);
+		LLFace* facep = gAgentAvatarp->mDrawable->getFace(0);
+		if (facep)	// Paranoia
+		{
+			LLDrawPoolAvatar* avatarPoolp = (LLDrawPoolAvatar*)facep->getPool();
+			if (avatarPoolp)	// More paranoia !
+			{
+				LLGLDepthTest gls_depth(GL_TRUE, GL_TRUE);
+				gGL.setAlphaRejectSettings(LLRender::CF_ALWAYS);
+				gGL.setSceneBlendType(LLRender::BT_REPLACE);
+				avatarPoolp->renderAvatars(gAgentAvatarp);  // renders only one avatar
+				gGL.setSceneBlendType(LLRender::BT_ALPHA);
+				gGL.setAlphaRejectSettings(LLRender::CF_DEFAULT);
+			}
+		}
 	}
 	gAgentAvatarp->setVisualParamWeight(mVisualParam->getID(),
 										mLastParamWeight);

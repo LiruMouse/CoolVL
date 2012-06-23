@@ -179,10 +179,58 @@ ATI Radeon X800					.*ATI.*Radeon X8.*					2		1
 ATI Radeon X900					.*ATI.*Radeon X9.*					2		1
 ATI Radeon Xpress				.*ATI.*Radeon Xpress.*				0		0
 ATI Rage 128					.*ATI.*Rage 128.*					0		1
+ATI R350 (9800)					.*R350.*							1		1
+ATI R580 (X1900)				.*R580.*							3		1
+ATI RC410 (Xpress 200)			.*RC410.*							0		0
+ATI RS48x (Xpress 200x)			.*RS48.*							0		0
+ATI RS600 (Xpress 3200)			.*RS600.*							0		0
 ATI RV250						.*ATI.*RV250.*						0		1
-ATI RV380						.*ATI.*RV380.*						0		1
+ATI RV350 (9600)				.*RV350.*							1		1
+ATI RV380						.*ATI.*RV380.*						1		1
+ATI RV410 (X700)				.*RV410.*							1		1
+ATI RV515						.*RV515.*							1		1
 ATI RV530						.*ATI.*RV530.*						1		1
+ATI RV570 (X1900 GT/PRO)		.*RV570.*							3		1
+ATI RX480 (Xpress 200P)			.*RX480.*							0		1
 ATI RX700						.*ATI.*RX700.*						1		1
+AMD ANTILLES (HD 6990)			.*(AMD|ATI).*Antilles.*				3		1
+AMD BARTS (HD 6800)				.*(AMD|ATI).*Barts.*				3		1
+AMD CAICOS (HD 6400)			.*(AMD|ATI).*Caicos.*				3		1
+AMD CAYMAN (HD 6900)			.*(AMD|ATI).*(Cayman|CAYMAM).*		3		1
+AMD CEDAR (HD 5450)				.*(AMD|ATI).*Cedar.*				2		1
+AMD CYPRESS (HD 5800)			.*(AMD|ATI).*Cypress.*				3		1
+AMD HEMLOCK (HD 5970)			.*(AMD|ATI).*Hemlock.*				3		1
+AMD JUNIPER (HD 5700)			.*(AMD|ATI).*Juniper.*				3		1
+AMD PARK						.*(AMD|ATI).*Park.*					3		1
+AMD REDWOOD (HD 5500/5600)		.*(AMD|ATI).*Redwood.*				3		1
+AMD TURKS (HD 6500/6600)		.*(AMD|ATI).*Turks.*				3		1
+AMD RS780 (HD 3200)				.*RS780.*							0		1
+AMD RS880 (HD 4200)				.*RS880.*							1		1
+AMD RV610 (HD 2400)				.*RV610.*							1		1
+AMD RV620 (HD 3400)				.*RV620.*							1		1
+AMD RV630 (HD 2600)				.*RV630.*							2		1
+AMD RV635 (HD 3600)				.*RV635.*							3		1
+AMD RV670 (HD 3800)				.*RV670.*							3		1
+AMD R680 (HD 3870 X2)			.*R680.*							3		1
+AMD R700 (HD 4800 X2)			.*R700.*							3		1
+AMD RV710 (HD 4300)				.*RV710.*							1		1
+AMD RV730 (HD 4600)				.*RV730.*							3		1
+AMD RV740 (HD 4700)				.*RV740.*							3		1
+AMD RV770 (HD 4800)				.*RV770.*							3		1
+AMD RV790 (HD 4800)				.*RV790.*							3		1
+ATI 760G/Radeon 3000			.*ATI.*AMD 760G.*					1		1
+ATI 780L/Radeon 3000			.*ATI.*AMD 780L.*					1		1
+ATI Radeon DDR					.*ATI.*Radeon ?DDR.*				0		1
+ATI FirePro 2000				.*ATI.*FirePro 2.*					1		1
+ATI FirePro 3000				.*ATI.*FirePro V3.*					1		1
+ATI FirePro 4000				.*ATI.*FirePro V4.*					2		1
+ATI FirePro 5000				.*ATI.*FirePro V5.*					3		1
+ATI FirePro 7000				.*ATI.*FirePro V7.*					3		1
+ATI FirePro M					.*ATI.*FirePro M.*					3		1
+ATI Technologies				.*ATI *Technologies.*				0		1
+// This entry is last to work around the "R300" driver problem.
+ATI R300 (9700)					.*R300.*							1		1
+ATI Radeon						.*ATI.*(Diamond|Radeon).*			0		1
 Intel X3100						.*Intel.*X3100.*					0		1
 Intel 830M						.*Intel.*830M						0		0
 Intel 845G						.*Intel.*845G						0		0

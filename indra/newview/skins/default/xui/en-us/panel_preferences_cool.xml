@@ -327,6 +327,43 @@
 			 tool_tip="While it is possible to wear more than one Physics, only the last worn one is actually taken into account. With this setting checked, any 'Add' action on a Physics wearable will be interpreted as a 'Wear', thus replacing any already worn Physics with the new one."
 			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
 			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
+			<text name="avatar_size_text" font="SansSerifSmall" mouse_opaque="true" halign="left"
+			 tool_tip="These settings allow to adjust the size of the bounding box around your avatar (which defaults to a fixed size, independent of the worn shape). This can be particularly useful for small or large, mesh-based avatars. Alas, the values are clamped server-side (see the tool tip of the depth and width spinners for the limits)."
+			 bottom_delta="-20" left="18" height="16" width="65" follows="left|right|top">
+				Avatar size:
+			</text>
+			<spinner name="avatar_depth" control_name="AvatarDepth"
+			 font="SansSerifSmall" label="Avatar depth" label_width="70" enabled="true" mouse_opaque="true"
+			 decimal_digits="2" min_val="0.05" max_val="2.00" initial_val="0.45" increment="0.05"
+			 tool_tip="This setting allows to set the size of the avatar 'depth' (front body/back body max distance). This value is normally clamped server-side between 0.30 and 0.60, 0.45 being the default."
+			 left_delta="70" bottom_delta="0" width="120" height="16" follows="left|top" />
+			<text name="avatar_depth_meters" type="string" length="1"
+			 enabled="true" mouse_opaque="true"
+			 bg_visible="false" border_visible="false" border_drop_shadow_visible="false"
+			 drop_shadow_visible="true" h_pad="0" v_pad="0" halign="left"
+			 left_delta="124" bottom_delta="0" width="20" height="16" follows="left|top">
+				m
+			</text>
+			<spinner name="avatar_width" control_name="AvatarWidth"
+			 font="SansSerifSmall" label="Avatar width" label_width="70" enabled="true" mouse_opaque="true"
+			 decimal_digits="2" min_val="0.05" max_val="2.00" initial_val="0.60" increment="0.05"
+			 tool_tip="This setting allows to set the size of the avatar 'width' (left body/right body max distance, i.e., typically, the shoulders width). This value is normally clamped server-side between 0.40 and 0.80, 0.60 being the default."
+			 left_delta="24" bottom_delta="0" width="120" height="16" follows="left|top" />
+			<text name="avatar_width_meters" type="string" length="1"
+			 enabled="true" mouse_opaque="true"
+			 bg_visible="false" border_visible="false" border_drop_shadow_visible="false"
+			 drop_shadow_visible="true" h_pad="0" v_pad="0" halign="left"
+			 left_delta="124" bottom_delta="0" width="20" height="16" follows="left|top">
+				m
+			</text>
+			<button name="reset_size_button" label="Reset to default" font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 tool_tip="Reset the avatar size parameters to default now."
+			 left_delta="22" bottom_delta="-4" width="102" height="20" follows="left|top" />
+			<check_box name="avatar_size_persist_check" control_name="AvatarSizePersist"
+			 label="Keep the avatar size parameters over sessions"
+			 tool_tip="When this setting is checked, the avatar size parameters are kept after relogs. Else, they are reset to their default value at each new login."
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="86" bottom_delta="-16" width="300" height="16" follows="left|top" />
 			<check_box name="avatar_physics_check" control_name="AvatarPhysics"
 			 label="Enable avatar physics (read carefully the tooltip for this setting)"
 			 tool_tip="This setting allows to turn Avatar Physics on (note that even when your avatar is wearing a Physics wearable, Avatar Physics stays off unless this setting is on). Beware: this feature requires a lot of viewer side calculations: it can cause a frame rate slow down, especially in crowded areas. Also, when on and using a Physics wearable on your avatar, the latter may fail to render properly for users of older viewers (v1.23, Snowglobe, etc)..."

@@ -331,6 +331,7 @@ public:
 	const LLWString& getWText() const						{ return mWText; }
 	llwchar			getWChar(S32 pos) const					{ return mWText[pos]; }
 	LLWString		getWSubString(S32 pos, S32 len) const	{ return mWText.substr(pos, len); }
+	S32				getLength() const						{ return mWText.length(); }
 
 	const LLTextSegment* getCurrentSegment() const			{ return getSegmentAtOffset(mCursorPos); }
 	const LLTextSegment* getPreviousSegment() const;
@@ -343,7 +344,6 @@ protected:
 	// Methods
 	//
 
-	S32				getLength() const						{ return mWText.length(); }
 	void			getSegmentAndOffset(S32 startpos,
 										S32* segidxp,
 										S32* offsetp) const;

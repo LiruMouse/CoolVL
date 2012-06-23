@@ -93,19 +93,21 @@ LLPreviewNotecard::LLPreviewNotecard(const std::string& name,
 	mAssetID(asset_id),
 	mNotecardItemID(item_id),
 	mObjectID(object_id),
-	mEditor(NULL)
+	mEditor(NULL),
+	mSaveButton(NULL)
 {
 	sList.insert(this);
 
 	LLRect curRect = rect;
 
+	std::string file;
 	if (show_keep_discard)
 	{
-		LLUICtrlFactory::getInstance()->buildFloater(this, "floater_preview_notecard_keep_discard.xml");
+		file = "floater_preview_notecard_keep_discard.xml";
 	}
 	else
 	{
-		LLUICtrlFactory::getInstance()->buildFloater(this, "floater_preview_notecard.xml");
+		file = "floater_preview_notecard.xml";
 
 		if (mAssetID.isNull())
 		{
@@ -116,6 +118,7 @@ LLPreviewNotecard::LLPreviewNotecard(const std::string& name,
 			}
 		}
 	}	
+	LLUICtrlFactory::getInstance()->buildFloater(this, file);
 
 	// only assert shape if not hosted in a multifloater
 	if (!getHost())
@@ -155,7 +158,11 @@ BOOL LLPreviewNotecard::postBuild()
 	childSetCommitCallback("desc", LLPreview::onText, this);
 	childSetPrevalidate("desc", &LLLineEditor::prevalidatePrintableNotPipe);
 
-	childSetAction("Save", onClickSave, this);
+	mSaveButton = getChild<LLButton>("Save", TRUE, FALSE);
+	if (mSaveButton)
+	{
+		mSaveButton->setClickedCallback(onClickSave, this);
+	}
 
 	if (getChild<LLButton>("Keep", TRUE, FALSE))
 	{
@@ -171,9 +178,9 @@ BOOL LLPreviewNotecard::postBuild()
 // virtual
 void LLPreviewNotecard::draw()
 {
-	if (mEditor)
+	if (mEditor && mSaveButton)
 	{
-		childSetEnabled("Save", !mEditor->isPristine() && getEnabled());
+		mSaveButton->setEnabled(getEnabled() && !mEditor->isPristine());
 	}
 
 	LLPreview::draw();
@@ -213,7 +220,10 @@ void LLPreviewNotecard::setEnabled(BOOL enabled)
 	childSetEnabled("Notecard Editor", enabled);
 	childSetVisible("lock", !enabled);
 	childSetEnabled("desc", enabled);
-	childSetEnabled("Save", enabled && !mEditor->isPristine());
+	if (mSaveButton)
+	{
+		mSaveButton->setEnabled(enabled && !mEditor->isPristine());
+	}
 }
 
 // virtual
@@ -221,16 +231,19 @@ BOOL LLPreviewNotecard::handleKeyHere(KEY key, MASK mask)
 {
 	if (!mEditor) return TRUE;
 
-	if ('S' == key && MASK_CONTROL == (mask & MASK_CONTROL))
+	if (mask == MASK_CONTROL)
 	{
-		saveIfNeeded();
-		return TRUE;
-	}
+		if (key == 'S')
+		{
+			saveIfNeeded();
+			return TRUE;
+		}
 
-	if ('F' == key && (mask & MASK_CONTROL) && !(mask & (MASK_SHIFT | MASK_ALT)))
-	{
-		LLFloaterSearchReplace::show(mEditor);
-		return TRUE;
+		if (key == 'F')
+		{
+			LLFloaterSearchReplace::show(mEditor);
+			return TRUE;
+		}
 	}
 
 	return LLPreview::handleKeyHere(key, mask);
@@ -265,7 +278,8 @@ bool LLPreviewNotecard::hasEmbeddedInventory()
 
 void LLPreviewNotecard::refreshFromInventory()
 {
-	LL_DEBUGS("Notecard") << "LLPreviewNotecard::refreshFromInventory()" << LL_ENDL;
+	LL_DEBUGS("Notecard") << "LLPreviewNotecard::refreshFromInventory()"
+						  << LL_ENDL;
 	loadAsset();
 }
 
@@ -295,16 +309,19 @@ void LLPreviewNotecard::loadAsset()
 				LLHost source_sim = LLHost::invalid;
 				if (mObjectUUID.notNull())
 				{
-					LLViewerObject *objectp = gObjectList.findObject(mObjectUUID);
+					LLViewerObject* objectp = gObjectList.findObject(mObjectUUID);
 					if (objectp && objectp->getRegion())
 					{
 						source_sim = objectp->getRegion()->getHost();
 					}
 					else
 					{
-						// The object that we're trying to look at disappeared, bail.
-						LL_WARNS("Notecard") << "Can't find object " << mObjectUUID
-											 << " associated with notecard." << LL_ENDL;
+						// The object that we're trying to look at disappeared,
+						// bail.
+						LL_WARNS("Notecard") << "Can't find object "
+											 << mObjectUUID
+											 << " associated with notecard."
+											 << LL_ENDL;
 						mAssetID.setNull();
 						mEditor->setText(getString("no_object"));
 						mEditor->makePristine();
@@ -353,7 +370,7 @@ void LLPreviewNotecard::loadAsset()
 }
 
 // static
-void LLPreviewNotecard::onLoadComplete(LLVFS *vfs,
+void LLPreviewNotecard::onLoadComplete(LLVFS* vfs,
 									   const LLUUID& asset_uuid,
 									   LLAssetType::EType type,
 									   void* user_data, S32 status,
@@ -366,6 +383,12 @@ void LLPreviewNotecard::onLoadComplete(LLVFS *vfs,
 	{
 		if (0 == status)
 		{
+			S32 pos = 0;
+			if (preview->mEditor->getLength() > 0)
+			{
+				pos = preview->mEditor->getCursorPos();
+			}
+
 			LLVFile file(vfs, asset_uuid, type, LLVFile::READ);
 
 			S32 file_length = file.getSize();
@@ -375,11 +398,13 @@ void LLPreviewNotecard::onLoadComplete(LLVFS *vfs,
 			// put a EOS at the end
 			buffer[file_length] = 0;
 
-			if (file_length > 19 && !strncmp(buffer, "Linden text version", 19))
+			if (file_length > 19 &&
+				!strncmp(buffer, "Linden text version", 19))
 			{
 				if (!preview->mEditor->importBuffer(buffer, file_length + 1))
 				{
-					LL_WARNS("Notecard") << "Problem importing notecard" << LL_ENDL;
+					LL_WARNS("Notecard") << "Problem importing notecard"
+										 << LL_ENDL;
 				}
 			}
 			else
@@ -389,6 +414,11 @@ void LLPreviewNotecard::onLoadComplete(LLVFS *vfs,
 			}
 
 			preview->mEditor->makePristine();
+			if (pos > 0)
+			{
+				preview->mEditor->setCursorPos(pos);
+				preview->mEditor->scrollToPos(pos);
+			}
 
 			const LLInventoryItem* item = preview->getItem();
 			BOOL modifiable = item && gAgent.allowOperation(PERM_MODIFY,
@@ -475,7 +505,8 @@ bool LLPreviewNotecard::saveIfNeeded(LLInventoryItem* copyitem)
 
 	if (!gAssetStorage)
 	{
-		LL_WARNS("Notecard") << "Not connected to an asset storage system." << LL_ENDL;
+		LL_WARNS("Notecard") << "Not connected to an asset storage system."
+							 << LL_ENDL;
 		return false;
 	}
 
@@ -486,7 +517,8 @@ bool LLPreviewNotecard::saveIfNeeded(LLInventoryItem* copyitem)
 		tid.generate();
 		LLAssetID asset_id = tid.makeAssetID(gAgent.getSecureSessionID());
 
-		LLVFile file(gVFS, asset_id, LLAssetType::AT_NOTECARD, LLVFile::APPEND);
+		LLVFile file(gVFS, asset_id,
+					 LLAssetType::AT_NOTECARD, LLVFile::APPEND);
 
 		std::string buffer;
 		if (!mEditor->exportBuffer(buffer))
@@ -500,12 +532,13 @@ bool LLPreviewNotecard::saveIfNeeded(LLInventoryItem* copyitem)
 		file.setMaxSize(size);
 		file.write((U8*)buffer.c_str(), size);
 
+		// Save it out to database
+		LLViewerRegion* region = gAgent.getRegion();
 		const LLInventoryItem* item = getItem();
-		// save it out to database
-		if (item)
+		if (item && region)
 		{			
-			std::string agent_url = gAgent.getRegion()->getCapability("UpdateNotecardAgentInventory");
-			std::string task_url = gAgent.getRegion()->getCapability("UpdateNotecardTaskInventory");
+			std::string agent_url = region->getCapability("UpdateNotecardAgentInventory");
+			std::string task_url = region->getCapability("UpdateNotecardTaskInventory");
 			if (mObjectUUID.isNull() && !agent_url.empty())
 			{
 				// Saving into agent inventory
@@ -620,7 +653,8 @@ void LLPreviewNotecard::onSaveComplete(const LLUUID& asset_uuid,
 	}
 	else
 	{
-		LL_WARNS("Notecard") << "Problem saving notecard: " << status << LL_ENDL;
+		LL_WARNS("Notecard") << "Problem saving notecard: " << status
+							 << LL_ENDL;
 		LLSD args;
 		args["REASON"] = std::string(LLAssetStorage::getErrorString(status));
 		LLNotifications::instance().add("SaveNotecardFailReason", args);
@@ -629,7 +663,8 @@ void LLPreviewNotecard::onSaveComplete(const LLUUID& asset_uuid,
 	std::string uuid_string;
 	asset_uuid.toString(uuid_string);
 	std::string filename;
-	filename = gDirUtilp->getExpandedFilename(LL_PATH_CACHE, uuid_string) + ".tmp";
+	filename = gDirUtilp->getExpandedFilename(LL_PATH_CACHE,
+											  uuid_string) + ".tmp";
 	LLFile::remove(filename);
 	delete info;
 }

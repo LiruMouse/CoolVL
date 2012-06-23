@@ -292,9 +292,6 @@ public:
 
 	const LLAgentAccess&  getAgentAccess();
 
-	// This function can go away after the AO transition (see llstartup.cpp)
-	void setAOTransition();
-
 	BOOL			isGroupTitleHidden() const		{ return mHideGroupTitle; }
 	BOOL			isGroupMember() const		{ return !mGroupID.isNull(); }		// This is only used for building titles!
 	const LLUUID	&getGroupID() const			{ return mGroupID; }

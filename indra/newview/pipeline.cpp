@@ -1557,7 +1557,7 @@ void LLPipeline::updateMove()
 
 	updateMovedList(mMovedList);
 
-	//balance octrees
+	// balance octrees
 	{
  		LLFastTimer ot(LLFastTimer::FTM_OCTREE_BALANCE);
 
@@ -1583,13 +1583,14 @@ void LLPipeline::updateMove()
 /////////////////////////////////////////////////////////////////////////////
 
 //static
-F32 LLPipeline::calcPixelArea(LLVector3 center, LLVector3 size, LLCamera &camera)
+F32 LLPipeline::calcPixelArea(LLVector3 center, LLVector3 size,
+							  LLCamera &camera)
 {
 	LLVector3 lookAt = center - camera.getOrigin();
 	F32 dist = lookAt.length();
 
-	//ramp down distance for nearby objects
-	//shrink dist by dist/16.
+	// ramp down distance for nearby objects
+	// shrink dist by dist/16.
 	if (dist < 16.f)
 	{
 		dist /= 16.f;
@@ -1597,14 +1598,15 @@ F32 LLPipeline::calcPixelArea(LLVector3 center, LLVector3 size, LLCamera &camera
 		dist *= 16.f;
 	}
 
-	//get area of circle around node
+	// get area of circle around node
 	F32 app_angle = atanf(size.length()/dist);
 	F32 radius = app_angle*LLDrawable::sCurPixelAngle;
 	return radius*radius * F_PI;
 }
 
 //static
-F32 LLPipeline::calcPixelArea(const LLVector4a& center, const LLVector4a& size, LLCamera &camera)
+F32 LLPipeline::calcPixelArea(const LLVector4a& center, const LLVector4a& size,
+							  LLCamera &camera)
 {
 	LLVector4a origin;
 	origin.load3(camera.getOrigin().mV);
@@ -1613,8 +1615,8 @@ F32 LLPipeline::calcPixelArea(const LLVector4a& center, const LLVector4a& size, 
 	lookAt.setSub(center, origin);
 	F32 dist = lookAt.getLength3().getF32();
 
-	//ramp down distance for nearby objects
-	//shrink dist by dist/16.
+	// ramp down distance for nearby objects
+	// shrink dist by dist/16.
 	if (dist < 16.f)
 	{
 		dist /= 16.f;
@@ -1622,8 +1624,8 @@ F32 LLPipeline::calcPixelArea(const LLVector4a& center, const LLVector4a& size, 
 		dist *= 16.f;
 	}
 
-	//get area of circle around node
-	F32 app_angle = atanf(size.getLength3().getF32()/dist);
+	// get area of circle around node
+	F32 app_angle = atanf(size.getLength3().getF32() / dist);
 	F32 radius = app_angle*LLDrawable::sCurPixelAngle;
 	return radius * radius * F_PI;
 }
@@ -1640,29 +1642,33 @@ void LLPipeline::clearReferences()
 
 void check_references(LLSpatialGroup* group, LLDrawable* drawable)
 {
-	for (LLSpatialGroup::element_iter i = group->getData().begin(); i != group->getData().end(); ++i)
+	for (LLSpatialGroup::element_iter i = group->getData().begin();
+		 i != group->getData().end(); ++i)
 	{
 		if (drawable == *i)
 		{
-			llerrs << "LLDrawable deleted while actively reference by LLPipeline." << llendl;
+			llerrs << "LLDrawable deleted while actively reference by LLPipeline."
+				   << llendl;
 		}
 	}
 }
 
 void check_references(LLDrawable* drawable, LLFace* face)
 {
-	for (S32 i = 0; i < drawable->getNumFaces(); ++i)
+	for (S32 i = 0, count = drawable->getNumFaces(); i < count; i++)
 	{
 		if (drawable->getFace(i) == face)
 		{
-			llerrs << "LLFace deleted while actively referenced by LLPipeline." << llendl;
+			llerrs << "LLFace deleted while actively referenced by LLPipeline."
+				   << llendl;
 		}
 	}
 }
 
 void check_references(LLSpatialGroup* group, LLFace* face)
 {
-	for (LLSpatialGroup::element_iter i = group->getData().begin(); i != group->getData().end(); ++i)
+	for (LLSpatialGroup::element_iter i = group->getData().begin();
+		 i != group->getData().end(); ++i)
 	{
 		LLDrawable* drawable = *i;
 		check_references(drawable, face);
@@ -1674,25 +1680,29 @@ void LLPipeline::checkReferences(LLFace* face)
 #if 0
 	if (sCull)
 	{
-		for (LLCullResult::sg_list_t::iterator iter = sCull->beginVisibleGroups(); iter != sCull->endVisibleGroups(); ++iter)
+		for (LLCullResult::sg_list_t::iterator iter = sCull->beginVisibleGroups();
+			 iter != sCull->endVisibleGroups(); ++iter)
 		{
 			LLSpatialGroup* group = *iter;
 			check_references(group, face);
 		}
 
-		for (LLCullResult::sg_list_t::iterator iter = sCull->beginAlphaGroups(); iter != sCull->endAlphaGroups(); ++iter)
+		for (LLCullResult::sg_list_t::iterator iter = sCull->beginAlphaGroups();
+			 iter != sCull->endAlphaGroups(); ++iter)
 		{
 			LLSpatialGroup* group = *iter;
 			check_references(group, face);
 		}
 
-		for (LLCullResult::sg_list_t::iterator iter = sCull->beginDrawableGroups(); iter != sCull->endDrawableGroups(); ++iter)
+		for (LLCullResult::sg_list_t::iterator iter = sCull->beginDrawableGroups();
+			 iter != sCull->endDrawableGroups(); ++iter)
 		{
 			LLSpatialGroup* group = *iter;
 			check_references(group, face);
 		}
 
-		for (LLCullResult::drawable_list_t::iterator iter = sCull->beginVisibleList(); iter != sCull->endVisibleList(); ++iter)
+		for (LLCullResult::drawable_list_t::iterator iter = sCull->beginVisibleList();
+			 iter != sCull->endVisibleList(); ++iter)
 		{
 			LLDrawable* drawable = *iter;
 			check_references(drawable, face);
@@ -2469,6 +2479,33 @@ void LLPipeline::markTextured(LLDrawable *drawablep)
 	}
 }
 
+void LLPipeline::markPartitionMove(LLDrawable* drawable)
+{
+	if (!drawable->isState(LLDrawable::PARTITION_MOVE) &&
+		!drawable->getPositionGroup().equals3(LLVector4a::getZero()))
+	{
+		drawable->setState(LLDrawable::PARTITION_MOVE);
+		mPartitionQ.push_back(drawable);
+	}
+}
+
+void LLPipeline::processPartitionQ()
+{
+	for (LLDrawable::drawable_list_t::iterator iter = mPartitionQ.begin();
+		 iter != mPartitionQ.end(); ++iter)
+	{
+		LLDrawable* drawable = *iter;
+		if (!drawable->isDead())
+		{
+			drawable->updateBinRadius();
+			drawable->movePartition();
+		}
+		drawable->clearState(LLDrawable::PARTITION_MOVE);
+	}
+
+	mPartitionQ.clear();
+}
+
 void LLPipeline::markGLRebuild(LLGLUpdate* glu)
 {
 	if (glu && !glu->mInQ)
@@ -2829,7 +2866,7 @@ U32 highlightable(LLViewerObject* vobj, U32& beacon_width)
 	return 1;
 }
 
-//function for creating scripted beacons
+// Function for creating scripted beacons
 void renderScriptedBeacons(LLDrawable* drawablep)
 {
 	LLViewerObject *vobj = drawablep->getVObj();
@@ -2847,11 +2884,14 @@ void renderScriptedBeacons(LLDrawable* drawablep)
 
 		if (gPipeline.sRenderHighlight)
 		{
-			S32 face_id;
-			S32 count = drawablep->getNumFaces();
-			for (face_id = 0; face_id < count; face_id++)
+			for (S32 face_id = 0, count = drawablep->getNumFaces();
+				 face_id < count; face_id++)
 			{
-				gPipeline.mHighlightFaces.push_back(drawablep->getFace(face_id));
+				LLFace* facep = drawablep->getFace(face_id);
+				if (facep)
+				{
+					gPipeline.mHighlightFaces.push_back(facep);
+				}
 			}
 		}
 	}
@@ -2874,11 +2914,14 @@ void renderScriptedTouchBeacons(LLDrawable* drawablep)
 
 		if (gPipeline.sRenderHighlight)
 		{
-			S32 face_id;
-			S32 count = drawablep->getNumFaces();
-			for (face_id = 0; face_id < count; face_id++)
+			for (S32 face_id = 0, count = drawablep->getNumFaces();
+				 face_id < count; face_id++)
 			{
-				gPipeline.mHighlightFaces.push_back(drawablep->getFace(face_id));
+				LLFace* facep = drawablep->getFace(face_id);
+				if (facep)
+				{
+					gPipeline.mHighlightFaces.push_back(facep);
+				}
 			}
 		}
 	}
@@ -2901,11 +2944,14 @@ void renderPhysicalBeacons(LLDrawable* drawablep)
 
 		if (gPipeline.sRenderHighlight)
 		{
-			S32 face_id;
-			S32 count = drawablep->getNumFaces();
-			for (face_id = 0; face_id < count; face_id++)
+			for (S32 face_id = 0, count = drawablep->getNumFaces();
+				 face_id < count; face_id++)
 			{
-				gPipeline.mHighlightFaces.push_back(drawablep->getFace(face_id));
+				LLFace* facep = drawablep->getFace(face_id);
+				if (facep)
+				{
+					gPipeline.mHighlightFaces.push_back(facep);
+				}
 			}
 		}
 	}
@@ -2943,11 +2989,14 @@ void renderMOAPBeacons(LLDrawable* drawablep)
 
 		if (gPipeline.sRenderHighlight)
 		{
-			S32 face_id;
-			S32 count = drawablep->getNumFaces();
-			for (face_id = 0; face_id < count; face_id++)
+			for (S32 face_id = 0, drawablep->getNumFaces(); face_id < count;
+				 face_id++)
 			{
-				gPipeline.mHighlightFaces.push_back(drawablep->getFace(face_id));
+				LLFace* facep = drawablep->getFace(face_id);
+				if (facep)
+				{
+					gPipeline.mHighlightFaces.push_back(facep);
+				}
 			}
 		}
 	}
@@ -2972,11 +3021,14 @@ void renderParticleBeacons(LLDrawable* drawablep)
 
 		if (gPipeline.sRenderHighlight)
 		{
-			S32 face_id;
-			S32 count = drawablep->getNumFaces();
-			for (face_id = 0; face_id < count; face_id++)
+			for (S32 face_id = 0, count = drawablep->getNumFaces();
+				 face_id < count; face_id++)
 			{
-				gPipeline.mHighlightFaces.push_back(drawablep->getFace(face_id));
+				LLFace* facep = drawablep->getFace(face_id);
+				if (facep)
+				{
+					gPipeline.mHighlightFaces.push_back(facep);
+				}
 			}
 		}
 	}
@@ -3000,11 +3052,14 @@ void renderSoundBeacons(LLDrawable* drawablep)
 
 		if (gPipeline.sRenderHighlight)
 		{
-			S32 face_id;
-			S32 count = drawablep->getNumFaces();
-			for (face_id = 0; face_id < count; face_id++)
+			for (S32 face_id = 0, count = drawablep->getNumFaces();
+				 face_id < count; face_id++)
 			{
-				gPipeline.mHighlightFaces.push_back(drawablep->getFace(face_id));
+				LLFace* facep = drawablep->getFace(face_id);
+				if (facep)
+				{
+					gPipeline.mHighlightFaces.push_back(facep);
+				}
 			}
 		}
 	}
@@ -3219,7 +3274,11 @@ void LLPipeline::postSort(LLCamera& camera)
 				{
 					if (object->mDrawable)
 					{
-						gPipeline.mSelectedFaces.push_back(object->mDrawable->getFace(te));
+						LLFace* facep = object->mDrawable->getFace(te);
+						if (facep)
+						{
+							gPipeline.mSelectedFaces.push_back(facep);
+						}
 					}
 					return true;
 				}
@@ -5908,10 +5967,13 @@ void LLPipeline::resetVertexBuffers(LLDrawable* drawable)
 		return;
 	}
 
-	for (S32 i = 0; i < drawable->getNumFaces(); i++)
+	for (S32 i = 0, count = drawable->getNumFaces(); i < count; i++)
 	{
 		LLFace* facep = drawable->getFace(i);
-		facep->clearVertexBuffer();
+		if (facep)
+		{
+			facep->clearVertexBuffer();
+		}
 	}
 }
 
@@ -8645,7 +8707,8 @@ void LLPipeline::renderHighlight(const LLViewerObject* obj, F32 fade)
 {
 	if (obj && obj->getVolume())
 	{
-		for (LLViewerObject::child_list_t::const_iterator iter = obj->getChildren().begin(); iter != obj->getChildren().end(); ++iter)
+		for (LLViewerObject::child_list_t::const_iterator iter = obj->getChildren().begin();
+			 iter != obj->getChildren().end(); ++iter)
 		{
 			renderHighlight(*iter, fade);
 		}
@@ -8653,12 +8716,13 @@ void LLPipeline::renderHighlight(const LLViewerObject* obj, F32 fade)
 		LLDrawable* drawable = obj->mDrawable;
 		if (drawable)
 		{
-			for (S32 i = 0; i < drawable->getNumFaces(); ++i)
+			for (S32 i = 0, count = drawable->getNumFaces(); i < count; i++)
 			{
 				LLFace* face = drawable->getFace(i);
 				if (face)
 				{
-					face->renderSelected(LLViewerTexture::sNullImagep, LLColor4(1,1,1,fade));
+					face->renderSelected(LLViewerTexture::sNullImagep,
+										 LLColor4(1, 1, 1, fade));
 				}
 			}
 		}

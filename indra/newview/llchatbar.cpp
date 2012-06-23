@@ -571,6 +571,11 @@ void LLChatBar::setIgnoreArrowKeys(BOOL b)
 	}
 }
 
+bool LLChatBar::hasTextEditor()
+{
+	return HBFloaterTextInput::hasFloaterFor(mInputEditor);
+}
+
 BOOL LLChatBar::inputEditorHasFocus()
 {
 	return mInputEditor && mInputEditor->hasFocus();

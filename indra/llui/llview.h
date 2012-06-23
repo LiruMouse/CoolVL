@@ -341,7 +341,7 @@ public:
 
 	virtual void	setTentative(BOOL b);
 	virtual BOOL	getTentative() const;
-	void 	setAllChildrenEnabled(BOOL b);
+	void			setAllChildrenEnabled(BOOL b);
 
 	virtual void	setVisible(BOOL visible);
 	BOOL			getVisible() const					{ return mVisible; }

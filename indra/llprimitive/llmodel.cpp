@@ -1054,19 +1054,22 @@ void LLModel::appendFaces(LLModel *model, LLMatrix4 &transform, LLMatrix4& norm_
 	}
 }
 
-void LLModel::appendFace(const LLVolumeFace& src_face, std::string src_material, LLMatrix4& mat, LLMatrix4& norm_mat)
+void LLModel::appendFace(const LLVolumeFace& src_face,
+						 std::string src_material,
+						 LLMatrix4& mat,
+						 LLMatrix4& norm_mat)
 {
-	S32 rindex = getNumVolumeFaces()-1; 
+	S32 rindex = getNumVolumeFaces() - 1; 
 	if (rindex == -1 || 
 		mVolumeFaces[rindex].mNumVertices + src_face.mNumVertices >= 65536)
-	{	//empty or overflow will occur, append new face
+	{	// empty or overflow will occur, append new face
 		LLVolumeFace cur_face;
 		cur_face.appendFace(src_face, mat, norm_mat);
 		addFace(cur_face);
 		mMaterialList.push_back(src_material);
 	}
 	else
-	{	//append to existing end face
+	{	// append to existing end face
 		mVolumeFaces.rbegin()->appendFace(src_face, mat, norm_mat);
 	}
 }
@@ -1354,22 +1357,15 @@ std::string LLModel::getName() const
 }
 
 //static
-LLSD LLModel::writeModel(
-	std::ostream& ostr,
-	LLModel* physics,
-	LLModel* high,
-	LLModel* medium,
-	LLModel* low,
-	LLModel* impostor,
-	const LLModel::Decomposition& decomp,
-	BOOL upload_skin,
-	BOOL upload_joints,
-	BOOL nowrite,
-	BOOL as_slm)
+LLSD LLModel::writeModel(std::ostream& ostr, LLModel* physics, LLModel* high,
+						 LLModel* medium, LLModel* low, LLModel* impostor,
+						 const LLModel::Decomposition& decomp,
+						 BOOL upload_skin, BOOL upload_joints, BOOL nowrite,
+						 BOOL as_slm)
 {
 	LLSD mdl;
 
-	LLModel* model[] = 
+	LLModel* model[] =
 	{
 		impostor,
 		low,
@@ -1411,9 +1407,9 @@ LLSD LLModel::writeModel(
 			LLVector3 min_pos = LLVector3(model[idx]->getVolumeFace(0).mPositions[0].getF32ptr());
 			LLVector3 max_pos = min_pos;
 
-			//find position domain
+			// find position domain
 			for (S32 i = 0; i < model[idx]->getNumVolumeFaces(); ++i)
-			{	//for each face
+			{	// for each face
 				const LLVolumeFace& face = model[idx]->getVolumeFace(i);
 				for (U32 j = 0; j < face.mNumVertices; ++j)
 				{

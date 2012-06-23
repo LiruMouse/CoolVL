@@ -1168,10 +1168,13 @@ BOOL LLVOSky::updateSky()
 		}
 	}
 
-	if (mDrawable.notNull() && mDrawable->getFace(0) &&
-		!mDrawable->getFace(0)->getVertexBuffer())
+	if (mDrawable.notNull())
 	{
-		gPipeline.markRebuild(mDrawable, LLDrawable::REBUILD_VOLUME, TRUE);
+		LLFace* facep = mDrawable->getFace(0);
+		if (facep && !facep->getVertexBuffer())
+		{
+			gPipeline.markRebuild(mDrawable, LLDrawable::REBUILD_VOLUME, TRUE);
+		}
 	}
 	return TRUE;
 }

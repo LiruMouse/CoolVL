@@ -59,11 +59,11 @@ extern LLPipeline gPipeline;
 //-----------------------------------------------------------------------------
 // LLViewerJointAttachment()
 //-----------------------------------------------------------------------------
-LLViewerJointAttachment::LLViewerJointAttachment() :
-mVisibleInFirst(FALSE),
-mGroup(0),
-mIsHUDAttachment(FALSE),
-mPieSlice(-1)
+LLViewerJointAttachment::LLViewerJointAttachment()
+:	mVisibleInFirst(FALSE),
+	mGroup(0),
+	mIsHUDAttachment(FALSE),
+	mPieSlice(-1)
 {
 	mValid = FALSE;
 	mUpdateXform = FALSE;
@@ -107,10 +107,12 @@ U32 LLViewerJointAttachment::drawShape(F32 pixelArea, BOOL first_pass, BOOL is_d
 	return 0;
 }
 
-void LLViewerJointAttachment::setupDrawable(LLViewerObject *object)
+void LLViewerJointAttachment::setupDrawable(LLViewerObject* object)
 {
 	if (!object->mDrawable)
+	{
 		return;
+	}
 	if (object->mDrawable->isActive())
 	{
 		object->mDrawable->makeStatic(FALSE);
@@ -130,14 +132,20 @@ void LLViewerJointAttachment::setupDrawable(LLViewerObject *object)
 	object->mDrawable->mXform.setPosition(current_pos);
 	object->mDrawable->mXform.setRotation(current_rot);
 	gPipeline.markMoved(object->mDrawable);
-	gPipeline.markTextured(object->mDrawable); // face may need to change draw pool to/from POOL_HUD
+	// face may need to change draw pool to/from POOL_HUD
+	gPipeline.markTextured(object->mDrawable);
 	object->mDrawable->setState(LLDrawable::USE_BACKLIGHT);
 	
-	if(mIsHUDAttachment)
+	if (mIsHUDAttachment)
 	{
-		for (S32 face_num = 0; face_num < object->mDrawable->getNumFaces(); face_num++)
+		for (S32 face_num = 0, count = object->mDrawable->getNumFaces();
+			 face_num < count; face_num++)
 		{
-			object->mDrawable->getFace(face_num)->setState(LLFace::HUD_RENDER);
+			LLFace* facep = object->mDrawable->getFace(face_num);
+			if (facep)
+			{
+				facep->setState(LLFace::HUD_RENDER);
+			}
 		}
 	}
 
@@ -149,14 +157,20 @@ void LLViewerJointAttachment::setupDrawable(LLViewerObject *object)
 		if (childp && childp->mDrawable.notNull())
 		{
 			childp->mDrawable->setState(LLDrawable::USE_BACKLIGHT);
-			gPipeline.markTextured(childp->mDrawable); // face may need to change draw pool to/from POOL_HUD
+			// face may need to change draw pool to/from POOL_HUD
+			gPipeline.markTextured(childp->mDrawable);
 			gPipeline.markMoved(childp->mDrawable);
 
-			if(mIsHUDAttachment)
+			if (mIsHUDAttachment)
 			{
-				for (S32 face_num = 0; face_num < childp->mDrawable->getNumFaces(); face_num++)
+				for (S32 face_num = 0;
+					 face_num < childp->mDrawable->getNumFaces(); face_num++)
 				{
-					childp->mDrawable->getFace(face_num)->setState(LLFace::HUD_RENDER);
+					LLFace* facep = childp->mDrawable->getFace(face_num);
+					if (facep)
+					{
+						facep->setState(LLFace::HUD_RENDER);
+					}
 				}
 			}
 		}
@@ -226,6 +240,7 @@ BOOL LLViewerJointAttachment::addObject(LLViewerObject* object)
 	{
 		LLInventoryItem* inv_item = gAgent.mRRInterface.getItem(object->getID());
 		LLUUID item_id = object->getAttachmentItemID();
+		std::deque<AssetAndTarget>::iterator it;
 		// If this attachment point is locked and was empty, then force detach,
 		// unless the attached object was supposed to be reattached
 		// automatically
@@ -236,8 +251,8 @@ BOOL LLViewerJointAttachment::addObject(LLViewerObject* object)
 			if (!gAgent.mRRInterface.canAttach(object, name))
 			{
 				bool just_reattaching = false;
-				std::deque<AssetAndTarget>::iterator it = gAgent.mRRInterface.mAssetsToReattach.begin();
-				for ( ; it != gAgent.mRRInterface.mAssetsToReattach.end(); ++it)
+				for (it = gAgent.mRRInterface.mAssetsToReattach.begin();
+					 it != gAgent.mRRInterface.mAssetsToReattach.end(); ++it)
 				{
 					if (it->uuid == item_id)
 					{
@@ -282,8 +297,8 @@ BOOL LLViewerJointAttachment::addObject(LLViewerObject* object)
 
 		// If the UUID of the attached item is contained into the list of
 		// things waiting to reattach, signal it and remove it from the list.
-		std::deque<AssetAndTarget>::iterator it = gAgent.mRRInterface.mAssetsToReattach.begin();
-		for ( ; it != gAgent.mRRInterface.mAssetsToReattach.end(); ++it)
+		for (it = gAgent.mRRInterface.mAssetsToReattach.begin();
+			 it != gAgent.mRRInterface.mAssetsToReattach.end(); ++it)
 		{
 			if (it->uuid == item_id)
 			{
@@ -293,7 +308,8 @@ BOOL LLViewerJointAttachment::addObject(LLViewerObject* object)
 				gAgent.mRRInterface.mAssetsToReattach.erase(it);
 //				gAgent.mRRInterface.mJustReattached.uuid = item_id;
 //				gAgent.mRRInterface.mJustReattached.attachpt = getName();
-				// Replace the previously stored asset id with the new viewer id in the list of restrictions
+				// Replace the previously stored asset id with the new viewer
+				// id in the list of restrictions
 				gAgent.mRRInterface.replace(item_id, object->getRootEdit()->getID());
 				break;
 			}
@@ -307,7 +323,7 @@ BOOL LLViewerJointAttachment::addObject(LLViewerObject* object)
 //-----------------------------------------------------------------------------
 // removeObject()
 //-----------------------------------------------------------------------------
-void LLViewerJointAttachment::removeObject(LLViewerObject *object)
+void LLViewerJointAttachment::removeObject(LLViewerObject* object)
 {
 	attachedobjs_vec_t::iterator iter;
 	for (iter = mAttachedObjects.begin(); iter != mAttachedObjects.end();
@@ -340,22 +356,34 @@ void LLViewerJointAttachment::removeObject(LLViewerObject *object)
 			target_attachpt = gAgentAvatarp->getAttachedPointName(inv_item_id);
 		}
 		inv_item_id = object->getAttachmentItemID();
- 		if (!gAgent.mRRInterface.canDetach(object)
-			&& gAgent.mRRInterface.mJustDetached.attachpt != target_attachpt	// we didn't just detach something from this attach pt automatically
-			&& gAgent.mRRInterface.mJustReattached.attachpt != target_attachpt)	// we didn't just reattach something to this attach pt automatically
+ 		if (!gAgent.mRRInterface.canDetach(object) &&
+			// we didn't just detach something from this attach pt automatically
+			gAgent.mRRInterface.mJustDetached.attachpt != target_attachpt &&
+			// we didn't just reattach something to this attach pt automatically
+			gAgent.mRRInterface.mJustReattached.attachpt != target_attachpt)
 		{
-			llinfos << "Detached a locked object : " << inv_item_id << " from " << target_attachpt << llendl;
+			llinfos << "Detached a locked object : " << inv_item_id << " from "
+					<< target_attachpt << llendl;
 
-			// Now notify that this object has been detached and will be reattached right away
-			gAgent.mRRInterface.notify (LLUUID::null, "detached illegally " + getName(), "");
+			// Now notify that this object has been detached and will be
+			// reattached right away
+			gAgent.mRRInterface.notify(LLUUID::null,
+									   "detached illegally " + getName(), "");
 
-			std::deque<AssetAndTarget>::iterator it = gAgent.mRRInterface.mAssetsToReattach.begin();
 			bool found = false;
 			bool found_for_this_point = false;
-			for ( ; it != gAgent.mRRInterface.mAssetsToReattach.end(); ++it)
+			std::deque<AssetAndTarget>::iterator it;
+			for (it = gAgent.mRRInterface.mAssetsToReattach.begin();
+				 it != gAgent.mRRInterface.mAssetsToReattach.end(); ++it)
 			{
-				if (it->uuid == inv_item_id) found = true;
-				if (it->attachpt == target_attachpt) found_for_this_point = true;
+				if (it->uuid == inv_item_id)
+				{
+					found = true;
+				}
+				if (it->attachpt == target_attachpt)
+				{
+					found_for_this_point = true;
+				}
 			}
 
 			if (!found && !found_for_this_point)
@@ -368,7 +396,8 @@ void LLViewerJointAttachment::removeObject(LLViewerObject *object)
 				// Little hack : store this item's asset id into the list of
 				// restrictions so they are automatically reapplied when it is
 				// reattached
-				gAgent.mRRInterface.replace(object->getRootEdit()->getID(), inv_item_id);
+				gAgent.mRRInterface.replace(object->getRootEdit()->getID(),
+											inv_item_id);
 			}
 		}
 		else
@@ -376,7 +405,8 @@ void LLViewerJointAttachment::removeObject(LLViewerObject *object)
 			if (inv_item)
 			{
 				// Notify that this object has been detached
-				gAgent.mRRInterface.notify (LLUUID::null, "detached legally " + getName(), "");
+				gAgent.mRRInterface.notify(LLUUID::null,
+										   "detached legally " + getName(), "");
 			}
 		}
 		gAgent.mRRInterface.mJustDetached.uuid.setNull();
@@ -385,14 +415,14 @@ void LLViewerJointAttachment::removeObject(LLViewerObject *object)
 		gAgent.mRRInterface.mJustReattached.attachpt = "";
 	}
 //mk
-	// force object visibile
+	// Force object visibile
 	setAttachmentVisibility(TRUE);
 
 	mAttachedObjects.erase(iter);
 	if (object->mDrawable.notNull())
 	{
-		//if object is active, make it static
-		if(object->mDrawable->isActive())
+		// If object is active, make it static
+		if (object->mDrawable->isActive())
 		{
 			object->mDrawable->makeStatic(FALSE) ;
 		}
@@ -403,15 +433,20 @@ void LLViewerJointAttachment::removeObject(LLViewerObject *object)
 		object->mDrawable->mXform.setPosition(cur_position);
 		object->mDrawable->mXform.setRotation(cur_rotation);
 		gPipeline.markMoved(object->mDrawable, TRUE);
-		gPipeline.markTextured(object->mDrawable); // face may need to change draw pool to/from POOL_HUD
+		// face may need to change draw pool to/from POOL_HUD
+		gPipeline.markTextured(object->mDrawable);
 		object->mDrawable->clearState(LLDrawable::USE_BACKLIGHT);
 
 		if (mIsHUDAttachment)
 		{
-			for (S32 face_num = 0; face_num < object->mDrawable->getNumFaces();
-				 face_num++)
+			for (S32 face_num = 0, count = object->mDrawable->getNumFaces();
+				 face_num < count; face_num++)
 			{
-				object->mDrawable->getFace(face_num)->clearState(LLFace::HUD_RENDER);
+				LLFace* facep = object->mDrawable->getFace(face_num);
+				if (facep)
+				{
+					facep->clearState(LLFace::HUD_RENDER);
+				}
 			}
 		}
 	}
@@ -427,9 +462,14 @@ void LLViewerJointAttachment::removeObject(LLViewerObject *object)
 			gPipeline.markTextured(childp->mDrawable); // face may need to change draw pool to/from POOL_HUD
 			if (mIsHUDAttachment)
 			{
-				for (S32 face_num = 0; face_num < childp->mDrawable->getNumFaces(); face_num++)
+				for (S32 face_num = 0;
+					 face_num < childp->mDrawable->getNumFaces(); face_num++)
 				{
-					childp->mDrawable->getFace(face_num)->clearState(LLFace::HUD_RENDER);
+					LLFace* facep = childp->mDrawable->getFace(face_num);
+					if (facep)
+					{
+						facep->clearState(LLFace::HUD_RENDER);
+					}
 				}
 			}
 		}
@@ -446,7 +486,7 @@ void LLViewerJointAttachment::removeObject(LLViewerObject *object)
 			 iter != child_list.end(); iter++)
 		{
 			LLViewerObject* childp = *iter;
-			if (childp->mText.notNull())
+			if (childp && childp->mText.notNull())
 			{
 				childp->mText->setOnHUDAttachment(FALSE);
 			}
@@ -529,12 +569,12 @@ void LLViewerJointAttachment::calcLOD()
 {
 	F32 maxarea = 0;
 	for (attachedobjs_vec_t::const_iterator iter = mAttachedObjects.begin();
-		 iter != mAttachedObjects.end();
-		 ++iter)
+		 iter != mAttachedObjects.end(); ++iter)
 	{
 		if (LLViewerObject *attached_object = (*iter))
 		{
-			maxarea = llmax(maxarea,attached_object->getMaxScale() * attached_object->getMidScale());
+			maxarea = llmax(maxarea,
+							attached_object->getMaxScale() * attached_object->getMidScale());
 			LLViewerObject::const_child_list_t& child_list = attached_object->getChildren();
 			for (LLViewerObject::child_list_t::const_iterator iter = child_list.begin();
 				 iter != child_list.end(); ++iter)
@@ -545,7 +585,7 @@ void LLViewerJointAttachment::calcLOD()
 			}
 		}
 	}
-	maxarea = llclamp(maxarea, .01f*.01f, 1.f);
+	maxarea = llclamp(maxarea, .01f * .01f, 1.f);
 	F32 avatar_area = (4.f * 4.f); // pixels for an avatar sized attachment
 	F32 min_pixel_area = avatar_area / maxarea;
 	setLOD(min_pixel_area);
@@ -565,8 +605,7 @@ BOOL LLViewerJointAttachment::updateLOD(F32 pixel_area, BOOL activate)
 	return res;
 }
 
-
-BOOL LLViewerJointAttachment::isObjectAttached(const LLViewerObject *viewer_object) const
+BOOL LLViewerJointAttachment::isObjectAttached(const LLViewerObject* viewer_object) const
 {
 	for (attachedobjs_vec_t::const_iterator iter = mAttachedObjects.begin();
 		 iter != mAttachedObjects.end();

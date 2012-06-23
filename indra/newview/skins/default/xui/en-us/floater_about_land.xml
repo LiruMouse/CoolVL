@@ -634,59 +634,9 @@ Only large parcels can be listed in search.
 			<string name="search_disabled_permissions_tooltip">
 				This option is disabled because you cannot modify this parcel&apos;s options.
 			</string>
-			<combo_box allow_text_entry="false" bottom="-140" enabled="false" follows="left|top"
+			<combo_box allow_text_entry="false" bottom="-140" follows="left|top"
 			     height="18" left="255" max_chars="20" mouse_opaque="true"
-			     name="land category with adult" width="130" visible="false">
-				<combo_item name="AnyCategory" value="any">
-					Any Category
-				</combo_item>
-				<combo_item name="LindenLocation" value="linden">
-					Linden Location
-				</combo_item>
-				<combo_item name="Adult" value="adult">
-					Adult
-				</combo_item>
-				<combo_item name="Arts&amp;Culture" value="arts">
-					Arts &amp; Culture
-				</combo_item>
-				<combo_item name="Business" value="store">
-					Business
-				</combo_item>
-				<combo_item name="Educational" value="educational">
-					Educational
-				</combo_item>
-				<combo_item name="Gaming" value="game">
-					Gaming
-				</combo_item>
-				<combo_item name="Hangout" value="gather">
-					Hangout
-				</combo_item>
-				<combo_item name="NewcomerFriendly" value="newcomer">
-					Newcomer Friendly
-				</combo_item>
-				<combo_item name="Parks&amp;Nature" value="park">
-					Parks &amp; Nature
-				</combo_item>
-				<combo_item name="Residential" value="home">
-					Residential
-				</combo_item>
-				<combo_item name="Shopping" value="shopping">
-					Shopping
-				</combo_item>
-				<combo_item name="Other" value="other">
-					Other
-				</combo_item>
-				<combo_item name="Rental" value="rental">
-					Rental
-				</combo_item>
-			</combo_box>
-			<!-- The following combo box is identical to the previous one, except for the
-			fact that the Adult item is missing. This seems to be the only way to safely
-			delete the adult item with our UI toolkit.
-			Once we have completed the transition period, the one WITH adult can be deleted. -->
-			<combo_box allow_text_entry="false" bottom="-140" enabled="false" follows="left|top"
-			     height="18" left="255" max_chars="20" mouse_opaque="true"
-			     name="land category" width="130" visible="false">
+			     name="land category" width="130">
 				<combo_item name="AnyCategory" value="any">
 					Any Category
 				</combo_item>

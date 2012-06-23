@@ -1056,17 +1056,28 @@ BOOL LLCircuitData::checkCircuitTimeout()
 	// Nota Bene: This needs to be turned off if you are debugging multiple simulators
 	if (time_since_last_ping > mHeartbeatTimeout)
 	{
-		llwarns << "LLCircuitData::checkCircuitTimeout for " << mHost << " last ping " << time_since_last_ping << " seconds ago." <<llendl;
+		llinfos << "LLCircuitData::checkCircuitTimeout for: " << mHost
+				<< ", last ping " << time_since_last_ping << " seconds ago."
+				<< llendl;
 		setAlive(FALSE);
 		if (mTimeoutCallback)
 		{
-			llwarns << "LLCircuitData::checkCircuitTimeout for " << mHost << " calling callback." << llendl;
+			llinfos << "Calling callback for: " << mHost << llendl;
 			mTimeoutCallback(mHost, mTimeoutUserData);
 		}
 		if (!isAlive())
 		{
-			// The callback didn't try and resurrect the circuit.  We should kill it.
-			llwarns << "LLCircuitData::checkCircuitTimeout for " << mHost << " still dead, dropping." << llendl;
+			// No callback, or the callback didn't try and resurrect the
+			// circuit. We should kill it.
+			if (mTimeoutCallback)
+			{
+				llwarns << mHost << " still dead after callback, dropping."
+						<< llendl;
+			}
+			else
+			{
+				llinfos << mHost << " is dead, dropping." << llendl;
+			}
 			return FALSE;
 		}
 	}

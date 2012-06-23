@@ -533,18 +533,24 @@ LLDrawable* LLVOTree::createDrawable(LLPipeline *pipeline)
 const S32 LEAF_INDICES = 24;
 const S32 LEAF_VERTICES = 16;
 
-BOOL LLVOTree::updateGeometry(LLDrawable *drawable)
+BOOL LLVOTree::updateGeometry(LLDrawable* drawable)
 {
 	LLFastTimer ftm(LLFastTimer::FTM_UPDATE_TREE);
 
-	if (mTrunkLOD >= sMAX_NUM_TREE_LOD_LEVELS) //do not display the tree.
+	LLFace* face = drawable->getFace(0);
+
+	if (mTrunkLOD >= sMAX_NUM_TREE_LOD_LEVELS) // do not display the tree.
 	{
 		mReferenceBuffer = NULL;
-		mDrawable->getFace(0)->setVertexBuffer(NULL);
+		if (face)
+		{
+			face->setVertexBuffer(NULL);
+		}
 		return TRUE;
 	}
 
-	if (mReferenceBuffer.isNull() || !mDrawable->getFace(0)->getVertexBuffer())
+	if (mReferenceBuffer.isNull() ||
+		(mDrawable->getFace(0) && !mDrawable->getFace(0)->getVertexBuffer()))
 	{
 		const F32 SRR3 = 0.577350269f; // sqrt(1/3)
 		const F32 SRR2 = 0.707106781f; // sqrt(1/2)
@@ -556,8 +562,7 @@ BOOL LLVOTree::updateGeometry(LLDrawable *drawable)
 		S32 max_vertices = LEAF_VERTICES;
 		S32 lod;
 
-		LLFace *face = drawable->getFace(0);
-
+		if (!face) return TRUE;	// Abort
 		face->mCenterAgent = getPositionAgent();
 		face->mCenterLocal = face->mCenterAgent;
 
@@ -565,14 +570,15 @@ BOOL LLVOTree::updateGeometry(LLDrawable *drawable)
 		{
 			slices = sLODSlices[lod];
 			sLODVertexOffset[lod] = max_vertices;
-			sLODVertexCount[lod] = slices*slices;
+			sLODVertexCount[lod] = slices * slices;
 			sLODIndexOffset[lod] = max_indices;
-			sLODIndexCount[lod] = (slices-1)*(slices-1)*6;
+			sLODIndexCount[lod] = (slices - 1) * (slices - 1) * 6;
 			max_indices += sLODIndexCount[lod];
 			max_vertices += sLODVertexCount[lod];
 		}
 
-		mReferenceBuffer = new LLVertexBuffer(LLDrawPoolTree::VERTEX_DATA_MASK, sRenderAnimateTrees ? GL_STATIC_DRAW_ARB : 0);
+		mReferenceBuffer = new LLVertexBuffer(LLDrawPoolTree::VERTEX_DATA_MASK,
+											  sRenderAnimateTrees ? GL_STATIC_DRAW_ARB : 0);
 		mReferenceBuffer->allocateBuffer(max_vertices, max_indices, TRUE);
 
 		LLStrider<LLVector3> vertices;
@@ -591,22 +597,22 @@ BOOL LLVOTree::updateGeometry(LLDrawable *drawable)
 		// First leaf
 		*(normals++) =		LLVector3(-SRR2, -SRR2, 0.f);
 		*(tex_coords++) =	LLVector2(LEAF_LEFT, LEAF_BOTTOM);
-		*(vertices++) =		LLVector3(-0.5f*LEAF_WIDTH, 0.f, 0.f);
+		*(vertices++) =		LLVector3(-0.5f * LEAF_WIDTH, 0.f, 0.f);
 		vertex_count++;
 
 		*(normals++) =		LLVector3(SRR3, -SRR3, SRR3);
 		*(tex_coords++) =	LLVector2(LEAF_RIGHT, LEAF_TOP);
-		*(vertices++) =		LLVector3(0.5f*LEAF_WIDTH, 0.f, 1.f);
+		*(vertices++) =		LLVector3(0.5f * LEAF_WIDTH, 0.f, 1.f);
 		vertex_count++;
 
 		*(normals++) =		LLVector3(-SRR3, -SRR3, SRR3);
 		*(tex_coords++) =	LLVector2(LEAF_LEFT, LEAF_TOP);
-		*(vertices++) =		LLVector3(-0.5f*LEAF_WIDTH, 0.f, 1.f);
+		*(vertices++) =		LLVector3(-0.5f * LEAF_WIDTH, 0.f, 1.f);
 		vertex_count++;
 
 		*(normals++) =		LLVector3(SRR2, -SRR2, 0.f);
 		*(tex_coords++) =	LLVector2(LEAF_RIGHT, LEAF_BOTTOM);
-		*(vertices++) =		LLVector3(0.5f*LEAF_WIDTH, 0.f, 0.f);
+		*(vertices++) =		LLVector3(0.5f * LEAF_WIDTH, 0.f, 0.f);
 		vertex_count++;
 
 		*(indicesp++) = 0;
@@ -873,13 +879,13 @@ BOOL LLVOTree::updateGeometry(LLDrawable *drawable)
 		llassert(index_count == max_indices);
 	}
 
-	if (sRenderAnimateTrees)
+	if (sRenderAnimateTrees && mDrawable->getFace(0))
 	{
 		mDrawable->getFace(0)->setVertexBuffer(mReferenceBuffer);
 	}
 	else
 	{
-		//generate tree mesh
+		// generate tree mesh
 		updateMesh();
 	}
 	
@@ -933,7 +939,10 @@ void LLVOTree::updateMesh()
 	calcNumVerts(vert_count, index_count, mTrunkLOD, stop_depth, mDepth, mTrunkDepth, mBranches);
 
 	LLFace* facep = mDrawable->getFace(0);
-	LLVertexBuffer* buff = new LLVertexBuffer(LLDrawPoolTree::VERTEX_DATA_MASK, GL_STATIC_DRAW_ARB);
+	if (!facep) return;	// Abort
+
+	LLVertexBuffer* buff = new LLVertexBuffer(LLDrawPoolTree::VERTEX_DATA_MASK,
+											  GL_STATIC_DRAW_ARB);
 	buff->allocateBuffer(vert_count, index_count, TRUE);
 	facep->setVertexBuffer(buff);
 
@@ -948,23 +957,25 @@ void LLVOTree::updateMesh()
 	buff->getTexCoord0Strider(tex_coords);
 	buff->getIndexStrider(indices);
 
-	genBranchPipeline(vertices, normals, tex_coords, indices, idx_offset, scale_mat, mTrunkLOD, stop_depth, mDepth, mTrunkDepth, 1.0, mTwist, droop, mBranches, alpha);
+	genBranchPipeline(vertices, normals, tex_coords, indices, idx_offset,
+					  scale_mat, mTrunkLOD, stop_depth, mDepth, mTrunkDepth,
+					  1.0, mTwist, droop, mBranches, alpha);
 
 	mReferenceBuffer->setBuffer(0);
 	buff->setBuffer(0);
 }
 
 void LLVOTree::appendMesh(LLStrider<LLVector3>& vertices, 
-						 LLStrider<LLVector3>& normals, 
-						 LLStrider<LLVector2>& tex_coords, 
-						 LLStrider<U16>& indices,
-						 U16& cur_idx,
-						 LLMatrix4& matrix,
-						 LLMatrix4& norm_mat,
-						 S32 vert_start,
-						 S32 vert_count,
-						 S32 index_count,
-						 S32 index_offset)
+						  LLStrider<LLVector3>& normals, 
+						  LLStrider<LLVector2>& tex_coords, 
+						  LLStrider<U16>& indices,
+						  U16& cur_idx,
+						  LLMatrix4& matrix,
+						  LLMatrix4& norm_mat,
+						  S32 vert_start,
+						  S32 vert_count,
+						  S32 index_count,
+						  S32 index_offset)
 {
 	LLStrider<LLVector3> v;
 	LLStrider<LLVector3> n;
@@ -976,7 +987,7 @@ void LLVOTree::appendMesh(LLStrider<LLVector3>& vertices,
 	mReferenceBuffer->getTexCoord0Strider(t);
 	mReferenceBuffer->getIndexStrider(idx);
 	
-	//copy/transform vertices into mesh - check
+	// copy/transform vertices into mesh - check
 	for (S32 i = 0; i < vert_count; i++)
 	{ 
 		U16 index = vert_start + i;

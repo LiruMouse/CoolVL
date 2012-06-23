@@ -66,7 +66,7 @@
 
 ////////////////////////////////////////////////////////////////////////////
 
-void (*LLViewerTextureList::sUUIDCallback)(void **, const LLUUID&) = NULL;
+void (*LLViewerTextureList::sUUIDCallback)(void**, const LLUUID&) = NULL;
 
 U32 LLViewerTextureList::sTextureBits = 0;
 U32 LLViewerTextureList::sTexturePackets = 0;
@@ -503,7 +503,7 @@ LLViewerFetchedTexture* LLViewerTextureList::createImage(const LLUUID &image_id,
 	return imagep;
 }
 
-LLViewerFetchedTexture *LLViewerTextureList::findImage(const LLUUID &image_id)
+LLViewerFetchedTexture* LLViewerTextureList::findImage(const LLUUID &image_id)
 {
 	uuid_map_t::iterator iter = mUUIDMap.find(image_id);
 	if (iter == mUUIDMap.end())
@@ -511,7 +511,7 @@ LLViewerFetchedTexture *LLViewerTextureList::findImage(const LLUUID &image_id)
 	return iter->second;
 }
 
-void LLViewerTextureList::addImageToList(LLViewerFetchedTexture *image)
+void LLViewerTextureList::addImageToList(LLViewerFetchedTexture* image)
 {
 	llassert(image);
 	if (image->isInImageList())
@@ -526,7 +526,7 @@ void LLViewerTextureList::addImageToList(LLViewerFetchedTexture *image)
 	image->setInImageList(TRUE);
 }
 
-void LLViewerTextureList::removeImageFromList(LLViewerFetchedTexture *image)
+void LLViewerTextureList::removeImageFromList(LLViewerFetchedTexture* image)
 {
 	llassert(image);
 	if (!image->isInImageList())
@@ -542,13 +542,15 @@ void LLViewerTextureList::removeImageFromList(LLViewerFetchedTexture *image)
 	S32 count = mImageList.erase(image);
 	if (count != 1) 
 	{
-		llerrs << "Error happened when removing image from mImageList: " << count << llendl;
+		llwarns << count
+				<< " references found while removing image from mImageList. Image id: "
+				<< image->getID() << llendl;
 	}
 
 	image->setInImageList(FALSE);
 }
 
-void LLViewerTextureList::addImage(LLViewerFetchedTexture *new_image)
+void LLViewerTextureList::addImage(LLViewerFetchedTexture* new_image)
 {
 	if (!new_image)
 	{
@@ -557,7 +559,7 @@ void LLViewerTextureList::addImage(LLViewerFetchedTexture *new_image)
 	}
 	LLUUID image_id = new_image->getID();
 
-	LLViewerFetchedTexture *image = findImage(image_id);
+	LLViewerFetchedTexture* image = findImage(image_id);
 	if (image)
 	{
 		llwarns << "Image with ID " << image_id << " already in list" << llendl;
@@ -569,7 +571,7 @@ void LLViewerTextureList::addImage(LLViewerFetchedTexture *new_image)
 }
 
 
-void LLViewerTextureList::deleteImage(LLViewerFetchedTexture *image)
+void LLViewerTextureList::deleteImage(LLViewerFetchedTexture* image)
 {
 	if (image)
 	{
@@ -589,7 +591,7 @@ void LLViewerTextureList::deleteImage(LLViewerFetchedTexture *image)
 
 ////////////////////////////////////////////////////////////////////////////
 
-void LLViewerTextureList::dirtyImage(LLViewerFetchedTexture *image)
+void LLViewerTextureList::dirtyImage(LLViewerFetchedTexture* image)
 {
 	mDirtyTextureList.insert(image);
 }
@@ -728,8 +730,8 @@ void LLViewerTextureList::updateImagesDecodePriorities()
 			F32 decode_priority = imagep->calcDecodePriority();
 			F32 decode_priority_test = llmax(decode_priority, 0.0f);
 			// Ignore < 20% difference
-			if ((decode_priority_test < old_priority_test * .8f) ||
-				(decode_priority_test > old_priority_test * 1.25f))
+			if (decode_priority_test < old_priority_test * .8f ||
+				decode_priority_test > old_priority_test * 1.25f)
 			{
 				removeImageFromList(imagep);
 				imagep->setDecodePriority(decode_priority);
@@ -757,7 +759,7 @@ F32 LLViewerTextureList::updateImagesCreateTextures(F32 max_time)
 	{
 		image_list_t::iterator curiter = iter++;
 		enditer = iter;
-		LLViewerFetchedTexture *imagep = *curiter;
+		LLViewerFetchedTexture* imagep = *curiter;
 		imagep->createTexture();
 		if (create_timer.getElapsedTimeF32() > max_time)
 		{
@@ -1154,7 +1156,7 @@ void LLViewerTextureList::updateMaxResidentTexMem(S32 mem)
 ///////////////////////////////////////////////////////////////////////////////
 
 // static
-void LLViewerTextureList::receiveImageHeader(LLMessageSystem *msg, void **user_data)
+void LLViewerTextureList::receiveImageHeader(LLMessageSystem* msg, void** user_data)
 {
 	LLFastTimer t(LLFastTimer::FTM_PROCESS_IMAGES);
 	
@@ -1201,10 +1203,10 @@ void LLViewerTextureList::receiveImageHeader(LLMessageSystem *msg, void **user_d
 	}
 	
 	// this buffer gets saved off in the packet list
-	U8 *data = new U8[data_size];
+	U8* data = new U8[data_size];
 	msg->getBinaryDataFast(_PREHASH_ImageData, _PREHASH_Data, data, data_size);
 	
-	LLViewerFetchedTexture *image = LLViewerTextureManager::getFetchedTexture(id, TRUE, LLViewerTexture::BOOST_NONE, LLViewerTexture::LOD_TEXTURE);
+	LLViewerFetchedTexture* image = LLViewerTextureManager::getFetchedTexture(id, TRUE, LLViewerTexture::BOOST_NONE, LLViewerTexture::LOD_TEXTURE);
 	if (!image)
 	{
 		delete [] data;
@@ -1220,7 +1222,7 @@ void LLViewerTextureList::receiveImageHeader(LLMessageSystem *msg, void **user_d
 }
 
 // static
-void LLViewerTextureList::receiveImagePacket(LLMessageSystem *msg, void **user_data)
+void LLViewerTextureList::receiveImagePacket(LLMessageSystem* msg, void** user_data)
 {
 	LLMemType mt1(LLMemType::MTYPE_APPFMTIMAGE);
 	LLFastTimer t(LLFastTimer::FTM_PROCESS_IMAGES);
@@ -1268,10 +1270,10 @@ void LLViewerTextureList::receiveImagePacket(LLMessageSystem *msg, void **user_d
 		llerrs << "image data chunk too large: " << data_size << " bytes" << llendl;
 		return;
 	}
-	U8 *data = new U8[data_size];
+	U8* data = new U8[data_size];
 	msg->getBinaryDataFast(_PREHASH_ImageData, _PREHASH_Data, data, data_size);
 	
-	LLViewerFetchedTexture *image = LLViewerTextureManager::getFetchedTexture(id, TRUE, LLViewerTexture::BOOST_NONE, LLViewerTexture::LOD_TEXTURE);
+	LLViewerFetchedTexture* image = LLViewerTextureManager::getFetchedTexture(id, TRUE, LLViewerTexture::BOOST_NONE, LLViewerTexture::LOD_TEXTURE);
 	if (!image)
 	{
 		delete [] data;
@@ -1289,7 +1291,7 @@ void LLViewerTextureList::receiveImagePacket(LLMessageSystem *msg, void **user_d
 
 // We've been that the asset server does not contain the requested image id.
 // static
-void LLViewerTextureList::processImageNotInDatabase(LLMessageSystem *msg, void **user_data)
+void LLViewerTextureList::processImageNotInDatabase(LLMessageSystem* msg, void** user_data)
 {
 	LLFastTimer t(LLFastTimer::FTM_PROCESS_IMAGES);
 	LLUUID image_id;
@@ -1425,7 +1427,7 @@ LLUIImagePtr LLUIImageList::preloadUIImage(const std::string& name, const std::s
 }
 
 //static 
-void LLUIImageList::onUIImageLoaded( BOOL success, LLViewerFetchedTexture *src_vi, LLImageRaw* src, LLImageRaw* src_aux, S32 discard_level, BOOL final, void* user_data )
+void LLUIImageList::onUIImageLoaded( BOOL success, LLViewerFetchedTexture* src_vi, LLImageRaw* src, LLImageRaw* src_aux, S32 discard_level, BOOL final, void* user_data )
 {
 	if (!success || !user_data) 
 	{

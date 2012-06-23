@@ -114,7 +114,6 @@ void LLViewerJoint::setValid(BOOL valid, BOOL recursive)
 			joint->setValid(valid, TRUE);
 		}
 	}
-
 }
 
 //--------------------------------------------------------------------
@@ -267,7 +266,7 @@ U32 LLViewerJoint::render(F32 pixelArea, BOOL first_pass, BOOL is_dummy)
 		else if (isTransparent() && !LLPipeline::sReflectionRender)
 		{
 			// Hair and Skirt
-			if ((pixelArea > MIN_PIXEL_AREA_3PASS_HAIR))
+			if (pixelArea > MIN_PIXEL_AREA_3PASS_HAIR)
 			{
 				// render all three passes
 				LLGLDisable cull(GL_CULL_FACE);
@@ -527,9 +526,10 @@ LLViewerJointCollisionVolume::LLViewerJointCollisionVolume()
 	mUpdateXform = FALSE;
 }
 
-LLViewerJointCollisionVolume::LLViewerJointCollisionVolume(const std::string &name, LLJoint *parent) : LLViewerJoint(name, parent)
+LLViewerJointCollisionVolume::LLViewerJointCollisionVolume(const std::string &name,
+														   LLJoint *parent)
+:	LLViewerJoint(name, parent)
 {
-
 }
 
 void LLViewerJointCollisionVolume::renderCollision()
@@ -545,13 +545,13 @@ void LLViewerJointCollisionVolume::renderCollision()
 
 	LLVector3 v[] = 
 	{
-		LLVector3(1,0,0),
-		LLVector3(-1,0,0),
-		LLVector3(0,1,0),
-		LLVector3(0,-1,0),
+		LLVector3(1, 0, 0),
+		LLVector3(-1, 0, 0),
+		LLVector3(0, 1, 0),
+		LLVector3(0, -1, 0),
 
-		LLVector3(0,0,-1),
-		LLVector3(0,0,1),
+		LLVector3(0, 0, -1),
+		LLVector3(0, 0, 1),
 	};
 
 	//sides

@@ -904,7 +904,6 @@ public:
 
 	void slamPosition(); // Slam position to transmitted position (for teleport);
 
-protected:
 	void computeBodySize();
 
 	//--------------------------------------------------------------------

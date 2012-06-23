@@ -118,13 +118,13 @@ std::string header_lod[] =
 	"high_lod"
 };
 
-//get the number of bytes resident in memory for given volume
+// get the number of bytes resident in memory for given volume
 U32 get_volume_memory_size(const LLVolume* volume)
 {
 	U32 indices = 0;
 	U32 vertices = 0;
 
-	for (U32 i = 0; i < volume->getNumVolumeFaces(); ++i)
+	for (S32 i = 0, count = volume->getNumVolumeFaces(); i < count; ++i)
 	{
 		const LLVolumeFace& face = volume->getVolumeFace(i);
 		indices += face.mNumIndices;
@@ -1263,7 +1263,8 @@ bool LLMeshRepoThread::physicsShapeReceived(const LLUUID& mesh_id, U8* data,
 			S32 vertex_count = 0;
 			S32 index_count = 0;
 
-			for (S32 i = 0; i < volume->getNumVolumeFaces(); ++i)
+			for (S32 i = 0, count = volume->getNumVolumeFaces(); i < count;
+				 i++)
 			{
 				const LLVolumeFace& face = volume->getVolumeFace(i);
 				vertex_count += face.mNumVertices;
@@ -1275,7 +1276,8 @@ bool LLMeshRepoThread::physicsShapeReceived(const LLUUID& mesh_id, U8* data,
 			std::vector<LLVector3>& pos = d->mPhysicsShapeMesh.mPositions;
 			std::vector<LLVector3>& norm = d->mPhysicsShapeMesh.mNormals;
 
-			for (S32 i = 0; i < volume->getNumVolumeFaces(); ++i)
+			for (S32 i = 0, count = volume->getNumVolumeFaces(); i < count;
+				 i++)
 			{
 				const LLVolumeFace& face = volume->getVolumeFace(i);
 
@@ -1675,7 +1677,7 @@ void LLMeshUploadThread::doWholeModelUpload()
 			// sleep for 10ms to prevent eating a whole core
 			apr_sleep(10000);
 		}
-		while (mCurlRequest->getQueued() > 0);
+		while (!LLApp::isQuitting() && mCurlRequest->getQueued() > 0);
 	}
 
 	delete mCurlRequest;
@@ -1719,7 +1721,7 @@ void LLMeshUploadThread::requestWholeModelFee()
 		// sleep for 10ms to prevent eating a whole core
 		apr_sleep(10000);
 	}
-	while (mCurlRequest->getQueued() > 0);
+	while (!LLApp::isQuitting() && mCurlRequest->getQueued() > 0);
 
 	delete mCurlRequest;
 	mCurlRequest = NULL;
@@ -3497,7 +3499,7 @@ void LLPhysicsDecomp::Request::assignData(LLModel* mdl)
 	mBBox[0] = LLVector3(F32_MAX, F32_MAX, F32_MAX);
 
 	// queue up vertex positions and indices
-	for (S32 i = 0; i < mdl->getNumVolumeFaces(); ++i)
+	for (S32 i = 0, count = mdl->getNumVolumeFaces(); i < count; i++)
 	{
 		const LLVolumeFace& face = mdl->getVolumeFace(i);
 		if (mPositions.size() + face.mNumVertices > 65535)

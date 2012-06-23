@@ -1058,8 +1058,8 @@ void LLSpatialGroup::clearOcclusionState(U32 state, S32 mode)
 //		Octree Listener Implementation
 //======================================
 
-LLSpatialGroup::LLSpatialGroup(OctreeNode* node, LLSpatialPartition* part) :
-	mState(0),
+LLSpatialGroup::LLSpatialGroup(OctreeNode* node, LLSpatialPartition* part)
+:	mState(0),
 	mBuilt(0.f),
 	mOctreeNode(node),
 	mSpatialPartition(part),
@@ -1346,10 +1346,13 @@ void LLSpatialGroup::destroyGL()
 	for (LLSpatialGroup::element_iter i = getData().begin(); i != getData().end(); ++i)
 	{
 		LLDrawable* drawable = *i;
-		for (S32 j = 0; j < drawable->getNumFaces(); j++)
+		for (S32 j = 0, count = drawable->getNumFaces(); j < count; j++)
 		{
 			LLFace* facep = drawable->getFace(j);
-			facep->clearVertexBuffer();
+			if (facep)
+			{
+				facep->clearVertexBuffer();
+			}
 		}
 	}
 }
@@ -2005,7 +2008,8 @@ public:
 	{
 		LLSpatialGroup::OctreeNode* branch = group->mOctreeNode;
 
-		for (LLSpatialGroup::OctreeNode::const_element_iter i = branch->getData().begin(); i != branch->getData().end(); ++i)
+		for (LLSpatialGroup::OctreeNode::const_element_iter i = branch->getData().begin();
+			 i != branch->getData().end(); ++i)
 		{
 			LLDrawable* drawable = *i;
 
@@ -2316,7 +2320,7 @@ void pushVerts(LLFace* face, U32 mask)
 
 void pushVerts(LLDrawable* drawable, U32 mask)
 {
-	for (S32 i = 0; i < drawable->getNumFaces(); ++i)
+	for (S32 i = 0, count = drawable->getNumFaces(); i < count; i++)
 	{
 		pushVerts(drawable->getFace(i), mask);
 	}
@@ -2324,12 +2328,15 @@ void pushVerts(LLDrawable* drawable, U32 mask)
 
 void pushVerts(LLVolume* volume)
 {
+	if (!volume) return;
+
 	LLVertexBuffer::unbind();
-	for (S32 i = 0; i < volume->getNumVolumeFaces(); ++i)
+	for (S32 i = 0, count = volume->getNumVolumeFaces(); i < count; i++)
 	{
 		const LLVolumeFace& face = volume->getVolumeFace(i);
 		glVertexPointer(3, GL_FLOAT, 16, face.mPositions);
-		glDrawElements(GL_TRIANGLES, face.mNumIndices, GL_UNSIGNED_SHORT, face.mIndices);
+		glDrawElements(GL_TRIANGLES, face.mNumIndices, GL_UNSIGNED_SHORT,
+					   face.mIndices);
 	}
 }
 
@@ -2338,7 +2345,9 @@ void pushBufferVerts(LLVertexBuffer* buffer, U32 mask)
 	if (buffer)
 	{
 		buffer->setBuffer(mask);
-		buffer->drawRange(LLRender::TRIANGLES, 0, buffer->getRequestedVerts()-1, buffer->getRequestedIndices(), 0);
+		buffer->drawRange(LLRender::TRIANGLES, 0,
+						  buffer->getRequestedVerts() - 1,
+						  buffer->getRequestedIndices(), 0);
 	}
 }
 
@@ -2353,11 +2362,14 @@ void pushBufferVerts(LLSpatialGroup* group, U32 mask)
 
 			pushBufferVerts(group->mVertexBuffer, mask);
 
-			for (LLSpatialGroup::buffer_map_t::iterator i = group->mBufferMap.begin(); i != group->mBufferMap.end(); ++i)
+			for (LLSpatialGroup::buffer_map_t::iterator i = group->mBufferMap.begin();
+				 i != group->mBufferMap.end(); ++i)
 			{
-				for (LLSpatialGroup::buffer_texture_map_t::iterator j = i->second.begin(); j != i->second.end(); ++j)
+				for (LLSpatialGroup::buffer_texture_map_t::iterator j = i->second.begin();
+					 j != i->second.end(); ++j)
 				{
-					for (LLSpatialGroup::buffer_list_t::iterator k = j->second.begin(); k != j->second.end(); ++k)
+					for (LLSpatialGroup::buffer_list_t::iterator k = j->second.begin();
+						 k != j->second.end(); ++k)
 					{
 						pushBufferVerts(*k, mask);
 					}
@@ -2445,10 +2457,11 @@ void renderOctree(LLSpatialGroup* group)
 					glTranslatef(trans.mV[0], trans.mV[1], trans.mV[2]);
 				}
 
-				for (S32 j = 0; j < drawable->getNumFaces(); j++)
+				for (S32 j = 0, count = drawable->getNumFaces(); j < count;
+					 j++)
 				{
 					LLFace* face = drawable->getFace(j);
-					if (face->getVertexBuffer())
+					if (face && face->getVertexBuffer())
 					{
 						if (gFrameTimeSeconds - face->mLastUpdateTime < 0.5f)
 						{
@@ -2714,10 +2727,11 @@ void renderBoundingBox(LLDrawable* drawable, BOOL set_color = TRUE)
 	const LLVector4a* ext;
 	LLVector4a pos, size;
 
-	//render face bounding boxes
-	for (S32 i = 0; i < drawable->getNumFaces(); i++)
+	// render face bounding boxes
+	for (S32 i = 0, count = drawable->getNumFaces(); i < count; i++)
 	{
 		LLFace* facep = drawable->getFace(i);
+		if (!facep) continue;
 
 		ext = facep->mExtents;
 
@@ -2771,7 +2785,7 @@ void renderNormals(LLDrawable* drawablep)
 		static LLCachedControl<F32> render_debug_normal_scale(gSavedSettings, "RenderDebugNormalScale");
 		LLVector4a scale(render_debug_normal_scale);
 
-		for (S32 i = 0; i < volume->getNumVolumeFaces(); ++i)
+		for (S32 i = 0, count = volume->getNumVolumeFaces(); i < count; i++)
 		{
 			const LLVolumeFace& face = volume->getVolumeFace(i);
 
@@ -2885,7 +2899,7 @@ void renderPhysicsShape(LLDrawable* drawable, LLVOVolume* volume)
 		return;
 	}
 
-	//not allowed to return at this point without rendering *something*
+	// not allowed to return at this point without rendering *something*
 
 	static LLCachedControl<F32> threshold(gSavedSettings, "ObjectCostHighThreshold");
 	F32 cost = volume->getObjectCost();
@@ -2916,7 +2930,9 @@ void renderPhysicsShape(LLDrawable* drawable, LLVOVolume* volume)
 		physics_type == LLViewerObject::PHYSICS_SHAPE_CONVEX_HULL); 
 
 	LLPhysicsShapeBuilderUtil::PhysicsShapeSpecification physics_spec;
-	LLPhysicsShapeBuilderUtil::determinePhysicsShape(physics_params, volume->getScale(), physics_spec);
+	LLPhysicsShapeBuilderUtil::determinePhysicsShape(physics_params,
+													 volume->getScale(),
+													 physics_spec);
 
 	U32 type = physics_spec.getType();
 
@@ -2932,12 +2948,12 @@ void renderPhysicsShape(LLDrawable* drawable, LLVOVolume* volume)
 		LLModel::Decomposition* decomp = gMeshRepo.getDecomposition(mesh_id);
 
 		if (decomp)
-		{ //render a physics based mesh
+		{	// render a physics based mesh
 
 			gGL.getTexUnit(0)->unbind(LLTexUnit::TT_TEXTURE);
 
 			if (!decomp->mHull.empty())
-			{ //decomposition exists, use that
+			{	// decomposition exists, use that
 
 				if (decomp->mMesh.empty())
 				{
@@ -2951,17 +2967,21 @@ void renderPhysicsShape(LLDrawable* drawable, LLVOVolume* volume)
 			}
 			else if (!decomp->mPhysicsShapeMesh.empty())
 			{ 
-				//decomp has physics mesh, render that mesh
+				// decomp has physics mesh, render that mesh
 				glColor4fv(color.mV);
-				LLVertexBuffer::drawArrays(LLRender::TRIANGLES, decomp->mPhysicsShapeMesh.mPositions, decomp->mPhysicsShapeMesh.mNormals);
+				LLVertexBuffer::drawArrays(LLRender::TRIANGLES,
+										   decomp->mPhysicsShapeMesh.mPositions,
+										   decomp->mPhysicsShapeMesh.mNormals);
 
 				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 				glColor4fv(line_color.mV);
-				LLVertexBuffer::drawArrays(LLRender::TRIANGLES, decomp->mPhysicsShapeMesh.mPositions, decomp->mPhysicsShapeMesh.mNormals);
+				LLVertexBuffer::drawArrays(LLRender::TRIANGLES,
+										   decomp->mPhysicsShapeMesh.mPositions,
+										   decomp->mPhysicsShapeMesh.mNormals);
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 			}
 			else
-			{ //no mesh or decomposition, render base hull
+			{	// no mesh or decomposition, render base hull
 				renderMeshBaseHull(volume, data_mask, color, line_color);
 
 				if (decomp->mPhysicsShapeMesh.empty())
@@ -2984,21 +3004,23 @@ void renderPhysicsShape(LLDrawable* drawable, LLVOVolume* volume)
 		{
 			renderMeshBaseHull(volume, data_mask, color, line_color);
 		}
-#if LL_WINDOWS 
+#if 1	//LL_WINDOWS 
 		else
 		{
 			LLVolumeParams volume_params = volume->getVolume()->getParams();
 			S32 detail = get_physics_detail(volume_params, volume->getScale());
-			LLVolume* phys_volume = LLPrimitive::sVolumeManager->refVolume(volume_params, detail);
+			LLVolume* phys_volume = LLPrimitive::sVolumeManager->refVolume(volume_params,
+																		   detail);
 
 			if (!phys_volume->mHullPoints)
-			{ //build convex hull
+			{	// build convex hull
 				std::vector<LLVector3> pos;
 				std::vector<U16> index;
 
 				S32 index_offset = 0;
 
-				for (S32 i = 0; i < phys_volume->getNumVolumeFaces(); ++i)
+				for (S32 i = 0, count = phys_volume->getNumVolumeFaces();
+					 i < count; i++)
 				{
 					const LLVolumeFace& face = phys_volume->getVolumeFace(i);
 					if (index_offset + face.mNumVertices > 65535)
@@ -3013,13 +3035,14 @@ void renderPhysicsShape(LLDrawable* drawable, LLVOVolume* volume)
 
 					for (S32 j = 0; j < face.mNumIndices; ++j)
 					{
-						index.push_back(face.mIndices[j]+index_offset);
+						index.push_back(face.mIndices[j] + index_offset);
 					}
 
 					index_offset += face.mNumVertices;
 				}
 
-				if (!pos.empty() && !index.empty() && LLConvexDecomposition::getInstance())
+				if (!pos.empty() && !index.empty() &&
+					LLConvexDecomposition::getInstance())
 				{
 					LLCDMeshData mesh;
 					mesh.mIndexBase = &index[0];
@@ -3033,9 +3056,10 @@ void renderPhysicsShape(LLDrawable* drawable, LLVOVolume* volume)
 
 					LLCDMeshData res;
 
-					LLConvexDecomposition::getInstance()->generateSingleHullMeshFromMesh(&mesh, &res);
+					LLConvexDecomposition::getInstance()->generateSingleHullMeshFromMesh(&mesh,
+																						 &res);
 
-					//copy res into phys_volume
+					// copy res into phys_volume
 					phys_volume->mHullPoints = (LLVector4a*) ll_aligned_malloc_16(sizeof(LLVector4a) * res.mNumVertices);
 					phys_volume->mNumHullPoints = res.mNumVertices;
 
@@ -3078,7 +3102,7 @@ void renderPhysicsShape(LLDrawable* drawable, LLVOVolume* volume)
 
 			if (phys_volume->mHullPoints)
 			{
-				//render hull
+				// render hull
 
 				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
@@ -3086,11 +3110,13 @@ void renderPhysicsShape(LLDrawable* drawable, LLVOVolume* volume)
 				LLVertexBuffer::unbind();
 
 				glVertexPointer(3, GL_FLOAT, 16, phys_volume->mHullPoints);
-				glDrawElements(GL_TRIANGLES, phys_volume->mNumHullIndices, GL_UNSIGNED_SHORT, phys_volume->mHullIndices);
+				glDrawElements(GL_TRIANGLES, phys_volume->mNumHullIndices,
+							   GL_UNSIGNED_SHORT, phys_volume->mHullIndices);
 
 				glColor4fv(color.mV);
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-				glDrawElements(GL_TRIANGLES, phys_volume->mNumHullIndices, GL_UNSIGNED_SHORT, phys_volume->mHullIndices);
+				glDrawElements(GL_TRIANGLES, phys_volume->mNumHullIndices,
+							   GL_UNSIGNED_SHORT, phys_volume->mHullIndices);
 			}
 			else
 			{
@@ -3100,7 +3126,7 @@ void renderPhysicsShape(LLDrawable* drawable, LLVOVolume* volume)
 
 			LLPrimitive::sVolumeManager->unrefVolume(phys_volume);
 		}
-#endif //LL_WINDOWS
+#endif // was LL_WINDOWS
 	}
 	else if (type == LLPhysicsShapeBuilderUtil::PhysicsShapeSpecification::BOX)
 	{
@@ -3232,10 +3258,12 @@ void renderPhysicsShapes(LLSpatialGroup* group)
 			LLViewerObject* object = drawable->getVObj();
 			if (object && object->getPCode() == LLViewerObject::LL_VO_SURFACE_PATCH)
 			{
-				//push face vertices for terrain
-				for (S32 i = 0; i < drawable->getNumFaces(); ++i)
+				// push face vertices for terrain
+				for (S32 i = 0, count = drawable->getNumFaces(); i < count;
+					 i++)
 				{
 					LLFace* face = drawable->getFace(i);
+					if (!face) continue;
 					LLVertexBuffer* buff = face->getVertexBuffer();
 					if (buff)
 					{
@@ -3257,9 +3285,10 @@ void renderPhysicsShapes(LLSpatialGroup* group)
 
 void renderTexturePriority(LLDrawable* drawable)
 {
-	for (int face=0; face<drawable->getNumFaces(); ++face)
+	for (S32 face = 0, count = drawable->getNumFaces(); face < count; face++)
 	{
-		LLFace *facep = drawable->getFace(face);
+		LLFace* facep = drawable->getFace(face);
+		if (!facep) continue;
 
 		LLVector4 cold(0,0,0.25f);
 		LLVector4 hot(1,0.25f,0.25f);
@@ -3321,9 +3350,13 @@ void renderPoints(LLDrawable* drawablep)
 	{
 		gGL.begin(LLRender::POINTS);
 		gGL.color3f(1,1,1);
-		for (S32 i = 0; i < drawablep->getNumFaces(); i++)
+		for (S32 i = 0, count = drawablep->getNumFaces(); i < count; i++)
 		{
-			gGL.vertex3fv(drawablep->getFace(i)->mCenterLocal.mV);
+			LLFace* facep = drawablep->getFace(i);
+			if (facep)
+			{
+				gGL.vertex3fv(facep->mCenterLocal.mV);
+			}
 		}
 		gGL.end();
 	}
@@ -3395,7 +3428,7 @@ void renderLights(LLDrawable* drawablep)
 		LLGLEnable blend(GL_BLEND);
 		glColor4f(0,1,1,0.5f);
 
-		for (S32 i = 0; i < drawablep->getNumFaces(); i++)
+		for (S32 i = 0, count = drawablep->getNumFaces(); i < count; i++)
 		{
 			pushVerts(drawablep->getFace(i), LLVertexBuffer::MAP_VERTEX);
 		}
@@ -3522,7 +3555,8 @@ void renderRaycast(LLDrawable* drawablep)
 			{
 				LLVector3 trans = drawablep->getRegion()->getOriginAgent();
 
-				for (S32 i = 0; i < volume->getNumVolumeFaces(); ++i)
+				for (S32 i = 0, count = volume->getNumVolumeFaces(); i < count;
+					 i++)
 				{
 					const LLVolumeFace& face = volume->getVolumeFace(i);
 					if (!face.mOctree)
@@ -4076,15 +4110,15 @@ public:
 					  LLVector2* tex_coord,
 					  LLVector3* normal,
 					  LLVector3* binormal)
-		: mStart(start),
-		  mEnd(end),
-		  mFaceHit(face_hit),
-		  mIntersection(intersection),
-		  mTexCoord(tex_coord),
-		  mNormal(normal),
-		  mBinormal(binormal),
-		  mHit(NULL),
-		  mPickTransparent(pick_transparent)
+	:	mStart(start),
+		mEnd(end),
+		mFaceHit(face_hit),
+		mIntersection(intersection),
+		mTexCoord(tex_coord),
+		mNormal(normal),
+		mBinormal(binormal),
+		mHit(NULL),
+		mPickTransparent(pick_transparent)
 	{
 	}
 

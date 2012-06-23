@@ -2448,7 +2448,8 @@ BOOL LLViewerWindow::handleKey(KEY key, MASK mask)
 		// arrow keys move avatar while chatting hack
 		if (gChatBar && gChatBar->inputEditorHasFocus())
 		{
-			if (gChatBar->getCurrentChat().empty() ||
+			if (gChatBar->hasTextEditor() ||
+				gChatBar->getCurrentChat().empty() ||
 				gSavedSettings.getBOOL("ArrowKeysMoveAvatar"))
 			{
 				switch (key)
@@ -5273,8 +5274,12 @@ void LLPickInfo::getSurfaceInfo()
 			if (objectp->mDrawable.notNull() && mObjectFace > -1)
 			{
 				LLFace* facep = objectp->mDrawable->getFace(mObjectFace);
-
-				mUVCoords = facep->surfaceToTexture(mSTCoords, mIntersection, mNormal);
+				if (facep)
+				{
+					mUVCoords = facep->surfaceToTexture(mSTCoords,
+														mIntersection,
+														mNormal);
+				}
 			}
 
 			// and XY coords:

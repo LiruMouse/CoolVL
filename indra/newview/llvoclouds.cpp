@@ -128,7 +128,7 @@ BOOL LLVOClouds::updateGeometry(LLDrawable *drawable)
 		dirtySpatialGroup(TRUE);
 	}
 
-	LLFace *facep;
+	LLFace* facep;
 	
 	S32 num_faces = mCloudGroupp->getNumPuffs();
 
@@ -145,7 +145,6 @@ BOOL LLVOClouds::updateGeometry(LLDrawable *drawable)
 		facep = drawable->getFace(face_indx);
 		if (!facep)
 		{
-			llwarns << "No facep for index " << face_indx << llendl;
 			continue;
 		}
 
@@ -160,12 +159,11 @@ BOOL LLVOClouds::updateGeometry(LLDrawable *drawable)
 		LLColor4 float_color(LLColor3(gSky.getSunDiffuseColor() + gSky.getSunAmbientColor()),puff.getAlpha());
 		facep->setFaceColor(float_color);
 	}
-	for ( ; face_indx < drawable->getNumFaces(); face_indx++)
+	for (S32 count = drawable->getNumFaces(); face_indx < count; face_indx++)
 	{
 		facep = drawable->getFace(face_indx);
 		if (!facep)
 		{
-			llwarns << "No facep for index " << face_indx << llendl;
 			continue;
 		}
 
@@ -184,11 +182,11 @@ F32 LLVOClouds::getPartSize(S32 idx)
 }
 
 void LLVOClouds::getGeometry(S32 te, 
-							LLStrider<LLVector3>& verticesp, 
-							LLStrider<LLVector3>& normalsp, 
-							LLStrider<LLVector2>& texcoordsp, 
-							LLStrider<LLColor4U>& colorsp, 
-							LLStrider<U16>& indicesp)
+							 LLStrider<LLVector3>& verticesp, 
+							 LLStrider<LLVector3>& normalsp, 
+							 LLStrider<LLVector2>& texcoordsp, 
+							 LLStrider<LLColor4U>& colorsp, 
+							 LLStrider<U16>& indicesp)
 {
 
 	if (te >= mCloudGroupp->getNumPuffs())
@@ -197,18 +195,19 @@ void LLVOClouds::getGeometry(S32 te,
 	}
 
 	LLDrawable* drawable = mDrawable;
-	LLFace *facep = drawable->getFace(te);
+	LLFace* facep = drawable->getFace(te);
 
-	if (!facep->hasGeometry())
+	if (!facep || !facep->hasGeometry())
 	{
 		return;
 	}
 	
-	LLVector3 normal(0.f,0.f,-1.f);
+	LLVector3 normal(0.f, 0.f, -1.f);
 
-	const LLCloudPuff &puff = mCloudGroupp->getPuff(te);
+	const LLCloudPuff& puff = mCloudGroupp->getPuff(te);
 	S32 index_offset = facep->getGeomIndex();
-	LLColor4 float_color(LLColor3(gSky.getSunDiffuseColor() + gSky.getSunAmbientColor()),puff.getAlpha());
+	LLColor4 float_color(LLColor3(gSky.getSunDiffuseColor() + gSky.getSunAmbientColor()),
+								  puff.getAlpha());
 	LLColor4U color;
 	color.setVec(float_color);
 	facep->setFaceColor(float_color);

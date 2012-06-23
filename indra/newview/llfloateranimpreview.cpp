@@ -1436,9 +1436,16 @@ BOOL LLPreviewAnimation::render()
 		LLVertexBuffer::unbind();
 		LLGLDepthTest gls_depth(GL_TRUE);
 
-		LLDrawPoolAvatar* avatarPoolp = (LLDrawPoolAvatar*)avatarp->mDrawable->getFace(0)->getPool();
 		avatarp->dirtyMesh();
-		avatarPoolp->renderAvatars(avatarp);  // renders only one avatar
+		LLFace* facep = avatarp->mDrawable->getFace(0);
+		if (facep)	// Paranoia
+		{
+			LLDrawPoolAvatar* avatarPoolp = (LLDrawPoolAvatar*)facep->getPool();
+			if (avatarPoolp)	// More paranoia !
+			{
+				avatarPoolp->renderAvatars(avatarp);  // renders only one avatar
+			}
+		}
 	}
 
 	gGL.color4f(1, 1, 1, 1);

@@ -1,11 +1,11 @@
-/** 
+/**
  * @file llpanelclassified.cpp
  * @brief LLPanelClassified class implementation
  *
  * $LicenseInfo:firstyear=2005&license=viewergpl$
- * 
+ *
  * Copyright (c) 2005-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -88,13 +88,15 @@ std::list<LLPanelClassified*> LLPanelClassified::sAllPanels;
 class LLDispatchClassifiedClickThrough : public LLDispatchHandler
 {
 public:
-	virtual bool operator()(
-		const LLDispatcher* dispatcher,
-		const std::string& key,
-		const LLUUID& invoice,
-		const sparam_t& strings)
+	virtual bool operator()(const LLDispatcher* dispatcher,
+							const std::string& key,
+							const LLUUID& invoice,
+							const sparam_t& strings)
 	{
-		if (strings.size() != 4) return false;
+		if (strings.size() != 4)
+		{
+			return false;
+		}
 		LLUUID classified_id(strings[0]);
 		S32 teleport_clicks = atoi(strings[1].c_str());
 		S32 map_clicks = atoi(strings[2].c_str());
@@ -108,17 +110,15 @@ public:
 };
 static LLDispatchClassifiedClickThrough sClassifiedClickThrough;
 
-
-/* Re-expose this if we need to have classified ad HTML detail
-   pages.  JC
-
-// We need to count classified teleport clicks from the search HTML detail pages,
-// so we need have a teleport that also sends a click count message.
+#if 0	// Re-expose this if we need to have classified ad HTML detail pages.
+// We need to count classified teleport clicks from the search HTML detail
+// pages, so we need have a teleport that also sends a click count message.
 class LLClassifiedTeleportHandler : public LLCommandHandler
 {
 public:
 	// don't allow from external browsers because it moves you immediately
-	LLClassifiedTeleportHandler() : LLCommandHandler("classifiedteleport", true) { }
+	LLClassifiedTeleportHandler()
+	:	LLCommandHandler("classifiedteleport", true) {}
 
 	bool handle(const LLSD& tokens, const LLSD& queryMap)
 	{
@@ -139,7 +139,8 @@ public:
 		// *TODO: separately track old search, sidebar, and new search
 		// Right now detail HTML pages count as new search.
 		const bool from_search = true;
-		LLPanelClassified::sendClassifiedClickMessage(classified_id, "teleport", from_search);
+		LLPanelClassified::sendClassifiedClickMessage(classified_id,
+													 "teleport", from_search);
 		// Invoke teleport
 		LLMediaCtrl* web = NULL;
 		const bool trusted_browser = true;
@@ -148,7 +149,7 @@ public:
 };
 // Creating the object registers with the dispatcher.
 LLClassifiedTeleportHandler gClassifiedTeleportHandler;
-*/
+#endif
 
 LLPanelClassified::LLPanelClassified(bool in_finder, bool from_search)
 :	LLPanel(std::string("Classified Panel")),
@@ -183,31 +184,22 @@ LLPanelClassified::LLPanelClassified(bool in_finder, bool from_search)
 	mTeleportClicksNew(0),
 	mMapClicksNew(0),
 	mProfileClicksNew(0)
-
 {
     sAllPanels.push_back(this);
 
-	std::string classified_def_file;
-	if (mInFinder)
-	{
-		LLUICtrlFactory::getInstance()->buildPanel(this, "panel_classified.xml");
-	}
-	else
-	{
-		LLUICtrlFactory::getInstance()->buildPanel(this, "panel_avatar_classified.xml");
-	}
+	std::string file = mInFinder ? "panel_classified.xml"
+								 : "panel_avatar_classified.xml";
+	LLUICtrlFactory::getInstance()->buildPanel(this, file);
 
 	// Register dispatcher
-	gGenericDispatcher.addHandler("classifiedclickthrough", 
+	gGenericDispatcher.addHandler("classifiedclickthrough",
 								  &sClassifiedClickThrough);
 }
-
 
 LLPanelClassified::~LLPanelClassified()
 {
     sAllPanels.remove(this);
 }
-
 
 void LLPanelClassified::reset()
 {
@@ -227,7 +219,6 @@ void LLPanelClassified::reset()
 	resetDirty();
 }
 
-
 BOOL LLPanelClassified::postBuild()
 {
     mSnapshotCtrl = getChild<LLTextureCtrl>("snapshot_ctrl");
@@ -241,7 +232,7 @@ BOOL LLPanelClassified::postBuild()
 	mNameEditor->setFocusReceivedCallback(focusReceived, this);
 	mNameEditor->setCommitCallback(onCommitAny);
 	mNameEditor->setCallbackUserData(this);
-	mNameEditor->setPrevalidate( LLLineEditor::prevalidateASCII );
+	mNameEditor->setPrevalidate(LLLineEditor::prevalidateASCII);
 
     mDescEditor = getChild<LLTextEditor>("desc_editor");
 	mDescEditor->setCommitOnFocusLost(TRUE);
@@ -252,38 +243,38 @@ BOOL LLPanelClassified::postBuild()
 
     mLocationEditor = getChild<LLLineEditor>("location_editor");
 
-    mSetBtn = getChild<LLButton>( "set_location_btn");
+    mSetBtn = getChild<LLButton>("set_location_btn");
     mSetBtn->setClickedCallback(onClickSet);
     mSetBtn->setCallbackUserData(this);
 
-    mTeleportBtn = getChild<LLButton>( "classified_teleport_btn");
+    mTeleportBtn = getChild<LLButton>("classified_teleport_btn");
     mTeleportBtn->setClickedCallback(onClickTeleport);
     mTeleportBtn->setCallbackUserData(this);
 
-    mMapBtn = getChild<LLButton>( "classified_map_btn");
+    mMapBtn = getChild<LLButton>("classified_map_btn");
     mMapBtn->setClickedCallback(onClickMap);
     mMapBtn->setCallbackUserData(this);
 
-	if(mInFinder)
+	if (mInFinder)
 	{
-		mProfileBtn  = getChild<LLButton>( "classified_profile_btn");
+		mProfileBtn  = getChild<LLButton>("classified_profile_btn");
 		mProfileBtn->setClickedCallback(onClickProfile);
 		mProfileBtn->setCallbackUserData(this);
 	}
 
-	mCategoryCombo = getChild<LLComboBox>( "classified_category_combo");
+	mCategoryCombo = getChild<LLComboBox>("classified_category_combo");
 	LLClassifiedInfo::cat_map::iterator iter;
 	for (iter = LLClassifiedInfo::sCategories.begin();
-		iter != LLClassifiedInfo::sCategories.end();
-		iter++)
+		 iter != LLClassifiedInfo::sCategories.end(); iter++)
 	{
-		mCategoryCombo->add(iter->second, (void *)((intptr_t)iter->first), ADD_BOTTOM);
+		mCategoryCombo->add(iter->second, (void *)((intptr_t)iter->first),
+							ADD_BOTTOM);
 	}
 	mCategoryCombo->setCurrentByIndex(0);
 	mCategoryCombo->setCommitCallback(onCommitAny);
 	mCategoryCombo->setCallbackUserData(this);
 
-	mMatureCombo = getChild<LLComboBox>( "classified_mature_check");
+	mMatureCombo = getChild<LLComboBox>("classified_mature_check");
 	mMatureCombo->setCurrentByIndex(0);
 	mMatureCombo->setCommitCallback(onCommitAny);
 	mMatureCombo->setCallbackUserData(this);
@@ -296,7 +287,7 @@ BOOL LLPanelClassified::postBuild()
 
 	if (!mInFinder)
 	{
-		mAutoRenewCheck = getChild<LLCheckBoxCtrl>( "auto_renew_check");
+		mAutoRenewCheck = getChild<LLCheckBoxCtrl>("auto_renew_check");
 		mAutoRenewCheck->setCommitCallback(onCommitAny);
 		mAutoRenewCheck->setCallbackUserData(this);
 	}
@@ -309,7 +300,7 @@ BOOL LLPanelClassified::postBuild()
 	{
 		mClickThroughText = getChild<LLTextBox>("click_through_text");
 	}
-	
+
 	resetDirty();
     return TRUE;
 }
@@ -343,45 +334,51 @@ void LLPanelClassified::apply()
 	}
 }
 
-bool LLPanelClassified::saveCallback(const LLSD& notification, const LLSD& response)
+bool LLPanelClassified::saveCallback(const LLSD& notification,
+									 const LLSD& response)
 {
 	S32 option = LLNotification::getSelectedOption(notification, response);
 
-	switch(option)
+	switch (option)
 	{
-		case 0: // Save
+		case 0:		// Save
+		{
 			sendClassifiedInfoUpdate();
 			// fall through to close
+		}
 
-		case 1: // Don't Save
+		case 1:		// Don't Save
+		{
+			mForceClose = true;
+			// Close containing floater
+			LLFloater* parent_floater = gFloaterView->getParentFloater(this);
+			if (parent_floater)
 			{
-				mForceClose = true;
-				// Close containing floater
-				LLFloater* parent_floater = gFloaterView->getParentFloater(this);
-				if (parent_floater)
-				{
-					parent_floater->close();
-				}
+				parent_floater->close();
 			}
 			break;
+		}
 
-		case 2: // Cancel
-		default:
+		default:	// Cancel
+		{
             LLAppViewer::instance()->abortQuit();
-			break;
+		}
 	}
 	return false;
 }
 
-
 BOOL LLPanelClassified::canClose()
 {
-	if (mForceClose || !checkDirty()) 
+	if (mForceClose || !checkDirty())
+	{
 		return TRUE;
+	}
 
 	LLSD args;
 	args["NAME"] = mNameEditor->getText();
-	LLNotifications::instance().add("ClassifiedSave", args, LLSD(), boost::bind(&LLPanelClassified::saveCallback, this, _1, _2));
+	LLNotifications::instance().add("ClassifiedSave", args, LLSD(),
+									boost::bind(&LLPanelClassified::saveCallback,
+												this, _1, _2));
 	return FALSE;
 }
 
@@ -391,7 +388,7 @@ void LLPanelClassified::initNewClassified()
 	// TODO:  Don't generate this on the client.
 	mClassifiedID.generate();
 
-	mCreatorID = gAgent.getID();
+	mCreatorID = gAgentID;
 
 	mPosGlobal = gAgent.getPositionGlobal();
 
@@ -409,11 +406,10 @@ void LLPanelClassified::initNewClassified()
 	}
 
 	mUpdateBtn->setLabel(getString("publish_txt"));
-	
+
 	// simulate clicking the "location" button
 	LLPanelClassified::onClickSet(this);
 }
-
 
 void LLPanelClassified::setClassifiedID(const LLUUID& id)
 {
@@ -427,7 +423,8 @@ void LLPanelClassified::setClickThrough(const LLUUID& classified_id,
 										S32 profile,
 										bool from_new_table)
 {
-	for (panel_list_t::iterator iter = sAllPanels.begin(); iter != sAllPanels.end(); ++iter)
+	for (panel_list_t::iterator iter = sAllPanels.begin();
+		 iter != sAllPanels.end(); ++iter)
 	{
 		LLPanelClassified* self = *iter;
 		// For top picks, must match pick id
@@ -436,8 +433,8 @@ void LLPanelClassified::setClickThrough(const LLUUID& classified_id,
 			continue;
 		}
 
-		// We need to check to see if the data came from the new stat_table 
-		// or the old classified table. We also need to cache the data from 
+		// We need to check to see if the data came from the new stat_table
+		// or the old classified table. We also need to cache the data from
 		// the two separate sources so as to display the aggregate totals.
 
 		if (from_new_table)
@@ -456,9 +453,9 @@ void LLPanelClassified::setClickThrough(const LLUUID& classified_id,
 		if (self->mClickThroughText)
 		{
 			std::string msg = llformat("Clicks: %d teleport, %d map, %d profile",
-									self->mTeleportClicksNew + self->mTeleportClicksOld,
-									self->mMapClicksNew + self->mMapClicksOld,
-									self->mProfileClicksNew + self->mProfileClicksOld);
+									   self->mTeleportClicksNew + self->mTeleportClicksOld,
+									   self->mMapClicksNew + self->mMapClicksOld,
+									   self->mProfileClicksNew + self->mProfileClicksOld);
 			self->mClickThroughText->setText(msg);
 		}
 	}
@@ -471,23 +468,21 @@ void LLPanelClassified::markForServerRequest()
 	mDataRequested = FALSE;
 }
 
-
 std::string LLPanelClassified::getClassifiedName()
 {
 	return mNameEditor->getText();
 }
 
-
 void LLPanelClassified::sendClassifiedInfoRequest()
 {
-    LLMessageSystem *msg = gMessageSystem;
+    LLMessageSystem* msg = gMessageSystem;
 
 	if (mClassifiedID != mRequestedID)
 	{
 		msg->newMessageFast(_PREHASH_ClassifiedInfoRequest);
 		msg->nextBlockFast(_PREHASH_AgentData);
-		msg->addUUIDFast(_PREHASH_SessionID, gAgent.getSessionID() );
-		msg->addUUIDFast(_PREHASH_AgentID, gAgent.getID() );
+		msg->addUUIDFast(_PREHASH_SessionID, gAgent.getSessionID());
+		msg->addUUIDFast(_PREHASH_AgentID, gAgentID);
 		msg->nextBlockFast(_PREHASH_Data);
 		msg->addUUIDFast(_PREHASH_ClassifiedID, mClassifiedID);
 		gAgent.sendReliableMessage();
@@ -504,11 +499,12 @@ void LLPanelClassified::sendClassifiedInfoRequest()
 		if (!url.empty())
 		{
 			llinfos << "Classified stat request via capability" << llendl;
-			LLHTTPClient::post(url, body, new LLClassifiedStatsResponder(((LLView*)this)->getHandle(), mClassifiedID));
+			LLHTTPClient::post(url, body,
+							   new LLClassifiedStatsResponder(((LLView*)this)->getHandle(),
+															  mClassifiedID));
 		}
 	}
 }
-
 
 void LLPanelClassified::sendClassifiedInfoUpdate()
 {
@@ -524,7 +520,7 @@ void LLPanelClassified::sendClassifiedInfoUpdate()
 
 	msg->newMessageFast(_PREHASH_ClassifiedInfoUpdate);
 	msg->nextBlockFast(_PREHASH_AgentData);
-	msg->addUUIDFast(_PREHASH_AgentID, gAgent.getID());
+	msg->addUUIDFast(_PREHASH_AgentID, gAgentID);
 	msg->addUUIDFast(_PREHASH_SessionID, gAgent.getSessionID());
 	msg->nextBlockFast(_PREHASH_Data);
 	msg->addUUIDFast(_PREHASH_ClassifiedID, mClassifiedID);
@@ -542,14 +538,15 @@ void LLPanelClassified::sendClassifiedInfoUpdate()
 	msg->addVector3dFast(_PREHASH_PosGlobal, mPosGlobal);
 	BOOL mature = mMatureCombo->getCurrentIndex() == MATURE_CONTENT;
 	BOOL auto_renew = FALSE;
-	if (mAutoRenewCheck) 
+	if (mAutoRenewCheck)
 	{
 		auto_renew = mAutoRenewCheck->get();
 	}
     // These flags doesn't matter here.
     const bool adult_enabled = false;
 	const bool is_pg = false;
-	U8 flags = pack_classified_flags_request(auto_renew, is_pg, mature, adult_enabled);
+	U8 flags = pack_classified_flags_request(auto_renew, is_pg, mature,
+											 adult_enabled);
 	msg->addU8Fast(_PREHASH_ClassifiedFlags, flags);
 	msg->addS32("PriceForListing", mPriceForListing);
 	gAgent.sendReliableMessage();
@@ -557,16 +554,16 @@ void LLPanelClassified::sendClassifiedInfoUpdate()
 	mDirty = false;
 }
 
-
 //static
-void LLPanelClassified::processClassifiedInfoReply(LLMessageSystem *msg, void **)
+void LLPanelClassified::processClassifiedInfoReply(LLMessageSystem* msg,
+												   void**)
 {
 	//lldebugs << "processClassifiedInfoReply()" << llendl;
     // Extract the agent id and verify the message is for this
     // client.
     LLUUID agent_id;
-    msg->getUUIDFast(_PREHASH_AgentData, _PREHASH_AgentID, agent_id );
-    if (agent_id != gAgent.getID())
+    msg->getUUIDFast(_PREHASH_AgentData, _PREHASH_AgentID, agent_id);
+    if (agent_id != gAgentID)
     {
         llwarns << "Agent ID mismatch in processClassifiedInfoReply"
             << llendl;
@@ -611,7 +608,8 @@ void LLPanelClassified::processClassifiedInfoReply(LLMessageSystem *msg, void **
     S32 region_y = llround((F32)pos_global.mdV[VY]) % REGION_WIDTH_UNITS;
 	S32 region_z = llround((F32)pos_global.mdV[VZ]);
 
-	std::string buffer = llformat("%s (%d, %d, %d)", sim_name.c_str(), region_x, region_y, region_z);
+	std::string buffer = llformat("%s (%d, %d, %d)", sim_name.c_str(),
+								  region_x, region_y, region_z);
     location_text.append(buffer);
 
 	U8 flags;
@@ -623,7 +621,7 @@ void LLPanelClassified::processClassifiedInfoReply(LLMessageSystem *msg, void **
 	U32 date = 0;
 	msg->getU32Fast(_PREHASH_Data, _PREHASH_CreationDate, date);
 	time_t tim = date;
-	tm *now=localtime(&tim);
+	tm *now = localtime(&tim);
 
 	// future use
 	U32 expiration_date = 0;
@@ -636,7 +634,8 @@ void LLPanelClassified::processClassifiedInfoReply(LLMessageSystem *msg, void **
 	msg->getS32("Data", "PriceForListing", price_for_listing);
 
     // Look up the panel to fill in
-	for (panel_list_t::iterator iter = sAllPanels.begin(); iter != sAllPanels.end(); ++iter)
+	for (panel_list_t::iterator iter = sAllPanels.begin();
+		 iter != sAllPanels.end(); ++iter)
 	{
 		LLPanelClassified* self = *iter;
 		// For top picks, must match pick id
@@ -661,7 +660,7 @@ void LLPanelClassified::processClassifiedInfoReply(LLMessageSystem *msg, void **
 		self->mLocationChanged = false;
 
 		self->mCategoryCombo->setCurrentByIndex(category - 1);
-		if(mature)
+		if (mature)
 		{
 			self->mMatureCombo->setCurrentByIndex(MATURE_CONTENT);
 		}
@@ -675,13 +674,16 @@ void LLPanelClassified::processClassifiedInfoReply(LLMessageSystem *msg, void **
 		}
 
 		std::string datestr;
-		timeStructToFormattedString(now, gSavedSettings.getString("ShortDateFormat"), datestr);
+		timeStructToFormattedString(now,
+									gSavedSettings.getString("ShortDateFormat"),
+									datestr);
 		LLStringUtil::format_map_t string_args;
 		string_args["[DATE]"] = datestr;
 		string_args["[AMT]"] = llformat("%d", price_for_listing);
 		if (self->getChild<LLTextBox>("classified_info_text", TRUE, FALSE))
 		{
-			self->childSetText("classified_info_text", self->getString("ad_placed_paid", string_args));
+			self->childSetText("classified_info_text",
+							   self->getString("ad_placed_paid", string_args));
 		}
 
 		// If we got data from the database, we know the listing is paid for.
@@ -691,7 +693,8 @@ void LLPanelClassified::processClassifiedInfoReply(LLMessageSystem *msg, void **
 
 		self->resetDirty();
 
-		// I don't know if a second call is deliberate or a bad merge, so I'm leaving it here. 
+		// I don't know if a second call is deliberate or a bad merge, so I'm
+		// leaving it here.
 		self->resetDirty();
     }
 }
@@ -699,10 +702,8 @@ void LLPanelClassified::processClassifiedInfoReply(LLMessageSystem *msg, void **
 void LLPanelClassified::draw()
 {
 	refresh();
-
 	LLPanel::draw();
 }
-
 
 void LLPanelClassified::refresh()
 {
@@ -712,26 +713,27 @@ void LLPanelClassified::refresh()
 	}
 
     // Check for god mode
-    BOOL godlike = gAgent.isGodlike();
-	BOOL is_self = (gAgent.getID() == mCreatorID);
+    bool godlike = gAgent.isGodlike();
+	bool is_self = (gAgentID == mCreatorID);
 
     // Set button visibility/enablement appropriately
 	if (mInFinder)
 	{
-
 		// End user doesn't ned to see price twice, or date posted.
 
 		mSnapshotCtrl->setEnabled(godlike);
-		if(godlike)
+		if (godlike)
 		{
-			//make it smaller, so text is more legible
-			mSnapshotCtrl->setOrigin(20, 175);
-			mSnapshotCtrl->reshape(300, 200);
+			// make it smaller, so text is more legible
+			//mSnapshotCtrl->setOrigin(20, 175);
+			mSnapshotCtrl->reshape(360, 270);
 		}
 		else
 		{
-			mSnapshotCtrl->setOrigin(mSnapshotSize.mLeft, mSnapshotSize.mBottom);
-			mSnapshotCtrl->reshape(mSnapshotSize.getWidth(), mSnapshotSize.getHeight());
+			mSnapshotCtrl->setOrigin(mSnapshotSize.mLeft,
+									 mSnapshotSize.mBottom);
+			mSnapshotCtrl->reshape(mSnapshotSize.getWidth(),
+								   mSnapshotSize.getHeight());
 			//normal
 		}
 		mNameEditor->setEnabled(godlike);
@@ -760,23 +762,23 @@ void LLPanelClassified::refresh()
 		mCategoryCombo->setEnabled(is_self);
 		mMatureCombo->setEnabled(is_self);
 
-		if( is_self )
-		{							
-			if( mMatureCombo->getCurrentIndex() == 0 )
+		if (is_self)
+		{
+			if (mMatureCombo->getCurrentIndex() == 0)
 			{
 				// It's a new panel.
-				// PG regions should have PG classifieds. AO should have mature.
-								
+				// PG regions should have PG classifieds.
+				// Adult should have mature.
 				setDefaultAccessCombo();
 			}
 		}
-		
+
 		if (mAutoRenewCheck)
 		{
 			mAutoRenewCheck->setEnabled(is_self);
 			mAutoRenewCheck->setVisible(is_self);
 		}
-		
+
 		mClickThroughText->setEnabled(is_self);
 		mClickThroughText->setVisible(is_self);
 
@@ -792,51 +794,46 @@ void LLPanelClassified::refresh()
 void LLPanelClassified::onClickUpdate(void* data)
 {
 	LLPanelClassified* self = (LLPanelClassified*)data;
+	if (!self) return;
 
-	if(self == NULL) return;
-
-	// Disallow leading spaces, punctuation, etc. that screw up
-	// sort order.
-	if ( ! self->titleIsValid() )
+	// Disallow leading spaces, punctuation, etc. that screw up sort order.
+	if (!self->titleIsValid())
 	{
-		return;
-	};
-
-	// If user has not set mature, do not allow publish
-	if(self->mMatureCombo->getCurrentIndex() == DECLINE_TO_STATE)
-	{
-		// Tell user about it
-		LLNotifications::instance().add("SetClassifiedMature", 
-				LLSD(), 
-				LLSD(), 
-				boost::bind(&LLPanelClassified::confirmMature, self, _1, _2));
 		return;
 	}
 
-	// Mature content flag is set, proceed
-	self->gotMature();
+	// If user has not set mature, do not allow publish
+	if (self->mMatureCombo->getCurrentIndex() == DECLINE_TO_STATE)
+	{
+		// Tell user about it
+		LLNotifications::instance().add("SetClassifiedMature", LLSD(), LLSD(),
+										boost::bind(&LLPanelClassified::confirmMature,
+													self, _1, _2));
+	}
+	else
+	{
+		// Mature content flag is set, proceed
+		self->gotMature();
+	}
 }
 
 // Callback from a dialog indicating response to mature notification
-bool LLPanelClassified::confirmMature(const LLSD& notification, const LLSD& response)
+bool LLPanelClassified::confirmMature(const LLSD& notification,
+									  const LLSD& response)
 {
 	S32 option = LLNotification::getSelectedOption(notification, response);
-	
-	// 0 == Yes
-	// 1 == No
-	// 2 == Cancel
-	switch(option)
+	switch (option)
 	{
-	case 0:
-		mMatureCombo->setCurrentByIndex(MATURE_CONTENT);
-		break;
-	case 1:
-		mMatureCombo->setCurrentByIndex(PG_CONTENT);
-		break;
-	default:
-		return false;
+		case 0:		// 0 == Yes
+			mMatureCombo->setCurrentByIndex(MATURE_CONTENT);
+			break;
+		case 1:		// 1 == No
+			mMatureCombo->setCurrentByIndex(PG_CONTENT);
+			break;
+		default:	// 2 == Cancel
+			return false;
 	}
-	
+
 	// If we got here it means they set a valid value
 	gotMature();
 	return false;
@@ -850,18 +847,21 @@ void LLPanelClassified::gotMature()
 	if (mPaidFor)
 	{
 		LLNotification::Params params("PublishClassified");
-		params.functor(boost::bind(&LLPanelClassified::confirmPublish, this, _1, _2));
+		params.functor(boost::bind(&LLPanelClassified::confirmPublish,
+								   this, _1, _2));
 		LLNotifications::instance().forceResponse(params, 0);
 	}
 	else
 	{
 		// Ask the user how much they want to pay
-		LLFloaterPriceForListing::show( callbackGotPriceForListing, this );
+		LLFloaterPriceForListing::show(callbackGotPriceForListing, this);
 	}
 }
 
 // static
-void LLPanelClassified::callbackGotPriceForListing(S32 option, std::string text, void* data)
+void LLPanelClassified::callbackGotPriceForListing(S32 option,
+												   std::string text,
+												   void* data)
 {
 	LLPanelClassified* self = (LLPanelClassified*)data;
 
@@ -874,39 +874,33 @@ void LLPanelClassified::callbackGotPriceForListing(S32 option, std::string text,
 		LLSD args;
 		std::string price_text = llformat("%d", MINIMUM_PRICE_FOR_LISTING);
 		args["MIN_PRICE"] = price_text;
-			
+
 		LLNotifications::instance().add("MinClassifiedPrice", args);
 		return;
 	}
 
-	// price is acceptable, put it in the dialog for later read by 
-	// update send
+	// price is acceptable, put it in the dialog for later read by update send
 	self->mPriceForListing = price_for_listing;
 
 	LLSD args;
 	args["AMOUNT"] = llformat("%d", price_for_listing);
-	LLNotifications::instance().add("PublishClassified", args, LLSD(), 
-									boost::bind(&LLPanelClassified::confirmPublish, self, _1, _2));
+	LLNotifications::instance().add("PublishClassified", args, LLSD(),
+									boost::bind(&LLPanelClassified::confirmPublish,
+												self, _1, _2));
 }
 
 void LLPanelClassified::resetDirty()
 {
-	// Tell all the widgets to reset their dirty state since the ad was just saved
-	if (mSnapshotCtrl)
-		mSnapshotCtrl->resetDirty();
-	if (mNameEditor)
-		mNameEditor->resetDirty();
-	if (mDescEditor)
-		mDescEditor->resetDirty();
-	if (mLocationEditor)
-		mLocationEditor->resetDirty();
+	// Tell all the widgets to reset their dirty state since the ad was just
+	// saved
+	if (mSnapshotCtrl)		mSnapshotCtrl->resetDirty();
+	if (mNameEditor)		mNameEditor->resetDirty();
+	if (mDescEditor)		mDescEditor->resetDirty();
+	if (mLocationEditor)	mLocationEditor->resetDirty();
 	mLocationChanged = false;
-	if (mCategoryCombo)
-		mCategoryCombo->resetDirty();
-	if (mMatureCombo)
-		mMatureCombo->resetDirty();
-	if (mAutoRenewCheck)
-		mAutoRenewCheck->resetDirty();
+	if (mCategoryCombo)		mCategoryCombo->resetDirty();
+	if (mMatureCombo)		mMatureCombo->resetDirty();
+	if (mAutoRenewCheck)	mAutoRenewCheck->resetDirty();
 }
 
 // invoked from callbackConfirmPublish
@@ -918,19 +912,20 @@ bool LLPanelClassified::confirmPublish(const LLSD& notification, const LLSD& res
 
 	sendClassifiedInfoUpdate();
 
-	// Big hack - assume that top picks are always in a browser,
-	// and non-finder-classifieds are always in a tab container.
-	if (mInFinder)
-	{
-		// TODO: enable this
-		//LLPanelDirClassifieds* panel = (LLPanelDirClassifieds*)getParent();
-		//panel->renameClassified(mClassifiedID, mNameEditor->getText());
-	}
-	else
+	// Big hack: assume that top picks are always in a browser and non-finder
+	// classifieds are always in a tab container.
+	if (!mInFinder)
 	{
 		LLTabContainer* tab = (LLTabContainer*)getParent();
 		tab->setCurrentTabName(mNameEditor->getText());
 	}
+#if 0	// TODO: enable this
+	else
+	{
+		LLPanelDirClassifieds* panel = (LLPanelDirClassifieds*)getParent();
+		panel->renameClassified(mClassifiedID, mNameEditor->getText());
+	}
+#endif
 
 	resetDirty();
 	return false;
@@ -941,7 +936,7 @@ void LLPanelClassified::onClickTeleport(void* data)
 {
     LLPanelClassified* self = (LLPanelClassified*)data;
 
-    if (!self->mPosGlobal.isExactlyZero())
+    if (self && !self->mPosGlobal.isExactlyZero())
     {
         gAgent.teleportViaLocation(self->mPosGlobal);
 		if (gFloaterWorldMap)
@@ -956,31 +951,37 @@ void LLPanelClassified::onClickTeleport(void* data)
 void LLPanelClassified::onClickMap(void* data)
 {
 	LLPanelClassified* self = (LLPanelClassified*)data;
-	if (gFloaterWorldMap)
+	if (self)
 	{
-		gFloaterWorldMap->trackLocation(self->mPosGlobal);
-	}
-	LLFloaterWorldMap::show(NULL, TRUE);
+		if (gFloaterWorldMap)
+		{
+			gFloaterWorldMap->trackLocation(self->mPosGlobal);
+		}
+		LLFloaterWorldMap::show(NULL, TRUE);
 
-	self->sendClassifiedClickMessage("map");
+		self->sendClassifiedClickMessage("map");
+	}
 }
 
 // static
 void LLPanelClassified::onClickProfile(void* data)
 {
 	LLPanelClassified* self = (LLPanelClassified*)data;
-	LLFloaterAvatarInfo::showFromDirectory(self->mCreatorID);
-	self->sendClassifiedClickMessage("profile");
+	if (self)
+	{
+		LLFloaterAvatarInfo::showFromDirectory(self->mCreatorID);
+		self->sendClassifiedClickMessage("profile");
+	}
 }
 
+#if 0
 // static
-/*
 void LLPanelClassified::onClickLandmark(void* data)
 {
     LLPanelClassified* self = (LLPanelClassified*)data;
 	create_landmark(self->mNameEditor->getText(), "", self->mPosGlobal);
 }
-*/
+#endif
 
 // static
 void LLPanelClassified::onClickSet(void* data)
@@ -1003,14 +1004,15 @@ void LLPanelClassified::onClickSet(void* data)
     S32 region_x = llround((F32)self->mPosGlobal.mdV[VX]) % REGION_WIDTH_UNITS;
     S32 region_y = llround((F32)self->mPosGlobal.mdV[VY]) % REGION_WIDTH_UNITS;
 	S32 region_z = llround((F32)self->mPosGlobal.mdV[VZ]);
-   
+
 	location_text.append(self->mSimName);
-    location_text.append(llformat(" (%d, %d, %d)", region_x, region_y, region_z));
+    location_text.append(llformat(" (%d, %d, %d)", region_x, region_y,
+								  region_z));
 
 	self->mLocationEditor->setText(location_text);
 	self->mLocationChanged = true;
-	
-	self->setDefaultAccessCombo();	
+
+	self->setDefaultAccessCombo();
 
 	// Set this to null so it updates on the next save.
 	self->mParcelID.setNull();
@@ -1018,18 +1020,17 @@ void LLPanelClassified::onClickSet(void* data)
 	onCommitAny(NULL, data);
 }
 
-
 BOOL LLPanelClassified::checkDirty()
 {
 	mDirty = FALSE;
-	if	( mSnapshotCtrl )			mDirty |= mSnapshotCtrl->isDirty();
-	if	( mNameEditor )				mDirty |= mNameEditor->isDirty();
-	if	( mDescEditor )				mDirty |= mDescEditor->isDirty();
-	if	( mLocationEditor )			mDirty |= mLocationEditor->isDirty();
-	if  ( mLocationChanged )		mDirty |= TRUE;
-	if	( mCategoryCombo )			mDirty |= mCategoryCombo->isDirty();
-	if	( mMatureCombo )			mDirty |= mMatureCombo->isDirty();
-	if	( mAutoRenewCheck )			mDirty |= mAutoRenewCheck->isDirty();
+	if	(mSnapshotCtrl)		mDirty |= mSnapshotCtrl->isDirty();
+	if	(mNameEditor)		mDirty |= mNameEditor->isDirty();
+	if	(mDescEditor)		mDirty |= mDescEditor->isDirty();
+	if	(mLocationEditor)	mDirty |= mLocationEditor->isDirty();
+	if  (mLocationChanged)	mDirty |= TRUE;
+	if	(mCategoryCombo)	mDirty |= mCategoryCombo->isDirty();
+	if	(mMatureCombo)		mDirty |= mMatureCombo->isDirty();
+	if	(mAutoRenewCheck)	mDirty |= mAutoRenewCheck->isDirty();
 
 	return mDirty;
 }
@@ -1051,11 +1052,10 @@ void LLPanelClassified::focusReceived(LLFocusableElement* ctrl, void* data)
 	onCommitAny((LLUICtrl*)ctrl, data);
 }
 
-
 void LLPanelClassified::sendClassifiedClickMessage(const std::string& type)
 {
-	// You're allowed to click on your own ads to reassure yourself
-	// that the system is working.
+	// You're allowed to click on your own ads to reassure yourself that the
+	// system is working.
 	LLSD body;
 	body["type"] = type;
 	body["from_search"] = mFromSearch;
@@ -1065,7 +1065,8 @@ void LLPanelClassified::sendClassifiedClickMessage(const std::string& type)
 	body["region_name"] = mSimName;
 
 	std::string url = gAgent.getRegion()->getCapability("SearchStatTracking");
-	llinfos << "LLPanelClassified::sendClassifiedClickMessage via capability" << llendl;
+	llinfos << "LLPanelClassified::sendClassifiedClickMessage via capability"
+			 << llendl;
 	LLHTTPClient::post(url, body, new LLHTTPClient::Responder());
 }
 
@@ -1075,11 +1076,13 @@ LLFloaterPriceForListing::LLFloaterPriceForListing()
 :	LLFloater(std::string("PriceForListing")),
 	mCallback(NULL),
 	mUserData(NULL)
-{ }
+{
+}
 
 //virtual
 LLFloaterPriceForListing::~LLFloaterPriceForListing()
-{ }
+{
+}
 
 //virtual
 BOOL LLFloaterPriceForListing::postBuild()
@@ -1095,20 +1098,21 @@ BOOL LLFloaterPriceForListing::postBuild()
 	}
 
 	childSetAction("set_price_btn", onClickSetPrice, this);
-
 	childSetAction("cancel_btn", onClickCancel, this);
-
 	setDefaultBtn("set_price_btn");
+
 	return TRUE;
 }
 
 //static
-void LLFloaterPriceForListing::show( void (*callback)(S32, std::string, void*), void* userdata)
+void LLFloaterPriceForListing::show(void (*callback)(S32, std::string, void*),
+									void* userdata)
 {
-	LLFloaterPriceForListing *self = new LLFloaterPriceForListing();
+	LLFloaterPriceForListing* self = new LLFloaterPriceForListing();
 
 	// Builds and adds to gFloaterView
-	LLUICtrlFactory::getInstance()->buildFloater(self, "floater_price_for_listing.xml");
+	LLUICtrlFactory::getInstance()->buildFloater(self,
+												 "floater_price_for_listing.xml");
 	self->center();
 
 	self->mCallback = callback;
@@ -1146,9 +1150,9 @@ void LLPanelClassified::setDefaultAccessCombo()
 
 	LLViewerRegion *regionp = gAgent.getRegion();
 
-	switch( regionp->getSimAccess() )
+	switch (regionp->getSimAccess())
 	{
-		case SIM_ACCESS_PG:	
+		case SIM_ACCESS_PG:
 			mMatureCombo->setCurrentByIndex(PG_CONTENT);
 			break;
 		case SIM_ACCESS_ADULT:

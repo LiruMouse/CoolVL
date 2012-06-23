@@ -149,13 +149,14 @@ protected:
 	static BOOL		checkSpellCheckMenu(void* userdata);
 
 protected:
-	LLViewerTextEditor* mEditor;
+	LLViewerTextEditor*	mEditor;
+	LLButton*			mSaveButton;
 
-	LLUUID mAssetID;
-	LLUUID mNotecardItemID;
-	LLUUID mObjectID;
+	LLUUID				mAssetID;
+	LLUUID				mNotecardItemID;
+	LLUUID				mObjectID;
 
-	std::string mNoteName;
+	std::string			mNoteName;
 
 	static std::set<LLPreviewNotecard*> sList;
 };

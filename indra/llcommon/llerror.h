@@ -229,10 +229,6 @@ typedef LLError::NoClassInfo _LL_CLASS_TO_LOG;
 	// Outside a class declaration, or in class without LOG_CLASS(), this
 	// typedef causes the messages to not be associated with any class.
 
-
-
-
-
 /*
 	Error Logging Macros
 	See top of file for common usage.	

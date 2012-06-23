@@ -4623,7 +4623,7 @@ void LLTextEditor::makePristine()
 	mPristineCmd = mLastCmd;
 	mBaseDocIsPristine = !mLastCmd;
 
-	// Create a clean partition in the undo stack.  We don't want a single
+	// Create a clean partition in the undo stack. We don't want a single
 	// command to extend from the "pre-pristine" state to the "post-pristine"
 	// state.
 	if (mLastCmd)

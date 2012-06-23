@@ -806,7 +806,7 @@ bool check_offer_throttle(const std::string& from_name, bool check_only)
 		throttle_logged=false;
 		return true;
 	}
-	else //has not expired
+	else // has not expired
 	{
 		LL_DEBUGS("Messaging") << "Throttle Not Expired, Count: " << throttle_count << LL_ENDL;
 		// When downloading the initial inventory we get a lot of new items
@@ -3465,11 +3465,14 @@ void process_agent_movement_complete(LLMessageSystem* msg, void**)
 	std::string version_channel;
 	msg->getString("SimData", "ChannelVersion", version_channel);
 
-	if (!isAgentAvatarValid())
+	// Could happen if you were immediately god-teleported away on login, maybe
+	// other cases. Continue, but warn, excepted if encountered at normal login
+	// time (since it *always* happens at this time).
+	if (!isAgentAvatarValid() &&
+		LLStartUp::getStartupState() >= STATE_INVENTORY_SEND)
 	{
-		// Could happen if you were immediately god-teleported away on login,
-		// maybe other cases.  Continue, but warn.
-		LL_WARNS("Messaging") << "agent_movement_complete() with NULL avatar." << LL_ENDL;
+		LL_WARNS("Messaging") << "agent_movement_complete() with NULL avatar."
+							  << LL_ENDL;
 	}
 
 	F32 x, y;

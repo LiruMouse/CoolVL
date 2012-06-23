@@ -476,7 +476,7 @@ void LLPanelFace::sendTextureInfo()
 		{
 			LLFace* get(LLViewerObject* object, S32 te)
 			{
-				return (object->mDrawable) ? object->mDrawable->getFace(te): NULL;
+				return object->mDrawable ? object->mDrawable->getFace(te) : NULL;
 			}
 		} get_last_face_func;
 		LLFace* last_face;
@@ -624,7 +624,7 @@ void LLPanelFace::getState()
 				{
 					LLFace* get(LLViewerObject* object, S32 te)
 					{
-						return (object->mDrawable) ? object->mDrawable->getFace(te): NULL;
+						return object->mDrawable ? object->mDrawable->getFace(te) : NULL;
 					}
 				} get_te_face_func;
 				LLFace* last_face;

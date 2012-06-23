@@ -1339,7 +1339,7 @@ void LLSelectMgr::remove(LLViewerObject *objectp, S32 te, BOOL undoable)
 	}
 
 	// if face = all, remove object from list
-	if ((objectp->getNumTEs() <= 0) || (te == SELECT_ALL_TES))
+	if (objectp->getNumTEs() <= 0 || te == SELECT_ALL_TES)
 	{
 		// Remove all faces (or the object doesn't have faces) so remove the node
 		mSelectedObjects->removeNode(nodep);
@@ -1362,7 +1362,8 @@ void LLSelectMgr::remove(LLViewerObject *objectp, S32 te, BOOL undoable)
 
 		// ...check to see if this operation turned off all faces
 		BOOL found = FALSE;
-		for (S32 i = 0; i < nodep->getObject()->getNumTEs(); i++)
+		for (S32 i = 0, count = nodep->getObject()->getNumTEs(); i < count;
+			 i++)
 		{
 			found = found || nodep->isTESelected(i);
 		}
@@ -1516,7 +1517,7 @@ void LLSelectMgr::dump()
 		LLSelectNode* node = *iter;
 		LLViewerObject* objectp = node->getObject();
 		if (!objectp) continue;
-		for (S32 te = 0; te < objectp->getNumTEs(); ++te)
+		for (S32 te = 0, count = objectp->getNumTEs(); te < count; te++)
 		{
 			if (node->isTESelected(te))
 			{
@@ -2415,7 +2416,8 @@ void LLSelectMgr::adjustTexturesByScale(BOOL send_to_sim, BOOL stretch)
 
 		BOOL send = FALSE;
 
-		for (U8 te_num = 0; te_num < object->getNumTEs(); te_num++)
+		for (U8 te_num = 0, count = object->getNumTEs(); te_num < count;
+			 te_num++)
 		{
 			const LLTextureEntry* tep = object->getTE(te_num);
 
@@ -3394,7 +3396,7 @@ void LLSelectMgr::selectDuplicateOnRay(const LLVector3 &ray_start_region,
 }
 
 // static
-void LLSelectMgr::packDuplicateOnRayHead(void *user_data)
+void LLSelectMgr::packDuplicateOnRayHead(void* user_data)
 {
 	LLMessageSystem *msg = gMessageSystem;
 	LLDuplicateOnRayData *data = (LLDuplicateOnRayData *)user_data;
@@ -3450,7 +3452,7 @@ void LLSelectMgr::sendMultipleUpdate(U32 type)
 }
 
 // static
-void LLSelectMgr::packMultipleUpdate(LLSelectNode* node, void *user_data)
+void LLSelectMgr::packMultipleUpdate(LLSelectNode* node, void* user_data)
 {
 	LLViewerObject* object = node->getObject();
 	U32	*type32 = (U32 *)user_data;
@@ -3512,7 +3514,7 @@ void LLSelectMgr::sendOwner(const LLUUID& owner_id,
 }
 
 // static
-void LLSelectMgr::packOwnerHead(void *user_data)
+void LLSelectMgr::packOwnerHead(void* user_data)
 {
 	LLOwnerData *data = (LLOwnerData *)user_data;
 
@@ -3944,7 +3946,7 @@ void LLSelectMgr::sendDehinge()
 }
 
 // static
-void LLSelectMgr::packHingeHead(void *user_data)
+void LLSelectMgr::packHingeHead(void* user_data)
 {
 	U8	*type = (U8 *)user_data;
 
@@ -4128,7 +4130,7 @@ void LLSelectMgr::selectionUpdateCastShadows(BOOL cast_shadows)
 //----------------------------------------------------------------------
 
 // static 
-void LLSelectMgr::packAgentIDAndSessionAndAttachment(void *user_data)
+void LLSelectMgr::packAgentIDAndSessionAndAttachment(void* user_data)
 {
 	U8 *attachment_point = (U8*)user_data;
 	gMessageSystem->nextBlockFast(_PREHASH_AgentData);
@@ -4138,7 +4140,7 @@ void LLSelectMgr::packAgentIDAndSessionAndAttachment(void *user_data)
 }
 
 // static
-void LLSelectMgr::packAgentID(	void *user_data)
+void LLSelectMgr::packAgentID(	void* user_data)
 {
 	gMessageSystem->nextBlockFast(_PREHASH_AgentData);
 	gMessageSystem->addUUIDFast(_PREHASH_AgentID, gAgent.getID());
@@ -4239,38 +4241,44 @@ void LLSelectMgr::packDeRezHeader(void* user_data)
 }
 
 // static 
-void LLSelectMgr::packObjectID(LLSelectNode* node, void *user_data)
+void LLSelectMgr::packObjectID(LLSelectNode* node, void* user_data)
 {
 	gMessageSystem->nextBlockFast(_PREHASH_ObjectData);
 	gMessageSystem->addUUIDFast(_PREHASH_ObjectID, node->getObject()->mID);
 }
 
-void LLSelectMgr::packObjectIDAndRotation(LLSelectNode* node, void *user_data)
+void LLSelectMgr::packObjectIDAndRotation(LLSelectNode* node, void* user_data)
 {
 	gMessageSystem->nextBlockFast(_PREHASH_ObjectData);
-	gMessageSystem->addU32Fast(_PREHASH_ObjectLocalID, node->getObject()->getLocalID());
-	gMessageSystem->addQuatFast(_PREHASH_Rotation, node->getObject()->getRotation());
+	gMessageSystem->addU32Fast(_PREHASH_ObjectLocalID,
+							   node->getObject()->getLocalID());
+	gMessageSystem->addQuatFast(_PREHASH_Rotation,
+								node->getObject()->getRotation());
 }
 
-void LLSelectMgr::packObjectClickAction(LLSelectNode* node, void *user_data)
+void LLSelectMgr::packObjectClickAction(LLSelectNode* node, void* user_data)
 {
 	gMessageSystem->nextBlockFast(_PREHASH_ObjectData);
-	gMessageSystem->addU32Fast(_PREHASH_ObjectLocalID, node->getObject()->getLocalID());
+	gMessageSystem->addU32Fast(_PREHASH_ObjectLocalID,
+							   node->getObject()->getLocalID());
 	gMessageSystem->addU8("ClickAction", node->getObject()->getClickAction());
 }
 
-void LLSelectMgr::packObjectIncludeInSearch(LLSelectNode* node, void *user_data)
+void LLSelectMgr::packObjectIncludeInSearch(LLSelectNode* node, void* user_data)
 {
 	gMessageSystem->nextBlockFast(_PREHASH_ObjectData);
-	gMessageSystem->addU32Fast(_PREHASH_ObjectLocalID, node->getObject()->getLocalID());
-	gMessageSystem->addBOOL("IncludeInSearch", node->getObject()->getIncludeInSearch());
+	gMessageSystem->addU32Fast(_PREHASH_ObjectLocalID,
+							   node->getObject()->getLocalID());
+	gMessageSystem->addBOOL("IncludeInSearch",
+							node->getObject()->getIncludeInSearch());
 }
 
 // static
-void LLSelectMgr::packObjectLocalID(LLSelectNode* node, void *)
+void LLSelectMgr::packObjectLocalID(LLSelectNode* node, void*)
 {
 	gMessageSystem->nextBlockFast(_PREHASH_ObjectData);
-	gMessageSystem->addU32Fast(_PREHASH_ObjectLocalID, node->getObject()->getLocalID());
+	gMessageSystem->addU32Fast(_PREHASH_ObjectLocalID,
+							   node->getObject()->getLocalID());
 }
 
 // static
@@ -4280,7 +4288,8 @@ void LLSelectMgr::packObjectName(LLSelectNode* node, void* user_data)
 	if (!name->empty())
 	{
 		gMessageSystem->nextBlockFast(_PREHASH_ObjectData);
-		gMessageSystem->addU32Fast(_PREHASH_LocalID, node->getObject()->getLocalID());
+		gMessageSystem->addU32Fast(_PREHASH_LocalID,
+								   node->getObject()->getLocalID());
 		gMessageSystem->addStringFast(_PREHASH_Name, *name);
 	}
 	delete name;
@@ -4290,10 +4299,11 @@ void LLSelectMgr::packObjectName(LLSelectNode* node, void* user_data)
 void LLSelectMgr::packObjectDescription(LLSelectNode* node, void* user_data)
 {
 	const std::string* desc = (const std::string*)user_data;
-	if (!desc->empty())
+	if (desc && !desc->empty())
 	{
 		gMessageSystem->nextBlockFast(_PREHASH_ObjectData);
-		gMessageSystem->addU32Fast(_PREHASH_LocalID, node->getObject()->getLocalID());
+		gMessageSystem->addU32Fast(_PREHASH_LocalID,
+								   node->getObject()->getLocalID());
 		gMessageSystem->addStringFast(_PREHASH_Description, *desc);
 	}
 }
@@ -4302,39 +4312,46 @@ void LLSelectMgr::packObjectDescription(LLSelectNode* node, void* user_data)
 void LLSelectMgr::packObjectCategory(LLSelectNode* node, void* user_data)
 {
 	LLCategory* category = (LLCategory*)user_data;
-	if (!category) return;
-	gMessageSystem->nextBlockFast(_PREHASH_ObjectData);
-	gMessageSystem->addU32Fast(_PREHASH_LocalID, node->getObject()->getLocalID());
-	category->packMessage(gMessageSystem);
+	if (category)
+	{
+		gMessageSystem->nextBlockFast(_PREHASH_ObjectData);
+		gMessageSystem->addU32Fast(_PREHASH_LocalID,
+								   node->getObject()->getLocalID());
+		category->packMessage(gMessageSystem);
+	}
 }
 
 // static
 void LLSelectMgr::packObjectSaleInfo(LLSelectNode* node, void* user_data)
 {
 	LLSaleInfo* sale_info = (LLSaleInfo*)user_data;
-	if (!sale_info) return;
-	gMessageSystem->nextBlockFast(_PREHASH_ObjectData);
-	gMessageSystem->addU32Fast(_PREHASH_LocalID, node->getObject()->getLocalID());
-	sale_info->packMessage(gMessageSystem);
+	if (sale_info)
+	{
+		gMessageSystem->nextBlockFast(_PREHASH_ObjectData);
+		gMessageSystem->addU32Fast(_PREHASH_LocalID,
+								   node->getObject()->getLocalID());
+		sale_info->packMessage(gMessageSystem);
+	}
 }
 
 // static
-void LLSelectMgr::packPhysics(LLSelectNode* node, void *user_data)
+void LLSelectMgr::packPhysics(LLSelectNode* node, void* user_data)
 {
 }
 
 // static
-void LLSelectMgr::packShape(LLSelectNode* node, void *user_data)
+void LLSelectMgr::packShape(LLSelectNode* node, void* user_data)
 {
 }
 
 // static 
-void LLSelectMgr::packPermissions(LLSelectNode* node, void *user_data)
+void LLSelectMgr::packPermissions(LLSelectNode* node, void* user_data)
 {
 	LLPermData *data = (LLPermData *)user_data;
 
 	gMessageSystem->nextBlockFast(_PREHASH_ObjectData);
-	gMessageSystem->addU32Fast(_PREHASH_ObjectLocalID, node->getObject()->getLocalID());
+	gMessageSystem->addU32Fast(_PREHASH_ObjectLocalID,
+							   node->getObject()->getLocalID());
 
 	gMessageSystem->addU8Fast(_PREHASH_Field, data->mField);
 	gMessageSystem->addBOOLFast(_PREHASH_Set, data->mSet);
@@ -4345,9 +4362,10 @@ void LLSelectMgr::packPermissions(LLSelectNode* node, void *user_data)
 // an object on the selection list.  We want to do this to reduce the total
 // number of packets sent by the viewer.
 void LLSelectMgr::sendListToRegions(const std::string& message_name,
-									void (*pack_header)(void *user_data), 
-									void (*pack_body)(LLSelectNode* node, void *user_data), 
-									void *user_data,
+									void (*pack_header)(void* user_data), 
+									void (*pack_body)(LLSelectNode* node,
+													  void* user_data), 
+									void* user_data,
 									ESendType send_type)
 {
 	LLSelectNode* node;
@@ -5432,7 +5450,7 @@ void LLSelectNode::saveColors()
 	if (mObject.notNull())
 	{
 		mSavedColors.clear();
-		for (S32 i = 0; i < mObject->getNumTEs(); i++)
+		for (S32 i = 0, count = mObject->getNumTEs(); i < count; i++)
 		{
 			const LLTextureEntry* tep = mObject->getTE(i);
 			mSavedColors.push_back(tep->getColor());
@@ -5459,7 +5477,7 @@ void LLSelectNode::saveTextureScaleRatios()
 	mTextureScaleRatios.clear();
 	if (mObject.notNull())
 	{
-		for (U8 i = 0; i < mObject->getNumTEs(); i++)
+		for (U8 i = 0, count = mObject->getNumTEs(); i < count; i++)
 		{
 			F32 s,t;
 			const LLTextureEntry* tep = mObject->getTE(i);
@@ -5580,7 +5598,6 @@ BOOL LLSelectNode::allowOperationOnNode(PermissionBit op, U64 group_proxy_power)
 // Helper function for pushing relevant vertices from drawable to GL
 void pushWireframe(LLDrawable* drawable)
 {
-#if 1
 	LLVOVolume* vobj = drawable->getVOVolume();
 	if (vobj)
 	{
@@ -5602,7 +5619,8 @@ void pushWireframe(LLDrawable* drawable)
 
 		if (volume)
 		{
-			for (S32 i = 0; i < volume->getNumVolumeFaces(); ++i)
+			for (S32 i = 0, count = volume->getNumVolumeFaces(); i < count;
+				 ++i)
 			{
 				const LLVolumeFace& face = volume->getVolumeFace(i);
 				glVertexPointer(3, GL_FLOAT, 16, face.mPositions);
@@ -5613,42 +5631,6 @@ void pushWireframe(LLDrawable* drawable)
 
 		gGL.popMatrix();
 	}
-#else
-	if (drawable->isState(LLDrawable::RIGGED))
-	{	// render straight from rigged volume if this is a rigged attachment
-		LLVOVolume* vobj = drawable->getVOVolume();
-		if (vobj)
-		{
-			vobj->updateRiggedVolume();
-			LLRiggedVolume* rigged_volume = vobj->getRiggedVolume();
-			if (rigged_volume)
-			{
-				LLVertexBuffer::unbind();
-				gGL.pushMatrix();
-				glMultMatrixf((F32*)vobj->getRelativeXform().mMatrix);
-				for (S32 i = 0; i < rigged_volume->getNumVolumeFaces(); ++i)
-				{
-					const LLVolumeFace& face = rigged_volume->getVolumeFace(i);
-					glVertexPointer(3, GL_FLOAT, 16, face.mPositions);
-					glDrawElements(GL_TRIANGLES, face.mNumIndices,
-								   GL_UNSIGNED_SHORT, face.mIndices);
-				}
-				gGL.popMatrix();
-			}
-		}
-	}
-	else
-	{
-		for (S32 i = 0; i < drawable->getNumFaces(); ++i)
-		{
-			LLFace* face = drawable->getFace(i);
-			if (face->verify())
-			{
-				pushVerts(face, LLVertexBuffer::MAP_VERTEX);
-			}
-		}
-	}
-#endif
 }
 
 void LLSelectNode::renderOneWireframe(const LLColor4& color)
@@ -6571,7 +6553,8 @@ S32 LLObjectSelection::getTECount()
 S32 LLObjectSelection::getRootObjectCount()
 {
 	S32 count = 0;
-	for (LLObjectSelection::root_iterator iter = root_begin(); iter != root_end(); iter++)
+	for (LLObjectSelection::root_iterator iter = root_begin();
+		 iter != root_end(); iter++)
 	{
 		++count;
 	}
@@ -6623,7 +6606,9 @@ bool LLObjectSelection::applyToTEs(LLSelectedTEFunctor* func, bool firstonly)
 		{
 			continue;
 		}
-		S32 num_tes = llmin((S32)object->getNumTEs(), (S32)object->getNumFaces()); // avatars have TEs but no faces
+		// avatars have TEs but no faces
+		S32 num_tes = llmin((S32)object->getNumTEs(),
+							(S32)object->getNumFaces());
 		for (S32 te = 0; te < num_tes; ++te)
 		{
 			if (node->isTESelected(te))
@@ -6712,7 +6697,7 @@ BOOL LLObjectSelection::contains(LLViewerObject* object, S32 te)
 				}
 
 				BOOL all_selected = TRUE;
-				for (S32 i = 0; i < object->getNumTEs(); i++)
+				for (S32 i = 0, count = object->getNumTEs(); i < count; i++)
 				{
 					all_selected = all_selected && nodep->isTESelected(i);
 				}
