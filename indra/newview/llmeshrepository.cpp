@@ -324,16 +324,14 @@ void log_upload_error(S32 status, const LLSD& content, std::string stage, std::s
 	gMeshRepo.uploadError(args);
 
 	// Log details.
-	LL_WARNS("Mesh") << "stage: " << stage << " http status: " << status << LL_ENDL;
+	llwarns << "stage: " << stage << " http status: " << status << llendl;
 	if (content.has("error"))
 	{
 		const LLSD& err = content["error"];
-		LL_WARNS("Mesh") << "err: " << err << "\n"
-						 << "mesh upload failed, stage '" << stage
-						 << "' error '" << err["error"].asString()
-						 << "', message '" << err["message"].asString()
-						 << "', id '" << err["identifier"].asString()
-						 << "'" << LL_ENDL;
+		llwarns << "err: " << err << "\nmesh upload failed, stage '" << stage
+				<< "' error '" << err["error"].asString() << "', message '"
+				<< err["message"].asString() << "', id '"
+				<< err["identifier"].asString() << "'" << llendl;
 		if (err.has("errors"))
 		{
 			S32 error_num = 0;
@@ -342,12 +340,12 @@ void log_upload_error(S32 status, const LLSD& content, std::string stage, std::s
 				 it != err_list.endArray(); ++it)
 			{
 				const LLSD& err_entry = *it;
-				LL_WARNS("Mesh") << "error[" << error_num << "]:" << LL_ENDL;
+				llwarns << "error[" << error_num << "]:" << llendl;
 				for (LLSD::map_const_iterator map_it = err_entry.beginMap();
 					 map_it != err_entry.endMap(); ++map_it)
 				{
-					LL_WARNS("Mesh") << "\t" << map_it->first << ": "
-									 << map_it->second << LL_ENDL;
+					llwarns << "\t" << map_it->first << ": " << map_it->second
+							<< llendl;
 				}
 				error_num++;
 			}
@@ -355,7 +353,7 @@ void log_upload_error(S32 status, const LLSD& content, std::string stage, std::s
 	}
 	else
 	{
-		LL_WARNS("Mesh") << "bad mesh, no error information available" << LL_ENDL;
+		llwarns << "bad mesh, no error information available" << llendl;
 	}
 }
 
@@ -405,7 +403,7 @@ public:
 		}
 		else
 		{
-			LL_WARNS("Mesh") << "fee request failed" << LL_ENDL;
+			llwarns << "fee request failed" << llendl;
 			log_upload_error(status, cc, "fee", mModelData["name"]);
 			mThread->mWholeModelUploadURL = "";
 
@@ -465,7 +463,7 @@ public:
 		}
 		else
 		{
-			LL_WARNS("Mesh") << "upload failed" << LL_ENDL;
+			llwarns << "upload failed" << llendl;
 			std::string model_name = mModelData["name"].asString();
 			log_upload_error(status, cc, "upload", model_name);
 
@@ -503,7 +501,7 @@ void LLMeshRepoThread::run()
 	LLCDResult res = LLConvexDecomposition::initThread();
 	if (res != LLCD_OK)
 	{
-		LL_WARNS("Mesh") << "convex decomposition unable to be loaded" << LL_ENDL;
+		llwarns << "convex decomposition unable to be loaded" << llendl;
 	}
 
 	while (!LLApp::isQuitting())
@@ -619,7 +617,7 @@ void LLMeshRepoThread::run()
 	res = LLConvexDecomposition::quitThread();
 	if (res != LLCD_OK)
 	{
-		LL_WARNS("Mesh") << "convex decomposition unable to be quit" << LL_ENDL;
+		llwarns << "convex decomposition unable to be quit" << llendl;
 	}
 
 	delete mCurlRequest;
@@ -690,8 +688,8 @@ std::string LLMeshRepoThread::constructUrl(LLUUID mesh_id)
 	}
 	else
 	{
-		LL_WARNS("Mesh") << "Current region does not have GetMesh capability, cannot load "
-						 << mesh_id << ".mesh" << LL_ENDL;
+		llwarns << "Current region does not have GetMesh capability, cannot load "
+				<< mesh_id << ".mesh" << llendl;
 	}
 
 	return http_url;
@@ -1117,8 +1115,8 @@ bool LLMeshRepoThread::headerReceived(const LLVolumeParams& mesh_params,
 
 		if (!LLSDSerialize::fromBinary(header, stream, data_size))
 		{
-			LL_WARNS("Mesh") << "Mesh header parse error. Not a valid mesh asset!"
-							 << LL_ENDL;
+			llwarns << "Mesh header parse error. Not a valid mesh asset !"
+					<< llendl;
 			return false;
 		}
 
@@ -1193,8 +1191,8 @@ bool LLMeshRepoThread::skinInfoReceived(const LLUUID& mesh_id, U8* data, S32 dat
 
 		if (!unzip_llsd(skin, stream, data_size))
 		{
-			LL_WARNS("Mesh") << "Mesh skin info parse error. Not a valid mesh asset!"
-							 << LL_ENDL;
+			llwarns << "Mesh skin info parse error. Not a valid mesh asset !"
+					<< llendl;
 			return false;
 		}
 	}
@@ -1221,8 +1219,8 @@ bool LLMeshRepoThread::decompositionReceived(const LLUUID& mesh_id, U8* data,
 
 		if (!unzip_llsd(decomp, stream, data_size))
 		{
-			LL_WARNS("Mesh") << "Mesh decomposition parse error. Not a valid mesh asset!"
-							 << LL_ENDL;
+			llwarns << "Mesh decomposition parse error. Not a valid mesh asset !"
+					<< llendl;
 			return false;
 		}
 	}
@@ -1862,7 +1860,7 @@ void LLMeshLODResponder::completedRaw(U32 status, const std::string& reason,
 
 	if (status < 200 || status > 400)
 	{
-		LL_WARNS("Mesh") << status << ": " << reason << LL_ENDL;
+		llwarns << status << ": " << reason << llendl;
 	}
 
 	if (data_size < mRequestedBytes)
@@ -1874,7 +1872,7 @@ void LLMeshLODResponder::completedRaw(U32 status, const std::string& reason,
 		}
 		else
 		{
-			LL_WARNS("Mesh") << "Unhandled status " << status << LL_ENDL;
+			llwarns << "Unhandled status " << status << llendl;
 		}
 		return;
 	}
@@ -1917,7 +1915,7 @@ void LLMeshSkinInfoResponder::completedRaw(U32 status, const std::string& reason
 
 	if (status < 200 || status > 400)
 	{
-		LL_WARNS("Mesh") << status << ": " << reason << LL_ENDL;
+		llwarns << status << ": " << reason << llendl;
 	}
 
 	if (data_size < mRequestedBytes)
@@ -1929,7 +1927,7 @@ void LLMeshSkinInfoResponder::completedRaw(U32 status, const std::string& reason
 		}
 		else
 		{
-			LL_WARNS("Mesh") << "Unhandled status " << status << LL_ENDL;
+			llwarns << "Unhandled status " << status << llendl;
 		}
 		return;
 	}
@@ -1971,7 +1969,7 @@ void LLMeshDecompositionResponder::completedRaw(U32 status, const std::string& r
 
 	if (status < 200 || status > 400)
 	{
-		LL_WARNS("Mesh") << status << ": " << reason << LL_ENDL;
+		llwarns << status << ": " << reason << llendl;
 	}
 
 	if (data_size < mRequestedBytes)
@@ -1983,7 +1981,7 @@ void LLMeshDecompositionResponder::completedRaw(U32 status, const std::string& r
 		}
 		else
 		{
-			LL_WARNS("Mesh") << "Unhandled status " << status << LL_ENDL;
+			llwarns << "Unhandled status " << status << llendl;
 		}
 		return;
 	}
@@ -2026,7 +2024,7 @@ void LLMeshPhysicsShapeResponder::completedRaw(U32 status,
 
 	if (status < 200 || status > 400)
 	{
-		LL_WARNS("Mesh") << status << ": " << reason << LL_ENDL;
+		llwarns << status << ": " << reason << llendl;
 	}
 
 	if (data_size < mRequestedBytes)
@@ -2038,7 +2036,7 @@ void LLMeshPhysicsShapeResponder::completedRaw(U32 status,
 		}
 		else
 		{
-			LL_WARNS("Mesh") << "Unhandled status " << status << LL_ENDL;
+			llwarns << "Unhandled status " << status << llendl;
 		}
 		return;
 	}
@@ -2079,9 +2077,8 @@ void LLMeshHeaderResponder::completedRaw(U32 status,
 {
 	if (status < 200 || status > 400)
 	{
-		//LL_WARNS("Mesh")
-		//	<< "Header responder failed with status: "
-		//	<< status << ": " << reason << LL_ENDL;
+		//llwarns << "Header responder failed with status: "
+		//		<< status << ": " << reason << llendl;
 
 		// 503 (service unavailable) or 499 (timeout)
 		// can be due to server load and can be retried
@@ -2114,8 +2111,8 @@ void LLMeshHeaderResponder::completedRaw(U32 status,
 
 	if (!gMeshRepo.mThread->headerReceived(mMeshParams, data, data_size))
 	{
-		LL_WARNS("Mesh") << "Unable to parse mesh header: " << status
-						 << ": " << reason << LL_ENDL;
+		llwarns << "Unable to parse mesh header: " << status << ": " << reason
+				<< llendl;
 	}
 	else if (data && data_size > 0)
 	{
@@ -2296,7 +2293,9 @@ S32 LLMeshRepository::loadMesh(LLVOVolume* vobj, const LLVolumeParams& mesh_para
 			LL_DEBUGS("Mesh") << "Initiating request for the associated mesh"
 							  << LL_ENDL;
 			mLoadingMeshes[detail][mesh_params].insert(vobj->getID());
-			if (detail != 3 && gSavedSettings.getBOOL("MeshLoadHighLOD"))
+			static LLCachedControl<bool> mesh_load_high_lod(gSavedSettings,
+															"MeshLoadHighLOD");
+			if (detail != 3 && mesh_load_high_lod)
 			{
 				LL_DEBUGS("Mesh") << "Loading at max LOD (3) for this mesh"
 								  << LL_ENDL;
@@ -2607,7 +2606,7 @@ void LLMeshRepository::notifyMeshLoaded(const LLVolumeParams& mesh_params, LLVol
 		// make sure target volume is still valid
 		if (volume->getNumVolumeFaces() <= 0)
 		{
-			LL_WARNS("Mesh") << "Mesh loading returned empty volume." << LL_ENDL;
+			llwarns << "Mesh loading returned empty volume." << llendl;
 		}
 
 		{	// update system volume
@@ -2621,7 +2620,8 @@ void LLMeshRepository::notifyMeshLoaded(const LLVolumeParams& mesh_params, LLVol
 			}
 			else
 			{
-				LL_WARNS("Mesh") << "Couldn't find system volume for given mesh." << LL_ENDL;
+				llwarns << "Couldn't find system volume for given mesh."
+						<< llendl;
 			}
 		}
 
@@ -3243,8 +3243,8 @@ void LLPhysicsDecomp::doDecomposition()
 
 	if (ret)
 	{
-		LL_WARNS("Mesh") << "Convex Decomposition thread valid but could not execute stage "
-						 << stage << LL_ENDL;
+		llwarns << "Convex Decomposition thread valid but could not execute stage "
+				<< stage << llendl;
 		LLMutexLock lock(mMutex);
 
 		mCurRequest->mHull.clear();
@@ -3377,8 +3377,8 @@ void LLPhysicsDecomp::doDecompositionSingleHull()
 	LLCDResult ret = decomp->buildSingleHull();
 	if (ret)
 	{
-		LL_WARNS("Mesh") << "Could not execute decomposition stage when attempting to create single hull."
-						 << LL_ENDL;
+		llwarns << "Could not execute decomposition stage when attempting to create single hull."
+				<< llendl;
 		make_box(mCurRequest);
 	}
 	else

@@ -68,7 +68,7 @@ LLShaderMgr * LLShaderMgr::instance()
 {
 	if (NULL == sInstance)
 	{
-		LL_ERRS("Shaders") << "LLShaderMgr should already have been instantiated by the application!" << LL_ENDL;
+		llerrs << "LLShaderMgr should already have been instantiated by the application!" << llendl;
 	}
 
 	return sInstance;
@@ -313,7 +313,7 @@ void LLShaderMgr::dumpObjectLog(GLhandleARB ret, BOOL warns)
 	{
 		if (warns)
 		{
-			LL_WARNS("ShaderLoading") << log << LL_ENDL;
+			llwarns << log << llendl;
 		}
 		else
 		{
@@ -330,7 +330,7 @@ GLhandleARB LLShaderMgr::loadShaderFile(const std::string& filename, S32 & shade
 		error = glGetError();
 		if (error != GL_NO_ERROR)
 		{
-			LL_WARNS("ShaderLoading") << "GL ERROR entering loadShaderFile(): " << error << LL_ENDL;
+			llwarns << "GL ERROR entering loadShaderFile(): " << error << llendl;
 		}
 	}
 
@@ -358,14 +358,14 @@ GLhandleARB LLShaderMgr::loadShaderFile(const std::string& filename, S32 & shade
 		file = LLFile::fopen(fname.str(), "r");		/* Flawfinder: ignore */
 		if (file)
 		{
-			LL_INFOS("ShaderLoading") << "Loading file: shaders/class" << gpu_class << "/" << filename << " (Want class " << gpu_class << ")" << LL_ENDL;
+			llinfos << "Loading file: shaders/class" << gpu_class << "/" << filename << " (Want class " << gpu_class << ")" << llendl;
 			break; // done
 		}
 	}
 
 	if (file == NULL)
 	{
-		LL_WARNS("ShaderLoading") << "GLSL Shader file not found: " << filename << LL_ENDL;
+		llwarns << "GLSL Shader file not found: " << filename << llendl;
 		return 0;
 	}
 
@@ -389,7 +389,7 @@ GLhandleARB LLShaderMgr::loadShaderFile(const std::string& filename, S32 & shade
 		error = glGetError();
 		if (error != GL_NO_ERROR)
 		{
-			LL_WARNS("ShaderLoading") << "GL ERROR in glCreateShaderObjectARB: " << error << LL_ENDL;
+			llwarns << "GL ERROR in glCreateShaderObjectARB: " << error << llendl;
 		}
 	}
 
@@ -401,7 +401,7 @@ GLhandleARB LLShaderMgr::loadShaderFile(const std::string& filename, S32 & shade
 		error = glGetError();
 		if (error != GL_NO_ERROR)
 		{
-			LL_WARNS("ShaderLoading") << "GL ERROR in glShaderSourceARB: " << error << LL_ENDL;
+			llwarns << "GL ERROR in glShaderSourceARB: " << error << llendl;
 		}
 	}
 
@@ -413,7 +413,7 @@ GLhandleARB LLShaderMgr::loadShaderFile(const std::string& filename, S32 & shade
 		error = glGetError();
 		if (error != GL_NO_ERROR)
 		{
-			LL_WARNS("ShaderLoading") << "GL ERROR in glCompileShaderARB: " << error << LL_ENDL;
+			llwarns << "GL ERROR in glCompileShaderARB: " << error << llendl;
 		}
 	}
 
@@ -433,7 +433,7 @@ GLhandleARB LLShaderMgr::loadShaderFile(const std::string& filename, S32 & shade
 			if (error != GL_NO_ERROR || success == GL_FALSE) 
 			{
 				//an error occured, print log
-				LL_WARNS("ShaderLoading") << "GLSL Compilation Error: (" << error << ") in " << filename << LL_ENDL;
+				llwarns << "GLSL Compilation Error: (" << error << ") in " << filename << llendl;
 				dumpObjectLog(ret);
 				ret = 0;
 			}
@@ -459,7 +459,7 @@ GLhandleARB LLShaderMgr::loadShaderFile(const std::string& filename, S32 & shade
 			shader_level--;
 			return loadShaderFile(filename,shader_level,type);
 		}
-		LL_WARNS("ShaderLoading") << "Failed to load " << filename << LL_ENDL;
+		llwarns << "Failed to load " << filename << llendl;
 	}
 	return ret;
 }
@@ -473,7 +473,7 @@ BOOL LLShaderMgr::linkProgramObject(GLhandleARB obj, BOOL suppress_errors)
 	if (!suppress_errors && success == GL_FALSE) 
 	{
 		//an error occured, print log
-		LL_WARNS("ShaderLoading") << "GLSL Linker Error:" << LL_ENDL;
+		llwarns << "GLSL Linker Error:" << llendl;
 	}
 
 // NOTE: Removing LL_DARWIN block as it doesn't seem to actually give the correct answer, 
@@ -493,7 +493,7 @@ BOOL LLShaderMgr::linkProgramObject(GLhandleARB obj, BOOL suppress_errors)
 	CGLGetParameter (ctx, kCGLCPGPUFragmentProcessing, &fragmentGPUProcessing);
 	if (!fragmentGPUProcessing || !vertexGPUProcessing)
 	{
-		LL_WARNS("ShaderLoading") << "GLSL Linker: Running in Software:" << LL_ENDL;
+		llwarns << "GLSL Linker: Running in Software:" << llendl;
 		success = GL_FALSE;
 		suppress_errors = FALSE;
 	}
@@ -503,7 +503,7 @@ BOOL LLShaderMgr::linkProgramObject(GLhandleARB obj, BOOL suppress_errors)
 	LLStringUtil::toLower(log);
 	if (log.find("software") != std::string::npos)
 	{
-		LL_WARNS("ShaderLoading") << "GLSL Linker: Running in Software:" << LL_ENDL;
+		llwarns << "GLSL Linker: Running in Software:" << llendl;
 		success = GL_FALSE;
 		suppress_errors = FALSE;
 	}
@@ -524,7 +524,7 @@ BOOL LLShaderMgr::validateProgramObject(GLhandleARB obj)
 	glGetObjectParameterivARB(obj, GL_OBJECT_VALIDATE_STATUS_ARB, &success);
 	if (success == GL_FALSE)
 	{
-		LL_WARNS("ShaderLoading") << "GLSL program not valid: " << LL_ENDL;
+		llwarns << "GLSL program not valid: " << llendl;
 		dumpObjectLog(obj);
 	}
 	else

@@ -49,12 +49,13 @@ public :
 	{
 	protected:
 		TranslationReceiver(const std::string &fromLang, const std::string &toLang)
-			: m_fromLang(fromLang),
+		:	m_fromLang(fromLang),
 			m_toLang(toLang)
 		{
 		}
 
-		virtual void handleResponse(const std::string &translation, const std::string &recognizedLang) {}
+		virtual void handleResponse(const std::string& translation,
+									const std::string& recognizedLang) {}
 		virtual void handleFailure() {};
 
 	public:
@@ -64,15 +65,14 @@ public :
 
 		virtual void error(U32 status, const std::string& reason)
 		{
-			LL_WARNS("Translate") << "URL Request error: " << reason << LL_ENDL;
+			llwarns << "URL Request error: " << reason << llendl;
 			handleFailure();
 		}
 
-		virtual void completedRaw(
-			U32 status,
-			const std::string& reason,
-			const LLChannelDescriptors& channels,
-			const LLIOPipe::buffer_ptr_t& buffer)
+		virtual void completedRaw(U32 status,
+								  const std::string& reason,
+								  const LLChannelDescriptors& channels,
+								  const LLIOPipe::buffer_ptr_t& buffer)
 		{
 			LLBufferStream istr(channels, buffer.get());
 
@@ -90,12 +90,12 @@ public :
 			}
 
 			// Fix up the response
-			stringReplaceAll( translation, "&lt;","<");
-			stringReplaceAll( translation, "&gt;",">");
-			stringReplaceAll( translation, "&quot;","\"");
-			stringReplaceAll( translation, "&#39;","'");
-			stringReplaceAll( translation, "&amp;","&");
-			stringReplaceAll( translation, "&apos;","'");
+			stringReplaceAll(translation, "&lt;","<");
+			stringReplaceAll(translation, "&gt;",">");
+			stringReplaceAll(translation, "&quot;","\"");
+			stringReplaceAll(translation, "&#39;","'");
+			stringReplaceAll(translation, "&amp;","&");
+			stringReplaceAll(translation, "&apos;","'");
 
 			handleResponse(translation, detectedLanguage);
 		}

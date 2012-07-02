@@ -332,7 +332,7 @@ void LLGLManager::initWGL()
 #if LL_WINDOWS && !LL_MESA_HEADLESS
 	if (!glh_init_extensions("WGL_ARB_pixel_format"))
 	{
-		LL_WARNS("RenderInit") << "No ARB pixel format extensions" << LL_ENDL;
+		llwarns << "No ARB pixel format extensions" << llendl;
 	}
 
 	if (ExtensionExists("WGL_EXT_swap_control", gGLHExts.mSysExts))
@@ -342,12 +342,12 @@ void LLGLManager::initWGL()
 
 	if( !glh_init_extensions("WGL_ARB_pbuffer") )
 	{
-		LL_WARNS("RenderInit") << "No ARB WGL PBuffer extensions" << LL_ENDL;
+		llwarns << "No ARB WGL PBuffer extensions" << llendl;
 	}
 
 	if( !glh_init_extensions("WGL_ARB_render_texture") )
 	{
-		LL_WARNS("RenderInit") << "No ARB WGL render texture extensions" << LL_ENDL;
+		llwarns << "No ARB WGL render texture extensions" << llendl;
 	}
 
 	mHasPBuffer = ExtensionExists("WGL_ARB_pbuffer", gGLHExts.mSysExts) &&
@@ -361,14 +361,14 @@ bool LLGLManager::initGL()
 {
 	if (mInited)
 	{
-		LL_ERRS("RenderInit") << "Calling init on LLGLManager after already initialized!" << LL_ENDL;
+		llerrs << "Calling init on LLGLManager after already initialized!" << llendl;
 	}
 
 	GLint alpha_bits;
 	glGetIntegerv( GL_ALPHA_BITS, &alpha_bits );
 	if( 8 != alpha_bits )
 	{
-		LL_WARNS("RenderInit") << "Frame buffer has less than 8 bits of alpha.  Avatar texture compositing will fail." << LL_ENDL;
+		llwarns << "Frame buffer has less than 8 bits of alpha.  Avatar texture compositing will fail." << llendl;
 	}
 
 	// Extract video card strings and convert to upper case to
@@ -488,7 +488,7 @@ bool LLGLManager::initGL()
 		mHasRequirements = FALSE;
 
 		// We don't support cards that don't support the GL_ARB_multitexture extension
-		LL_WARNS("RenderInit") << "GL Drivers do not support GL_ARB_multitexture" << LL_ENDL;
+		llwarns << "GL Drivers do not support GL_ARB_multitexture" << llendl;
 		return false;
 	}
 	
@@ -537,9 +537,9 @@ void LLGLManager::printGLInfoString()
 	std::string info_str;
 	std::string all_exts, line;
 	
-	LL_INFOS("RenderInit") << "GL_VENDOR:     " << ((const char *)glGetString(GL_VENDOR)) << LL_ENDL;
-	LL_INFOS("RenderInit") << "GL_RENDERER:   " << ((const char *)glGetString(GL_RENDERER)) << LL_ENDL;
-	LL_INFOS("RenderInit") << "GL_VERSION:    " << ((const char *)glGetString(GL_VERSION)) << LL_ENDL;
+	llinfos << "GL_VENDOR:     " << ((const char *)glGetString(GL_VENDOR)) << llendl;
+	llinfos << "GL_RENDERER:   " << ((const char *)glGetString(GL_RENDERER)) << llendl;
+	llinfos << "GL_VERSION:    " << ((const char *)glGetString(GL_VERSION)) << llendl;
 
 #if !LL_MESA_HEADLESS
 	all_exts = std::string(gGLHExts.mSysExts);
@@ -681,7 +681,7 @@ void LLGLManager::initExtensions()
 		mHasShaderObjects = FALSE;
 		mHasVertexShader = FALSE;
 		mHasFragmentShader = FALSE;
-		LL_WARNS("RenderInit") << "GL extension support DISABLED via LL_GL_NOEXT" << LL_ENDL;
+		llwarns << "GL extension support DISABLED via LL_GL_NOEXT" << llendl;
 	}
 	else if (getenv("LL_GL_BASICEXT"))	/* Flawfinder: ignore */
 	{
@@ -697,7 +697,7 @@ void LLGLManager::initExtensions()
 		mHasVertexShader = FALSE;
 		mHasFragmentShader = FALSE;
 		mHasBlendFuncSeparate = FALSE;
-		LL_WARNS("RenderInit") << "GL extension support forced to SIMPLE level via LL_GL_BASICEXT" << LL_ENDL;
+		llwarns << "GL extension support forced to SIMPLE level via LL_GL_BASICEXT" << llendl;
 	}
 	if (getenv("LL_GL_BLACKLIST"))	/* Flawfinder: ignore */
 	{
@@ -705,7 +705,7 @@ void LLGLManager::initExtensions()
 		// GL extensions to isolate problems with their hardware.
 		// SL-28126
 		const char *const blacklist = getenv("LL_GL_BLACKLIST");	/* Flawfinder: ignore */
-		LL_WARNS("RenderInit") << "GL extension support partially disabled via LL_GL_BLACKLIST: " << blacklist << LL_ENDL;
+		llwarns << "GL extension support partially disabled via LL_GL_BLACKLIST: " << blacklist << llendl;
 		if (strchr(blacklist,'a')) mHasARBEnvCombine = FALSE;
 		if (strchr(blacklist,'b')) mHasCompressedTextures = FALSE;
 		if (strchr(blacklist,'c')) mHasVertexBufferObject = FALSE;
@@ -732,70 +732,70 @@ void LLGLManager::initExtensions()
 	
 	if (!mHasMultitexture)
 	{
-		LL_INFOS("RenderInit") << "Couldn't initialize multitexturing" << LL_ENDL;
+		llinfos << "Couldn't initialize multitexturing" << llendl;
 	}
 	if (!mHasMipMapGeneration)
 	{
-		LL_INFOS("RenderInit") << "Couldn't initialize mipmap generation" << LL_ENDL;
+		llinfos << "Couldn't initialize mipmap generation" << llendl;
 	}
 	if (!mHasARBEnvCombine)
 	{
-		LL_INFOS("RenderInit") << "Couldn't initialize GL_ARB_texture_env_combine" << LL_ENDL;
+		llinfos << "Couldn't initialize GL_ARB_texture_env_combine" << llendl;
 	}
 	if (!mHasSeparateSpecularColor)
 	{
-		LL_INFOS("RenderInit") << "Couldn't initialize separate specular color" << LL_ENDL;
+		llinfos << "Couldn't initialize separate specular color" << llendl;
 	}
 	if (!mHasAnisotropic)
 	{
-		LL_INFOS("RenderInit") << "Couldn't initialize anisotropic filtering" << LL_ENDL;
+		llinfos << "Couldn't initialize anisotropic filtering" << llendl;
 	}
 	if (!mHasCompressedTextures)
 	{
-		LL_INFOS("RenderInit") << "Couldn't initialize GL_ARB_texture_compression" << LL_ENDL;
+		llinfos << "Couldn't initialize GL_ARB_texture_compression" << llendl;
 	}
 	if (!mHasOcclusionQuery)
 	{
-		LL_INFOS("RenderInit") << "Couldn't initialize GL_ARB_occlusion_query" << LL_ENDL;
+		llinfos << "Couldn't initialize GL_ARB_occlusion_query" << llendl;
 	}
 	if (!mHasOcclusionQuery2)
 	{
-		LL_INFOS("RenderInit") << "Couldn't initialize GL_ARB_occlusion_query2" << LL_ENDL;
+		llinfos << "Couldn't initialize GL_ARB_occlusion_query2" << llendl;
 	}
 	if (!mHasPointParameters)
 	{
-		LL_INFOS("RenderInit") << "Couldn't initialize GL_ARB_point_parameters" << LL_ENDL;
+		llinfos << "Couldn't initialize GL_ARB_point_parameters" << llendl;
 	}
 	if (!mHasShaderObjects)
 	{
-		LL_INFOS("RenderInit") << "Couldn't initialize GL_ARB_shader_objects" << LL_ENDL;
+		llinfos << "Couldn't initialize GL_ARB_shader_objects" << llendl;
 	}
 	if (!mHasVertexShader)
 	{
-		LL_INFOS("RenderInit") << "Couldn't initialize GL_ARB_vertex_shader" << LL_ENDL;
+		llinfos << "Couldn't initialize GL_ARB_vertex_shader" << llendl;
 	}
 	if (!mHasFragmentShader)
 	{
-		LL_INFOS("RenderInit") << "Couldn't initialize GL_ARB_fragment_shader" << LL_ENDL;
+		llinfos << "Couldn't initialize GL_ARB_fragment_shader" << llendl;
 	}
 	if (!mHasBlendFuncSeparate)
 	{
-		LL_INFOS("RenderInit") << "Couldn't initialize GL_EXT_blend_func_separate" << LL_ENDL;
+		llinfos << "Couldn't initialize GL_EXT_blend_func_separate" << llendl;
 	}
 	if (!mHasDrawBuffers)
 	{
-		LL_INFOS("RenderInit") << "Couldn't initialize GL_ARB_draw_buffers" << LL_ENDL;
+		llinfos << "Couldn't initialize GL_ARB_draw_buffers" << llendl;
 	}
 
 	// Disable certain things due to known bugs
 	if (mIsIntel && mHasMipMapGeneration)
 	{
-		LL_INFOS("RenderInit") << "Disabling mip-map generation for Intel GPUs" << LL_ENDL;
+		llinfos << "Disabling mip-map generation for Intel GPUs" << llendl;
 		mHasMipMapGeneration = FALSE;
 	}
 	if (mIsATI && mHasMipMapGeneration)
 	{
-		LL_INFOS("RenderInit") << "Disabling mip-map generation for ATI GPUs (performance opt)" << LL_ENDL;
+		llinfos << "Disabling mip-map generation for ATI GPUs (performance opt)" << llendl;
 		mHasMipMapGeneration = FALSE;
 	}
 	
@@ -1028,7 +1028,7 @@ void assert_glerror()
 	}
 	if (LL_UNLIKELY(!gGLManager.mInited))
 	{
-		LL_ERRS("RenderInit") << "GL not initialized" << LL_ENDL;
+		llerrs << "GL not initialized" << llendl;
 	}
 	//  Create or update texture to be used with this data 
 	GLenum error;
@@ -1040,14 +1040,14 @@ void assert_glerror()
 		GLubyte const * gl_error_msg = gluErrorString(error);
 		if (NULL != gl_error_msg)
 		{
-			LL_WARNS("RenderState") << "GL Error:" << error<< LL_ENDL;
-			LL_WARNS("RenderState") << "GL Error String:" << gl_error_msg << LL_ENDL;
+			llwarns << "GL Error:" << error<< llendl;
+			llwarns << "GL Error String:" << gl_error_msg << llendl;
 		}
 		else
 		{
 			// gluErrorString returns NULL for some extensions' error codes.
 			// you'll probably have to grep for the number in glext.h.
-			LL_WARNS("RenderState") << "GL Error: UNKNOWN 0x" << std::hex << error << std::dec << LL_ENDL;
+			llwarns << "GL Error: UNKNOWN 0x" << std::hex << error << std::dec << llendl;
 		}
 		error = glGetError();
 	}
@@ -1118,11 +1118,11 @@ void LLGLState::resetTextureStates()
 
 void LLGLState::dumpStates() 
 {
-	LL_INFOS("RenderState") << "GL States:" << LL_ENDL;
+	llinfos << "GL States:" << llendl;
 	for (boost::unordered_map<LLGLenum, LLGLboolean>::iterator iter = sStateMap.begin();
 		 iter != sStateMap.end(); ++iter)
 	{
-		LL_INFOS("RenderState") << llformat(" 0x%04x : %s",(S32)iter->first,iter->second?"TRUE":"FALSE") << LL_ENDL;
+		llinfos << llformat(" 0x%04x : %s",(S32)iter->first,iter->second?"TRUE":"FALSE") << llendl;
 	}
 }
 
@@ -1186,7 +1186,7 @@ void LLGLState::checkTextureChannels(const std::string& msg)
 		if (tex_env_mode != GL_MODULATE)
 		{
 			error = TRUE;
-			LL_WARNS("RenderState") << "GL_TEXTURE_ENV_MODE invalid: " << std::hex << tex_env_mode << std::dec << LL_ENDL;
+			llwarns << "GL_TEXTURE_ENV_MODE invalid: " << std::hex << tex_env_mode << std::dec << llendl;
 		}
 	}
 
@@ -1237,7 +1237,7 @@ void LLGLState::checkTextureChannels(const std::string& msg)
 		if (stackDepth != 1)
 		{
 			error = TRUE;
-			LL_WARNS("RenderState") << "Texture matrix stack corrupted." << LL_ENDL;
+			llwarns << "Texture matrix stack corrupted." << llendl;
 		}
 
 		glGetFloatv(GL_TEXTURE_MATRIX, (GLfloat*) mat.m);
@@ -1246,7 +1246,7 @@ void LLGLState::checkTextureChannels(const std::string& msg)
 		if (mat != identity)
 		{
 			error = TRUE;
-			LL_WARNS("RenderState") << "Texture matrix in channel " << i << " corrupt." << LL_ENDL;
+			llwarns << "Texture matrix in channel " << i << " corrupt." << llendl;
 		}
 
 		for (S32 j = (i == 0 ? 1 : 0);
@@ -1255,7 +1255,7 @@ void LLGLState::checkTextureChannels(const std::string& msg)
 			if (glIsEnabled(value[j]))
 			{
 				error = TRUE;
-				LL_WARNS("RenderState") << "Texture channel " << i << " still has " << label[j] << " enabled." << LL_ENDL;
+				llwarns << "Texture channel " << i << " still has " << label[j] << " enabled." << llendl;
 			}
 			stop_glerror();
 		}
@@ -1266,7 +1266,7 @@ void LLGLState::checkTextureChannels(const std::string& msg)
 		if (mat != identity)
 		{
 			error = TRUE;
-			LL_WARNS("RenderState") << "Texture matrix " << i << " is not identity." << LL_ENDL;
+			llwarns << "Texture matrix " << i << " is not identity." << llendl;
 		}
 	}
 
@@ -1338,7 +1338,7 @@ void LLGLState::checkClientArrays(const std::string& msg, U32 data_mask)
 			if (!(mask[j] & data_mask))
 			{
 				error = TRUE;
-				LL_WARNS("RenderState") << "GL still has " << label[j] << " enabled." << LL_ENDL;
+				llwarns << "GL still has " << label[j] << " enabled." << llendl;
 			}
 		}
 		else
@@ -1346,7 +1346,7 @@ void LLGLState::checkClientArrays(const std::string& msg, U32 data_mask)
 			if (mask[j] & data_mask)
 			{
 				error = TRUE;
-				LL_WARNS("RenderState") << "GL does not have " << label[j] << " enabled." << LL_ENDL;
+				llwarns << "GL does not have " << label[j] << " enabled." << llendl;
 			}
 		}
 	}
@@ -1358,7 +1358,7 @@ void LLGLState::checkClientArrays(const std::string& msg, U32 data_mask)
 		if (!(data_mask & 0x0008))
 		{
 			error = TRUE;
-			LL_WARNS("RenderState") << "GL still has GL_TEXTURE_COORD_ARRAY enabled on channel 1." << LL_ENDL;
+			llwarns << "GL still has GL_TEXTURE_COORD_ARRAY enabled on channel 1." << llendl;
 		}
 	}
 	else
@@ -1366,7 +1366,7 @@ void LLGLState::checkClientArrays(const std::string& msg, U32 data_mask)
 		if (data_mask & 0x0008)
 		{
 			error = TRUE;
-			LL_WARNS("RenderState") << "GL does not have GL_TEXTURE_COORD_ARRAY enabled on channel 1." << LL_ENDL;
+			llwarns << "GL does not have GL_TEXTURE_COORD_ARRAY enabled on channel 1." << llendl;
 		}
 	}
 
@@ -1375,7 +1375,7 @@ void LLGLState::checkClientArrays(const std::string& msg, U32 data_mask)
 		if (!(data_mask & 0x0008))
 		{
 			error = TRUE;
-			LL_WARNS("RenderState") << "GL still has GL_TEXTURE_2D enabled on channel 1." << LL_ENDL;
+			llwarns << "GL still has GL_TEXTURE_2D enabled on channel 1." << llendl;
 		}
 	}
 	else
@@ -1383,7 +1383,7 @@ void LLGLState::checkClientArrays(const std::string& msg, U32 data_mask)
 		if (data_mask & 0x0008)
 		{
 			error = TRUE;
-			LL_WARNS("RenderState") << "GL does not have GL_TEXTURE_2D enabled on channel 1." << LL_ENDL;
+			llwarns << "GL does not have GL_TEXTURE_2D enabled on channel 1." << llendl;
 		}
 	}
 
@@ -1401,7 +1401,7 @@ void LLGLState::checkClientArrays(const std::string& msg, U32 data_mask)
 			if (enabled)
 			{
 				error = TRUE;
-				LL_WARNS("RenderState") << "GL still has vertex attrib array " << i << " enabled." << LL_ENDL;
+				llwarns << "GL still has vertex attrib array " << i << " enabled." << llendl;
 			}
 		}
 	}

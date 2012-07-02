@@ -404,10 +404,8 @@ U32 LLVOVolume::processUpdateMessage(LLMessageSystem *mesgsys,
 			BOOL res = LLVolumeMessage::unpackVolumeParams(&volume_params, *dp);
 			if (!res)
 			{
-				LL_WARNS("RenderVolume") << "Bogus volume parameters in object "
-										 << getID() << " at "
-										 << getRegion()->getOriginGlobal()
-										 << LL_ENDL;
+				llwarns << "Bogus volume parameters in object " << getID()
+						<< " at " << getRegion()->getOriginGlobal() << llendl;
 			}
 
 			volume_params.setSculptID(sculpt_id, sculpt_type);
@@ -421,13 +419,13 @@ U32 LLVOVolume::processUpdateMessage(LLMessageSystem *mesgsys,
 			{
 				// There's something bogus in the data that we're unpacking.
 				dp->dumpBufferToLog();
-				LL_WARNS("RenderVolume") << "Flushing cache files" << LL_ENDL;
+				llwarns << "Flushing cache files" << llendl;
 
 				std::string mask;
 				mask = gDirUtilp->getDirDelimiter() + "*.slc";
 				gDirUtilp->deleteFilesInDir(gDirUtilp->getExpandedFilename(LL_PATH_CACHE,""), mask);
 
-				LL_WARNS("RenderVolume") << "Bogus TE data in " << getID() << LL_ENDL;
+				llwarns << "Bogus TE data in " << getID() << llendl;
 			}
 			else
 			{
@@ -510,10 +508,10 @@ U32 LLVOVolume::processUpdateMessage(LLMessageSystem *mesgsys,
 		}
         else
 		{
-            LL_INFOS("MediaOnAPrim") << "Ignoring media update for: " << getID()
-									 << " Media URL: "
-									 << (mMedia ?  mMedia->mMediaURL : std::string(""))
-									 << LL_ENDL;
+            llinfos << "Ignoring media update for: " << getID()
+					<< " Media URL: "
+					<< (mMedia ?  mMedia->mMediaURL : std::string(""))
+					<< llendl;
         }
 	}
 	// ...and clean up any media impls
@@ -1190,19 +1188,17 @@ void LLVOVolume::sculpt()
 		S32 current_discard = getVolume()->getSculptLevel();
 		if (current_discard < -2)
 		{
-			LL_WARNS("RenderVolume") << "Current discard of sculpty at "
-									 << current_discard  << " is less than -2 !"
-									 << LL_ENDL;
+			llwarns << "Current discard of sculpty at " << current_discard
+					<< " is less than -2 !" << llendl;
 
 			// corrupted volume... don't update the sculpty
 			return;
 		}
 		else if (current_discard > MAX_DISCARD_LEVEL)
 		{
-			LL_WARNS("RenderVolume") << "Current discard of sculpty at "
-									 << current_discard
-									 << " is more than the allowed max of "
-									 << MAX_DISCARD_LEVEL << LL_ENDL;
+			llwarns << "Current discard of sculpty at " << current_discard
+					<< " is more than the allowed max of " << MAX_DISCARD_LEVEL
+					<< llendl;
 
 			// corrupted volume... don't update the sculpty
 			return;
@@ -1888,8 +1884,8 @@ S32 LLVOVolume::setTEColor(const U8 te, const LLColor4& color)
 	const LLTextureEntry *tep = getTE(te);
 	if (!tep)
 	{
-		LL_WARNS("RenderVolume") << "No texture entry for te " << (S32)te
-								 << ", object " << mID << LL_ENDL;
+		llwarns << "No texture entry for te " << (S32)te << ", object " << mID
+				<< llendl;
 	}
 	else if (color != tep->getColor())
 	{
@@ -2226,20 +2222,24 @@ void LLVOVolume::mediaNavigateBounceBack(U8 texture_index)
 		{
 			// The url to navigate back to is not good, and we have nowhere else
 			// to go.
-			LL_WARNS("MediaOnAPrim") << "FAILED to bounce back URL \"" << url << "\" -- unloading impl" << LL_ENDL;
+			llwarns << "FAILED to bounce back URL \"" << url
+					<< "\" -- unloading impl" << llendl;
 			impl->setMediaFailed(true);
 		}
-		else {
+		else
+		{
 			// Okay, navigate now
-            LL_INFOS("MediaOnAPrim") << "bouncing back to URL: " << url << LL_ENDL;
+            llinfos << "bouncing back to URL: " << url << llendl;
             impl->navigateTo(url, "", false, true);
         }
     }
 }
 
-bool LLVOVolume::hasMediaPermission(const LLMediaEntry* media_entry, MediaPermType perm_type)
+bool LLVOVolume::hasMediaPermission(const LLMediaEntry* media_entry,
+									MediaPermType perm_type)
 {
-    // NOTE: This logic ALMOST duplicates the logic in the server (in particular, in llmediaservice.cpp).
+    // NOTE: This logic ALMOST duplicates the logic in the server (in
+	// particular, in llmediaservice.cpp).
     if (NULL == media_entry) return false; // XXX should we assert here?
 
     // The agent has permissions if:
@@ -2247,32 +2247,28 @@ bool LLVOVolume::hasMediaPermission(const LLMediaEntry* media_entry, MediaPermTy
     // - group permissions are on, and agent_id is in the group, or
     // - agent permissions are on, and agent_id is the owner
 
-	// *NOTE: We *used* to check for modify permissions here (i.e. permissions were
-	// granted if permModify() was true).  However, this doesn't make sense in the
-	// viewer: we don't want to show controls or allow interaction if the author
-	// has deemed it so.  See DEV-42115.
+	// *NOTE: We *used* to check for modify permissions here (i.e. permissions
+	// were granted if permModify() was true).  However, this doesn't make
+	// sense in the viewer: we don't want to show controls or allow interaction
+	// if the author has deemed it so. See DEV-42115.
 
-    U8 media_perms = (perm_type == MEDIA_PERM_INTERACT) ? media_entry->getPermsInteract() : media_entry->getPermsControl();
+    U8 media_perms = (perm_type == MEDIA_PERM_INTERACT) ? media_entry->getPermsInteract()
+														: media_entry->getPermsControl();
 
-    // World permissions
     if (0 != (media_perms & LLMediaEntry::PERM_ANYONE))
-    {
+    {	// World permissions
         return true;
     }
-
-    // Group permissions
     else if (0 != (media_perms & LLMediaEntry::PERM_GROUP))
-    {
+    {	// Group permissions
 		LLPermissions* obj_perm = LLSelectMgr::getInstance()->findObjectPermissions(this);
 		if (obj_perm && gAgent.isInGroup(obj_perm->getGroup()))
 		{
 			return true;
 		}
     }
-
-    // Owner permissions
     else if (0 != (media_perms & LLMediaEntry::PERM_OWNER) && permYouOwner())
-    {
+    {	// Owner permissions
         return true;
     }
 
@@ -2280,11 +2276,14 @@ bool LLVOVolume::hasMediaPermission(const LLMediaEntry* media_entry, MediaPermTy
 
 }
 
-void LLVOVolume::mediaNavigated(LLViewerMediaImpl *impl, LLPluginClassMedia* plugin, std::string new_location)
+void LLVOVolume::mediaNavigated(LLViewerMediaImpl *impl,
+								LLPluginClassMedia* plugin,
+								std::string new_location)
 {
 	bool block_navigation = false;
-	// FIXME: if/when we allow the same media impl to be used by multiple faces, the logic here will need to be fixed
-	// to deal with multiple face indices.
+	// FIXME: if/when we allow the same media impl to be used by multiple
+	// faces, the logic here will need to be fixed to deal with multiple face
+	// indices.
 	int face_index = getFaceIndexWithMediaImpl(impl, -1);
 
 	// Find the media entry for this navigate
@@ -2308,12 +2307,12 @@ void LLVOVolume::mediaNavigated(LLViewerMediaImpl *impl, LLPluginClassMedia* plu
 	}
 	else
 	{
-		LL_WARNS("MediaOnAPrim") << "Couldn't find media entry!" << LL_ENDL;
+		llwarns << "Couldn't find media entry!" << llendl;
 	}
 
 	if (block_navigation)
 	{
-		LL_INFOS("MediaOnAPrim") << "blocking navigate to URI " << new_location << LL_ENDL;
+		llinfos << "blocking navigate to URI " << new_location << llendl;
 
 		// "bounce back" to the current URL from the media entry
 		mediaNavigateBounceBack(face_index);
@@ -2321,41 +2320,53 @@ void LLVOVolume::mediaNavigated(LLViewerMediaImpl *impl, LLPluginClassMedia* plu
 	else if (sObjectMediaNavigateClient)
 	{
 
-		LL_DEBUGS("MediaOnAPrim") << "broadcasting navigate with URI " << new_location << LL_ENDL;
+		LL_DEBUGS("MediaOnAPrim") << "broadcasting navigate with URI "
+								  << new_location << LL_ENDL;
 
-		sObjectMediaNavigateClient->navigate(new LLMediaDataClientObjectImpl(this, false), face_index, new_location);
+		sObjectMediaNavigateClient->navigate(new LLMediaDataClientObjectImpl(this,
+																			 false),
+											 face_index, new_location);
 	}
 }
 
-void LLVOVolume::mediaEvent(LLViewerMediaImpl *impl, LLPluginClassMedia* plugin, LLViewerMediaObserver::EMediaEvent event)
+void LLVOVolume::mediaEvent(LLViewerMediaImpl *impl,
+							LLPluginClassMedia* plugin,
+							LLViewerMediaObserver::EMediaEvent event)
 {
-	switch(event)
+	switch (event)
 	{
 
 		case LLViewerMediaObserver::MEDIA_EVENT_LOCATION_CHANGED:
 		{
-			switch(impl->getNavState())
+			switch (impl->getNavState())
 			{
 				case LLViewerMediaImpl::MEDIANAVSTATE_FIRST_LOCATION_CHANGED:
 				{
-					// This is the first location changed event after the start of a non-server-directed nav.  It may need to be broadcast or bounced back.
+					// This is the first location changed event after the start
+					// of a non-server-directed nav. It may need to be
+					// broadcast or bounced back.
 					mediaNavigated(impl, plugin, plugin->getLocation());
 				}
 				break;
 
 				case LLViewerMediaImpl::MEDIANAVSTATE_FIRST_LOCATION_CHANGED_SPURIOUS:
 					// This navigate didn't change the current URL.
-					LL_DEBUGS("MediaOnAPrim") << "	NOT broadcasting navigate (spurious)" << LL_ENDL;
+					LL_DEBUGS("MediaOnAPrim") << "NOT broadcasting navigate (spurious)"
+											  << LL_ENDL;
 				break;
 
 				case LLViewerMediaImpl::MEDIANAVSTATE_SERVER_FIRST_LOCATION_CHANGED:
-					// This is the first location changed event after the start of a server-directed nav.  Don't broadcast it.
-					LL_INFOS("MediaOnAPrim") << "	NOT broadcasting navigate (server-directed)" << LL_ENDL;
+					// This is the first location changed event after the start
+					// of a server-directed nav. Don't broadcast it.
+					llinfos << "NOT broadcasting navigate (server-directed)"
+							<< llendl;
 				break;
 
 				default:
-					// This is a subsequent location-changed due to a redirect.	 Don't broadcast.
-					LL_INFOS("MediaOnAPrim") << "	NOT broadcasting navigate (redirect)" << LL_ENDL;
+					// This is a subsequent location-changed due to a redirect.
+					// Don't broadcast.
+					llinfos << "NOT broadcasting navigate (redirect)"
+							<< llendl;
 				break;
 			}
 		}
@@ -2367,23 +2378,29 @@ void LLVOVolume::mediaEvent(LLViewerMediaImpl *impl, LLPluginClassMedia* plugin,
 			{
 				case LLViewerMediaImpl::MEDIANAVSTATE_COMPLETE_BEFORE_LOCATION_CHANGED:
 				{
-					// This is the first location changed event after the start of a non-server-directed nav.  It may need to be broadcast or bounced back.
+					// This is the first location changed event after the start
+					// of a non-server-directed nav. It may need to be
+					// broadcast or bounced back.
 					mediaNavigated(impl, plugin, plugin->getNavigateURI());
 				}
 				break;
 
 				case LLViewerMediaImpl::MEDIANAVSTATE_COMPLETE_BEFORE_LOCATION_CHANGED_SPURIOUS:
 					// This navigate didn't change the current URL.
-					LL_DEBUGS("MediaOnAPrim") << "	NOT broadcasting navigate (spurious)" << LL_ENDL;
+					LL_DEBUGS("MediaOnAPrim") << "NOT broadcasting navigate (spurious)"
+											  << LL_ENDL;
 				break;
 
 				case LLViewerMediaImpl::MEDIANAVSTATE_SERVER_COMPLETE_BEFORE_LOCATION_CHANGED:
-					// This is the the navigate complete event from a server-directed nav.  Don't broadcast it.
-					LL_INFOS("MediaOnAPrim") << "	NOT broadcasting navigate (server-directed)" << LL_ENDL;
+					// This is the the navigate complete event from a
+					// server-directed nav. Don't broadcast it.
+					llinfos << "NOT broadcasting navigate (server-directed)"
+							<< llendl;
 				break;
 
 				default:
-					// For all other states, the navigate should have been handled by LOCATION_CHANGED events already.
+					// For all other states, the navigate should have been
+					// handled by LOCATION_CHANGED events already.
 				break;
 			}
 		}
@@ -2392,7 +2409,6 @@ void LLVOVolume::mediaEvent(LLViewerMediaImpl *impl, LLPluginClassMedia* plugin,
 		default:
 		break;
 	}
-
 }
 
 void LLVOVolume::sendMediaDataUpdate()
@@ -3042,7 +3058,8 @@ BOOL LLVOVolume::isHUDAttachment() const
 
 const LLMatrix4 LLVOVolume::getRenderMatrix() const
 {
-	if (mDrawable->isActive() && !mDrawable->isRoot())
+	if (mDrawable->isActive() && !mDrawable->isRoot() &&
+		mDrawable->getParent())
 	{
 		return mDrawable->getParent()->getWorldMatrix();
 	}
@@ -4413,7 +4430,7 @@ void LLVolumeGeometryManager::registerFace(LLSpatialGroup* group, LLFace* facep,
 	if (!fullbright && type != LLRenderPass::PASS_GLOW &&
 		!facep->getVertexBuffer()->hasDataType(LLVertexBuffer::TYPE_NORMAL))
 	{
-		LL_WARNS("RenderVolume") << "Non fullbright face has no normals!" << LL_ENDL;
+		llwarns << "Non fullbright face has no normals!" << llendl;
 		return;
 	}
 

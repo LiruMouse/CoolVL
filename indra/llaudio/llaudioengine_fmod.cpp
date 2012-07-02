@@ -55,11 +55,9 @@
 
 #include "sound_ids.h"
 
-
 extern "C" {
 	void * F_CALLBACKAPI windCallback(void *originalbuffer, void *newbuffer, int length, void* userdata);
 }
-
 
 LLAudioEngine_FMOD::LLAudioEngine_FMOD()
 {
@@ -68,11 +66,9 @@ LLAudioEngine_FMOD::LLAudioEngine_FMOD()
 	mWindDSP = NULL;
 }
 
-
 LLAudioEngine_FMOD::~LLAudioEngine_FMOD()
 {
 }
-
 
 bool LLAudioEngine_FMOD::init(const S32 num_channels, void* userdata)
 {
@@ -81,7 +77,7 @@ bool LLAudioEngine_FMOD::init(const S32 num_channels, void* userdata)
 	// Reserve one extra channel for the http stream.
 	if (!FSOUND_SetMinHardwareChannels(num_channels + 1))
 	{
-		LL_WARNS("AppInit") << "FMOD::init[0](), error: " << FMOD_ErrorString(FSOUND_GetError()) << LL_ENDL;
+		llwarns << "FMOD::init[0](), error: " << FMOD_ErrorString(FSOUND_GetError()) << llendl;
 	}
 
 	LL_DEBUGS("AppInit") << "LLAudioEngine_FMOD::init() initializing FMOD" << LL_ENDL;
@@ -89,8 +85,8 @@ bool LLAudioEngine_FMOD::init(const S32 num_channels, void* userdata)
 	F32 version = FSOUND_GetVersion();
 	if (version < FMOD_VERSION)
 	{
-		LL_WARNS("AppInit") << "Error : You are using the wrong FMOD version (" << version
-			<< ")!  You should be using FMOD " << FMOD_VERSION << LL_ENDL;
+		llwarns << "Error : You are using the wrong FMOD version (" << version
+				<< ")!  You should be using FMOD " << FMOD_VERSION << llendl;
 		//return false;
 	}
 
@@ -104,8 +100,8 @@ bool LLAudioEngine_FMOD::init(const S32 num_channels, void* userdata)
 	// between minimized and not-focused states.
 	if (!FSOUND_SetHWND(userdata))
 	{
-		LL_WARNS("AppInit") << "Error setting FMOD window: "
-			<< FMOD_ErrorString(FSOUND_GetError()) << LL_ENDL;
+		llwarns << "Error setting FMOD window: "
+				<< FMOD_ErrorString(FSOUND_GetError()) << llendl;
 		return false;
 	}
 	// Play audio when we don't have focus.
@@ -123,7 +119,7 @@ bool LLAudioEngine_FMOD::init(const S32 num_channels, void* userdata)
 	// otherwise valgrind will fall over on FMOD's MMX detection
 	if (getenv("LL_VALGRIND"))		/*Flawfinder: ignore*/
 	{
-		LL_INFOS("AppInit") << "Pacifying valgrind in FMOD init." << LL_ENDL;
+		llinfos << "Pacifying valgrind in FMOD init." << llendl;
 		FSOUND_SetMixer(FSOUND_MIXER_QUALITY_FPU);
 	}
 
@@ -140,17 +136,19 @@ bool LLAudioEngine_FMOD::init(const S32 num_channels, void* userdata)
 		if (NULL == getenv("LL_BAD_FMOD_ESD")) /*Flawfinder: ignore*/
 		{
 			LL_DEBUGS("AppInit") << "Trying ESD audio output..." << LL_ENDL;
-			if(FSOUND_SetOutput(FSOUND_OUTPUT_ESD) &&
-			   FSOUND_Init(44100, num_channels, fmod_flags))
+			if (FSOUND_SetOutput(FSOUND_OUTPUT_ESD) &&
+				FSOUND_Init(44100, num_channels, fmod_flags))
 			{
 				LL_DEBUGS("AppInit") << "ESD audio output initialized OKAY"
 					<< LL_ENDL;
 				audio_ok = true;
 			} else {
-				LL_WARNS("AppInit") << "ESD audio output FAILED to initialize: "
-					<< FMOD_ErrorString(FSOUND_GetError()) << LL_ENDL;
+				llwarns << "ESD audio output FAILED to initialize: "
+						<< FMOD_ErrorString(FSOUND_GetError()) << llendl;
 			}
-		} else {
+		}
+		else
+		{
 			LL_DEBUGS("AppInit") << "ESD audio output SKIPPED" << LL_ENDL;
 		}
 
@@ -158,16 +156,18 @@ bool LLAudioEngine_FMOD::init(const S32 num_channels, void* userdata)
 		if (NULL == getenv("LL_BAD_FMOD_OSS")) 	 /*Flawfinder: ignore*/
 		{
 			LL_DEBUGS("AppInit") << "Trying OSS audio output..."	<< LL_ENDL;
-			if(FSOUND_SetOutput(FSOUND_OUTPUT_OSS) &&
+			if (FSOUND_SetOutput(FSOUND_OUTPUT_OSS) &&
 			   FSOUND_Init(44100, num_channels, fmod_flags))
 			{
 				LL_DEBUGS("AppInit") << "OSS audio output initialized OKAY" << LL_ENDL;
 				audio_ok = true;
 			} else {
-				LL_WARNS("AppInit") << "OSS audio output FAILED to initialize: "
-					<< FMOD_ErrorString(FSOUND_GetError()) << LL_ENDL;
+				llwarns << "OSS audio output FAILED to initialize: "
+						<< FMOD_ErrorString(FSOUND_GetError()) << llendl;
 			}
-		} else {
+		}
+		else
+		{
 			LL_DEBUGS("AppInit") << "OSS audio output SKIPPED" << LL_ENDL;
 		}
 
@@ -181,16 +181,18 @@ bool LLAudioEngine_FMOD::init(const S32 num_channels, void* userdata)
 				LL_DEBUGS("AppInit") << "ALSA audio output initialized OKAY" << LL_ENDL;
 				audio_ok = true;
 			} else {
-				LL_WARNS("AppInit") << "ALSA audio output FAILED to initialize: "
-					<< FMOD_ErrorString(FSOUND_GetError()) << LL_ENDL;
+				llwarns << "ALSA audio output FAILED to initialize: "
+						<< FMOD_ErrorString(FSOUND_GetError()) << llendl;
 			}
-		} else {
+		}
+		else
+		{
 			LL_DEBUGS("AppInit") << "OSS audio output SKIPPED" << LL_ENDL;
 		}
 
 	if (!audio_ok)
 	{
-		LL_WARNS("AppInit") << "Overall audio init failure." << LL_ENDL;
+		llwarns << "Overall audio init failure." << llendl;
 		return false;
 	}
 
@@ -203,11 +205,21 @@ bool LLAudioEngine_FMOD::init(const S32 num_channels, void* userdata)
 	// ended up with, for QA purposes.
 	switch (FSOUND_GetOutput())
 	{
-	case FSOUND_OUTPUT_NOSOUND: LL_DEBUGS("AppInit") << "Audio output: NoSound" << LL_ENDL; break;
-	case FSOUND_OUTPUT_OSS:	LL_DEBUGS("AppInit") << "Audio output: OSS" << LL_ENDL; break;
-	case FSOUND_OUTPUT_ESD:	LL_DEBUGS("AppInit") << "Audio output: ESD" << LL_ENDL; break;
-	case FSOUND_OUTPUT_ALSA: LL_DEBUGS("AppInit") << "Audio output: ALSA" << LL_ENDL; break;
-	default: LL_INFOS("AppInit") << "Audio output: Unknown!" << LL_ENDL; break;
+		case FSOUND_OUTPUT_NOSOUND:
+			LL_DEBUGS("AppInit") << "Audio output: NoSound" << LL_ENDL;
+			break;
+		case FSOUND_OUTPUT_OSS:
+			LL_DEBUGS("AppInit") << "Audio output: OSS" << LL_ENDL;
+			break;
+		case FSOUND_OUTPUT_ESD:
+			LL_DEBUGS("AppInit") << "Audio output: ESD" << LL_ENDL;
+			break;
+		case FSOUND_OUTPUT_ALSA:
+			LL_DEBUGS("AppInit") << "Audio output: ALSA" << LL_ENDL;
+			break;
+		default:
+			llinfos << "Audio output: Unknown!" << llendl;
+			break;
 	};
 
 #else // LL_LINUX
@@ -215,8 +227,8 @@ bool LLAudioEngine_FMOD::init(const S32 num_channels, void* userdata)
 	// initialize the FMOD engine
 	if (!FSOUND_Init(44100, num_channels, fmod_flags))
 	{
-		LL_WARNS("AppInit") << "Error initializing FMOD: "
-			<< FMOD_ErrorString(FSOUND_GetError()) << LL_ENDL;
+		llwarns << "Error initializing FMOD: "
+				<< FMOD_ErrorString(FSOUND_GetError()) << llendl;
 		return false;
 	}
 	
@@ -233,7 +245,6 @@ bool LLAudioEngine_FMOD::init(const S32 num_channels, void* userdata)
 	return true;
 }
 
-
 std::string LLAudioEngine_FMOD::getDriverName(bool verbose)
 {
 	if (verbose)
@@ -247,16 +258,14 @@ std::string LLAudioEngine_FMOD::getDriverName(bool verbose)
 	}
 }
 
-
 void LLAudioEngine_FMOD::allocateListener(void)
 {	
-	mListenerp = (LLListener *) new LLListener_FMOD();
+	mListenerp = (LLListener*) new LLListener_FMOD();
 	if (!mListenerp)
 	{
 		llwarns << "Listener creation failed" << llendl;
 	}
 }
-
 
 void LLAudioEngine_FMOD::shutdown()
 {
@@ -278,18 +287,15 @@ void LLAudioEngine_FMOD::shutdown()
 	mListenerp = NULL;
 }
 
-
-LLAudioBuffer * LLAudioEngine_FMOD::createBuffer()
+LLAudioBuffer* LLAudioEngine_FMOD::createBuffer()
 {
 	return new LLAudioBufferFMOD();
 }
 
-
-LLAudioChannel * LLAudioEngine_FMOD::createChannel()
+LLAudioChannel* LLAudioEngine_FMOD::createChannel()
 {
 	return new LLAudioChannelFMOD();
 }
-
 
 bool LLAudioEngine_FMOD::initWind()
 {
@@ -313,7 +319,7 @@ bool LLAudioEngine_FMOD::initWind()
 				break;
 			default:
 				// FSOUND_GetMixer() does not return a valid mixer type on Darwin
-				LL_INFOS("AppInit") << "Unknown FMOD mixer type, assuming default" << LL_ENDL;
+				llinfos << "Unknown FMOD mixer type, assuming default" << llendl;
 				enable = true;
 				break;
 		}
@@ -324,7 +330,8 @@ bool LLAudioEngine_FMOD::initWind()
 		}
 		else
 		{
-			LL_WARNS("AppInit") << "Incompatible FMOD mixer type, wind noise disabled" << LL_ENDL;
+			llwarns << "Incompatible FMOD mixer type, wind noise disabled"
+					<< llendl;
 		}
 	}
 
@@ -343,7 +350,6 @@ bool LLAudioEngine_FMOD::initWind()
 	return false;
 }
 
-
 void LLAudioEngine_FMOD::cleanupWind()
 {
 	if (mWindDSP)
@@ -356,7 +362,6 @@ void LLAudioEngine_FMOD::cleanupWind()
 	delete mWindGen;
 	mWindGen = NULL;
 }
-
 
 //-----------------------------------------------------------------------
 void LLAudioEngine_FMOD::updateWind(LLVector3 wind_vec, F32 camera_height_above_water)
@@ -403,7 +408,9 @@ void LLAudioEngine_FMOD::setSourceMinDistance(U16 source_num, F64 distance)
 		mMinDistance[source_num] = (F32) distance;
 		if (!FSOUND_Sample_SetMinMaxDistance(mBuffer[source_num],mMinDistance[source_num], mMaxDistance[source_num]))
 		{
-			llwarns << "FMOD::setSourceMinDistance(" << source_num << "), error: " << FMOD_ErrorString(FSOUND_GetError()) << llendl;
+			llwarns << "FMOD::setSourceMinDistance(" << source_num
+					<< "), error: " << FMOD_ErrorString(FSOUND_GetError())
+					<< llendl;
 		}
 	}
 }
@@ -420,7 +427,9 @@ void LLAudioEngine_FMOD::setSourceMaxDistance(U16 source_num, F64 distance)
 		mMaxDistance[source_num] = (F32) distance;
 		if (!FSOUND_Sample_SetMinMaxDistance(mBuffer[source_num],mMinDistance[source_num], mMaxDistance[source_num]))
 		{
-			llwarns << "FMOD::setSourceMaxDistance(" << source_num << "), error: " << FMOD_ErrorString(FSOUND_GetError()) << llendl;
+			llwarns << "FMOD::setSourceMaxDistance(" << source_num
+					<< "), error: " << FMOD_ErrorString(FSOUND_GetError())
+					<< llendl;
 		}
 	}
 }
@@ -439,7 +448,6 @@ void LLAudioEngine_FMOD::get3DParams(S32 source_num, S32 *volume, S32 *freq, S32
 }
 
 */
-
 
 //-----------------------------------------------------------------------
 void LLAudioEngine_FMOD::setInternalGain(F32 gain)
@@ -469,12 +477,10 @@ LLAudioChannelFMOD::LLAudioChannelFMOD() : LLAudioChannel(), mChannelID(0), mLas
 {
 }
 
-
 LLAudioChannelFMOD::~LLAudioChannelFMOD()
 {
 	cleanup();
 }
-
 
 bool LLAudioChannelFMOD::updateBuffer()
 {
@@ -495,10 +501,10 @@ bool LLAudioChannelFMOD::updateBuffer()
 			return false;
 		}
 
-
-		// Actually play the sound.  Start it off paused so we can do all the necessary
-		// setup.
-		mChannelID = FSOUND_PlaySoundEx(FSOUND_FREE, samplep, FSOUND_DSP_GetSFXUnit(), true);
+		// Actually play the sound.  Start it off paused so we can do all the
+		// necessary setup.
+		mChannelID = FSOUND_PlaySoundEx(FSOUND_FREE, samplep,
+										FSOUND_DSP_GetSFXUnit(), true);
 		if (!mChannelID)
 		{
 // 			llwarns << "Could not allocate a new channel ID" << llendl;
@@ -513,22 +519,27 @@ bool LLAudioChannelFMOD::updateBuffer()
 	if (mCurrentSourcep)
 	{
 		// SJB: warnings can spam and hurt framerate, disabling
-		if (!FSOUND_SetVolume(mChannelID, llround(getSecondaryGain() * mCurrentSourcep->getGain() * 255.0f)))
+		if (!FSOUND_SetVolume(mChannelID,
+							  llround(getSecondaryGain() * mCurrentSourcep->getGain() * 255.0f)))
 		{
-// 			llwarns << "LLAudioChannelFMOD::updateBuffer error: " << FMOD_ErrorString(FSOUND_GetError()) << llendl;
+// 			llwarns << "LLAudioChannelFMOD::updateBuffer error: "
+//					<< FMOD_ErrorString(FSOUND_GetError()) << llendl;
 		}
 		
-		if (!FSOUND_SetLoopMode(mChannelID, mCurrentSourcep->isLoop() ? FSOUND_LOOP_NORMAL : FSOUND_LOOP_OFF))
+		if (!FSOUND_SetLoopMode(mChannelID,
+								mCurrentSourcep->isLoop() ? FSOUND_LOOP_NORMAL
+														  : FSOUND_LOOP_OFF))
 		{
-// 			llwarns << "Channel " << mChannelID << "Source ID: " << mCurrentSourcep->getID()
-// 					<< " at " << mCurrentSourcep->getPositionGlobal() << llendl;
-// 			llwarns << "LLAudioChannelFMOD::updateBuffer error: " << FMOD_ErrorString(FSOUND_GetError()) << llendl;
+// 			llwarns << "Channel " << mChannelID << "Source ID: "
+//					<< mCurrentSourcep->getID() << " at "
+//					<< mCurrentSourcep->getPositionGlobal() << llendl;
+// 			llwarns << "LLAudioChannelFMOD::updateBuffer error: "
+//					<< FMOD_ErrorString(FSOUND_GetError()) << llendl;
 		}
 	}
 
 	return true;
 }
-
 
 void LLAudioChannelFMOD::update3DPosition()
 {
@@ -560,11 +571,11 @@ void LLAudioChannelFMOD::update3DPosition()
 		float_pos.setVec(mCurrentSourcep->getPositionGlobal());
 		if (!FSOUND_3D_SetAttributes(mChannelID, float_pos.mV, mCurrentSourcep->getVelocity().mV))
 		{
-			LL_DEBUGS("FMOD") << "LLAudioChannelFMOD::update3DPosition error: " << FMOD_ErrorString(FSOUND_GetError()) << LL_ENDL;
+			LL_DEBUGS("FMOD") << "LLAudioChannelFMOD::update3DPosition error: "
+							  << FMOD_ErrorString(FSOUND_GetError()) << LL_ENDL;
 		}
 	}
 }
-
 
 void LLAudioChannelFMOD::updateLoop()
 {
@@ -587,7 +598,6 @@ void LLAudioChannelFMOD::updateLoop()
 	mLastSamplePos = cur_pos;
 }
 
-
 void LLAudioChannelFMOD::cleanup()
 {
 	if (!mChannelID)
@@ -606,7 +616,6 @@ void LLAudioChannelFMOD::cleanup()
 	mChannelID = 0;
 }
 
-
 void LLAudioChannelFMOD::play()
 {
 	if (!mChannelID)
@@ -621,7 +630,6 @@ void LLAudioChannelFMOD::play()
 	}
 	getSource()->setPlayedOnce(true);
 }
-
 
 void LLAudioChannelFMOD::playSynced(LLAudioChannel *channelp)
 {
@@ -643,7 +651,6 @@ void LLAudioChannelFMOD::playSynced(LLAudioChannel *channelp)
 	play();
 }
 
-
 bool LLAudioChannelFMOD::isPlaying()
 {
 	if (!mChannelID)
@@ -654,18 +661,14 @@ bool LLAudioChannelFMOD::isPlaying()
 	return FSOUND_IsPlaying(mChannelID) && (!FSOUND_GetPaused(mChannelID));
 }
 
-
-
 //
 // LLAudioBufferFMOD implementation
 //
-
 
 LLAudioBufferFMOD::LLAudioBufferFMOD()
 {
 	mSamplep = NULL;
 }
-
 
 LLAudioBufferFMOD::~LLAudioBufferFMOD()
 {
@@ -676,7 +679,6 @@ LLAudioBufferFMOD::~LLAudioBufferFMOD()
 		mSamplep = NULL;
 	}
 }
-
 
 bool LLAudioBufferFMOD::loadWAV(const std::string& filename)
 {
@@ -747,7 +749,6 @@ bool LLAudioBufferFMOD::loadWAV(const std::string& filename)
 	return true;
 }
 
-
 U32 LLAudioBufferFMOD::getLength()
 {
 	if (!mSamplep)
@@ -757,7 +758,6 @@ U32 LLAudioBufferFMOD::getLength()
 
 	return FSOUND_Sample_GetLength(mSamplep);
 }
-
 
 void LLAudioBufferFMOD::set3DMode(bool use3d)
 {
@@ -779,8 +779,7 @@ void LLAudioBufferFMOD::set3DMode(bool use3d)
 	}
 }
 
-
-void * F_CALLBACKAPI windCallback(void *originalbuffer, void *newbuffer, int length, void* userdata)
+void *F_CALLBACKAPI windCallback(void *originalbuffer, void *newbuffer, int length, void* userdata)
 {
 	// originalbuffer = fmod's original mixbuffer.
 	// newbuffer = the buffer passed from the previous DSP unit.

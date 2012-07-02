@@ -116,9 +116,7 @@ public:
 	inline bool isApproximatelyEqual( const LLMatrix3a& rhs, F32 tolerance = F_APPROXIMATELY_ZERO ) const;
 
 protected:
-
-	LLVector4a mColumns[3];
-
+	LL_ALIGN_16(LLVector4a mColumns[3]);
 };
 
 class LLRotation : public LLMatrix3a

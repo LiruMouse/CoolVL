@@ -4138,7 +4138,7 @@
     <key>PrivateLookAt</key>
     <map>
       <key>Comment</key>
-      <string>When TRUE, do not broadcast info about objects beyond PrivateLookAtLimit we are looking at or pointing to</string>
+      <string>When TRUE, do not broadcast info about objects beyond PrivateLookAtLimit we are looking at</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
@@ -4149,7 +4149,29 @@
     <key>PrivateLookAtLimit</key>
     <map>
       <key>Comment</key>
-      <string>Distance of objects beyond which we do not broadcast info about looking or pointing at them</string>
+      <string>Distance of objects beyond which we do not broadcast info about looking at them</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
+      <key>Value</key>
+      <integer>20</integer>
+    </map>
+    <key>PrivatePointAt</key>
+    <map>
+      <key>Comment</key>
+      <string>When TRUE, do not broadcast info about objects beyond PrivatePointAtLimit we are pointing to</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
+    <key>PrivatePointAtLimit</key>
+    <map>
+      <key>Comment</key>
+      <string>Distance of objects beyond which we do not broadcast info about pointing to them</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
@@ -13694,17 +13716,6 @@
       <string>String</string>
       <key>Value</key>
       <string>4c8c3c77-de8d-bde2-b9b8-32635e0fd4a6</string>
-    </map>
-    <key>UISndDebugSpamToggle</key>
-    <map>
-      <key>Comment</key>
-      <string>Log UI sound effects as they are played</string>
-      <key>Persist</key>
-      <integer>1</integer>
-      <key>Type</key>
-      <string>Boolean</string>
-      <key>Value</key>
-      <integer>0</integer>
     </map>
     <key>UISndHealthReductionF</key>
     <map>

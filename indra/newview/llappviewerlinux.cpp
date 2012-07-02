@@ -726,9 +726,9 @@ bool LLAppViewerLinux::initParseCommandLine(LLCommandLineParser& clp)
 	{
 		if (success >= 2 && locale->lang) // confident!
 		{
-			LL_INFOS("AppInit") << "Language " << ll_safe_string(locale->lang) << LL_ENDL;
-			LL_INFOS("AppInit") << "Location " << ll_safe_string(locale->country) << LL_ENDL;
-			LL_INFOS("AppInit") << "Variant " << ll_safe_string(locale->variant) << LL_ENDL;
+			llinfos << "Language " << ll_safe_string(locale->lang) << llendl;
+			llinfos << "Location " << ll_safe_string(locale->country) << llendl;
+			llinfos << "Variant " << ll_safe_string(locale->variant) << llendl;
 
 			LLControlVariable* c = gSavedSettings.getControl("SystemLanguage");
 			if(c)

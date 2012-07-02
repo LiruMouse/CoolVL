@@ -64,7 +64,7 @@ void ll_init_apr()
 
 void ll_cleanup_apr()
 {
-	LL_INFOS("APR") << "Cleaning up APR" << LL_ENDL;
+	llinfos << "Cleaning up APR" << llendl;
 
 	if (gLogMutexp)
 	{
@@ -274,18 +274,16 @@ void LLVolatileAPRPool::clearVolatileAPRPool()
 
 		if (global && mNumTotalRef >= global_num_ref + REF_LIMIT / 2)
 		{
-			LL_WARNS("APR") << "Reached  " << mNumTotalRef
-							<< " references with " << mNumActiveRef
-							<< " still active for the global pool !"
-							<< LL_ENDL;
+			llwarns << "Reached  " << mNumTotalRef << " references with "
+					<< mNumActiveRef << " still active for the global pool !"
+					<< llendl;
 			global_num_ref = mNumTotalRef;
 		}
 		else if (!global && mNumTotalRef >= local_num_ref + REF_LIMIT / 2)
 		{
-			LL_WARNS("APR") << "Reached  " << mNumTotalRef
-							<< " references with " << mNumActiveRef
-							<< " still active for this local pool ("
-							<< mPool << ") !" << LL_ENDL;
+			llwarns << "Reached  " << mNumTotalRef << " references with "
+					<< mNumActiveRef << " still active for this local pool ("
+					<< mPool << ") !" << llendl;
 			local_num_ref = mNumTotalRef;
 		}
 	}
@@ -342,7 +340,7 @@ bool ll_apr_warn_status(apr_status_t status)
 	if (APR_SUCCESS == status) return false;
 	char buf[MAX_STRING];	/* Flawfinder: ignore */
 	apr_strerror(status, buf, sizeof(buf));
-	LL_WARNS("APR") << "APR: " << buf << LL_ENDL;
+	llwarns << "APR: " << buf << llendl;
 	return true;
 }
 
@@ -354,7 +352,7 @@ bool ll_apr_warn_status(apr_status_t status, apr_dso_handle_t *handle)
     // stores the output in a fixed 255-character internal buffer. (*sigh*)
     char buf[MAX_STRING];           /* Flawfinder: ignore */
     apr_dso_error(handle, buf, sizeof(buf));
-    LL_WARNS("APR") << "APR: " << buf << LL_ENDL;
+    llwarns << "APR: " << buf << llendl;
     return result;
 }
 
@@ -581,8 +579,7 @@ apr_file_t* LLAPRFile::open(const std::string& filename,
 	if (s != APR_SUCCESS || !file_handle)
 	{
 		ll_apr_warn_status(s);
-		LL_WARNS("APR") << " Attempting to open filename: " << filename
-						<< LL_ENDL;
+		llwarns << "Attempting to open filename: " << filename << llendl;
 		file_handle = NULL;
 		close(file_handle, pool);
 		return NULL;
@@ -657,8 +654,7 @@ S32 LLAPRFile::readEx(const std::string& filename,
 		apr_status_t s = apr_file_read(file_handle, buf, &bytes_read);
 		if (s != APR_SUCCESS)
 		{
-			LL_WARNS("APR") << " Attempting to read filename: " << filename
-							<< LL_ENDL;
+			llwarns << "Attempting to read filename: " << filename << llendl;
 			ll_apr_warn_status(s);
 			bytes_read = 0;
 		}
@@ -714,8 +710,7 @@ S32 LLAPRFile::writeEx(const std::string& filename,
 		apr_status_t s = apr_file_write(file_handle, buf, &bytes_written);
 		if (s != APR_SUCCESS)
 		{
-			LL_WARNS("APR") << " Attempting to write filename: " << filename
-							<< LL_ENDL;
+			llwarns << "Attempting to write filename: " << filename << llendl;
 			ll_apr_warn_status(s);
 			bytes_written = 0;
 		}
@@ -751,8 +746,7 @@ bool LLAPRFile::remove(const std::string& filename, LLVolatileAPRPool* pool)
 #endif
 		{
 			ll_apr_warn_status(s);
-			LL_WARNS("APR") << " Attempting to remove filename: " << filename
-							<< LL_ENDL;
+			llwarns << "Attempting to remove filename: " << filename << llendl;
 		}
 		return false;
 	}
@@ -773,8 +767,7 @@ bool LLAPRFile::rename(const std::string& filename, const std::string& newname,
 	if (s != APR_SUCCESS)
 	{
 		ll_apr_warn_status(s);
-		LL_WARNS("APR") << " Attempting to rename filename: " << filename
-						<< LL_ENDL;
+		llwarns << "Attempting to rename filename: " << filename << llendl;
 		return false;
 	}
 	return true;
@@ -851,8 +844,7 @@ bool LLAPRFile::makeDir(const std::string& dirname, LLVolatileAPRPool* pool)
 	if (s != APR_SUCCESS)
 	{
 		ll_apr_warn_status(s);
-		LL_WARNS("APR") << " Attempting to make directory: " << dirname
-						<< LL_ENDL;
+		llwarns << "Attempting to make directory: " << dirname << llendl;
 		return false;
 	}
 	return true;
@@ -870,8 +862,7 @@ bool LLAPRFile::removeDir(const std::string& dirname, LLVolatileAPRPool* pool)
 	if (s != APR_SUCCESS)
 	{
 		ll_apr_warn_status(s);
-		LL_WARNS("APR") << " Attempting to remove directory: " << dirname
-						<< LL_ENDL;
+		llwarns << "Attempting to remove directory: " << dirname << llendl;
 		return false;
 	}
 	return true;

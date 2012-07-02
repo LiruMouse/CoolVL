@@ -402,12 +402,11 @@ void LLViewerJoystick::agentPush(F32 inc)
 // -----------------------------------------------------------------------------
 void LLViewerJoystick::agentFly(F32 inc)
 {
+	static LLCachedControl<bool> automatic_fly(gSavedSettings, "AutomaticFly");
 	if (inc < 0.f)
 	{
-		if (! (gAgent.getFlying() ||
-		       !gAgent.canFly() ||
-		       gAgent.upGrabbed() ||
-		       !gSavedSettings.getBOOL("AutomaticFly")) )
+		if (automatic_fly && !gAgent.getFlying() && gAgent.canFly() &&
+			!gAgent.upGrabbed())
 		{
 			gAgent.setFlying(true);
 		}

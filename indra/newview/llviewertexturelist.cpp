@@ -1383,6 +1383,8 @@ LLUIImagePtr LLUIImageList::getUIImageByID(const LLUUID& image_id,
 	uuid_ui_image_map_t::iterator found_it = mUIImages.find(image_name);
 	if (found_it != mUIImages.end())
 	{
+		LL_DEBUGS("GetUIImageCalls") << "Requested UI image UUID: " << image_id
+									 << LL_ENDL;
 		return found_it->second;
 	}
 
@@ -1399,6 +1401,8 @@ LLUIImagePtr LLUIImageList::getUIImage(const std::string& image_name,
 	uuid_ui_image_map_t::iterator found_it = mUIImages.find(image_name);
 	if (found_it != mUIImages.end())
 	{
+		LL_DEBUGS("GetUIImageCalls") << "Requested UI image: " << image_name
+									 << LL_ENDL;
 		return found_it->second;
 	}
 
@@ -1414,6 +1418,8 @@ LLUIImagePtr LLUIImageList::loadUIImageByName(const std::string& name,
 											  const LLRect& scale_rect,
 											  LLViewerTexture::EBoostLevel boost_priority)
 {
+	LL_DEBUGS("GetUIImageCalls") << "Loaded UI image: " << name << LL_ENDL;
+
 	if (boost_priority == LLViewerTexture::BOOST_NONE)
 	{
 		boost_priority = LLViewerTexture::BOOST_UI;
@@ -1430,6 +1436,8 @@ LLUIImagePtr LLUIImageList::loadUIImageByID(const LLUUID& id,
 											const LLRect& scale_rect,
 											LLViewerTexture::EBoostLevel boost_priority)
 {
+	LL_DEBUGS("GetUIImageCalls") << "Loaded UI image UUID: " << id << LL_ENDL;
+
 	if (boost_priority == LLViewerTexture::BOOST_NONE)
 	{
 		boost_priority = LLViewerTexture::BOOST_UI;

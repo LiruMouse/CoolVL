@@ -1,11 +1,11 @@
-/** 
+/**
  * @file llfloateractivespeakers.h
  * @brief Management interface for muting and controlling volume of residents currently speaking
  *
  * $LicenseInfo:firstyear=2005&license=viewergpl$
- * 
+ *
  * Copyright (c) 2005-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -32,6 +32,7 @@
 
 #ifndef LL_LLFLOATERACTIVESPEAKERS_H
 #define LL_LLFLOATERACTIVESPEAKERS_H
+
 #include <list>
 
 #include "llavatarnamecache.h"
@@ -44,14 +45,17 @@
 
 #include "llvoiceclient.h"
 
-class LLScrollListCtrl;
 class LLButton;
 class LLPanelActiveSpeakers;
+class LLScrollListCtrl;
+class LLSlider;
 class LLSpeakerMgr;
 class LLVoiceChannel;
 
 // data for a given participant in a voice channel
-class LLSpeaker : public LLRefCount, public LLOldEvents::LLObservable, public LLHandleProvider<LLSpeaker>
+class LLSpeaker : public LLRefCount,
+				  public LLOldEvents::LLObservable,
+				  public LLHandleProvider<LLSpeaker>
 {
 public:
 	typedef enum e_speaker_type
@@ -71,14 +75,15 @@ public:
 		STATUS_MUTED
 	} ESpeakerStatus;
 
-
 	LLSpeaker(const LLUUID& id,
 			  const std::string& name = LLStringUtil::null,
 			  const ESpeakerType type = SPEAKER_AGENT);
 	~LLSpeaker() {};
 	void lookupName();
 
-	static void onAvatarNameLookup(const LLUUID& id, const LLAvatarName& avatar_name, void* user_data);
+	static void onAvatarNameLookup(const LLUUID& id,
+								   const LLAvatarName& avatar_name,
+								   void* user_data);
 
 	ESpeakerStatus	mStatus;			// current activity status in speech group
 	F32				mLastSpokeTime;		// timestamp when this speaker last spoke
@@ -133,8 +138,8 @@ public:
 	void setSpeakerTyping(const LLUUID& speaker_id, BOOL typing);
 	void speakerChatted(const LLUUID& speaker_id);
 	LLPointer<LLSpeaker> setSpeaker(const LLUUID& id,
-									const std::string& name = LLStringUtil::null, 
-									LLSpeaker::ESpeakerStatus status = LLSpeaker::STATUS_TEXT_ONLY, 
+									const std::string& name = LLStringUtil::null,
+									LLSpeaker::ESpeakerStatus status = LLSpeaker::STATUS_TEXT_ONLY,
 									LLSpeaker::ESpeakerType = LLSpeaker::SPEAKER_AGENT,
 									const LLUUID& owner_id = LLUUID::null);
 
@@ -159,14 +164,15 @@ class LLIMSpeakerMgr : public LLSpeakerMgr
 {
 public:
 	LLIMSpeakerMgr(LLVoiceChannel* channel);
-	
+
 	void updateSpeakers(const LLSD& update);
 	void setSpeakers(const LLSD& speakers);
 protected:
 	virtual void updateSpeakerList();
 };
 
-class LLActiveSpeakerMgr : public LLSpeakerMgr, public LLSingleton<LLActiveSpeakerMgr>
+class LLActiveSpeakerMgr : public LLSpeakerMgr,
+						   public LLSingleton<LLActiveSpeakerMgr>
 {
 public:
 	LLActiveSpeakerMgr();
@@ -174,7 +180,8 @@ protected:
 	virtual void updateSpeakerList();
 };
 
-class LLLocalSpeakerMgr : public LLSpeakerMgr, public LLSingleton<LLLocalSpeakerMgr>
+class LLLocalSpeakerMgr : public LLSpeakerMgr,
+						  public LLSingleton<LLLocalSpeakerMgr>
 {
 public:
 	LLLocalSpeakerMgr();
@@ -183,14 +190,13 @@ protected:
 	virtual void updateSpeakerList();
 };
 
-
-class LLFloaterActiveSpeakers : 
-	public LLFloaterSingleton<LLFloaterActiveSpeakers>, 
-	public LLFloater, 
+class LLFloaterActiveSpeakers :
+	public LLFloaterSingleton<LLFloaterActiveSpeakers>,
+	public LLFloater,
 	public LLVoiceClientParticipantObserver
 {
-	// friend of singleton class to allow construction inside getInstance() since constructor is protected
-	// to enforce singleton constraint
+	// friend of singleton class to allow construction inside getInstance()
+	// since constructor is protected to enforce singleton constraint
 	friend class LLUISingleton<LLFloaterActiveSpeakers, VisibilityPolicy<LLFloater> >;
 public:
 	virtual ~LLFloaterActiveSpeakers();
@@ -219,15 +225,15 @@ public:
 
 	void handleSpeakerSelect();
 	void refreshSpeakers();
-	
-	void setSpeaker(const LLUUID& id, 
-					const std::string& name = LLStringUtil::null, 
-					LLSpeaker::ESpeakerStatus status = LLSpeaker::STATUS_TEXT_ONLY, 
+
+	void setSpeaker(const LLUUID& id,
+					const std::string& name = LLStringUtil::null,
+					LLSpeaker::ESpeakerStatus status = LLSpeaker::STATUS_TEXT_ONLY,
 					LLSpeaker::ESpeakerType = LLSpeaker::SPEAKER_AGENT,
 					const LLUUID& owner_id = LLUUID::null);
 
 	void setVoiceModerationCtrlMode(const BOOL& moderated_voice);
-	
+
 	static void onClickMuteVoice(void* user_data);
 	static void onClickMuteVoiceCommit(LLUICtrl* ctrl, void* user_data);
 	static void onClickMuteTextCommit(LLUICtrl* ctrl, void* user_data);
@@ -246,7 +252,8 @@ protected:
 	public:
 		SpeakerMuteListener(LLPanelActiveSpeakers* panel) : mPanel(panel) {}
 
-		/*virtual*/ bool handleEvent(LLPointer<LLOldEvents::LLEvent> event, const LLSD& userdata);
+		/*virtual*/ bool handleEvent(LLPointer<LLOldEvents::LLEvent> event,
+									 const LLSD& userdata);
 
 		LLPanelActiveSpeakers* mPanel;
 	};
@@ -257,7 +264,8 @@ protected:
 	public:
 		SpeakerAddListener(LLPanelActiveSpeakers* panel) : mPanel(panel) {}
 
-		/*virtual*/ bool handleEvent(LLPointer<LLOldEvents::LLEvent> event, const LLSD& userdata);
+		/*virtual*/ bool handleEvent(LLPointer<LLOldEvents::LLEvent> event,
+									 const LLSD& userdata);
 
 		LLPanelActiveSpeakers* mPanel;
 	};
@@ -268,11 +276,11 @@ protected:
 	public:
 		SpeakerRemoveListener(LLPanelActiveSpeakers* panel) : mPanel(panel) {}
 
-		/*virtual*/ bool handleEvent(LLPointer<LLOldEvents::LLEvent> event, const LLSD& userdata);
+		/*virtual*/ bool handleEvent(LLPointer<LLOldEvents::LLEvent> event,
+									 const LLSD& userdata);
 
 		LLPanelActiveSpeakers* mPanel;
 	};
-
 
 	friend class SpeakerClearListener;
 	class SpeakerClearListener : public LLOldEvents::LLSimpleListener
@@ -280,7 +288,8 @@ protected:
 	public:
 		SpeakerClearListener(LLPanelActiveSpeakers* panel) : mPanel(panel) {}
 
-		/*virtual*/ bool handleEvent(LLPointer<LLOldEvents::LLEvent> event, const LLSD& userdata);
+		/*virtual*/ bool handleEvent(LLPointer<LLOldEvents::LLEvent> event,
+									 const LLSD& userdata);
 
 		LLPanelActiveSpeakers* mPanel;
 	};
@@ -288,10 +297,14 @@ protected:
 	void addSpeaker(const LLUUID& id);
 	void removeSpeaker(const LLUUID& id);
 
-
 	LLScrollListCtrl*	mSpeakerList;
+	LLSlider*			mSpeakerVolumeSlider;
 	LLUICtrl*			mMuteVoiceCtrl;
 	LLUICtrl*			mMuteTextCtrl;
+	LLUICtrl*			mModeratorAllowVoiceCtrl;
+	LLUICtrl*			mModeratorAllowTextCtrl;
+	LLUICtrl*			mModerationModeCtrl;
+	LLTextBox*			mModeratorControlsText;
 	LLTextBox*			mNameText;
 	LLButton*			mProfileBtn;
 	BOOL				mShowTextChatters;
@@ -302,6 +315,5 @@ protected:
 	LLPointer<SpeakerRemoveListener> mSpeakerRemoveListener;
 	LLPointer<SpeakerClearListener> mSpeakerClearListener;
 };
-
 
 #endif // LL_LLFLOATERACTIVESPEAKERS_H

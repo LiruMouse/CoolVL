@@ -261,7 +261,8 @@ void LLPluginProcessParent::idle(void)
 			else if (mSocketError != APR_SUCCESS)
 			{
 				// The socket is in an error state -- the plugin is gone.
-				LL_WARNS("Plugin") << "Socket hit an error state (" << mSocketError << ")" << LL_ENDL;
+				llwarns << "Socket hit an error state (" << mSocketError << ")"
+						<< llendl;
 				errorState();
 			}
 		}
@@ -313,7 +314,9 @@ void LLPluginProcessParent::idle(void)
 				// Get the actual port the socket was bound to
 				{
 					apr_sockaddr_t* bound_addr = NULL;
-					if (ll_apr_warn_status(apr_socket_addr_get(&bound_addr, APR_LOCAL, mListenSocket->getSocket())))
+					if (ll_apr_warn_status(apr_socket_addr_get(&bound_addr,
+															   APR_LOCAL,
+															   mListenSocket->getSocket())))
 					{
 						killSockets();
 						errorState();
@@ -323,7 +326,8 @@ void LLPluginProcessParent::idle(void)
 
 					if (mBoundPort == 0)
 					{
-						LL_WARNS("Plugin") << "Bound port number unknown, bailing out." << LL_ENDL;
+						llwarns << "Bound port number unknown, bailing out."
+								<< llendl;
 
 						killSockets();
 						errorState();
@@ -479,7 +483,8 @@ void LLPluginProcessParent::idle(void)
 				}
 				else if (pluginLockedUp())
 				{
-					LL_WARNS("Plugin") << "timeout in exiting state, bailing out" << LL_ENDL;
+					llwarns << "timeout in exiting state, bailing out"
+							<< llendl;
 					errorState();
 				}
 			break;
@@ -678,7 +683,8 @@ void LLPluginProcessParent::updatePollset()
 			if (status != APR_SUCCESS)
 			{
 #endif // APR_POLLSET_NOCOPY
-				LL_WARNS("PluginPoll") << "Couldn't create pollset.  Falling back to non-pollset mode." << LL_ENDL;
+				llwarns << "Couldn't create pollset.  Falling back to non-pollset mode."
+						<< llendl;
 				sPollSet = NULL;
 #ifdef APR_POLLSET_NOCOPY
 			}
@@ -698,7 +704,8 @@ void LLPluginProcessParent::updatePollset()
 						}
 						else
 						{
-							LL_WARNS("PluginPoll") << "apr_pollset_add failed with status " << status << LL_ENDL;
+							llwarns << "apr_pollset_add failed with status "
+									<< status << llendl;
 						}
 					}
 				}
@@ -719,7 +726,7 @@ void LLPluginProcessParent::setUseReadThread(bool use_read_thread)
 			if (!sReadThread)
 			{
 				// start up the read thread
-				LL_INFOS("PluginPoll") << "creating read thread " << LL_ENDL;
+				llinfos << "creating read thread " << llendl;
 
 				// make sure the pollset gets rebuilt.
 				sPollsetNeedsRebuild = true;
@@ -733,7 +740,7 @@ void LLPluginProcessParent::setUseReadThread(bool use_read_thread)
 			if (sReadThread)
 			{
 				// shut down the read thread
-				LL_INFOS("PluginPoll") << "destroying read thread " << LL_ENDL;
+				llinfos << "destroying read thread " << llendl;
 				delete sReadThread;
 				sReadThread = NULL;
 			}
@@ -812,7 +819,8 @@ void LLPluginProcessParent::poll(F64 timeout)
 		}
 		else if (status != APR_SUCCESS)
 		{
-			LL_WARNS("PluginPoll") << "apr_pollset_poll failed with status " << status << LL_ENDL;
+			llwarns << "apr_pollset_poll failed with status " << status
+					<< llendl;
 		}
 	}
 }
@@ -906,7 +914,8 @@ void LLPluginProcessParent::receiveMessage(const LLPluginMessage &message)
 			}
 			else
 			{
-				LL_WARNS("Plugin") << "received hello message in wrong state -- bailing out" << LL_ENDL;
+				llwarns << "received hello message in wrong state -- bailing out"
+						<< llendl;
 				errorState();
 			}
 		}
@@ -917,16 +926,20 @@ void LLPluginProcessParent::receiveMessage(const LLPluginMessage &message)
 				// Plugin has been loaded. 
 
 				mPluginVersionString = message.getValue("plugin_version");
-				LL_INFOS("Plugin") << "plugin version string: " << mPluginVersionString << LL_ENDL;
+				llinfos << "plugin version string: " << mPluginVersionString
+						<< llendl;
 
 				// Check which message classes/versions the plugin supports.
 				// TODO: check against current versions
 				// TODO: kill plugin on major mismatches?
 				mMessageClassVersions = message.getValueLLSD("versions");
 				LLSD::map_iterator iter;
-				for (iter = mMessageClassVersions.beginMap(); iter != mMessageClassVersions.endMap(); iter++)
+				for (iter = mMessageClassVersions.beginMap();
+					 iter != mMessageClassVersions.endMap(); ++iter)
 				{
-					LL_INFOS("Plugin") << "message class: " << iter->first << " -> version: " << iter->second.asString() << LL_ENDL;
+					llinfos << "message class: " << iter->first
+							<< " -> version: " << iter->second.asString()
+							<< llendl;
 				}
 
 				// Send initial sleep time
@@ -937,7 +950,8 @@ void LLPluginProcessParent::receiveMessage(const LLPluginMessage &message)
 			}
 			else
 			{
-				LL_WARNS("Plugin") << "received load_plugin_response message in wrong state -- bailing out" << LL_ENDL;
+				llwarns << "received load_plugin_response message in wrong state -- bailing out"
+						<< llendl;
 				errorState();
 			}
 		}
@@ -970,7 +984,8 @@ void LLPluginProcessParent::receiveMessage(const LLPluginMessage &message)
 		}
 		else
 		{
-			LL_WARNS("Plugin") << "Unknown internal message from child: " << message_name << LL_ENDL;
+			llwarns << "Unknown internal message from child: " << message_name
+					<< llendl;
 		}
 	}
 	else
@@ -1002,7 +1017,7 @@ std::string LLPluginProcessParent::addSharedMemory(size_t size)
 	}
 	else
 	{
-		LL_WARNS("Plugin") << "Couldn't create a shared memory segment!" << LL_ENDL;
+		llwarns << "Couldn't create a shared memory segment!" << llendl;
 
 		// Don't leak
 		delete region;
@@ -1024,7 +1039,8 @@ void LLPluginProcessParent::removeSharedMemory(const std::string &name)
 	}
 	else
 	{
-		LL_WARNS("Plugin") << "Request to remove an unknown shared memory segment." << LL_ENDL;
+		llwarns << "Request to remove an unknown shared memory segment."
+				<< llendl;
 	}
 }
 size_t LLPluginProcessParent::getSharedMemorySize(const std::string &name)
@@ -1081,12 +1097,12 @@ bool LLPluginProcessParent::pluginLockedUpOrQuit()
 
 	if (!mProcess.isRunning())
 	{
-		LL_WARNS("Plugin") << "child exited" << LL_ENDL;
+		llwarns << "child exited" << llendl;
 		result = true;
 	}
 	else if (pluginLockedUp())
 	{
-		LL_WARNS("Plugin") << "timeout" << LL_ENDL;
+		llwarns << "timeout" << llendl;
 		result = true;
 	}
 

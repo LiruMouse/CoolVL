@@ -3344,11 +3344,13 @@ const LLVector3 &LLViewerObject::getPositionAgent() const
 	// If region is removed from the list it is also deleted.
 	if (mRegionp && LLWorld::instance().isRegionListed(mRegionp))
 	{
-		if (mDrawable.notNull() && (!mDrawable->isRoot() && getParent()))
+		if (mDrawable.notNull() && !mDrawable->isRoot() && getParent())
 		{
-			// Don't return cached position if you have a parent, recalc (until all dirtying is done correctly.
+			// Don't return cached position if you have a parent, recalc (until
+			// all dirtying is done correctly.
 			LLVector3 position_region;
-			position_region = ((LLViewerObject *)getParent())->getPositionRegion() + getPosition() * getParent()->getRotation();
+			position_region = ((LLViewerObject*)getParent())->getPositionRegion() +
+							  getPosition() * getParent()->getRotation();
 			mPositionAgent = mRegionp->getPosAgentFromRegion(position_region);
 		}
 		else
@@ -3363,8 +3365,9 @@ const LLVector3 &LLViewerObject::getPositionRegion() const
 {
 	if (!isRoot())
 	{
-		LLViewerObject *parent = (LLViewerObject *)getParent();
-		mPositionRegion = parent->getPositionRegion() + (getPosition() * parent->getRotation());
+		LLViewerObject* parent = (LLViewerObject*)getParent();
+		mPositionRegion = parent->getPositionRegion() +
+						  getPosition() * parent->getRotation();
 	}
 	else
 	{
@@ -3382,8 +3385,9 @@ const LLVector3 LLViewerObject::getPositionEdit() const
 	}
 	else
 	{
-		LLViewerObject *parent = (LLViewerObject *)getParent();
-		LLVector3 position_edit = parent->getPositionEdit() + getPosition() * parent->getRotationEdit();
+		LLViewerObject* parent = (LLViewerObject*)getParent();
+		LLVector3 position_edit = parent->getPositionEdit() +
+								  getPosition() * parent->getRotationEdit();
 		return position_edit;
 	}
 }
@@ -3395,7 +3399,7 @@ const LLVector3 LLViewerObject::getRenderPosition() const
 		LLVOAvatar* avatar = getAvatar();
 		if (avatar)
 		{
-			return avatar->getPositionAgent();
+			return avatar->getRenderPosition();
 		}
 	}
 

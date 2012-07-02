@@ -35,7 +35,6 @@
 
 #include "llerrorcontrol.h" // For LLLineBuffer
 #include "llthread.h"
-#include "llui.h"
 #include "llview.h"
 #include "v4color.h"
 #include <deque>
@@ -53,7 +52,6 @@ private:
 	S32				mConsoleHeight;
 	LLMutex 		mQueueMutex;
 	LLTimer			mTimer;
-	LLUIImagePtr	mRoundedSquare;
 
 public:
 	// A paragraph color segment defines the color of text in a line of text

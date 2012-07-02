@@ -39,6 +39,7 @@
 #include "llmath.h"
 #include "llsd.h"
 #include "lltextparser.h"
+#include "llui.h"
 
 #include "llstartup.h"
 #include "llviewercontrol.h"
@@ -66,7 +67,6 @@ LLConsole::LLConsole(const std::string& name, const LLRect& rect,
 	mQueueMutex(NULL)
 {
 	mTimer.reset();
-	mRoundedSquare = LLUI::getUIImage("rounded_square.tga");
 	setFontSize(font_size_index);
 }
 
@@ -136,6 +136,12 @@ void LLConsole::setFontSize(S32 size_index)
 
 void LLConsole::draw()
 {
+	static const LLUIImagePtr rounded_square = LLUI::getUIImage("rounded_square.tga");
+	if (!rounded_square)
+	{
+		llerrs << "Missing UI image: rounded_square.tga" << llendl;
+	}
+
 	LLGLSUIDefault gls_ui;
 
 	{
@@ -244,7 +250,7 @@ void LLConsole::draw()
 			y_pos += ((*paragraph_it)->mLines.size()) * line_height;
 			y_pos += message_spacing;  // Extra spacing between messages.
 		}
-		mRoundedSquare->drawSolid(-CONSOLE_GUTTER_LEFT,
+		rounded_square->drawSolid(-CONSOLE_GUTTER_LEFT,
 								  (S32)(y_pos + line_height - bkg_height - message_spacing),
 								  bkg_width, bkg_height, color);
 	}
@@ -261,7 +267,7 @@ void LLConsole::draw()
 		{
 			// per-message block boxes
 			target_height = llfloor((*paragraph_it)->mLines.size() * line_height + 8);
-			mRoundedSquare->drawSolid(-CONSOLE_GUTTER_LEFT,
+			rounded_square->drawSolid(-CONSOLE_GUTTER_LEFT,
 									  (S32)(y_pos + line_height - target_height),
 									  target_width, target_height, color);
 		}

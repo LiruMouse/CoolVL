@@ -34,7 +34,6 @@
 #define LL_LLOVERLAYBAR_H
 
 #include "llpanel.h"
-#include "llui.h"
 
 #include "llviewercontrol.h"
 
@@ -104,8 +103,6 @@ protected:
 	LLButton*	mBtnMouseLook;
 	LLButton*	mBtnStandUp;
 	LLButton*	mBtnFlyCam;
-
-	LLUIImagePtr			mRoundedSquare;
 
 	LLCachedControl<S32>	mStatusBarPad;
 

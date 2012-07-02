@@ -102,7 +102,7 @@ void LLPrefsMedia::refreshValues()
 	mPreviousNotifyStreamChanges	= gSavedSettings.getBOOL("NotifyStreamChanges");
 	mPreviousStreamingVideo			= gSavedSettings.getBOOL("AudioStreamingVideo");
 	mPreviousParcelMediaAutoPlay	= gSavedSettings.getBOOL("ParcelMediaAutoPlayEnable");
-	mPreviousMediaOnAPrimUI			= gSavedSettings.getBOOL("PreviousMediaOnAPrimUI");
+	mPreviousMediaOnAPrimUI			= gSavedSettings.getBOOL("MediaOnAPrimUI");
 	mPreviousMediaEnableFilter		= gSavedSettings.getBOOL("MediaEnableFilter");
 	mPreviousMediaLookupIP			= gSavedSettings.getBOOL("MediaLookupIP");
 
@@ -126,7 +126,7 @@ void LLPrefsMedia::cancel()
 	gSavedSettings.setBOOL("NotifyStreamChanges",		mPreviousNotifyStreamChanges);
 	gSavedSettings.setBOOL("AudioStreamingVideo",		mPreviousStreamingVideo);
 	gSavedSettings.setBOOL("ParcelMediaAutoPlayEnable",	mPreviousParcelMediaAutoPlay);
-	gSavedSettings.setBOOL("PreviousMediaOnAPrimUI",	mPreviousMediaOnAPrimUI);
+	gSavedSettings.setBOOL("MediaOnAPrimUI",			mPreviousMediaOnAPrimUI);
 	gSavedSettings.setBOOL("MediaEnableFilter",			mPreviousMediaEnableFilter);
 	gSavedSettings.setBOOL("MediaLookupIP",				mPreviousMediaLookupIP);
 

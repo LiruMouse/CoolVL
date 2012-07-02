@@ -148,7 +148,8 @@ bool checkExceptionHandler()
 
 	if (prev_filter != myWin32ExceptionHandler)
 	{
-		LL_WARNS("AppInit") << "Our exception handler (" << (void *)myWin32ExceptionHandler << ") replaced with " << prev_filter << "!" << LL_ENDL;
+		llwarns << "Our exception handler (" << (void*)myWin32ExceptionHandler
+				<< ") replaced with " << prev_filter << "!" << llendl;
 		ok = false;
 	}
 
@@ -157,11 +158,13 @@ bool checkExceptionHandler()
 		ok = FALSE;
 		if (NULL == myWin32ExceptionHandler)
 		{
-			LL_WARNS("AppInit") << "Exception handler uninitialized." << LL_ENDL;
+			llwarns << "Exception handler uninitialized." << llendl;
 		}
 		else
 		{
-			LL_WARNS("AppInit") << "Our exception handler (" << (void *)myWin32ExceptionHandler << ") replaced with NULL!" << LL_ENDL;
+			llwarns << "Our exception handler ("
+					<< (void*)myWin32ExceptionHandler
+					<< ") replaced with NULL!" << llendl;
 		}
 	}
 
@@ -191,13 +194,13 @@ int main(int argc, char **argv)
 #if LL_WINDOWS
 	if (strlen(lpCmdLine ) == 0)
 	{
-		LL_ERRS("slplugin") << "usage: " << "SLPlugin" << " launcher_port" << LL_ENDL;
+		llerrs << "usage: " << "SLPlugin" << " launcher_port" << llendl;
 	};
 
 	U32 port = 0;
 	if (!LLStringUtil::convertToU32(lpCmdLine, port))
 	{
-		LL_ERRS("slplugin") << "port number must be numeric" << LL_ENDL;
+		llerrs << "port number must be numeric" << llendl;
 	};
 
 	// Insert our exception handler into the system so this plugin doesn't
@@ -207,13 +210,13 @@ int main(int argc, char **argv)
 #elif LL_DARWIN || LL_LINUX
 	if (argc < 2)
 	{
-		LL_ERRS("slplugin") << "usage: " << argv[0] << " launcher_port" << LL_ENDL;
+		llerrs << "usage: " << argv[0] << " launcher_port" << llendl;
 	}
 
 	U32 port = 0;
 	if (!LLStringUtil::convertToU32(argv[1], port))
 	{
-		LL_ERRS("slplugin") << "port number must be numeric" << LL_ENDL;
+		llerrs << "port number must be numeric" << llendl;
 	}
 
 	// Catch signals that most kinds of crashes will generate, and exit cleanly so the system crash dialog isn't shown.
@@ -248,15 +251,19 @@ int main(int argc, char **argv)
 #endif
 
 #if LL_DARWIN
-	// If the plugin opens a new window (such as the Flash plugin's fullscreen player), we may need to bring this plugin process to the foreground.
-	// Use this to track the current frontmost window and bring this process to the front if it changes.
+	// If the plugin opens a new window (such as the Flash plugin's fullscreen
+	// player), we may need to bring this plugin process to the foreground.
+	// Use this to track the current frontmost window and bring this process to
+	// the front if it changes.
 	WindowRef front_window = NULL;
 	WindowGroupRef layer_group = NULL;
 	int window_hack_state = 0;
 	CreateWindowGroup(kWindowGroupAttrFixedLevel, &layer_group);
 	if (layer_group)
 	{
-		// Start out with a window layer that's way out in front (fixes the problem with the menubar not getting hidden on first switch to fullscreen youtube)
+		// Start out with a window layer that's way out in front (fixes the
+		// problem with the menubar not getting hidden on first switch to
+		// fullscreen youtube)
 		SetWindowGroupName(layer_group, CFSTR("SLPlugin Layer"));
 		SetWindowGroupLevel(layer_group, kCGOverlayWindowLevel);
 	}
@@ -274,7 +281,8 @@ int main(int argc, char **argv)
 		plugin->idle();
 #if LL_DARWIN
 		{
-			// Some plugins (webkit at least) will want an event loop.  This qualifies.
+			// Some plugins (webkit at least) will want an event loop. This
+			// qualifies.
 			EventRef event;
 			if (ReceiveNextEvent(0, 0, kEventDurationNoWait, true, &event) == noErr)
 			{
@@ -301,7 +309,8 @@ int main(int argc, char **argv)
 						parent = info.processLauncher;
 					}
 
-					// and figure out whether this process or its parent are currently frontmost
+					// and figure out whether this process or its parent are
+					// currently frontmost
 					if (GetFrontProcess(&front) == noErr)
 					{
 						(void) SameProcess(&self, &front, &this_is_front_process);
@@ -309,19 +318,23 @@ int main(int argc, char **argv)
 					}
 				}
 
-				if (GetFrontWindowOfClass(kAllWindowClasses, true) != NULL && front_window == NULL)
+				if (GetFrontWindowOfClass(kAllWindowClasses, true) != NULL &&
+					front_window == NULL)
 				{
 					// Opening the first window
 
 					if (window_hack_state == 0)
 					{
-						// Next time through the event loop, lower the window group layer
+						// Next time through the event loop, lower the window
+						// group layer
 						window_hack_state = 1;
 					}
 
 					if (layer_group)
 					{
-						SetWindowGroup(GetFrontWindowOfClass(kAllWindowClasses, true), layer_group);
+						SetWindowGroup(GetFrontWindowOfClass(kAllWindowClasses,
+															 true),
+									   layer_group);
 					}
 
 					if (parent_is_front_process)
@@ -330,9 +343,12 @@ int main(int argc, char **argv)
 						(void) SetFrontProcess( &self );
 					}
 
-					ActivateWindow(GetFrontWindowOfClass(kAllWindowClasses, true), true);
+					ActivateWindow(GetFrontWindowOfClass(kAllWindowClasses,
+														 true),
+								   true);
 				}
-				else if (GetFrontWindowOfClass(kAllWindowClasses, true) == NULL && front_window != NULL)
+				else if (GetFrontWindowOfClass(kAllWindowClasses, true) == NULL &&
+						 front_window != NULL)
 				{
 					// Closing the last window
 
@@ -363,7 +379,8 @@ int main(int argc, char **argv)
 		if (remaining <= 0.0f)
 		{
 			// We've already used our full allotment.
-//			LL_INFOS("slplugin") << "elapsed = " << elapsed * 1000.0f << " ms, remaining = " << remaining * 1000.0f << " ms, not sleeping" << LL_ENDL;
+//			llinfos << "elapsed = " << elapsed * 1000.0f << " ms, remaining = "
+//					<< remaining * 1000.0f << " ms, not sleeping" << llendl;
 
 			// Still need to service the network...
 			plugin->pump();
@@ -371,13 +388,16 @@ int main(int argc, char **argv)
 		else
 		{
 
-//			LL_INFOS("slplugin") << "elapsed = " << elapsed * 1000.0f << " ms, remaining = " << remaining * 1000.0f << " ms, sleeping for " << remaining * 1000.0f << " ms" << LL_ENDL;
+//			llinfos << "elapsed = " << elapsed * 1000.0f << " ms, remaining = "
+//					<< remaining * 1000.0f << " ms, sleeping for "
+//					<< remaining * 1000.0f << " ms" << llendl;
 //			timer.reset();
 
 			// This also services the network as needed.
 			plugin->sleep(remaining);
 
-//			LL_INFOS("slplugin") << "slept for "<< timer.getElapsedTimeF64() * 1000.0f << " ms" <<  LL_ENDL;
+//			llinfos << "slept for "<< timer.getElapsedTimeF64() * 1000.0f
+//					<< " ms" <<  llendl;
 		}
 
 #if LL_WINDOWS

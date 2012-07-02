@@ -43,6 +43,7 @@
 #include "llpermissions.h"
 #include "llrender.h"
 #include "llresmgr.h"
+#include "llui.h"
 
 // Viewer includes
 #include "llagent.h"
@@ -86,9 +87,7 @@ LLHoverView::LLHoverView(const std::string& name, const LLRect& rect)
 	mStartHoverPickTimer(FALSE),
 	mHoverActive(FALSE),
 	mUseHover(FALSE),
-	mTyping(FALSE),
-	mBoxImage(LLUI::getUIImage("rounded_square.tga")),
-	mShadowImage(LLUI::getUIImage("rounded_square_soft.tga"))
+	mTyping(FALSE)
 {
 	mHoverOffset.clearVec();
 }
@@ -653,6 +652,13 @@ void LLHoverView::updateText()
 
 void LLHoverView::draw()
 {
+	static const LLUIImagePtr box_image = LLUI::getUIImage("rounded_square.tga");
+	static const LLUIImagePtr shadow_image = LLUI::getUIImage("rounded_square_soft.tga");
+	if (!box_image || !shadow_image)
+	{
+		llerrs << "Missing UI image !" << llendl;
+	}
+
 	if (!isHovering())
 	{
 		return;
@@ -770,12 +776,12 @@ void LLHoverView::draw()
 	LLGLSUIDefault gls_ui;
 
 	shadow_color.mV[VALPHA] = 0.7f * alpha;
-	mShadowImage->draw(LLRect(left + shadow_offset, top - shadow_offset,
+	shadow_image->draw(LLRect(left + shadow_offset, top - shadow_offset,
 							  right + shadow_offset, bottom - shadow_offset),
 					   shadow_color);
 
 	bg_color.mV[VALPHA] = alpha;
-	mBoxImage->draw(LLRect(left, top, right, bottom), bg_color);
+	box_image->draw(LLRect(left, top, right, bottom), bg_color);
 
 	S32 cur_offset = top - 4;
 	for (text_list_t::iterator iter = mText.begin(); iter != text_end; ++iter)

@@ -230,11 +230,14 @@ struct LLVFSFileBlock_less
 	}
 };
 
-
 const S32 LLVFSFileBlock::SERIAL_SIZE = 34;
      
 
-LLVFS::LLVFS(const std::string& index_filename, const std::string& data_filename, const BOOL read_only, const U32 presize, const BOOL remove_after_crash)
+LLVFS::LLVFS(const std::string& index_filename,
+			 const std::string& data_filename,
+			 const BOOL read_only,
+			 const U32 presize,
+			 const BOOL remove_after_crash)
 :	mRemoveAfterCrash(remove_after_crash)
 {
 	mDataMutex = new LLMutex(NULL);
@@ -256,7 +259,8 @@ LLVFS::LLVFS(const std::string& index_filename, const std::string& data_filename
     
 		if (mReadOnly)
 		{
-			LL_WARNS("VFS") << "Can't find " << mDataFilename << " to open read-only VFS" << LL_ENDL;
+			llwarns << "Can't find " << mDataFilename
+					<< " to open read-only VFS" << llendl;
 			mValid = VFSVALID_BAD_CANNOT_OPEN_READONLY;
 			return;
 		}
@@ -269,7 +273,8 @@ LLVFS::LLVFS(const std::string& index_filename, const std::string& data_filename
 		}
 		else
 		{
-			LL_WARNS("VFS") << "Can't open VFS data file " << mDataFilename << " attempting to use alternate" << LL_ENDL;
+			llwarns << "Can't open VFS data file " << mDataFilename
+					<< " attempting to use alternate" << llendl;
     
 			std::string temp_index;
 			std::string temp_data;
@@ -295,7 +300,8 @@ LLVFS::LLVFS(const std::string& index_filename, const std::string& data_filename
     
 			if (! mDataFP)
 			{
-				LL_WARNS("VFS") << "Couldn't open vfs data file after trying many alternates" << LL_ENDL;
+				llwarns << "Couldn't open vfs data file after trying many alternates"
+						<< llendl;
 				mValid = VFSVALID_BAD_CANNOT_CREATE;
 				return;
 			}
@@ -322,7 +328,8 @@ LLVFS::LLVFS(const std::string& index_filename, const std::string& data_filename
 			unlockAndClose(mDataFP);
 			mDataFP = NULL;
 
-			LL_WARNS("VFS") << "VFS: File left open on last run, removing old VFS file " << mDataFilename << LL_ENDL;
+			llwarns << "VFS: File left open on last run, removing old VFS file "
+					<< mDataFilename << llendl;
 			LLFile::remove(mIndexFilename);
 			LLFile::remove(mDataFilename);
 			LLFile::remove(marker);
@@ -330,7 +337,8 @@ LLVFS::LLVFS(const std::string& index_filename, const std::string& data_filename
 			mDataFP = openAndLock(mDataFilename, "w+b", FALSE);
 			if (!mDataFP)
 			{
-				LL_WARNS("VFS") << "Can't open VFS data file in crash recovery" << LL_ENDL;
+				llwarns << "Can't open VFS data file in crash recovery"
+						<< llendl;
 				mValid = VFSVALID_BAD_CANNOT_CREATE;
 				return;
 			}
@@ -386,9 +394,13 @@ LLVFS::LLVFS(const std::string& index_filename, const std::string& data_filename
 			if (block->mLength && block->mSize > 0)
 			{
 				// this is corrupt, not empty
-				LL_WARNS("VFS") << "VFS corruption: " << block->mFileID << " (" << block->mFileType << ") at index " << block->mIndexLocation << " DS: " << data_size << LL_ENDL;
-				LL_WARNS("VFS") << "Length: " << block->mLength << "\tLocation: " << block->mLocation << "\tSize: " << block->mSize << LL_ENDL;
-				LL_WARNS("VFS") << "File has bad data - VFS removed" << LL_ENDL;
+				llwarns << "VFS corruption: " << block->mFileID << " ("
+						<< block->mFileType << ") at index "
+						<< block->mIndexLocation << " - Data size: "
+						<< data_size << " - Length: " << block->mLength
+						<< " - Location: " << block->mLocation << "- Size: "
+						<< block->mSize << ". File has bad data - VFS removed"
+						<< llendl;
 
 				delete[] buffer;
 				delete block;
@@ -401,11 +413,8 @@ LLVFS::LLVFS(const std::string& index_filename, const std::string& data_filename
 				mDataFP = NULL;
 				LLFile::remove(mDataFilename);
 
-				LL_WARNS("VFS") << "Deleted corrupt VFS files " 
-					<< mDataFilename 
-					<< " and "
-					<< mIndexFilename
-					<< LL_ENDL;
+				llwarns << "Deleted corrupt VFS files " << mDataFilename
+						<< " and " << mIndexFilename << llendl;
 
 				mValid = VFSVALID_BAD_CORRUPT;
 				return;
@@ -459,23 +468,20 @@ LLVFS::LLVFS(const std::string& index_filename, const std::string& data_filename
 				if (cur_file_block->mLocation == last_file_block->mLocation
 					&& cur_file_block->mLength == last_file_block->mLength)
 				{
-					LL_WARNS("VFS") << "VFS: removing duplicate entry"
-						<< " at " << cur_file_block->mLocation 
-						<< " length " << cur_file_block->mLength 
-						<< " size " << cur_file_block->mSize
-						<< " ID " << cur_file_block->mFileID 
-						<< " type " << cur_file_block->mFileType 
-						<< LL_ENDL;
+					llwarns << "VFS: removing duplicate entry at: "
+							<< cur_file_block->mLocation << " - length: "
+							<< cur_file_block->mLength << " - size: "
+							<< cur_file_block->mSize << " - ID: "
+							<< cur_file_block->mFileID << " - type: "
+							<< cur_file_block->mFileType << llendl;
 
 					// Duplicate entries.  Nuke them both for safety.
 					mFileBlocks.erase(*cur_file_block);	// remove ID/type entry
 					if (cur_file_block->mLength > 0)
 					{
 						// convert to hole
-						addFreeBlock(
-							new LLVFSBlock(
-								cur_file_block->mLocation,
-								cur_file_block->mLength));
+						addFreeBlock(new LLVFSBlock(cur_file_block->mLocation,
+													cur_file_block->mLength));
 					}
 					lockData();						// needed for sync()
 					sync(cur_file_block, TRUE);		// remove first on disk
@@ -506,18 +512,14 @@ LLVFS::LLVFS(const std::string& index_filename, const std::string& data_filename
 					mDataFP = NULL;
 					LLFile::remove(mDataFilename);
 
-					LL_WARNS("VFS") << "VFS: overlapping entries"
-						<< " at " << cur_file_block->mLocation 
-						<< " length " << cur_file_block->mLength 
-						<< " ID " << cur_file_block->mFileID 
-						<< " type " << cur_file_block->mFileType 
-						<< LL_ENDL;
+					llwarns << "VFS: overlapping entries at "
+							<< cur_file_block->mLocation << " - Length: "
+							<< cur_file_block->mLength << " - ID: "
+							<< cur_file_block->mFileID << " - Type: "
+							<< cur_file_block->mFileType << llendl;
 
-					LL_WARNS("VFS") << "Deleted corrupt VFS files " 
-						<< mDataFilename 
-						<< " and "
-						<< mIndexFilename
-						<< LL_ENDL;
+					llwarns << "Deleted corrupt VFS files " << mDataFilename
+							<< " and " << mIndexFilename << llendl;
 
 					mValid = VFSVALID_BAD_CORRUPT;
 					return;
@@ -548,7 +550,8 @@ LLVFS::LLVFS(const std::string& index_filename, const std::string& data_filename
 	{
 		if (mReadOnly)
 		{
-			LL_WARNS("VFS") << "Can't find " << mIndexFilename << " to open read-only VFS" << LL_ENDL;
+			llwarns << "Can't find " << mIndexFilename
+					<< " to open read-only VFS" << llendl;
 			mValid = VFSVALID_BAD_CANNOT_OPEN_READONLY;
 			return;
 		}
@@ -557,7 +560,8 @@ LLVFS::LLVFS(const std::string& index_filename, const std::string& data_filename
 		mIndexFP = openAndLock(mIndexFilename, "w+b", FALSE);
 		if (!mIndexFP)
 		{
-			LL_WARNS("VFS") << "Couldn't open an index file for the VFS, probably a sharing violation!" << LL_ENDL;
+			llwarns << "Couldn't open an index file for the VFS, probably a sharing violation !"
+					<< llendl;
 
 			unlockAndClose(mDataFP);
 			mDataFP = NULL;
@@ -568,7 +572,8 @@ LLVFS::LLVFS(const std::string& index_filename, const std::string& data_filename
 		}
 
 		// no index file, start from scratch w/ 1GB allocation
-		LLVFSBlock *first_block = new LLVFSBlock(0, data_size ? data_size : 0x40000000);
+		LLVFSBlock *first_block = new LLVFSBlock(0, data_size ? data_size
+															  : 0x40000000);
 		addFreeBlock(first_block);
 	}
 
@@ -584,8 +589,8 @@ LLVFS::LLVFS(const std::string& index_filename, const std::string& data_filename
 		}
 	}
 
-	LL_INFOS("VFS") << "Using index file " << mIndexFilename << LL_ENDL;
-	LL_INFOS("VFS") << "Using data file " << mDataFilename << LL_ENDL;
+	llinfos << "Using index file " << mIndexFilename << llendl;
+	llinfos << "Using data file " << mDataFilename << llendl;
 
 	mValid = VFSVALID_OK;
 }
@@ -594,7 +599,7 @@ LLVFS::~LLVFS()
 {
 	if (mDataMutex->isLocked())
 	{
-		LL_ERRS("VFS") << "LLVFS destroyed with mutex locked" << LL_ENDL;
+		llerrs << "LLVFS destroyed with mutex locked" << llendl;
 	}
 
 	unlockAndClose(mIndexFP);
@@ -609,7 +614,8 @@ LLVFS::~LLVFS()
 
 	mFreeBlocksByLength.clear();
 
-	for_each(mFreeBlocksByLocation.begin(), mFreeBlocksByLocation.end(), DeletePairedPointer());
+	for_each(mFreeBlocksByLocation.begin(), mFreeBlocksByLocation.end(),
+			 DeletePairedPointer());
     
 	unlockAndClose(mDataFP);
 	mDataFP = NULL;
@@ -643,7 +649,8 @@ void LLVFS::presizeDataFile(const U32 size)
 
 	if (tmp)
 	{
-		llinfos << "Pre-sized VFS data file to " << ftell(mDataFP) << " bytes" << llendl;
+		llinfos << "Pre-sized VFS data file to " << ftell(mDataFP) << " bytes"
+				<< llendl;
 	}
 	else
 	{
@@ -651,9 +658,10 @@ void LLVFS::presizeDataFile(const U32 size)
 	}
 }
 
-BOOL LLVFS::getExists(const LLUUID &file_id, const LLAssetType::EType file_type)
+BOOL LLVFS::getExists(const LLUUID& file_id,
+					  const LLAssetType::EType file_type)
 {
-	LLVFSFileBlock *block = NULL;
+	LLVFSFileBlock* block = NULL;
 
 	if (!isValid())
 	{
@@ -677,14 +685,13 @@ BOOL LLVFS::getExists(const LLUUID &file_id, const LLAssetType::EType file_type)
 	return res;
 }
     
-S32	 LLVFS::getSize(const LLUUID &file_id, const LLAssetType::EType file_type)
+S32	 LLVFS::getSize(const LLUUID& file_id, const LLAssetType::EType file_type)
 {
 	S32 size = 0;
 
 	if (!isValid())
 	{
 		llerrs << "Attempting to use invalid VFS!" << llendl;
-
 	}
 
 	lockData();
@@ -704,7 +711,8 @@ S32	 LLVFS::getSize(const LLUUID &file_id, const LLAssetType::EType file_type)
 	return size;
 }
     
-S32  LLVFS::getMaxSize(const LLUUID &file_id, const LLAssetType::EType file_type)
+S32  LLVFS::getMaxSize(const LLUUID& file_id,
+					   const LLAssetType::EType file_type)
 {
 	S32 size = 0;
 
@@ -742,7 +750,8 @@ BOOL LLVFS::checkAvailable(S32 max_size)
 	return res;
 }
 
-BOOL LLVFS::setMaxSize(const LLUUID &file_id, const LLAssetType::EType file_type, S32 max_size)
+BOOL LLVFS::setMaxSize(const LLUUID& file_id,
+					   const LLAssetType::EType file_type, S32 max_size)
 {
 	if (!isValid())
 	{
@@ -754,7 +763,8 @@ BOOL LLVFS::setMaxSize(const LLUUID &file_id, const LLAssetType::EType file_type
 	}
 	if (max_size <= 0)
 	{
-		llwarns << "VFS: Attempt to assign size " << max_size << " to vfile " << file_id << llendl;
+		llwarns << "VFS: Attempt to assign size " << max_size << " to vfile "
+				<< file_id << llendl;
 		return FALSE;
 	}
 
@@ -769,8 +779,9 @@ BOOL LLVFS::setMaxSize(const LLUUID &file_id, const LLAssetType::EType file_type
 	}
     
 	// round all sizes upward to KB increments
-	// SJB: Need to not round for the new texture-pipeline code so we know the correct
-	//      max file size. Need to investigate the potential problems with this...
+	// SJB: Need to not round for the new texture-pipeline code so we know the
+	//      correct max file size. Need to investigate the potential problems
+	//      with this...
 	if (file_type != LLAssetType::AT_TEXTURE)
 	{
 		if (max_size & FILE_BLOCK_MASK)
@@ -845,17 +856,19 @@ BOOL LLVFS::setMaxSize(const LLUUID &file_id, const LLAssetType::EType file_type
     
 			if (free_block)
 			{
-				// Save location where data is going, useFreeSpace will move free_block->mLocation;
+				// Save location where data is going, useFreeSpace will move
+				// free_block->mLocation;
 				U32 new_data_location = free_block->mLocation;
 
-				//mark the free block as used so it does not
-				//interfere with other operations such as addFreeBlock
-				useFreeSpace(free_block, max_size);		// useFreeSpace takes ownership (and may delete) free_block
+				// mark the free block as used so it does not interfere with
+				// other operations such as addFreeBlock
+				useFreeSpace(free_block, max_size);	// useFreeSpace takes ownership (and may delete) free_block
 
 				if (block->mLength > 0)
 				{
 					// create a new free block where this file used to be
-					LLVFSBlock *new_free_block = new LLVFSBlock(block->mLocation, block->mLength);
+					LLVFSBlock *new_free_block = new LLVFSBlock(block->mLocation,
+																block->mLength);
 
 					addFreeBlock(new_free_block);
 
@@ -871,7 +884,9 @@ BOOL LLVFS::setMaxSize(const LLUUID &file_id, const LLAssetType::EType file_type
 							{
 								llwarns << "Short write" << llendl;
 							}
-						} else {
+						}
+						else
+						{
 							llwarns << "Short read" << llendl;
 						}
     
@@ -883,7 +898,6 @@ BOOL LLVFS::setMaxSize(const LLUUID &file_id, const LLAssetType::EType file_type
     
 				block->mLength = max_size;
 
-
 				sync(block);
 
 				unlockData();
@@ -891,7 +905,8 @@ BOOL LLVFS::setMaxSize(const LLUUID &file_id, const LLAssetType::EType file_type
 			}
 			else
 			{
-				llwarns << "VFS: No space (" << max_size << ") to resize existing vfile " << file_id << llendl;
+				llwarns << "VFS: No space (" << max_size
+						<< ") to resize existing vfile " << file_id << llendl;
 				//dumpMap();
 				unlockData();
 				dumpStatistics();
@@ -914,7 +929,8 @@ BOOL LLVFS::setMaxSize(const LLUUID &file_id, const LLAssetType::EType file_type
 			else
 			{
 				// this file doesn't exist, create it
-				block = new LLVFSFileBlock(file_id, file_type, free_block->mLocation, max_size);
+				block = new LLVFSFileBlock(file_id, file_type,
+										   free_block->mLocation, max_size);
 				mFileBlocks.insert(fileblock_map::value_type(spec, block));
 			}
 
@@ -927,7 +943,8 @@ BOOL LLVFS::setMaxSize(const LLUUID &file_id, const LLAssetType::EType file_type
 		}
 		else
 		{
-			llwarns << "VFS: No space (" << max_size << ") for new virtual file " << file_id << llendl;
+			llwarns << "VFS: No space (" << max_size
+					<< ") for new virtual file " << file_id << llendl;
 			//dumpMap();
 			unlockData();
 			dumpStatistics();
@@ -937,7 +954,6 @@ BOOL LLVFS::setMaxSize(const LLUUID &file_id, const LLAssetType::EType file_type
 	unlockData();
 	return TRUE;
 }
-
 
 // WARNING: HERE BE DRAGONS!
 // rename is the weirdest VFS op, because the file moves but the locks don't!
@@ -963,8 +979,9 @@ void LLVFS::renameFile(const LLUUID &file_id, const LLAssetType::EType file_type
 	{
 		LLVFSFileBlock *src_block = (*it).second;
 
-		// this will purge the data but leave the file block in place, w/ locks, if any
-		// WAS: removeFile(new_id, new_type); NOW uses removeFileBlock() to avoid mutex lock recursion
+		// this will purge the data but leave the file block in place, w/
+		// locks, if any WAS: removeFile(new_id, new_type); NOW uses
+		// removeFileBlock() to avoid mutex lock recursion
 		fileblock_map::iterator new_it = mFileBlocks.find(new_spec);
 		if (new_it != mFileBlocks.end())
 		{
@@ -972,7 +989,8 @@ void LLVFS::renameFile(const LLUUID &file_id, const LLAssetType::EType file_type
 			removeFileBlock(new_block);
 		}
 
-		// if there's something in the target location, remove it but inherit its locks
+		// if there's something in the target location, remove it but inherit
+		// its locks
 		it = mFileBlocks.find(new_spec);
 		if (it != mFileBlocks.end())
 		{
@@ -1002,7 +1020,8 @@ void LLVFS::renameFile(const LLUUID &file_id, const LLAssetType::EType file_type
 	}
 	else
 	{
-		llwarns << "VFS: Attempt to rename nonexistent vfile " << file_id << ":" << file_type << llendl;
+		llwarns << "VFS: Attempt to rename nonexistent vfile " << file_id
+				<< ":" << file_type << llendl;
 	}
 	unlockData();
 }
@@ -1010,14 +1029,15 @@ void LLVFS::renameFile(const LLUUID &file_id, const LLAssetType::EType file_type
 // mDataMutex must be LOCKED before calling this
 void LLVFS::removeFileBlock(LLVFSFileBlock *fileblock)
 {
-	// convert this into an unsaved, dummy fileblock to preserve locks
-	// a more rubust solution would store the locks in a seperate data structure
+	// convert this into an unsaved, dummy fileblock to preserve locks a more
+	// rubust solution would store the locks in a seperate data structure
 	sync(fileblock, TRUE);
 
 	if (fileblock->mLength > 0)
 	{
 		// turn this file into an empty block
-		LLVFSBlock *free_block = new LLVFSBlock(fileblock->mLocation, fileblock->mLength);
+		LLVFSBlock *free_block = new LLVFSBlock(fileblock->mLocation,
+												fileblock->mLength);
 
 		addFreeBlock(free_block);
 	}
@@ -1030,7 +1050,8 @@ void LLVFS::removeFileBlock(LLVFSFileBlock *fileblock)
 	//mergeFreeBlocks();
 }
 
-void LLVFS::removeFile(const LLUUID &file_id, const LLAssetType::EType file_type)
+void LLVFS::removeFile(const LLUUID& file_id,
+					   const LLAssetType::EType file_type)
 {
 	if (!isValid())
 	{
@@ -1052,14 +1073,16 @@ void LLVFS::removeFile(const LLUUID &file_id, const LLAssetType::EType file_type
 	}
 	else
 	{
-		llwarns << "VFS: attempting to remove nonexistent file " << file_id << " type " << file_type << llendl;
+		llwarns << "VFS: attempting to remove nonexistent file " << file_id
+				<< " type " << file_type << llendl;
 	}
 
 	unlockData();
 }
     
     
-S32 LLVFS::getData(const LLUUID &file_id, const LLAssetType::EType file_type, U8 *buffer, S32 location, S32 length)
+S32 LLVFS::getData(const LLUUID& file_id, const LLAssetType::EType file_type,
+				   U8* buffer, S32 location, S32 length)
 {
 	S32 bytesread = 0;
 
@@ -1084,7 +1107,9 @@ S32 LLVFS::getData(const LLUUID &file_id, const LLAssetType::EType file_type, U8
     
 		if (location > block->mSize)
 		{
-			llwarns << "VFS: Attempt to read location " << location << " in file " << file_id << " of length " << block->mSize << llendl;
+			llwarns << "VFS: Attempt to read location " << location
+					<< " in file " << file_id << " of length " << block->mSize
+					<< llendl;
 		}
 		else
 		{
@@ -1108,7 +1133,8 @@ S32 LLVFS::getData(const LLUUID &file_id, const LLAssetType::EType file_type, U8
 	return bytesread;
 }
     
-S32 LLVFS::storeData(const LLUUID &file_id, const LLAssetType::EType file_type, const U8 *buffer, S32 location, S32 length)
+S32 LLVFS::storeData(const LLUUID& file_id, const LLAssetType::EType file_type,
+					 const U8* buffer, S32 location, S32 length)
 {
 	if (!isValid())
 	{
@@ -1141,22 +1167,18 @@ S32 LLVFS::storeData(const LLUUID &file_id, const LLAssetType::EType file_type, 
 		if (block->mLength == BLOCK_LENGTH_INVALID)
 		{
 			// Block was removed, ignore write
-			llwarns << "VFS: Attempt to write to invalid block"
-					<< " in file " << file_id 
-					<< " location: " << in_loc
-					<< " bytes: " << length
-					<< llendl;
+			llwarns << "VFS: Attempt to write to invalid block in file "
+					<< file_id << " location: " << in_loc << " bytes: "
+					<< length << llendl;
 			unlockData();
 			return length;
 		}
 		else if (location > block->mLength)
 		{
 			llwarns << "VFS: Attempt to write to location " << location 
-					<< " in file " << file_id 
-					<< " type " << S32(file_type)
-					<< " of size " << block->mSize
-					<< " block length " << block->mLength
-					<< llendl;
+					<< " in file " << file_id << " type " << S32(file_type)
+					<< " of size " << block->mSize << " block length "
+					<< block->mLength << llendl;
 			unlockData();
 			return length;
 		}
@@ -1164,7 +1186,8 @@ S32 LLVFS::storeData(const LLUUID &file_id, const LLAssetType::EType file_type, 
 		{
 			if (length > block->mLength - location)
 			{
-				llwarns << "VFS: Truncating write to virtual file " << file_id << " type " << S32(file_type) << llendl;
+				llwarns << "VFS: Truncating write to virtual file " << file_id
+						<< " type " << S32(file_type) << llendl;
 				length = block->mLength - location;
 			}
 			U32 file_location = location + block->mLocation;
@@ -1173,7 +1196,8 @@ S32 LLVFS::storeData(const LLUUID &file_id, const LLAssetType::EType file_type, 
 			S32 write_len = (S32)fwrite(buffer, 1, length, mDataFP);
 			if (write_len != length)
 			{
-				llwarns << llformat("VFS Write Error: %d != %d",write_len,length) << llendl;
+				llwarns << llformat("VFS Write Error: %d != %d",
+									write_len,length) << llendl;
 			}
 			// fflush(mDataFP);
 
@@ -1194,7 +1218,8 @@ S32 LLVFS::storeData(const LLUUID &file_id, const LLAssetType::EType file_type, 
 	}
 }
  
-void LLVFS::incLock(const LLUUID &file_id, const LLAssetType::EType file_type, EVFSLock lock)
+void LLVFS::incLock(const LLUUID& file_id, const LLAssetType::EType file_type,
+					EVFSLock lock)
 {
 	lockData();
 
@@ -1220,7 +1245,8 @@ void LLVFS::incLock(const LLUUID &file_id, const LLAssetType::EType file_type, E
 	unlockData();
 }
 
-void LLVFS::decLock(const LLUUID &file_id, const LLAssetType::EType file_type, EVFSLock lock)
+void LLVFS::decLock(const LLUUID& file_id, const LLAssetType::EType file_type,
+					EVFSLock lock)
 {
 	lockData();
 
@@ -1244,7 +1270,8 @@ void LLVFS::decLock(const LLUUID &file_id, const LLAssetType::EType file_type, E
 	unlockData();
 }
 
-BOOL LLVFS::isLocked(const LLUUID &file_id, const LLAssetType::EType file_type, EVFSLock lock)
+BOOL LLVFS::isLocked(const LLUUID& file_id, const LLAssetType::EType file_type,
+					 EVFSLock lock)
 {
 	lockData();
 
@@ -1292,7 +1319,6 @@ void LLVFS::eraseBlockLength(LLVFSBlock *block)
 	}
 }
 
-
 // Remove block from both free lists (by location and by length).
 void LLVFS::eraseBlock(LLVFSBlock *block)
 {
@@ -1301,7 +1327,6 @@ void LLVFS::eraseBlock(LLVFSBlock *block)
 	U32 location = block->mLocation;
 	llverify(mFreeBlocksByLocation.erase(location) == 1); // we should only have one entry per location.
 }
-
 
 // Add the region specified by block location and length to the free lists.
 // Also incrementally defragment by merging with previous and next free blocks.
@@ -1596,8 +1621,8 @@ LLVFSBlock *LLVFS::findFreeBlock(S32 size, LLVFSFileBlock *immune)
 				continue;
 			}
 
-
-			llinfos << "VFS: LRU: Aggressive: " << (S32)lru_list.size() << " files remain" << llendl;
+			llinfos << "VFS: LRU: Aggressive: " << (S32)lru_list.size()
+					<< " files remain" << llendl;
 			dumpLockCounts();
 
 			// Now it's time to aggressively make more space

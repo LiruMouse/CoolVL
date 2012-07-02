@@ -116,14 +116,14 @@ BOOL LLAgent::setPointAt(EPointAtType target_type, LLViewerObject *object, LLVec
 	}
 
 	// No point at for far objects when PrivateLookAt is TRUE
-	static LLCachedControl<bool> private_look_at(gSavedSettings, "PrivateLookAt");
-	static LLCachedControl<U32> look_at_limit(gSavedSettings, "PrivateLookAtLimit");
-	if (private_look_at && object &&
+	static LLCachedControl<bool> private_point_at(gSavedSettings, "PrivatePointAt");
+	static LLCachedControl<U32> point_at_limit(gSavedSettings, "PrivatePointAtLimit");
+	if (private_point_at && object &&
 		target_type != POINTAT_TARGET_NONE &&
 		target_type != POINTAT_TARGET_CLEAR)
 	{
 		if ((object->getPositionGlobal() - gAgent.getPositionGlobal()).magVec() >
-			look_at_limit)
+			point_at_limit)
 		{
 			target_type = POINTAT_TARGET_NONE;
 			object = NULL;

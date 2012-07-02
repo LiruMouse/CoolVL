@@ -42,6 +42,7 @@
 #include "llmath.h"
 #include "llrender.h"
 #include "lltimer.h"
+#include "llui.h"
 #include "llwindow.h"
 #include "v3color.h"
 
@@ -71,7 +72,6 @@ LLScrollbar::LLScrollbar(const std::string& name,
 	mThumbColor(LLUI::sColorsGroup->getColor("ScrollbarThumbColor")),
 	mHighlightColor(LLUI::sColorsGroup->getColor("DefaultHighlightLight")),
 	mShadowColor(LLUI::sColorsGroup->getColor("DefaultShadowLight")),
-	mImageBar(LLUI::getUIImage("rounded_square.tga")),
 	mOnScrollEndCallback(NULL),
 	mOnScrollEndData(NULL)
 {
@@ -523,6 +523,12 @@ void LLScrollbar::reshape(S32 width, S32 height, BOOL called_from_parent)
 
 void LLScrollbar::draw()
 {
+	static const LLUIImagePtr rounded_square = LLUI::getUIImage("rounded_square.tga");
+	if (!rounded_square)
+	{
+		llerrs << "Missing UI image: rounded_square.tga" << llendl;
+	}
+
 	if (!getRect().isValid())
 	{
 		return;
@@ -547,47 +553,31 @@ void LLScrollbar::draw()
 								LLCriticalDamp::getInterpolant(0.05f));
 	}
 
-	// Draw background and thumb.
-	if (!mImageBar)
-	{
-		gl_rect_2d(mOrientation == HORIZONTAL ? SCROLLBAR_SIZE : 0,
-				   mOrientation == VERTICAL ? getRect().getHeight() - 2 * SCROLLBAR_SIZE
-											: getRect().getHeight(),
-				   mOrientation == HORIZONTAL ? getRect().getWidth() - 2 * SCROLLBAR_SIZE
-											  : getRect().getWidth(),
-				   mOrientation == VERTICAL ? SCROLLBAR_SIZE : 0, mTrackColor,
-				   TRUE);
+	// Background
+	rounded_square->drawSolid(mOrientation == HORIZONTAL ? SCROLLBAR_SIZE : 0,
+							  mOrientation == VERTICAL ? SCROLLBAR_SIZE : 0,
+							  mOrientation == HORIZONTAL ? getRect().getWidth() - 2 * SCROLLBAR_SIZE
+														 : getRect().getWidth(),
+							  mOrientation == VERTICAL ? getRect().getHeight() - 2 * SCROLLBAR_SIZE
+													   : getRect().getHeight(),
+							  mTrackColor);
 
-		gl_rect_2d(mThumbRect, mThumbColor, TRUE);
+	// Thumb
+	LLRect outline_rect = mThumbRect;
+	outline_rect.stretch(2);
+
+	if (gFocusMgr.getKeyboardFocus() == this)
+	{
+		rounded_square->draw(outline_rect, gFocusMgr.getFocusColor());
 	}
-	else
+
+	rounded_square->draw(mThumbRect, mThumbColor);
+	if (mCurGlowStrength > 0.01f)
 	{
-		// Background
-		mImageBar->drawSolid(mOrientation == HORIZONTAL ? SCROLLBAR_SIZE : 0,
-							 mOrientation == VERTICAL ? SCROLLBAR_SIZE : 0,
-							 mOrientation == HORIZONTAL ? getRect().getWidth() - 2 * SCROLLBAR_SIZE
-														: getRect().getWidth(),
-							 mOrientation == VERTICAL ? getRect().getHeight() - 2 * SCROLLBAR_SIZE
-													  : getRect().getHeight(),
-							 mTrackColor);
-
-		// Thumb
-		LLRect outline_rect = mThumbRect;
-		outline_rect.stretch(2);
-
-		if (gFocusMgr.getKeyboardFocus() == this)
-		{
-			mImageBar->draw(outline_rect, gFocusMgr.getFocusColor());
-		}
-
-		mImageBar->draw(mThumbRect, mThumbColor);
-		if (mCurGlowStrength > 0.01f)
-		{
-			gGL.setSceneBlendType(LLRender::BT_ADD_WITH_ALPHA);
-			mImageBar->drawSolid(mThumbRect, LLColor4(1.f, 1.f, 1.f,
-													  mCurGlowStrength));
-			gGL.setSceneBlendType(LLRender::BT_ALPHA);
-		}
+		gGL.setSceneBlendType(LLRender::BT_ADD_WITH_ALPHA);
+		rounded_square->drawSolid(mThumbRect,
+								  LLColor4(1.f, 1.f, 1.f, mCurGlowStrength));
+		gGL.setSceneBlendType(LLRender::BT_ALPHA);
 	}
 
 	BOOL was_scrolled_to_bottom = (getDocPos() == getDocPosMax());

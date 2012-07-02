@@ -746,12 +746,17 @@ void LLPipeline::allocateScreenBuffer(U32 resX, U32 resY)
 //static
 void LLPipeline::updateRenderDeferred()
 {
-	BOOL deferred = (gSavedSettings.getBOOL("RenderDeferred") &&
-					 LLRenderTarget::sUseFBO &&
+	static LLCachedControl<bool> render_deferred(gSavedSettings,
+												 "RenderDeferred");
+	static LLCachedControl<bool> vertex_shader_enable(gSavedSettings,
+													  "VertexShaderEnable");
+	static LLCachedControl<bool> render_avatar_vp(gSavedSettings,
+												  "RenderAvatarVP");
+	static LLCachedControl<bool> use_atmos_shaders(gSavedSettings,
+												   "WindLightUseAtmosShaders");
+	BOOL deferred = (render_deferred && LLRenderTarget::sUseFBO &&
+					 vertex_shader_enable && render_avatar_vp && use_atmos_shaders &&
 					 LLFeatureManager::getInstance()->isFeatureAvailable("RenderDeferred") &&
-					 gSavedSettings.getBOOL("VertexShaderEnable") &&
-					 gSavedSettings.getBOOL("RenderAvatarVP") &&
-					 gSavedSettings.getBOOL("WindLightUseAtmosShaders") &&
 					 !gUseWireframe) ? TRUE : FALSE;
 
 	sRenderDeferred = deferred;

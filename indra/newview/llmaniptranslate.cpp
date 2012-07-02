@@ -193,7 +193,7 @@ void LLManipTranslate::restoreGL()
 		return;
 	}
 
-	GLuint* d = new GLuint[rez*rez];
+	GLuint* d = new GLuint[rez * rez];
 
 	gGL.getTexUnit(0)->bindManual(LLTexUnit::TT_TEXTURE,
 								  sGridTex->getTexName(), true);
@@ -322,12 +322,9 @@ BOOL LLManipTranslate::handleMouseDown(S32 x, S32 y, MASK mask)
 	BOOL	handled = FALSE;
 
 	// didn't click in any UI object, so must have clicked in the world
-	if ((mHighlightedPart == LL_X_ARROW ||
-		 mHighlightedPart == LL_Y_ARROW ||
-		 mHighlightedPart == LL_Z_ARROW ||
-		 mHighlightedPart == LL_YZ_PLANE ||
-		 mHighlightedPart == LL_XZ_PLANE ||
-		 mHighlightedPart == LL_XY_PLANE))
+	if (mHighlightedPart == LL_X_ARROW || mHighlightedPart == LL_Y_ARROW ||
+		mHighlightedPart == LL_Z_ARROW || mHighlightedPart == LL_YZ_PLANE ||
+		mHighlightedPart == LL_XZ_PLANE || mHighlightedPart == LL_XY_PLANE)
 	{
 		handled = handleMouseDownOnPart(x, y, mask);
 	}
@@ -347,12 +344,9 @@ BOOL LLManipTranslate::handleMouseDownOnPart(S32 x, S32 y, MASK mask)
 	highlightManipulators(x, y);
 	S32 hit_part = mHighlightedPart;
 
-	if ((hit_part != LL_X_ARROW) && 
-		(hit_part != LL_Y_ARROW) &&
-		(hit_part != LL_Z_ARROW) &&
-		(hit_part != LL_YZ_PLANE) &&
-		(hit_part != LL_XZ_PLANE) &&
-		(hit_part != LL_XY_PLANE))
+	if (hit_part != LL_X_ARROW && hit_part != LL_Y_ARROW &&
+		hit_part != LL_Z_ARROW && hit_part != LL_YZ_PLANE &&
+		hit_part != LL_XZ_PLANE && hit_part != LL_XY_PLANE)
 	{
 		return TRUE;
 	}
@@ -372,9 +366,9 @@ BOOL LLManipTranslate::handleMouseDownOnPart(S32 x, S32 y, MASK mask)
 	mMouseDownY = y;
 	mMouseOutsideSlop = FALSE;
 
-	LLVector3		axis;
+	LLVector3 axis;
 
-	LLSelectNode *selectNode = mObjectSelection->getFirstMoveableNode(TRUE);
+	LLSelectNode* selectNode = mObjectSelection->getFirstMoveableNode(TRUE);
 
 	if (!selectNode)
 	{
@@ -399,7 +393,12 @@ BOOL LLManipTranslate::handleMouseDownOnPart(S32 x, S32 y, MASK mask)
 	//LLVector3 select_center_agent = gAgent.getPosAgentFromGlobal(LLSelectMgr::getInstance()->getSelectionCenterGlobal());
 	// TomY: The above should (?) be identical to the below
 	LLVector3 select_center_agent = getPivotPoint();
-	mSubdivisions = llclamp(getSubdivisionLevel(select_center_agent, axis_exists ? axis : LLVector3::z_axis, getMinGridScale()), sGridMinSubdivisionLevel, sGridMaxSubdivisionLevel);
+	mSubdivisions = llclamp(getSubdivisionLevel(select_center_agent,
+												axis_exists ? axis
+															: LLVector3::z_axis,
+												getMinGridScale()),
+							sGridMinSubdivisionLevel,
+							sGridMaxSubdivisionLevel);
 
 	// if we clicked on a planar manipulator, recenter mouse cursor
 	if (mManipPart >= LL_YZ_PLANE && mManipPart <= LL_XY_PLANE)
@@ -420,11 +419,12 @@ BOOL LLManipTranslate::handleMouseDownOnPart(S32 x, S32 y, MASK mask)
 
 	LLSelectMgr::getInstance()->updateSelectionCenter();
 	LLVector3d object_start_global = gAgent.getPosGlobalFromAgent(getPivotPoint());
-	getMousePointOnPlaneGlobal(mDragCursorStartGlobal, x, y, object_start_global, mManipNormal);
+	getMousePointOnPlaneGlobal(mDragCursorStartGlobal, x, y,
+							   object_start_global, mManipNormal);
 	mDragSelectionStartGlobal = object_start_global;
 	mCopyMadeThisDrag = FALSE;
 
-	// Route future Mouse messages here preemptively.  (Release on mouse up.)
+	// Route future Mouse messages here preemptively (release on mouse up).
 	setMouseCapture(TRUE);
 
 	return TRUE;
@@ -436,7 +436,8 @@ BOOL LLManipTranslate::handleHover(S32 x, S32 y, MASK mask)
 	// Bail out if mouse not down.
 	if (!hasMouseCapture())
 	{
-		lldebugst(LLERR_USER_INPUT) << "hover handled by LLManipTranslate (inactive)" << llendl;
+		lldebugst(LLERR_USER_INPUT) << "hover handled by LLManipTranslate (inactive)"
+									<< llendl;
 		// Always show cursor
 		// gViewerWindow->setCursor(UI_CURSOR_ARROW);
 		gViewerWindow->setCursor(UI_CURSOR_TOOLTRANSLATE);
@@ -466,25 +467,26 @@ BOOL LLManipTranslate::handleHover(S32 x, S32 y, MASK mask)
 		}
 	}
 
-	// Suppress processing if mouse hasn't actually moved.
-	// This may cause problems if the camera moves outside of the
-	// rotation above.
+	// Suppress processing if mouse hasn't actually moved. This may cause
+	// problems if the camera moves outside of the rotation above.
 	if (x == mLastHoverMouseX && y == mLastHoverMouseY && !rotated)
 	{
-		lldebugst(LLERR_USER_INPUT) << "hover handled by LLManipTranslate (mouse unmoved)" << llendl;
+		lldebugst(LLERR_USER_INPUT) << "hover handled by LLManipTranslate (mouse unmoved)"
+									<< llendl;
 		gViewerWindow->setCursor(UI_CURSOR_TOOLTRANSLATE);
 		return TRUE;
 	}
 	mLastHoverMouseX = x;
 	mLastHoverMouseY = y;
 
-	// Suppress if mouse hasn't moved past the initial slop region
-	// Reset once we start moving
+	// Suppress if mouse hasn't moved past the initial slop region. Reset once
+	// we start moving
 	if (!mMouseOutsideSlop)
 	{
 		if (abs(mMouseDownX - x) < MOUSE_DRAG_SLOP && abs(mMouseDownY - y) < MOUSE_DRAG_SLOP)
 		{
-			lldebugst(LLERR_USER_INPUT) << "hover handled by LLManipTranslate (mouse inside slop)" << llendl;
+			lldebugst(LLERR_USER_INPUT) << "hover handled by LLManipTranslate (mouse inside slop)"
+										<< llendl;
 			gViewerWindow->setCursor(UI_CURSOR_TOOLTRANSLATE);
 			return TRUE;
 		}
@@ -503,9 +505,11 @@ BOOL LLManipTranslate::handleHover(S32 x, S32 y, MASK mask)
 					LLSelectMgr::getInstance()->selectDuplicate(LLVector3::zero, FALSE);
 					mCopyMadeThisDrag = TRUE;
 
-					// When we make the copy, we don't want to do any other processing.
-					// If so, the object will also be moved, and the copy will be offset.
-					lldebugst(LLERR_USER_INPUT) << "hover handled by LLManipTranslate (made copy)" << llendl;
+					// When we make the copy, we don't want to do any other
+					// processing. If so, the object will also be moved, and
+					// the copy will be offset.
+					lldebugst(LLERR_USER_INPUT) << "hover handled by LLManipTranslate (made copy)"
+												<< llendl;
 					gViewerWindow->setCursor(UI_CURSOR_TOOLTRANSLATE);
 				}
 			}
@@ -515,11 +519,11 @@ BOOL LLManipTranslate::handleHover(S32 x, S32 y, MASK mask)
 	// Throttle updates to 10 per second.
 	BOOL send_update = FALSE;
 
-	LLVector3		axis_f;
-	LLVector3d		axis_d;
+	LLVector3 axis_f;
+	LLVector3d axis_d;
 
-	// pick the first object to constrain to grid w/ common origin
-	// this is so we don't screw up groups
+	// Pick the first object to constrain to grid w/ common origin. This is so
+	// we don't screw up groups
 	LLSelectNode* selectNode = mObjectSelection->getFirstMoveableNode(TRUE);
 	if (!selectNode)
 	{
@@ -533,20 +537,24 @@ BOOL LLManipTranslate::handleHover(S32 x, S32 y, MASK mask)
 	if (!object)
 	{
 		// somehow we lost the object!
-		llwarns << "Translate manip lost the object, no object in selectNode" << llendl;
+		llwarns << "Translate manip lost the object, no object in selectNode"
+				<< llendl;
 		gViewerWindow->setCursor(UI_CURSOR_TOOLTRANSLATE);
 		return TRUE;
 	}
 
 	// Compute unit vectors for arrow hit and a plane through that vector
-	BOOL axis_exists = getManipAxis(object, mManipPart, axis_f);		// TODO: move this
+	BOOL axis_exists = getManipAxis(object, mManipPart, axis_f);	// TODO: move this
 
 	axis_d.setVec(axis_f);
 
 	LLSelectMgr::getInstance()->updateSelectionCenter();
 	LLVector3d current_pos_global = gAgent.getPosGlobalFromAgent(getPivotPoint());
 
-	mSubdivisions = llclamp(getSubdivisionLevel(getPivotPoint(), axis_f, getMinGridScale()), sGridMinSubdivisionLevel, sGridMaxSubdivisionLevel);
+	mSubdivisions = llclamp(getSubdivisionLevel(getPivotPoint(), axis_f,
+												getMinGridScale()),
+							sGridMinSubdivisionLevel,
+							sGridMaxSubdivisionLevel);
 
 	// Project the cursor onto that plane
 	LLVector3d relative_move;
@@ -569,13 +577,15 @@ BOOL LLManipTranslate::handleHover(S32 x, S32 y, MASK mask)
 		}
 	}
 
-	F64 axis_magnitude = relative_move * axis_d;					// dot product
+	F64 axis_magnitude = relative_move * axis_d;	// dot product
 	LLVector3d cursor_point_snap_line;
 
 	F64 off_axis_magnitude;
 
-	getMousePointOnPlaneGlobal(cursor_point_snap_line, x, y, current_pos_global, mSnapOffsetAxis % axis_f);
-	off_axis_magnitude = axis_exists ? llabs((cursor_point_snap_line - current_pos_global) * LLVector3d(mSnapOffsetAxis)) : 0.f;
+	getMousePointOnPlaneGlobal(cursor_point_snap_line, x, y,
+							   current_pos_global, mSnapOffsetAxis % axis_f);
+	off_axis_magnitude = axis_exists ? llabs((cursor_point_snap_line - current_pos_global) * LLVector3d(mSnapOffsetAxis))
+									 : 0.f;
 
 	if (getSnapEnabled())
 	{
@@ -639,7 +649,11 @@ BOOL LLManipTranslate::handleHover(S32 x, S32 y, MASK mask)
 				max_grid_scale = mGridScale.mV[VZ];
 			}
 
-			F32 num_subdivisions = llclamp(getSubdivisionLevel(getPivotPoint(), camera_projected_dir, max_grid_scale), sGridMinSubdivisionLevel, sGridMaxSubdivisionLevel);
+			F32 num_subdivisions = llclamp(getSubdivisionLevel(getPivotPoint(),
+															   camera_projected_dir,
+															   max_grid_scale),
+										   sGridMinSubdivisionLevel,
+										   sGridMaxSubdivisionLevel);
 
 			F32 grid_scale_a;
 			F32 grid_scale_b;
@@ -701,8 +715,8 @@ BOOL LLManipTranslate::handleHover(S32 x, S32 y, MASK mask)
 		LLSelectNode* selectNode = *iter;
 		LLViewerObject* object = selectNode->getObject();
 
-		// Only apply motion to root objects and objects selected
-		// as "individual".
+		// Only apply motion to root objects and objects selected as
+		// "individual".
 		if (!object->isRootEdit() && !selectNode->mIndividualSelection)
 		{
 			continue;
@@ -819,7 +833,8 @@ BOOL LLManipTranslate::handleHover(S32 x, S32 y, MASK mask)
 	gAgent.clearFocusObject();
 	dialog_refresh_all();		// ??? is this necessary?
 
-	lldebugst(LLERR_USER_INPUT) << "hover handled by LLManipTranslate (active)" << llendl;
+	lldebugst(LLERR_USER_INPUT) << "hover handled by LLManipTranslate (active)"
+								<< llendl;
 	gViewerWindow->setCursor(UI_CURSOR_TOOLTRANSLATE);
 	return TRUE;
 }
@@ -967,7 +982,7 @@ void LLManipTranslate::highlightManipulators(S32 x, S32 y)
 	std::vector<ManipulatorHandle> projected_manipulators;
 	projected_manipulators.reserve(9);
 
-	for (S32 i = 0; i < num_arrow_manips; i+= 2)
+	for (S32 i = 0; i < num_arrow_manips; i += 2)
 	{
 		LLVector4 projected_start = mManipulatorVertices[i] * transform;
 		projected_start = projected_start / projected_start.mV[VW];
@@ -1829,7 +1844,7 @@ void LLManipTranslate::highlightIntersection(LLVector3 normal,
 
 		gGL.setColorMask(true, false);
 	}
-	gGL.color4f(1,1,1,1);
+	gGL.color4f(1, 1, 1, 1);
 
 	gGL.pushMatrix();
 

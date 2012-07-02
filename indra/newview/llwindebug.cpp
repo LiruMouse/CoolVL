@@ -624,8 +624,8 @@ LLSD WINAPI Get_Exception_Info(PEXCEPTION_POINTERS pException)
 
 #define UNICODE
 
-
-class LLMemoryReserve {
+class LLMemoryReserve
+{
 public:
 	LLMemoryReserve();
 	~LLMemoryReserve();
@@ -636,10 +636,10 @@ protected:
 	static const size_t MEMORY_RESERVATION_SIZE;
 };
 
-LLMemoryReserve::LLMemoryReserve() :
-	mReserve(NULL)
+LLMemoryReserve::LLMemoryReserve()
+:	mReserve(NULL)
 {
-};
+}
 
 LLMemoryReserve::~LLMemoryReserve()
 {
@@ -653,13 +653,13 @@ void LLMemoryReserve::reserve()
 {
 	if(NULL == mReserve)
 		mReserve = new unsigned char[MEMORY_RESERVATION_SIZE];
-};
+}
 
 void LLMemoryReserve::release()
 {
 	delete [] mReserve;
 	mReserve = NULL;
-};
+}
 
 static LLMemoryReserve gEmergencyMemoryReserve;
 
@@ -669,19 +669,20 @@ static LLMemoryReserve gEmergencyMemoryReserve;
 LPTOP_LEVEL_EXCEPTION_FILTER WINAPI MyDummySetUnhandledExceptionFilter(
 	LPTOP_LEVEL_EXCEPTION_FILTER lpTopLevelExceptionFilter)
 {
-	if(lpTopLevelExceptionFilter ==  gFilterFunc)
+	if (lpTopLevelExceptionFilter ==  gFilterFunc)
+	{
 		return gFilterFunc;
+	}
 
-	llinfos << "Someone tried to set the exception filter. Listing call stack modules" << llendl;
+	llinfos << "Someone tried to set the exception filter. Listing call stack modules"
+			<< llendl;
 	LLSD cs_info;
 	Get_Call_Stack(NULL, NULL, cs_info);
 	
-	if(cs_info.has("CallStack") && cs_info["CallStack"].isArray())
+	if (cs_info.has("CallStack") && cs_info["CallStack"].isArray())
 	{
 		LLSD cs = cs_info["CallStack"];
-		for(LLSD::array_iterator i = cs.beginArray(); 
-			i != cs.endArray(); 
-			++i)
+		for (LLSD::array_iterator i = cs.beginArray(); i != cs.endArray(); ++i)
 		{
 			llinfos << "Module: " << (*i)["ModuleName"] << llendl;
 		}
@@ -726,7 +727,9 @@ void  LLWinDebug::initExceptionHandler(LPTOP_LEVEL_EXCEPTION_FILTER filter_func)
 	if (s_first_run)
 	{
 		// First, try loading from the directory that the app resides in.
-		std::string local_dll_name = gDirUtilp->findFile("dbghelp.dll", gDirUtilp->getWorkingDir(), gDirUtilp->getExecutableDir());
+		std::string local_dll_name = gDirUtilp->findFile("dbghelp.dll",
+														 gDirUtilp->getWorkingDir(),
+														 gDirUtilp->getExecutableDir());
 
 		HMODULE hDll = NULL;
 		hDll = LoadLibraryA(local_dll_name.c_str());
@@ -737,11 +740,12 @@ void  LLWinDebug::initExceptionHandler(LPTOP_LEVEL_EXCEPTION_FILTER filter_func)
 
 		if (!hDll)
 		{
-			LL_WARNS("AppInit") << "Couldn't find dbghelp.dll!" << LL_ENDL;
+			llwarns << "Couldn't find dbghelp.dll!" << llendl;
 		}
 		else
 		{
-			f_mdwp = (MINIDUMPWRITEDUMP) GetProcAddress(hDll, "MiniDumpWriteDump");
+			f_mdwp = (MINIDUMPWRITEDUMP) GetProcAddress(hDll,
+														"MiniDumpWriteDump");
 
 			if (!f_mdwp)
 			{
@@ -758,8 +762,10 @@ void  LLWinDebug::initExceptionHandler(LPTOP_LEVEL_EXCEPTION_FILTER filter_func)
 	// Try to get Tool Help library functions.
 	HMODULE hKernel32;
 	hKernel32 = GetModuleHandle(_T("KERNEL32"));
-	CreateToolhelp32Snapshot_ = (CREATE_TOOL_HELP32_SNAPSHOT)GetProcAddress(hKernel32, "CreateToolhelp32Snapshot");
-	Module32First_ = (MODULE32_FIRST)GetProcAddress(hKernel32, "Module32FirstW");
+	CreateToolhelp32Snapshot_ = (CREATE_TOOL_HELP32_SNAPSHOT)GetProcAddress(hKernel32,
+																			"CreateToolhelp32Snapshot");
+	Module32First_ = (MODULE32_FIRST)GetProcAddress(hKernel32,
+													"Module32FirstW");
 	Module32Next_ = (MODULE32_NEST)GetProcAddress(hKernel32, "Module32NextW");
 
     LPTOP_LEVEL_EXCEPTION_FILTER prev_filter;
@@ -770,8 +776,8 @@ void  LLWinDebug::initExceptionHandler(LPTOP_LEVEL_EXCEPTION_FILTER filter_func)
 
 	if(prev_filter != gFilterFunc)
 	{
-		LL_WARNS("AppInit") 
-			<< "Replacing unknown exception (" << (void *)prev_filter << ") with (" << (void *)filter_func << ") !" << LL_ENDL;
+		llwarns << "Replacing unknown exception (" << (void*)prev_filter
+				<< ") with (" << (void *)filter_func << ") !" << llendl;
 	}
 	
 	gFilterFunc = filter_func;
@@ -785,7 +791,8 @@ bool LLWinDebug::checkExceptionHandler()
 
 	if (prev_filter != gFilterFunc)
 	{
-		LL_WARNS("AppInit") << "Our exception handler (" << (void *)gFilterFunc << ") replaced with " << prev_filter << "!" << LL_ENDL;
+		llwarns << "Our exception handler (" << (void*)gFilterFunc
+				<< ") replaced with " << prev_filter << "!" << llendl;
 		ok = false;
 	}
 
@@ -794,20 +801,23 @@ bool LLWinDebug::checkExceptionHandler()
 		ok = FALSE;
 		if (gFilterFunc == NULL)
 		{
-			LL_WARNS("AppInit") << "Exception handler uninitialized." << LL_ENDL;
+			llwarns << "Exception handler uninitialized." << llendl;
 		}
 		else
 		{
-			LL_WARNS("AppInit") << "Our exception handler (" << (void *)gFilterFunc << ") replaced with NULL!" << LL_ENDL;
+			llwarns << "Our exception handler (" << (void*)gFilterFunc
+					<< ") replaced with NULL!" << llendl;
 		}
 	}
 
 	return ok;
 }
 
-void LLWinDebug::writeDumpToFile(MINIDUMP_TYPE type, MINIDUMP_EXCEPTION_INFORMATION *ExInfop, const std::string& filename)
+void LLWinDebug::writeDumpToFile(MINIDUMP_TYPE type,
+								 MINIDUMP_EXCEPTION_INFORMATION* ExInfop,
+								 const std::string& filename)
 {
-	if(f_mdwp == NULL || gDirUtilp == NULL) 
+	if (f_mdwp == NULL || gDirUtilp == NULL) 
 	{
 		return;
 		//write_debug("No way to generate a minidump, no MiniDumpWriteDump function!\n");
@@ -816,28 +826,18 @@ void LLWinDebug::writeDumpToFile(MINIDUMP_TYPE type, MINIDUMP_EXCEPTION_INFORMAT
 	{
 		std::string dump_path = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, filename);
 
-		HANDLE hFile = CreateFileA(dump_path.c_str(),
-									GENERIC_WRITE,
-									FILE_SHARE_WRITE,
-									NULL,
-									CREATE_ALWAYS,
-									FILE_ATTRIBUTE_NORMAL,
-									NULL);
+		HANDLE hFile = CreateFileA(dump_path.c_str(), GENERIC_WRITE,
+								   FILE_SHARE_WRITE, NULL, CREATE_ALWAYS,
+								   FILE_ATTRIBUTE_NORMAL, NULL);
 
 		if (hFile != INVALID_HANDLE_VALUE)
 		{
 			// Write the dump, ignoring the return value
-			f_mdwp(GetCurrentProcess(),
-					GetCurrentProcessId(),
-					hFile,
-					type,
-					ExInfop,
-					NULL,
-					NULL);
+			f_mdwp(GetCurrentProcess(), GetCurrentProcessId(), hFile, type,
+				   ExInfop, NULL, NULL);
 
 			CloseHandle(hFile);
 		}
-
 	}
 }
 
@@ -862,7 +862,8 @@ void LLWinDebug::generateCrashStacks(struct _EXCEPTION_POINTERS *exception_infop
 		// Since there is exception info... Release the hounds.
 		gEmergencyMemoryReserve.release();
 
-		if(gSavedSettings.getControl("SaveMinidump").notNull() && gSavedSettings.getBOOL("SaveMinidump"))
+		if (gSavedSettings.getControl("SaveMinidump").notNull() &&
+			gSavedSettings.getBOOL("SaveMinidump"))
 		{
 			_MINIDUMP_EXCEPTION_INFORMATION ExInfo;
 
@@ -871,7 +872,8 @@ void LLWinDebug::generateCrashStacks(struct _EXCEPTION_POINTERS *exception_infop
 			ExInfo.ClientPointers = NULL;
 
 			writeDumpToFile(MiniDumpNormal, &ExInfo, "SecondLife.dmp");
-			writeDumpToFile((MINIDUMP_TYPE)(MiniDumpWithDataSegs | MiniDumpWithIndirectlyReferencedMemory), &ExInfo, "SecondLifePlus.dmp");
+			writeDumpToFile((MINIDUMP_TYPE)(MiniDumpWithDataSegs | MiniDumpWithIndirectlyReferencedMemory),
+							&ExInfo, "SecondLifePlus.dmp");
 		}
 
 		info = Get_Exception_Info(exception_infop);
@@ -907,6 +909,7 @@ void LLWinDebug::generateCrashStacks(struct _EXCEPTION_POINTERS *exception_infop
 void LLWinDebug::clearCrashStacks()
 {
 	LLSD info;
-	std::string dump_path = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, "SecondLifeException.log");
+	std::string dump_path = gDirUtilp->getExpandedFilename(LL_PATH_LOGS,
+														   "SecondLifeException.log");
 	LLFile::remove(dump_path);
 }

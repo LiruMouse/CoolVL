@@ -43,6 +43,7 @@
 #include "llmenugl.h"
 #include "llimagegl.h"
 #include "llrender.h"
+#include "llui.h"
 
 #include "llagent.h"
 #include "llchatbar.h"
@@ -112,7 +113,6 @@ LLHUDText::LLHUDText(const U8 type) :
 	mDropShadow = TRUE;
 	mOffscreen = FALSE;
 	mRadius = 0.1f;
-	mRoundedSquare = LLUI::getUIImage("rounded_square.tga");
 	LLPointer<LLHUDText> ptr(this);
 	sTextObjects.insert(ptr);
 	//LLDebugVarMessageBox::show("max width", &HUD_TEXT_MAX_WIDTH, 500.f, 1.f);
@@ -237,6 +237,12 @@ void LLHUDText::render()
 
 void LLHUDText::renderText()
 {
+	static const LLUIImagePtr rounded_square = LLUI::getUIImage("rounded_square.tga");
+	if (!rounded_square)
+	{
+		llerrs << "Missing UI image: rounded_square.tga" << llendl;
+	}
+
 	if (!mVisible || mHidden)
 	{
 		return;
@@ -306,8 +312,8 @@ void LLHUDText::renderText()
 													   x_pixel_vec);
 	}
 
-	LLVector2 border_scale_vec((F32)border_width / (F32)mRoundedSquare->getTextureWidth(),
-							   (F32)border_height / (F32)mRoundedSquare->getTextureHeight());
+	LLVector2 border_scale_vec((F32)border_width / (F32)rounded_square->getTextureWidth(),
+							   (F32)border_height / (F32)rounded_square->getTextureHeight());
 	LLVector3 width_vec = mWidth * x_pixel_vec;
 	LLVector3 height_vec = mHeight * y_pixel_vec;
 	LLVector3 scaled_border_width = (F32)llfloor(border_scale * (F32)border_width) * x_pixel_vec;
@@ -342,7 +348,7 @@ void LLHUDText::renderText()
 							   width_vec / 2.f - height_vec;
 			LLUI::translate(bg_pos.mV[VX], bg_pos.mV[VY], bg_pos.mV[VZ]);
 
-			gGL.getTexUnit(0)->bind(mRoundedSquare->getImage());
+			gGL.getTexUnit(0)->bind(rounded_square->getImage());
 
 			gGL.color4fv(bg_color.mV);
 			gl_segmented_rect_3d_tex(border_scale_vec, scaled_border_width,

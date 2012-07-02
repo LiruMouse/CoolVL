@@ -34,9 +34,9 @@
 
 #include "llworldmapmessage.h"
 
-#include "llworldmap.h"
 #include "llagent.h"
 #include "llfloaterworldmap.h"
+#include "llworldmap.h"
 
 const U32 LAYER_FLAG = 2;
 
@@ -44,8 +44,8 @@ const U32 LAYER_FLAG = 2;
 // World Map Message Handling
 //---------------------------------------------------------------------------
 
-LLWorldMapMessage::LLWorldMapMessage() :
-	mSLURLRegionName(),
+LLWorldMapMessage::LLWorldMapMessage()
+:	mSLURLRegionName(),
 	mSLURLRegionHandle(0),
 	mSLURL(),
 	mSLURLCallback(0),
@@ -59,7 +59,7 @@ LLWorldMapMessage::~LLWorldMapMessage()
 
 void LLWorldMapMessage::sendItemRequest(U32 type, U64 handle)
 {
-	//LL_INFOS("World Map") << "Send item request : type = " << type << LL_ENDL;
+	//llinfos << "Send item request : type = " << type << llendl;
 	LLMessageSystem* msg = gMessageSystem;
 
 	msg->newMessageFast(_PREHASH_MapItemRequest);
@@ -79,7 +79,7 @@ void LLWorldMapMessage::sendItemRequest(U32 type, U64 handle)
 
 void LLWorldMapMessage::sendNamedRegionRequest(std::string region_name)
 {
-	//LL_INFOS("World Map") << "LLWorldMap::sendNamedRegionRequest()" << LL_ENDL;
+	//llinfos << "LLWorldMap::sendNamedRegionRequest()" << llendl;
 	LLMessageSystem* msg = gMessageSystem;
 
 	// Request for region data
@@ -100,7 +100,7 @@ void LLWorldMapMessage::sendNamedRegionRequest(std::string region_name,
 		const std::string& callback_url,
 		bool teleport)	// immediately teleport when result returned
 {
-	//LL_INFOS("World Map") << "LLWorldMap::sendNamedRegionRequest()" << LL_ENDL;
+	//llinfos << "LLWorldMap::sendNamedRegionRequest()" << llendl;
 	mSLURLRegionName = region_name;
 	mSLURLRegionHandle = 0;
 	mSLURL = callback_url;
@@ -115,7 +115,7 @@ void LLWorldMapMessage::sendHandleRegionRequest(U64 region_handle,
 		const std::string& callback_url,
 		bool teleport)	// immediately teleport when result returned
 {
-	//LL_INFOS("World Map") << "LLWorldMap::sendHandleRegionRequest()" << LL_ENDL;
+	//llinfos << "LLWorldMap::sendHandleRegionRequest()" << llendl;
 	mSLURLRegionName.clear();
 	mSLURLRegionHandle = region_handle;
 	mSLURL = callback_url;
@@ -131,9 +131,12 @@ void LLWorldMapMessage::sendHandleRegionRequest(U64 region_handle,
 	sendMapBlockRequest(grid_x, grid_y, grid_x, grid_y, true);
 }
 
-void LLWorldMapMessage::sendMapBlockRequest(U16 min_x, U16 min_y, U16 max_x, U16 max_y, bool return_nonexistent)
+void LLWorldMapMessage::sendMapBlockRequest(U16 min_x, U16 min_y, U16 max_x,
+											U16 max_y, bool return_nonexistent)
 {
-	//LL_INFOS("World Map") << "LLWorldMap::sendMapBlockRequest()" << ", min = (" << min_x << ", " << min_y << "), max = (" << max_x << ", " << max_y << "), nonexistent = " << return_nonexistent << LL_ENDL;
+	//llinfos << "LLWorldMap::sendMapBlockRequest()" << ", min = (" << min_x
+	//		<< ", " << min_y << "), max = (" << max_x << ", " << max_y
+	//		<< "), nonexistent = " << return_nonexistent << llendl;
 	LLMessageSystem* msg = gMessageSystem;
 	msg->newMessageFast(_PREHASH_MapBlockRequest);
 	msg->nextBlockFast(_PREHASH_AgentData);
@@ -163,16 +166,18 @@ void LLWorldMapMessage::processMapBlockReply(LLMessageSystem* msg, void**)
 	// There's only one flag that we ever use here
 	if (agent_flags != LAYER_FLAG)
 	{
-		llwarns << "Invalid map image type returned! layer = " << agent_flags << llendl;
+		llwarns << "Invalid map image type returned! layer = " << agent_flags
+				<< llendl;
 		return;
 	}
 
 	S32 num_blocks = msg->getNumberOfBlocksFast(_PREHASH_Data);
-	//LL_INFOS("World Map") << "LLWorldMap::processMapBlockReply(), num_blocks = " << num_blocks << LL_ENDL;
+	//llinfos << "LLWorldMap::processMapBlockReply(), num_blocks = "
+	//		<< num_blocks << llendl;
 
 	bool found_null_sim = false;
 
-	for (S32 block=0; block<num_blocks; ++block)
+	for (S32 block = 0; block < num_blocks; ++block)
 	{
 		U16 x_regions;
 		U16 y_regions;
@@ -194,8 +199,12 @@ void LLWorldMapMessage::processMapBlockReply(LLMessageSystem* msg, void**)
 		U32 x_world = (U32)(x_regions) * REGION_WIDTH_UNITS;
 		U32 y_world = (U32)(y_regions) * REGION_WIDTH_UNITS;
 
-		// Insert that region in the world map, if failure, flag it as a "null_sim"
-		if (!(LLWorldMap::getInstance()->insertRegion(x_world, y_world, name, image_id, (U32)accesscode, region_flags)))
+		// Insert that region in the world map, if failure, flag it as a
+		// "null_sim"
+		if (!(LLWorldMap::getInstance()->insertRegion(x_world, y_world, name,
+													  image_id,
+													  (U32)accesscode,
+													  region_flags)))
 		{
 			found_null_sim = true;
 		}
@@ -227,7 +236,10 @@ void LLWorldMapMessage::processMapBlockReply(LLMessageSystem* msg, void**)
 				LLWorldMapMessage::getInstance()->mSLURLRegionName.clear();
 				LLWorldMapMessage::getInstance()->mSLURLRegionHandle = 0;
 
-				callback(handle, LLWorldMapMessage::getInstance()->mSLURL, image_id, LLWorldMapMessage::getInstance()->mSLURLTeleport);
+				callback(handle,
+						 LLWorldMapMessage::getInstance()->mSLURL,
+						 image_id,
+						 LLWorldMapMessage::getInstance()->mSLURLTeleport);
 			}
 		}
 	}
@@ -238,13 +250,13 @@ void LLWorldMapMessage::processMapBlockReply(LLMessageSystem* msg, void**)
 // public static
 void LLWorldMapMessage::processMapItemReply(LLMessageSystem* msg, void**)
 {
-	//LL_INFOS("World Map") << "LLWorldMap::processMapItemReply()" << LL_ENDL;
+	//llinfos << "LLWorldMap::processMapItemReply()" << llendl;
 	U32 type;
 	msg->getU32Fast(_PREHASH_RequestData, _PREHASH_ItemType, type);
 
 	S32 num_blocks = msg->getNumberOfBlocks("Data");
 
-	for (S32 block=0; block<num_blocks; ++block)
+	for (S32 block = 0; block < num_blocks; ++block)
 	{
 		U32 X, Y;
 		std::string name;

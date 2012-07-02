@@ -439,14 +439,15 @@ bool LLAppViewerWin32::initHardwareTest()
 
 		LLSplashScreen::update("Detecting hardware...");
 
-		LL_DEBUGS("AppInit") << "Attempting to poll DirectX for hardware info" << LL_ENDL;
+		LL_DEBUGS("AppInit") << "Attempting to poll DirectX for hardware info"
+							 << LL_ENDL;
 		gDXHardware.setWriteDebugFunc(write_debug_dx);
 		BOOL probe_ok = gDXHardware.getInfo(vram_only);
 
 		if (!probe_ok
 			&& gSavedSettings.getWarning("AboutDirectX9"))
 		{
-			LL_WARNS("AppInit") << "DirectX probe failed, alerting user." << LL_ENDL;
+			llwarns << "DirectX probe failed, alerting user." << llendl;
 
 			// Warn them that runnin without DirectX 9 will
 			// not allow us to tell them about driver issues
@@ -467,13 +468,15 @@ bool LLAppViewerWin32::initHardwareTest()
 				OSMB_YESNO);
 			if (OSBTN_NO== button)
 			{
-				LL_INFOS("AppInit") << "User quitting after failed DirectX 9 detection" << LL_ENDL;
+				llinfos << "User quitting after failed DirectX 9 detection"
+						<< llendl;
 				LLWeb::loadURLExternal(DIRECTX_9_URL, false);
 				return false;
 			}
 			gSavedSettings.setWarning("AboutDirectX9", FALSE);
 		}
-		LL_DEBUGS("AppInit") << "Done polling DirectX for hardware info" << LL_ENDL;
+		LL_DEBUGS("AppInit") << "Done polling DirectX for hardware info"
+							 << LL_ENDL;
 
 		// Only probe once after installation
 		gSavedSettings.setBOOL("ProbeHardwareOnStartup", FALSE);
@@ -487,14 +490,15 @@ bool LLAppViewerWin32::initHardwareTest()
 
 	if (!restoreErrorTrap())
 	{
-		LL_WARNS("AppInit") << " Someone took over my exception handler (post hardware probe)!" << LL_ENDL;
+		llwarns << " Someone took over my exception handler (post hardware probe) !"
+				<< llendl;
 	}
 
 	if (gGLManager.mVRAM == 0)
 	{
 		gGLManager.mVRAM = gDXHardware.getVRAM();
 	}
-	LL_INFOS("AppInit") << "Detected VRAM: " << gGLManager.mVRAM << LL_ENDL;
+	llinfos << "Detected VRAM: " << gGLManager.mVRAM << llendl;
 
 	return true;
 }
@@ -513,11 +517,13 @@ bool LLAppViewerWin32::initParseCommandLine(LLCommandLineParser& clp)
 	{
 		if (success >= 2 && locale->lang) // confident!
 		{
-			LL_INFOS("AppInit") << "Language: " << ll_safe_string(locale->lang) << LL_ENDL;
-			LL_INFOS("AppInit") << "Location: " << ll_safe_string(locale->country) << LL_ENDL;
-			LL_INFOS("AppInit") << "Variant: " << ll_safe_string(locale->variant) << LL_ENDL;
+			llinfos << "Language: " << ll_safe_string(locale->lang) << llendl;
+			llinfos << "Location: " << ll_safe_string(locale->country)
+					<< llendl;
+			llinfos << "Variant: " << ll_safe_string(locale->variant)
+					<< llendl;
 			LLControlVariable* c = gSavedSettings.getControl("SystemLanguage");
-			if(c)
+			if (c)
 			{
 				c->setValue(std::string(locale->lang), false);
 			}

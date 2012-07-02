@@ -84,7 +84,7 @@ LLW32MsgCallback gAsyncMsgCallback = NULL;
 
 void show_window_creation_error(const std::string& title)
 {
-	LL_WARNS("Window") << title << LL_ENDL;
+	llwarns << title << llendl;
 }
 
 //static
@@ -536,7 +536,9 @@ LLWindowWin32::LLWindowWin32(const std::string& title, const std::string& name, 
 
 		if (closest_refresh == 0)
 		{
-			LL_WARNS("Window") << "Couldn't find display mode " << width << " by " << height << " at " << BITS_PER_PIXEL << " bits per pixel" << LL_ENDL;
+			llwarns << "Couldn't find display mode " << width << " by "
+					<< height << " at " << BITS_PER_PIXEL << " bits per pixel"
+					<< llendl;
 			success = FALSE;
 		}
 
@@ -559,11 +561,9 @@ LLWindowWin32::LLWindowWin32(const std::string& title, const std::string& name, 
 			mFullscreenBits    = dev_mode.dmBitsPerPel;
 			mFullscreenRefresh = dev_mode.dmDisplayFrequency;
 
-			LL_INFOS("Window") << "Running at " << dev_mode.dmPelsWidth
-				<< "x"   << dev_mode.dmPelsHeight
-				<< "x"   << dev_mode.dmBitsPerPel
-				<< " @ " << dev_mode.dmDisplayFrequency
-				<< LL_ENDL;
+			llinfos << "Running at " << dev_mode.dmPelsWidth << "x"
+					<< dev_mode.dmPelsHeight << "x" << dev_mode.dmBitsPerPel
+					<< " @ " << dev_mode.dmDisplayFrequency << llendl;
 		}
 		else
 		{
@@ -573,7 +573,8 @@ LLWindowWin32::LLWindowWin32(const std::string& title, const std::string& name, 
 			mFullscreenBits    = -1;
 			mFullscreenRefresh = -1;
 
-			std::string error = llformat("Unable to run fullscreen at %d x %d.\nRunning in window.", width, height);
+			std::string error = llformat("Unable to run fullscreen at %d x %d.\nRunning in window.",
+										 width, height);
 			OSMessageBox(error, "Error", OSMB_OK);
 		}
 	}
@@ -693,12 +694,12 @@ void LLWindowWin32::close()
 	{
 		if (!wglMakeCurrent(NULL, NULL))
 		{
-			LL_WARNS("Window") << "Release of DC and RC failed" << LL_ENDL;
+			llwarns << "Release of DC and RC failed" << llendl;
 		}
 
 		if (!wglDeleteContext(mhRC))
 		{
-			LL_WARNS("Window") << "Release of rendering context failed" << LL_ENDL;
+			llwarns << "Release of rendering context failed" << llendl;
 		}
 
 		mhRC = NULL;
@@ -709,7 +710,7 @@ void LLWindowWin32::close()
 
 	if (mhDC && !ReleaseDC(mWindowHandle, mhDC))
 	{
-		LL_WARNS("Window") << "Release of ghDC failed" << LL_ENDL;
+		llwarns << "Release of ghDC failed" << llendl;
 		mhDC = NULL;
 	}
 
@@ -881,12 +882,12 @@ BOOL LLWindowWin32::switchContext(BOOL fullscreen, const LLCoordScreen &size, BO
 	{
 		if (!wglMakeCurrent(NULL, NULL))
 		{
-			LL_WARNS("Window") << "Release of DC and RC failed" << LL_ENDL;
+			llwarns << "Release of DC and RC failed" << llendl;
 		}
 
 		if (!wglDeleteContext(mhRC))
 		{
-			LL_WARNS("Window") << "Release of rendering context failed" << LL_ENDL;
+			llwarns << "Release of rendering context failed" << llendl;
 		}
 
 		mhRC = NULL;
@@ -920,7 +921,9 @@ BOOL LLWindowWin32::switchContext(BOOL fullscreen, const LLCoordScreen &size, BO
 
 		if (closest_refresh == 0)
 		{
-			LL_WARNS("Window") << "Couldn't find display mode " << width << " by " << height << " at " << BITS_PER_PIXEL << " bits per pixel" << LL_ENDL;
+			llwarns << "Couldn't find display mode " << width << " by "
+					<< height << " at " << BITS_PER_PIXEL << " bits per pixel"
+					<< llendl;
 			return FALSE;
 		}
 
@@ -942,16 +945,14 @@ BOOL LLWindowWin32::switchContext(BOOL fullscreen, const LLCoordScreen &size, BO
 			mFullscreenBits    = dev_mode.dmBitsPerPel;
 			mFullscreenRefresh = dev_mode.dmDisplayFrequency;
 
-			LL_INFOS("Window") << "Running at " << dev_mode.dmPelsWidth
-				<< "x"   << dev_mode.dmPelsHeight
-				<< "x"   << dev_mode.dmBitsPerPel
-				<< " @ " << dev_mode.dmDisplayFrequency
-				<< LL_ENDL;
+			llinfos << "Running at " << dev_mode.dmPelsWidth << "x"
+					<< dev_mode.dmPelsHeight << "x" << dev_mode.dmBitsPerPel
+					<< " @ " << dev_mode.dmDisplayFrequency << llendl;
 
-			window_rect.left = (long) 0;
-			window_rect.right = (long) width;			// Windows GDI rects don't include rightmost pixel
-			window_rect.top = (long) 0;
-			window_rect.bottom = (long) height;
+			window_rect.left = (long)0;
+			window_rect.right = (long)width;	// Windows GDI rects don't include rightmost pixel
+			window_rect.top = (long)0;
+			window_rect.bottom = (long)height;
 			dw_ex_style = WS_EX_APPWINDOW;
 			dw_style = WS_POPUP;
 
@@ -967,7 +968,8 @@ BOOL LLWindowWin32::switchContext(BOOL fullscreen, const LLCoordScreen &size, BO
 			mFullscreenBits    = -1;
 			mFullscreenRefresh = -1;
 
-			LL_INFOS("Window") << "Unable to run fullscreen at " << width << "x" << height << LL_ENDL;
+			llinfos << "Unable to run fullscreen at " << width << "x" << height
+					<< llendl;
 			return FALSE;
 		}
 	}
@@ -1160,7 +1162,8 @@ BOOL LLWindowWin32::switchContext(BOOL fullscreen, const LLCoordScreen &size, BO
 		{
 			if (end_attrib > 0)
 			{
-				LL_INFOS("Window") << "No valid pixel format for " << mFSAASamples << "x anti-aliasing." << LL_ENDL;
+				llinfos << "No valid pixel format for " << mFSAASamples
+						<< "x anti-aliasing." << llendl;
 				attrib_list[end_attrib] = 0;
 
 				BOOL result = wglChoosePixelFormatARB(mhDC, attrib_list, NULL, 256, pixel_formats, &num_formats);
@@ -1174,7 +1177,8 @@ BOOL LLWindowWin32::switchContext(BOOL fullscreen, const LLCoordScreen &size, BO
 
 			if (!num_formats)
 			{
-				LL_INFOS("Window") << "No 32 bit z-buffer, trying 24 bits instead" << LL_ENDL;
+				llinfos << "No 32 bit z-buffer, trying 24 bits instead"
+						<< llendl;
 				// Try 24-bit format
 				attrib_list[1] = 24;
 				BOOL result = wglChoosePixelFormatARB(mhDC, attrib_list, NULL, 256, pixel_formats, &num_formats);
@@ -1187,7 +1191,8 @@ BOOL LLWindowWin32::switchContext(BOOL fullscreen, const LLCoordScreen &size, BO
 
 				if (!num_formats)
 				{
-					LL_WARNS("Window") << "Couldn't get 24 bit z-buffer,trying 16 bits instead!" << LL_ENDL;
+					llwarns << "Couldn't get 24 bit z-buffer,trying 16 bits instead !"
+							<< llendl;
 					attrib_list[1] = 16;
 					BOOL result = wglChoosePixelFormatARB(mhDC, attrib_list, NULL, 256, pixel_formats, &num_formats);
 					if (!result || !num_formats)
@@ -1199,7 +1204,8 @@ BOOL LLWindowWin32::switchContext(BOOL fullscreen, const LLCoordScreen &size, BO
 				}
 			}
 
-			LL_INFOS("Window") << "Choosing pixel formats: " << num_formats << " pixel formats returned" << LL_ENDL;
+			llinfos << "Choosing pixel formats: " << num_formats
+					<< " pixel formats returned" << llendl;
 		}
 
 		
@@ -1291,7 +1297,8 @@ BOOL LLWindowWin32::switchContext(BOOL fullscreen, const LLCoordScreen &size, BO
 	}
 	else
 	{
-		LL_WARNS("Window") << "No wgl_ARB_pixel_format extension, using default ChoosePixelFormat!" << LL_ENDL;
+		llwarns << "No wgl_ARB_pixel_format extension, using default ChoosePixelFormat "
+				<< llendl;
 	}
 
 	// Verify what pixel format we actually received.
@@ -1303,10 +1310,9 @@ BOOL LLWindowWin32::switchContext(BOOL fullscreen, const LLCoordScreen &size, BO
 		return FALSE;
 	}
 
-	LL_INFOS("Window") << "GL buffer: Color Bits " << S32(pfd.cColorBits) 
-		<< " Alpha Bits " << S32(pfd.cAlphaBits)
-		<< " Depth Bits " << S32(pfd.cDepthBits) 
-		<< LL_ENDL;
+	llinfos << "GL buffer: Color Bits " << S32(pfd.cColorBits)
+			<< " Alpha Bits " << S32(pfd.cAlphaBits) << " Depth Bits "
+			<< S32(pfd.cDepthBits) << llendl;
 
 	// make sure we have 32 bits per pixel
 	if (pfd.cColorBits < 32 || GetDeviceCaps(mhDC, BITSPIXEL) < 32)
@@ -1778,11 +1784,10 @@ LRESULT CALLBACK LLWindowWin32::mainWindowProc(HWND h_wnd, UINT u_msg, WPARAM w_
 
 				if (gDebugWindowProc)
 				{
-					LL_INFOS("Window") << "WINDOWPROC ActivateApp "
-						<< " activating " << S32(activating)
-						<< " minimized " << S32(minimized)
-						<< " fullscreen " << S32(window_imp->mFullscreen)
-						<< LL_ENDL;
+					llinfos << "WINDOWPROC ActivateApp activating "
+							<< S32(activating) << " minimized "
+							<< S32(minimized) << " fullscreen "
+							<< S32(window_imp->mFullscreen) << llendl;
 				}
 
 				if (window_imp->mFullscreen)
@@ -1824,10 +1829,9 @@ LRESULT CALLBACK LLWindowWin32::mainWindowProc(HWND h_wnd, UINT u_msg, WPARAM w_
 				// properly when we run fullscreen.
 				if (gDebugWindowProc)
 				{
-					LL_INFOS("Window") << "WINDOWPROC Activate "
-						<< " activating " << S32(activating) 
-						<< " minimized " << S32(minimized)
-						<< LL_ENDL;
+					llinfos << "WINDOWPROC Activate - activating "
+							<< S32(activating) << " minimized "
+							<< S32(minimized) << llendl;
 				}
 
 				// Don't handle this.
@@ -1889,9 +1893,8 @@ LRESULT CALLBACK LLWindowWin32::mainWindowProc(HWND h_wnd, UINT u_msg, WPARAM w_
 			{
 				if (gDebugWindowProc)
 				{
-					LL_INFOS("Window") << "Debug WindowProc WM_KEYDOWN "
-						<< " key " << S32(w_param) 
-						<< LL_ENDL;
+					llinfos << "Debug WindowProc WM_KEYDOWN - key "
+							<< S32(w_param) << llendl;
 				}
 				if(gKeyboard->handleKeyDown(w_param, mask) && eat_keystroke)
 				{
@@ -1909,9 +1912,8 @@ LRESULT CALLBACK LLWindowWin32::mainWindowProc(HWND h_wnd, UINT u_msg, WPARAM w_
 
 			if (gDebugWindowProc)
 			{
-				LL_INFOS("Window") << "Debug WindowProc WM_KEYUP "
-					<< " key " << S32(w_param) 
-					<< LL_ENDL;
+				llinfos << "Debug WindowProc WM_KEYUP - key " << S32(w_param)
+						<< llendl;
 			}
 			if (gKeyboard->handleKeyUp(w_param, mask) && eat_keystroke)
 			{
@@ -2002,9 +2004,8 @@ LRESULT CALLBACK LLWindowWin32::mainWindowProc(HWND h_wnd, UINT u_msg, WPARAM w_
 			window_imp->mCallbacks->handlePingWatchdog(window_imp, "Main:WM_CHAR");
 			if (gDebugWindowProc)
 			{
-				LL_INFOS("Window") << "Debug WindowProc WM_CHAR "
-					<< " key " << S32(w_param) 
-					<< LL_ENDL;
+				llinfos << "Debug WindowProc WM_CHAR - key " << S32(w_param)
+						<< llendl;
 			}
 			// Even if LLWindowCallbacks::handleUnicodeChar(llwchar, BOOL) returned FALSE,
 			// we *did* processed the event, so I believe we should not pass it to DefWindowProc...
@@ -2081,7 +2082,7 @@ LRESULT CALLBACK LLWindowWin32::mainWindowProc(HWND h_wnd, UINT u_msg, WPARAM w_
 				LLFastTimer t2(LLFastTimer::FTM_MOUSEHANDLER);
 				//if (gDebugClicks)
 				//{
-				//	LL_INFOS("Window") << "WndProc left button up" << LL_ENDL;
+				//	llinfos << "WndProc left button up" << llendl;
 				//}
 				// Because we move the cursor position in the app, we need to query
 				// to find out where the cursor at the time the event is handled.
@@ -2294,12 +2295,10 @@ LRESULT CALLBACK LLWindowWin32::mainWindowProc(HWND h_wnd, UINT u_msg, WPARAM w_
 					BOOL restored  = ( w_param == SIZE_RESTORED );
 					BOOL minimized = ( w_param == SIZE_MINIMIZED );
 
-					LL_INFOS("Window") << "WINDOWPROC Size "
-						<< width << "x" << height
-						<< " max " << S32(maximized)
-						<< " min " << S32(minimized)
-						<< " rest " << S32(restored)
-						<< LL_ENDL;
+					llinfos << "WINDOWPROC Size " << width << "x" << height
+							<< " max " << S32(maximized) << " min "
+							<< S32(minimized) << " rest " << S32(restored)
+							<< llendl;
 				}
 
 				// There's an odd behavior with WM_SIZE that I would call a bug. If 
@@ -2346,7 +2345,7 @@ LRESULT CALLBACK LLWindowWin32::mainWindowProc(HWND h_wnd, UINT u_msg, WPARAM w_
 			window_imp->mCallbacks->handlePingWatchdog(window_imp, "Main:WM_SETFOCUS");
 			if (gDebugWindowProc)
 			{
-				LL_INFOS("Window") << "WINDOWPROC SetFocus" << LL_ENDL;
+				llinfos << "WINDOWPROC SetFocus" << llendl;
 			}
 			window_imp->mCallbacks->handleFocus(window_imp);
 			return 0;
@@ -2355,7 +2354,7 @@ LRESULT CALLBACK LLWindowWin32::mainWindowProc(HWND h_wnd, UINT u_msg, WPARAM w_
 			window_imp->mCallbacks->handlePingWatchdog(window_imp, "Main:WM_KILLFOCUS");
 			if (gDebugWindowProc)
 			{
-				LL_INFOS("Window") << "WINDOWPROC KillFocus" << LL_ENDL;
+				llinfos << "WINDOWPROC KillFocus" << llendl;
 			}
 			window_imp->mCallbacks->handleFocusLost(window_imp);
 			return 0;
@@ -2776,8 +2775,8 @@ BOOL LLWindowWin32::setDisplayResolution(S32 width, S32 height, S32 bits, S32 re
 
 	if (!success)
 	{
-		LL_WARNS("Window") << "setDisplayResolution failed, "
-			<< width << "x" << height << "x" << bits << " @ " << refresh << LL_ENDL;
+		llwarns << "setDisplayResolution failed, " << width << "x" << height
+				<< "x" << bits << " @ " << refresh << llendl;
 	}
 
 	return success;
@@ -2807,7 +2806,7 @@ BOOL LLWindowWin32::resetDisplayResolution()
 
 	if (!success)
 	{
-		LL_WARNS("Window") << "resetDisplayResolution failed" << LL_ENDL;
+		llwarns << "resetDisplayResolution failed" << llendl;
 	}
 
 	LL_DEBUGS("Window") << "resetDisplayResolution END" << LL_ENDL;
@@ -2951,11 +2950,12 @@ void LLWindowWin32::spawnWebBrowser(const std::string& escaped_url, bool async)
 
 	if (!found)
 	{
-		LL_WARNS("Window") << "spawn_web_browser() called for url with protocol not on whitelist: " << escaped_url << LL_ENDL;
+		llwarns << "spawn_web_browser() called for url with protocol not on whitelist: "
+				<< escaped_url << llendl;
 		return;
 	}
 
-	LL_INFOS("Window") << "Opening URL " << escaped_url << LL_ENDL;
+	llinfos << "Opening URL " << escaped_url << llendl;
 
 	// replaced ShellExecute code with ShellExecuteEx since ShellExecute doesn't work
 	// reliablly on Vista.
@@ -2999,7 +2999,7 @@ void LLWindowWin32::spawnWebBrowser(const std::string& escaped_url, bool async)
 
 	if (browser_open_wstring.length() < 2)
 	{
-		LL_WARNS("Window") << "Invalid browser executable in registry " << browser_open_wstring << LL_ENDL;
+		llwarns << "Invalid browser executable in registry " << browser_open_wstring << llendl;
 		return;
 	}
 
@@ -3020,7 +3020,7 @@ void LLWindowWin32::spawnWebBrowser(const std::string& escaped_url, bool async)
 	}
 
 	LL_DEBUGS("Window") << "Browser reg key: " << wstring_to_utf8str(browser_open_wstring) << LL_ENDL;
-	LL_INFOS("Window") << "Browser executable: " << wstring_to_utf8str(browser_executable) << LL_ENDL;
+	llinfos << "Browser executable: " << wstring_to_utf8str(browser_executable) << llendl;
 
 	// Convert URL to wide string for Windows API
 	// Assume URL is UTF8, as can come from scripts
@@ -3046,7 +3046,7 @@ void LLWindowWin32::spawnWebBrowser(const std::string& escaped_url, bool async)
 	}
 	else
 	{
-		LL_INFOS("Window") << "load_url failure with " << retval << LL_ENDL;
+		llinfos << "load_url failure with " << retval << llendl;
 	}
 	*/
 }
@@ -3588,7 +3588,8 @@ BOOL LLWindowWin32::handleImeRequests(U32 request, U32 param, LRESULT *result)
 
 				if (!mPreeditor->getPreeditLocation(position, &caret_coord, &preedit_bounds, &text_control))
 				{
-					LL_WARNS("Window") << "*** IMR_QUERYCHARPOSITON called but getPreeditLocation failed." << LL_ENDL;
+					llwarns << "*** IMR_QUERYCHARPOSITON called but getPreeditLocation failed."
+							<< llendl;
 					return FALSE;
 				}
 				fillCharPosition(caret_coord, preedit_bounds, text_control, char_position);

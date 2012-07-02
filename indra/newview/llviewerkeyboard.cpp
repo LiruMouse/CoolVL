@@ -65,8 +65,9 @@ void agent_jump(EKeystate s)
 	F32 time = gKeyboard->getCurKeyElapsedTime();
 	S32 frame_count = llround(gKeyboard->getCurKeyElapsedFrameCount());
 
+	static LLCachedControl<bool> automatic_fly(gSavedSettings, "AutomaticFly");
 	if (time < FLY_TIME || frame_count <= FLY_FRAMES || gAgent.upGrabbed() ||
-		!gSavedSettings.getBOOL("AutomaticFly"))
+		!automatic_fly)
 	{
 		gAgent.moveUp(1);
 	}

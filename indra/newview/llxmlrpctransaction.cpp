@@ -335,11 +335,10 @@ bool LLXMLRPCTransaction::Impl::process()
 			if (result != CURLE_OK)
 			{
 				setCurlStatus(result);
-				llwarns << "LLXMLRPCTransaction CURL error "
-						<< mCurlCode << ": " << mCurlRequest->getErrorString()
+				llwarns << "LLXMLRPCTransaction CURL error " << mCurlCode
+						<< ": " << mCurlRequest->getErrorString() << llendl;
+				llwarns << "LLXMLRPCTransaction request URI: " << mURI
 						<< llendl;
-				llwarns << "LLXMLRPCTransaction request URI: "
-						<< mURI << llendl;
 
 				return true;
 			}
@@ -373,11 +372,10 @@ bool LLXMLRPCTransaction::Impl::process()
 				setStatus(LLXMLRPCTransaction::StatusXMLRPCError);
 
 				llwarns << "LLXMLRPCTransaction XMLRPC "
-						<< (hasError ? "error " : "fault ")
-						<< faultCode << ": "
-						<< faultString << llendl;
-				llwarns << "LLXMLRPCTransaction request URI: "
-						<< mURI << llendl;
+						<< (hasError ? "error " : "fault ") << faultCode
+						<< ": " << faultString << llendl;
+				llwarns << "LLXMLRPCTransaction request URI: " << mURI
+						<< llendl;
 			}
 
 			return true;
@@ -419,13 +417,12 @@ void LLXMLRPCTransaction::Impl::setStatus(Status status,
 				break;
 
 			default:
-				// Usually this means that there's a problem with the login server,
-				// not with the client.  Direct user to status page.
-				mStatusMessage =
-					"Despite our best efforts, something unexpected has gone wrong. \n"
-					" \n"
-					"Please check secondlife.com/status \n"
-					"to see if there is a known problem with the service.";
+				// Usually this means that there's a problem with the login
+				// server, not with the client.  Direct user to status page.
+				mStatusMessage = "Despite our best efforts, something unexpected has gone wrong. \n"
+								 " \n"
+								 "Please check secondlife.com/status \n"
+								 "to see if there is a known problem with the service.";
 
 				mStatusURI = "http://secondlife.com/status/";
 		}
@@ -440,31 +437,28 @@ void LLXMLRPCTransaction::Impl::setCurlStatus(CURLcode code)
 	switch (code)
 	{
 		case CURLE_COULDNT_RESOLVE_HOST:
-			message =
-				"DNS could not resolve the host name.\n"
-				"Please verify that you can connect to the www.secondlife.com\n"
-				"web site.  If you can, but continue to receive this error,\n"
-				"please go to the support section and report this problem.";
+			message = "DNS could not resolve the host name.\n"
+					  "Please verify that you can connect to the www.secondlife.com\n"
+					  "web site. If you can, but continue to receive this error,\n"
+					  "please go to the support section and report this problem.";
 			break;
 
 		case CURLE_SSL_PEER_CERTIFICATE:
-			message =
-				"The login server couldn't verify itself via SSL.\n"
-				"If you continue to receive this error, please go\n"
-				"to the Support section of the SecondLife.com web site\n"
-				"and report the problem.";
+			message = "The login server couldn't verify itself via SSL.\n"
+					  "If you continue to receive this error, please go\n"
+					  "to the Support section of the SecondLife.com web site\n"
+					  "and report the problem.";
 			break;
 
 		case CURLE_SSL_CACERT:
 		case CURLE_SSL_CONNECT_ERROR:
-			message =
-				"Often this means that your computer\'s clock is set incorrectly.\n"
-				"Please go to Control Panels and make sure the time and date\n"
-				"are set correctly.\n"
-				"\n"
-				"If you continue to receive this error, please go\n"
-				"to the Support section of the SecondLife.com web site\n"
-				"and report the problem.";
+			message = "Often this means that your computer\'s clock is set incorrectly.\n"
+					  "Please go to Control Panels and make sure the time and date\n"
+					  "are set correctly.\n"
+					  "\n"
+					  "If you continue to receive this error, please go\n"
+					  "to the Support section of the SecondLife.com web site\n"
+					  "and report the problem.";
 			break;
 
 		default:
@@ -559,16 +553,16 @@ F64 LLXMLRPCTransaction::transferRate()
 
 	double rate_bits_per_sec = impl.mTransferInfo.mSpeedDownload * 8.0;
 
-	LL_INFOS("AppInit") << "Buffer size:   " << impl.mResponseText.size()
-						<< " B" << LL_ENDL;
+	llinfos << "Buffer size:   " << impl.mResponseText.size() << " B"
+			<< llendl;
 	LL_DEBUGS("AppInit") << "Transfer size: "
 						 << impl.mTransferInfo.mSizeDownload << " B"
 						 << LL_ENDL;
 	LL_DEBUGS("AppInit") << "Transfer time: "
 						 << impl.mTransferInfo.mTotalTime << " s"
 						 << LL_ENDL;
-	LL_INFOS("AppInit") << "Transfer rate: "
-					    << rate_bits_per_sec / 1000.0 << " Kbps" << LL_ENDL;
+	llinfos << "Transfer rate: " << rate_bits_per_sec / 1000.0 << " Kbps"
+			<< llendl;
 
 	return rate_bits_per_sec;
 }

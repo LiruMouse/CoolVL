@@ -1,11 +1,11 @@
-/** 
+/**
  * @file llmodel.cpp
  * @brief Model handling implementation
  *
  * $LicenseInfo:firstyear=2001&license=viewergpl$
- * 
+ *
  * Copyright (c) 2010, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -985,7 +985,7 @@ void LLModel::normalizeVolumeFaces()
 		normalized_scale.div(scale);
 		mNormalizedScale.set(normalized_scale.getF32ptr());
 		mNormalizedTranslation.set(trans.getF32ptr());
-		mNormalizedTranslation *= -1.f; 
+		mNormalizedTranslation *= -1.f;
 	}
 }
 
@@ -1000,24 +1000,23 @@ void LLModel::setNumVolumeFaces(S32 count)
 	mVolumeFaces.resize(count);
 }
 
-void LLModel::setVolumeFaceData(
-	S32 f, 
-	LLStrider<LLVector3> pos, 
-	LLStrider<LLVector3> norm, 
-	LLStrider<LLVector2> tc, 
-	LLStrider<U16> ind, 
-	U32 num_verts, 
-	U32 num_indices)
+void LLModel::setVolumeFaceData(S32 f,
+								LLStrider<LLVector3> pos,
+								LLStrider<LLVector3> norm,
+								LLStrider<LLVector2> tc,
+								LLStrider<U16> ind,
+								U32 num_verts,
+								U32 num_indices)
 {
 	LLVolumeFace& face = mVolumeFaces[f];
 
 	face.resizeVertices(num_verts);
 	face.resizeIndices(num_indices);
 
-	LLVector4a::memcpyNonAliased16((F32*) face.mPositions, (F32*) pos.get(), num_verts*4*sizeof(F32));
+	LLVector4a::memcpyNonAliased16((F32*)face.mPositions, (F32*)pos.get(), num_verts * 4 * sizeof(F32));
 	if (norm.get())
 	{
-		LLVector4a::memcpyNonAliased16((F32*) face.mNormals, (F32*) norm.get(), num_verts*4*sizeof(F32));
+		LLVector4a::memcpyNonAliased16((F32*)face.mNormals, (F32*)norm.get(), num_verts * 4 * sizeof(F32));
 	}
 	else
 	{
@@ -1027,7 +1026,8 @@ void LLModel::setVolumeFaceData(
 
 	if (tc.get())
 	{
-		LLVector4a::memcpyNonAliased16((F32*) face.mTexCoords, (F32*) tc.get(), num_verts*2*sizeof(F32));
+		U32 tex_size = (num_verts * 2 * sizeof(F32) + 0xF) & ~0xF;
+		LLVector4a::memcpyNonAliased16((F32*)face.mTexCoords, (F32*)tc.get(), tex_size);
 	}
 	else
 	{
@@ -1035,8 +1035,8 @@ void LLModel::setVolumeFaceData(
 		face.mTexCoords = NULL;
 	}
 
-	U32 size = (num_indices*2+0xF)&~0xF;
-	LLVector4a::memcpyNonAliased16((F32*) face.mIndices, (F32*) ind.get(), size);
+	U32 size = (num_indices * 2 + 0xF) & ~0xF;
+	LLVector4a::memcpyNonAliased16((F32*)face.mIndices, (F32*)ind.get(), size);
 }
 
 void LLModel::appendFaces(LLModel *model, LLMatrix4 &transform, LLMatrix4& norm_mat)
@@ -1046,7 +1046,7 @@ void LLModel::appendFaces(LLModel *model, LLMatrix4 &transform, LLMatrix4& norm_
 		setNumVolumeFaces(1);
 	}
 
-	LLVolumeFace& face = mVolumeFaces[mVolumeFaces.size()-1];
+	LLVolumeFace& face = mVolumeFaces[mVolumeFaces.size() - 1];
 
 	for (S32 i = 0; i < model->getNumFaces(); ++i)
 	{
@@ -1059,8 +1059,8 @@ void LLModel::appendFace(const LLVolumeFace& src_face,
 						 LLMatrix4& mat,
 						 LLMatrix4& norm_mat)
 {
-	S32 rindex = getNumVolumeFaces() - 1; 
-	if (rindex == -1 || 
+	S32 rindex = getNumVolumeFaces() - 1;
+	if (rindex == -1 ||
 		mVolumeFaces[rindex].mNumVertices + src_face.mNumVertices >= 65536)
 	{	// empty or overflow will occur, append new face
 		LLVolumeFace cur_face;
@@ -1337,12 +1337,12 @@ std::string LLModel::getElementLabel(daeElement *element)
 	return std::string("object");
 }
 
-//static 
+//static
 LLModel* LLModel::loadModelFromDomMesh(domMesh *mesh)
 {
 	LLVolumeParams volume_params;
 	volume_params.setType(LL_PCODE_PROFILE_SQUARE, LL_PCODE_PATH_LINE);
-	LLModel* ret = new LLModel(volume_params, 0.f); 
+	LLModel* ret = new LLModel(volume_params, 0.f);
 	ret->createVolumeFacesFromDomMesh(mesh);
 	ret->mLabel = getElementLabel(mesh);
 	return ret;
@@ -1717,7 +1717,7 @@ LLModel::weight_list& LLModel::getJointInfluences(const LLVector3& pos)
 
 		bool done = false;
 		while (!done)
-		{	//search up and down mSkinWeights from lower bound of pos until a 
+		{	//search up and down mSkinWeights from lower bound of pos until a
 			//match is found within epsilon.  If no match is found within epsilon,
 			//return closest match
 			done = true;
@@ -1819,7 +1819,7 @@ bool LLModel::loadModel(std::istream& is)
 		}
 	}
 
-	std::string nm[] = 
+	std::string nm[] =
 	{
 		"lowest_lod",
 		"low_lod",
@@ -1832,7 +1832,7 @@ bool LLModel::loadModel(std::istream& is)
 
 	S32 lod = llclamp((S32) mDetail, 0, MODEL_LODS);
 
-	if (header[nm[lod]]["offset"].asInteger() == -1 || 
+	if (header[nm[lod]]["offset"].asInteger() == -1 ||
 		header[nm[lod]]["size"].asInteger() == 0)
 	{	//cannot load requested LOD
 		llwarns << "LoD data is invalid!" << llendl;
@@ -1861,7 +1861,7 @@ bool LLModel::loadModel(std::istream& is)
 	if (unpackVolumeFaces(is, header[nm[lod]]["size"].asInteger()))
 	{
 		if (has_skin)
-		{ 
+		{
 			//build out mSkinWeight from face info
 			for (S32 i = 0; i < getNumVolumeFaces(); ++i)
 			{
@@ -1959,7 +1959,7 @@ bool LLModel::matchMaterialOrder(LLModel* ref, int& refFaceCnt, int& modelFaceCn
 	bool isASubset = isMaterialListSubset(ref);
 	if (!isASubset)
 	{
-		llinfos<<"Material of model is not a subset of reference."<<llendl;
+		llinfos << "Material of model is not a subset of reference." << llendl;
 		return false;
 	}
 
@@ -1981,7 +1981,7 @@ bool LLModel::matchMaterialOrder(LLModel* ref, int& refFaceCnt, int& modelFaceCn
 		cur_mat.insert(mMaterialList[i]);
 	}
 
-	if (reorder && 
+	if (reorder &&
 		base_mat == cur_mat) //don't reorder if material name sets don't match
 	{
 		std::vector<LLVolumeFace> new_face_list;
@@ -1990,10 +1990,10 @@ bool LLModel::matchMaterialOrder(LLModel* ref, int& refFaceCnt, int& modelFaceCn
 		std::vector<std::string> new_material_list;
 		new_material_list.resize(mVolumeFaces.size());
 
-		//rebuild face list so materials have the same order 
+		//rebuild face list so materials have the same order
 		//as the reference model
 		for (U32 i = 0; i < mMaterialList.size(); ++i)
-		{ 
+		{
 			U32 ref_idx = index_map[mMaterialList[i]];
 			new_face_list[ref_idx] = mVolumeFaces[i];
 
@@ -2077,7 +2077,7 @@ void LLMeshSkinInfo::fromLLSD(LLSD& skin)
 			{
 				for (U32 k = 0; k < 4; k++)
 				{
-					mat.mMatrix[j][k] = skin["inverse_bind_matrix"][i][j*4+k].asReal();
+					mat.mMatrix[j][k] = skin["inverse_bind_matrix"][i][j * 4 + k].asReal();
 				}
 			}
 
@@ -2091,7 +2091,7 @@ void LLMeshSkinInfo::fromLLSD(LLSD& skin)
 		{
 			for (U32 k = 0; k < 4; k++)
 			{
-				mBindShapeMatrix.mMatrix[j][k] = skin["bind_shape_matrix"][j*4+k].asReal();
+				mBindShapeMatrix.mMatrix[j][k] = skin["bind_shape_matrix"][j * 4 + k].asReal();
 			}
 		}
 	}
@@ -2105,7 +2105,7 @@ void LLMeshSkinInfo::fromLLSD(LLSD& skin)
 			{
 				for (U32 k = 0; k < 4; k++)
 				{
-					mat.mMatrix[j][k] = skin["alt_inverse_bind_matrix"][i][j*4+k].asReal();
+					mat.mMatrix[j][k] = skin["alt_inverse_bind_matrix"][i][j * 4 + k].asReal();
 				}
 			}
 
@@ -2140,7 +2140,7 @@ LLSD LLMeshSkinInfo::asLLSD(bool include_joints) const
 		{
 			for (U32 k = 0; k < 4; k++)
 			{
-				ret["inverse_bind_matrix"][i][j*4+k] = mInvBindMatrix[i].mMatrix[j][k]; 
+				ret["inverse_bind_matrix"][i][j * 4 + k] = mInvBindMatrix[i].mMatrix[j][k];
 			}
 		}
 	}
@@ -2149,7 +2149,7 @@ LLSD LLMeshSkinInfo::asLLSD(bool include_joints) const
 	{
 		for (U32 j = 0; j < 4; j++)
 		{
-			ret["bind_shape_matrix"][i*4+j] = mBindShapeMatrix.mMatrix[i][j];
+			ret["bind_shape_matrix"][i * 4 + j] = mBindShapeMatrix.mMatrix[i][j];
 		}
 	}
 
@@ -2161,7 +2161,7 @@ LLSD LLMeshSkinInfo::asLLSD(bool include_joints) const
 			{
 				for (U32 k = 0; k < 4; k++)
 				{
-					ret["alt_inverse_bind_matrix"][i][j*4+k] = mAlternateBindMatrix[i].mMatrix[j][k]; 
+					ret["alt_inverse_bind_matrix"][i][j * 4 + k] = mAlternateBindMatrix[i].mMatrix[j][k];
 				}
 			}
 		}
@@ -2224,10 +2224,9 @@ void LLModel::Decomposition::fromLLSD(LLSD& decomp)
 				//llassert(valid.find(test) == valid.end());
 				valid.insert(test);
 
-				mHull[i].push_back(LLVector3(
-					(F32) p[0]/65535.f*range.mV[0]+min.mV[0],
-					(F32) p[1]/65535.f*range.mV[1]+min.mV[1],
-					(F32) p[2]/65535.f*range.mV[2]+min.mV[2]));
+				mHull[i].push_back(LLVector3((F32)p[0] / 65535.f * range.mV[0] + min.mV[0],
+											 (F32)p[1] / 65535.f * range.mV[1] + min.mV[1],
+											 (F32)p[2] / 65535.f * range.mV[2] + min.mV[2]));
 				p += 3;
 
 			}
@@ -2260,21 +2259,19 @@ void LLModel::Decomposition::fromLLSD(LLSD& decomp)
 
 		range = max-min;
 
-		U16 count = position.size()/6;
-
+		U32 count = position.size() / 6;
 		for (U32 j = 0; j < count; ++j)
 		{
-			mBaseHull.push_back(LLVector3(
-				(F32) p[0]/65535.f*range.mV[0]+min.mV[0],
-				(F32) p[1]/65535.f*range.mV[1]+min.mV[1],
-				(F32) p[2]/65535.f*range.mV[2]+min.mV[2]));
+			mBaseHull.push_back(LLVector3((F32)p[0] / 65535.f * range.mV[0] + min.mV[0],
+										  (F32)p[1] / 65535.f * range.mV[1] + min.mV[1],
+										  (F32)p[2] / 65535.f * range.mV[2] + min.mV[2]));
 			p += 3;
-		}		 
+		}		
 	}
 	else
 	{
-		//empty base hull mesh to indicate decomposition has been loaded
-		//but contains no base hull
+		// Empty base hull mesh to indicate decomposition has been loaded but
+		// contains no base hull
 		mBaseHullMesh.clear();
 	}
 }
@@ -2302,7 +2299,7 @@ LLSD LLModel::Decomposition::asLLSD() const
 	LLVector3 min;
 
 	if (mHull.empty())
-	{  
+	{
 		min = mBaseHull[0];
 	}
 	else
@@ -2437,11 +2434,12 @@ void LLModel::Decomposition::merge(const LLModel::Decomposition* rhs)
 
 	if (mMeshID != rhs->mMeshID)
 	{
-		llerrs << "Attempted to merge with decomposition of some other mesh." << llendl;
+		llerrs << "Attempted to merge with decomposition of some other mesh."
+			   << llendl;
 	}
 
 	if (mBaseHull.empty())
-	{	//take base hull and decomposition from rhs
+	{	// take base hull and decomposition from rhs
 		mHull = rhs->mHull;
 		mBaseHull = rhs->mBaseHull;
 		mMesh = rhs->mMesh;
@@ -2449,7 +2447,7 @@ void LLModel::Decomposition::merge(const LLModel::Decomposition* rhs)
 	}
 
 	if (mPhysicsShapeMesh.empty())
-	{	//take physics shape mesh from rhs
+	{	// take physics shape mesh from rhs
 		mPhysicsShapeMesh = rhs->mPhysicsShapeMesh;
 	}
 }

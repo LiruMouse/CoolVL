@@ -86,7 +86,7 @@ BOOL HBFloaterDebugTags::postBuild()
 			LLSD data = list[id];
 			if (data.has("columns"))
 			{
-				for (S32 i = 0; i < (S32)data["columns"].size(); i++)
+				for (S32 i = 0; i < (S32)data["columns"].size(); ++i)
 				{
 					LLSD map = data["columns"][i];
 					if (map.has("column"))
@@ -172,8 +172,10 @@ void HBFloaterDebugTags::onSelectLine(LLUICtrl* ctrl, void* data)
 						file.close();
 					}
 					LLError::configure(configuration);
-					for (std::set<std::string>::iterator it = sAddedTagsList.begin();
-						 it != sAddedTagsList.end(); it++)
+					for (std::set<std::string>::iterator
+							it = sAddedTagsList.begin(),
+							end = sAddedTagsList.end();
+						 it != end; ++it)
 					{
 						LLError::setTagLevel(*it, LLError::LEVEL_DEBUG);
 					}
@@ -190,7 +192,9 @@ void HBFloaterDebugTags::onSelectLine(LLUICtrl* ctrl, void* data)
 					LLError::setTagLevel(tag, LLError::LEVEL_DEBUG);
 				}
 			}
+			// Enable/disable debug message checks depending whether there are
+			// debug tags or not.
+			LLError::Log::sDebugMessages = !sAddedTagsList.empty();
 		}
 	}
 }
-

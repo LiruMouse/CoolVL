@@ -86,6 +86,7 @@ private:
 	static void onCommitCheckBoxRestrainedLove(LLUICtrl* ctrl, void* user_data);
 	static void onCommitCheckBoxSpeedRez(LLUICtrl* ctrl, void* user_data);
 	static void onCommitCheckBoxPrivateLookAt(LLUICtrl* ctrl, void* user_data);
+	static void onCommitCheckBoxPrivatePointAt(LLUICtrl* ctrl, void* user_data);
 	static void onCommitCheckBoxAvatarPhysics(LLUICtrl* ctrl, void* user_data);
 	static void onCommitUserProfile(LLUICtrl* ctrl, void* user_data);
 	static void onCommitCheckBoxAfterRestart(LLUICtrl* ctrl, void* user_data);
@@ -143,6 +144,7 @@ private:
 	BOOL mSpeedRez;
 	BOOL mPreviewAnimInWorld;
 	BOOL mPrivateLookAt;
+	BOOL mPrivatePointAt;
 	BOOL mRevokePermsOnStandUp;
 	BOOL mTeleportHistoryDeparture;
 	BOOL mRezWithLandGroup;
@@ -168,6 +170,7 @@ private:
 	U32 mDateFormat;
 	U32 mSpeedRezInterval;
 	U32 mPrivateLookAtLimit;
+	U32 mPrivatePointAtLimit;
 	U32 mRestrainedLoveReattachDelay;
 	LLColor4 mOwnNameChatColor;
 	std::string mHighlightNicknames;
@@ -263,6 +266,7 @@ HBPrefsCoolImpl::HBPrefsCoolImpl()
 	childSetCommitCallback("spell_check_check"			,		onCommitCheckBoxSpellCheck, this);
 	childSetCommitCallback("speed_rez_check",					onCommitCheckBoxSpeedRez, this);
 	childSetCommitCallback("private_look_at_check",				onCommitCheckBoxPrivateLookAt, this);
+	childSetCommitCallback("private_point_at_check",			onCommitCheckBoxPrivatePointAt, this);
 	childSetCommitCallback("avatar_physics_check",				onCommitCheckBoxAvatarPhysics, this);
 	childSetCommitCallback("restrained_love_check",				onCommitCheckBoxRestrainedLove, this);
 	childSetCommitCallback("user_profile",						onCommitUserProfile, this);
@@ -492,7 +496,9 @@ void HBPrefsCoolImpl::refreshValues()
 	mSpeedRezInterval					= gSavedSettings.getU32("SpeedRezInterval");
 	mPreviewAnimInWorld					= gSavedSettings.getBOOL("PreviewAnimInWorld");
 	mPrivateLookAt						= gSavedSettings.getBOOL("PrivateLookAt");
+	mPrivatePointAt						= gSavedSettings.getBOOL("PrivatePointAt");
 	mPrivateLookAtLimit					= gSavedSettings.getU32("PrivateLookAtLimit");
+	mPrivatePointAtLimit				= gSavedSettings.getU32("PrivatePointAtLimit");
 	mRevokePermsOnStandUp				= gSavedSettings.getBOOL("RevokePermsOnStandUp");
 	mTeleportHistoryDeparture			= gSavedSettings.getBOOL("TeleportHistoryDeparture");
 	mRezWithLandGroup					= gSavedSettings.getBOOL("RezWithLandGroup");
@@ -612,6 +618,10 @@ void HBPrefsCoolImpl::refresh()
 	// Miscellaneous
 	childSetEnabled("speed_rez_interval", mSpeedRez);
 	childSetEnabled("speed_rez_seconds", mSpeedRez);
+	childSetEnabled("private_look_at_limit", mPrivateLookAt);
+	childSetEnabled("private_look_at_limit_meters", mPrivateLookAt);
+	childSetEnabled("private_point_at_limit", mPrivatePointAt);
+	childSetEnabled("private_point_at_limit_meters", mPrivatePointAt);
 	childSetEnabled("avatar_physics_lod", mAvatarPhysics);
 
 	// RestrainedLove
@@ -677,7 +687,9 @@ void HBPrefsCoolImpl::cancel()
 	gSavedSettings.setU32("SpeedRezInterval",					mSpeedRezInterval);
 	gSavedSettings.setBOOL("PreviewAnimInWorld",				mPreviewAnimInWorld);
 	gSavedSettings.setBOOL("PrivateLookAt",						mPrivateLookAt);
+	gSavedSettings.setBOOL("PrivatePointAt",					mPrivatePointAt);
 	gSavedSettings.setU32("PrivateLookAtLimit",					mPrivateLookAtLimit);
+	gSavedSettings.setU32("PrivatePointAtLimit",				mPrivatePointAtLimit);
 	gSavedSettings.setBOOL("RevokePermsOnStandUp",				mRevokePermsOnStandUp);
 	gSavedSettings.setBOOL("TeleportHistoryDeparture",			mTeleportHistoryDeparture);
 	gSavedSettings.setBOOL("RezWithLandGroup",					mRezWithLandGroup);
@@ -1005,6 +1017,19 @@ void HBPrefsCoolImpl::onCommitCheckBoxPrivateLookAt(LLUICtrl* ctrl,
 	bool enabled = check->get();
 	self->childSetEnabled("private_look_at_limit", enabled);
 	self->childSetEnabled("private_look_at_limit_meters", enabled);
+}
+
+//static
+void HBPrefsCoolImpl::onCommitCheckBoxPrivatePointAt(LLUICtrl* ctrl,
+													 void* user_data)
+{
+	HBPrefsCoolImpl* self = (HBPrefsCoolImpl*)user_data;
+	LLCheckBoxCtrl* check = (LLCheckBoxCtrl*)ctrl;
+	if (!self || !check) return;
+
+	bool enabled = check->get();
+	self->childSetEnabled("private_point_at_limit", enabled);
+	self->childSetEnabled("private_point_at_limit_meters", enabled);
 }
 
 //static

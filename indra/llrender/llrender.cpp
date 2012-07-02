@@ -1113,7 +1113,13 @@ void LLRender::blendFunc(eBlendFactor color_sfactor, eBlendFactor color_dfactor,
 	llassert(alpha_dfactor < BF_UNDEF);
 	if (!gGLManager.mHasBlendFuncSeparate)
 	{
-		LL_WARNS_ONCE("render") << "no glBlendFuncSeparateEXT(), using color-only blend func" << llendl;
+		static bool warned = false;	// faster than LL_WARNS_ONCE
+		if (!warned)
+		{
+			warned = true;
+			llwarns << "no glBlendFuncSeparateEXT(), using color-only blend func"
+					<< llendl;
+		}
 		blendFunc(color_sfactor, color_dfactor);
 		return;
 	}
@@ -1423,9 +1429,9 @@ void LLRender::color4ubv(const GLubyte* c)
 void LLRender::color4f(const GLfloat& r, const GLfloat& g, const GLfloat& b, const GLfloat& a)
 {
 	color4ub((GLubyte) (llclamp(r, 0.f, 1.f)*255),
-		(GLubyte) (llclamp(g, 0.f, 1.f)*255),
-		(GLubyte) (llclamp(b, 0.f, 1.f)*255),
-		(GLubyte) (llclamp(a, 0.f, 1.f)*255));
+			 (GLubyte) (llclamp(g, 0.f, 1.f)*255),
+			 (GLubyte) (llclamp(b, 0.f, 1.f)*255),
+			 (GLubyte) (llclamp(a, 0.f, 1.f)*255));
 }
 
 void LLRender::color4fv(const GLfloat* c)
@@ -1445,15 +1451,15 @@ void LLRender::color3fv(const GLfloat* c)
 
 void LLRender::debugTexUnits(void)
 {
-	LL_INFOS("TextureUnit") << "Active TexUnit: " << mCurrTextureUnitIndex << LL_ENDL;
+	llinfos << "Active TexUnit: " << mCurrTextureUnitIndex << llendl;
 	std::string active_enabled = "false";
 	for (U32 i = 0; i < mTexUnits.size(); i++)
 	{
 		if (getTexUnit(i)->mCurrTexType != LLTexUnit::TT_NONE)
 		{
 			if (i == mCurrTextureUnitIndex) active_enabled = "true";
-			LL_INFOS("TextureUnit") << "TexUnit: " << i << " Enabled" << LL_ENDL;
-			LL_INFOS("TextureUnit") << "Enabled As: ";
+			llinfos << "TexUnit: " << i << " Enabled" << llendl;
+			llinfos << "Enabled As: ";
 			switch (getTexUnit(i)->mCurrTexType)
 			{
 				case LLTexUnit::TT_TEXTURE:
@@ -1469,8 +1475,9 @@ void LLRender::debugTexUnits(void)
 					LL_CONT << "ARGH!!! NONE!";
 					break;
 			}
-			LL_CONT << ", Texture Bound: " << getTexUnit(i)->mCurrTexture << LL_ENDL;
+			LL_CONT << ", Texture Bound: " << getTexUnit(i)->mCurrTexture
+					<< llendl;
 		}
 	}
-	LL_INFOS("TextureUnit") << "Active TexUnit Enabled : " << active_enabled << LL_ENDL;
+	llinfos << "Active TexUnit Enabled : " << active_enabled << llendl;
 }

@@ -844,7 +844,7 @@ void LLAppearanceMgr::updateClothingOrderingInfo(LLUUID cat_id)
 		LLViewerInventoryItem* item = wear_items.get(i);
 		if (!item)
 		{
-			LL_WARNS("Appearance") << "NULL item found" << LL_ENDL;
+			llwarns << "NULL item found" << llendl;
 			continue;
 		}
 		// Ignore non-links and non-worn link wearables.
@@ -856,8 +856,8 @@ void LLAppearanceMgr::updateClothingOrderingInfo(LLUUID cat_id)
 		LLWearableType::EType type = item->getWearableType();
 		if (type < 0 || type >= LLWearableType::WT_COUNT)
 		{
-			LL_WARNS("Appearance") << "Invalid wearable type. Inventory type does not match wearable flag bitfield."
-								   << LL_ENDL;
+			llwarns << "Invalid wearable type. Inventory type does not match wearable flag bitfield."
+					<< llendl;
 			continue;
 		}
 		LLWearable* wearable = gAgentWearables.getWearableFromItemID(item->getUUID());

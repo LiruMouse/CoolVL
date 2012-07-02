@@ -50,6 +50,14 @@
 //static
 char* LLMemory::reserveMem = 0;
 
+void ll_assert_aligned_func(uintptr_t ptr, U32 alignment)
+{
+	if (ptr % alignment != 0)
+	{
+		llerrs << "alignment check failed" << llendl;
+	}
+}
+
 //static
 void LLMemory::initClass()
 {

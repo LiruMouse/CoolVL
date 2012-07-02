@@ -35,25 +35,25 @@
 #include "lldrawpoolterrain.h"
 
 #include "llfasttimer.h"
+#include "llrender.h"
 
 #include "llagent.h"
-#include "llviewercontrol.h"
 #include "lldrawable.h"
 #include "llface.h"
 #include "llsky.h"
 #include "llsurface.h"
 #include "llsurfacepatch.h"
-#include "llviewerregion.h"
-#include "llvlcomposition.h"
+#include "llviewercamera.h"
+#include "llviewercontrol.h"
 #include "llviewerparcelmgr.h"		// for gRenderParcelOwnership
 #include "llviewerparceloverlay.h"
+#include "llviewerregion.h"
+#include "llviewershadermgr.h"
+#include "llviewertexturelist.h"	// To get alpha gradients
+#include "llvlcomposition.h"
 #include "llvosurfacepatch.h"
-#include "llviewercamera.h"
-#include "llviewertexturelist.h" // To get alpha gradients
 #include "llworld.h"
 #include "pipeline.h"
-#include "llviewershadermgr.h"
-#include "llrender.h"
 
 const F32 DETAIL_SCALE = 1.f / 16.f;
 int DebugDetailMap = 0;
@@ -67,22 +67,30 @@ LLDrawPoolTerrain::LLDrawPoolTerrain(LLViewerTexture* texturep)
 	mTexturep(texturep)
 {
 	// Hack!
-	sDetailScale = 1.f / gSavedSettings.getF32("RenderTerrainScale");
-	sDetailMode = gSavedSettings.getS32("RenderTerrainDetail");
+	static LLCachedControl<F32> terrain_scale(gSavedSettings,
+											  "RenderTerrainScale");
+	static LLCachedControl<S32> terrain_detail(gSavedSettings,
+											   "RenderTerrainDetail");
+	sDetailScale = 1.f / llmax(0.1f, (F32)terrain_scale);
+	sDetailMode = llclamp((S32)terrain_detail, 0, 2);
 	mAlphaRampImagep = LLViewerTextureManager::getFetchedTextureFromFile("alpha_gradient.tga",
-													TRUE, LLViewerTexture::BOOST_UI,
-													LLViewerTexture::FETCHED_TEXTURE,
-													GL_ALPHA8, GL_ALPHA,
-													LLUUID("e97cf410-8e61-7005-ec06-629eba4cd1fb"));
+																		 TRUE,
+																		 LLViewerTexture::BOOST_UI,
+																		 LLViewerTexture::FETCHED_TEXTURE,
+																		 GL_ALPHA8,
+																		 GL_ALPHA,
+																		 LLUUID("e97cf410-8e61-7005-ec06-629eba4cd1fb"));
 
 	//gGL.getTexUnit(0)->bind(mAlphaRampImagep.get());
 	mAlphaRampImagep->setAddressMode(LLTexUnit::TAM_CLAMP);
 
 	m2DAlphaRampImagep = LLViewerTextureManager::getFetchedTextureFromFile("alpha_gradient_2d.j2c",
-													TRUE, LLViewerTexture::BOOST_UI,
-													LLViewerTexture::FETCHED_TEXTURE,
-													GL_ALPHA8, GL_ALPHA,
-													LLUUID("38b86f85-2575-52a9-a531-23108d8da837"));
+																		   TRUE,
+																		   LLViewerTexture::BOOST_UI,
+																		   LLViewerTexture::FETCHED_TEXTURE,
+																		   GL_ALPHA8,
+																		   GL_ALPHA,
+																		   LLUUID("38b86f85-2575-52a9-a531-23108d8da837"));
 
 	//gGL.getTexUnit(0)->bind(m2DAlphaRampImagep.get());
 	m2DAlphaRampImagep->setAddressMode(LLTexUnit::TAM_CLAMP);
@@ -97,12 +105,10 @@ LLDrawPoolTerrain::~LLDrawPoolTerrain()
 	llassert(gPipeline.findPool(getType(), getTexture()) == NULL);
 }
 
-
 LLDrawPool* LLDrawPoolTerrain::instancePool()
 {
 	return new LLDrawPoolTerrain(mTexturep);
 }
-
 
 U32 LLDrawPoolTerrain::getVertexDataMask()
 {
@@ -125,8 +131,9 @@ void LLDrawPoolTerrain::prerender()
 	}
 	else
 	{
-		static LLCachedControl<S32> render_terrain_detail(gSavedSettings, "RenderTerrainDetail");
-		sDetailMode = render_terrain_detail;
+		static LLCachedControl<S32> terrain_detail(gSavedSettings,
+												   "RenderTerrainDetail");
+		sDetailMode = llclamp((S32)terrain_detail, 0, 2);
 	}
 }
 
@@ -171,13 +178,14 @@ void LLDrawPoolTerrain::render(S32 pass)
 		return;
 	}
 
-	// Hack! Get the region that this draw pool is rendering from!
+	// Hack! Get the region that this draw pool is rendering from !
 	LLViewerRegion* regionp = mDrawFace[0]->getDrawable()->getVObj()->getRegion();
 	LLVLComposition* compp = regionp->getComposition();
 	for (S32 i = 0; i < 4; ++i)
 	{
 		compp->mDetailTextures[i]->setBoostLevel(LLViewerTexture::BOOST_TERRAIN);
-		compp->mDetailTextures[i]->addTextureStats(1024.f*1024.f); // assume large pixel area
+		// assume large pixel area
+		compp->mDetailTextures[i]->addTextureStats(1024.f * 1024.f);
 	}
 
 	if (!gGLManager.mHasMultitexture)
@@ -220,11 +228,12 @@ void LLDrawPoolTerrain::render(S32 pass)
 	}
 
 	// Special-case for land ownership feedback
-	static LLCachedControl<bool> show_parcel_owners(gSavedSettings, "ShowParcelOwners");
+	static LLCachedControl<bool> show_parcel_owners(gSavedSettings,
+													"ShowParcelOwners");
 	if (show_parcel_owners)
 	{
 		if (mVertexShaderLevel > 1)
-		{ //use fullbright shader for highlighting
+		{	// use fullbright shader for highlighting
 			LLGLSLShader* old_shader = sShader;
 			sShader->unbind();
 			sShader = &gObjectFullbrightProgram;
@@ -307,8 +316,8 @@ void LLDrawPoolTerrain::renderFullShader()
 	LLViewerTexture* detail_texture3p = compp->mDetailTextures[3];
 
 	LLVector3d region_origin_global = gAgent.getRegion()->getOriginGlobal();
-	F32 offset_x = (F32)fmod(region_origin_global.mdV[VX], 1.0/(F64)sDetailScale)*sDetailScale;
-	F32 offset_y = (F32)fmod(region_origin_global.mdV[VY], 1.0/(F64)sDetailScale)*sDetailScale;
+	F32 offset_x = (F32)fmod(region_origin_global.mdV[VX], 1.0 / (F64)sDetailScale) * sDetailScale;
+	F32 offset_y = (F32)fmod(region_origin_global.mdV[VY], 1.0 / (F64)sDetailScale) * sDetailScale;
 
 	LLVector4 tp0, tp1;
 
@@ -447,8 +456,8 @@ void LLDrawPoolTerrain::renderFull4TU()
 	LLViewerTexture* detail_texture3p = compp->mDetailTextures[3];
 
 	LLVector3d region_origin_global = gAgent.getRegion()->getOriginGlobal();
-	F32 offset_x = (F32)fmod(region_origin_global.mdV[VX], 1.0/(F64)sDetailScale)*sDetailScale;
-	F32 offset_y = (F32)fmod(region_origin_global.mdV[VY], 1.0/(F64)sDetailScale)*sDetailScale;
+	F32 offset_x = (F32)fmod(region_origin_global.mdV[VX], 1.0 / (F64)sDetailScale) * sDetailScale;
+	F32 offset_y = (F32)fmod(region_origin_global.mdV[VY], 1.0 / (F64)sDetailScale) * sDetailScale;
 
 	LLVector4 tp0, tp1;
 
@@ -474,7 +483,8 @@ void LLDrawPoolTerrain::renderFull4TU()
 	glTexGenfv(GL_S, GL_OBJECT_PLANE, tp0.mV);
 	glTexGenfv(GL_T, GL_OBJECT_PLANE, tp1.mV);
 
-	gGL.getTexUnit(0)->setTextureColorBlend(LLTexUnit::TBO_REPLACE, LLTexUnit::TBS_TEX_COLOR);
+	gGL.getTexUnit(0)->setTextureColorBlend(LLTexUnit::TBO_REPLACE,
+											LLTexUnit::TBS_TEX_COLOR);
 
 	//
 	// Stage 1: Generate alpha ramp for detail0/detail1 transition
@@ -485,8 +495,10 @@ void LLDrawPoolTerrain::renderFull4TU()
 	gGL.getTexUnit(1)->activate();
 
 	// Care about alpha only
-	gGL.getTexUnit(1)->setTextureColorBlend(LLTexUnit::TBO_REPLACE, LLTexUnit::TBS_PREV_COLOR);
-	gGL.getTexUnit(1)->setTextureAlphaBlend(LLTexUnit::TBO_REPLACE, LLTexUnit::TBS_TEX_ALPHA);
+	gGL.getTexUnit(1)->setTextureColorBlend(LLTexUnit::TBO_REPLACE,
+											LLTexUnit::TBS_PREV_COLOR);
+	gGL.getTexUnit(1)->setTextureAlphaBlend(LLTexUnit::TBO_REPLACE,
+											LLTexUnit::TBS_TEX_ALPHA);
 
 	//
 	// Stage 2: Interpolate detail1 with existing based on ramp
@@ -502,7 +514,9 @@ void LLDrawPoolTerrain::renderFull4TU()
 	glTexGenfv(GL_S, GL_OBJECT_PLANE, tp0.mV);
 	glTexGenfv(GL_T, GL_OBJECT_PLANE, tp1.mV);
 
-	gGL.getTexUnit(2)->setTextureColorBlend(LLTexUnit::TBO_LERP_PREV_ALPHA, LLTexUnit::TBS_PREV_COLOR, LLTexUnit::TBS_TEX_COLOR);
+	gGL.getTexUnit(2)->setTextureColorBlend(LLTexUnit::TBO_LERP_PREV_ALPHA,
+											LLTexUnit::TBS_PREV_COLOR,
+											LLTexUnit::TBS_TEX_COLOR);
 
 	//
 	// Stage 3: Modulate with primary (vertex) color for lighting
@@ -512,7 +526,9 @@ void LLDrawPoolTerrain::renderFull4TU()
 	gGL.getTexUnit(3)->activate();
 
 	// Set alpha texture and do lighting modulation
-	gGL.getTexUnit(3)->setTextureColorBlend(LLTexUnit::TBO_MULT, LLTexUnit::TBS_PREV_COLOR, LLTexUnit::TBS_VERT_COLOR);
+	gGL.getTexUnit(3)->setTextureColorBlend(LLTexUnit::TBO_MULT,
+											LLTexUnit::TBS_PREV_COLOR,
+											LLTexUnit::TBS_VERT_COLOR);
 
 	gGL.getTexUnit(0)->activate();
 
@@ -534,7 +550,8 @@ void LLDrawPoolTerrain::renderFull4TU()
 	glTexGenfv(GL_S, GL_OBJECT_PLANE, tp0.mV);
 	glTexGenfv(GL_T, GL_OBJECT_PLANE, tp1.mV);
 
-	gGL.getTexUnit(0)->setTextureColorBlend(LLTexUnit::TBO_REPLACE, LLTexUnit::TBS_TEX_COLOR);
+	gGL.getTexUnit(0)->setTextureColorBlend(LLTexUnit::TBO_REPLACE,
+											LLTexUnit::TBS_TEX_COLOR);
 
 	//
 	// Stage 1: Generate alpha ramp for detail2/detail3 transition
@@ -549,8 +566,10 @@ void LLDrawPoolTerrain::renderFull4TU()
 	glTranslatef(-2.f, 0.f, 0.f);
 
 	// Care about alpha only
-	gGL.getTexUnit(1)->setTextureColorBlend(LLTexUnit::TBO_REPLACE, LLTexUnit::TBS_PREV_COLOR);
-	gGL.getTexUnit(1)->setTextureAlphaBlend(LLTexUnit::TBO_REPLACE, LLTexUnit::TBS_TEX_ALPHA);
+	gGL.getTexUnit(1)->setTextureColorBlend(LLTexUnit::TBO_REPLACE,
+											LLTexUnit::TBS_PREV_COLOR);
+	gGL.getTexUnit(1)->setTextureAlphaBlend(LLTexUnit::TBO_REPLACE,
+											LLTexUnit::TBS_TEX_ALPHA);
 
 	//
 	// Stage 2: Interpolate detail2 with existing based on ramp
@@ -566,7 +585,9 @@ void LLDrawPoolTerrain::renderFull4TU()
 	glTexGenfv(GL_S, GL_OBJECT_PLANE, tp0.mV);
 	glTexGenfv(GL_T, GL_OBJECT_PLANE, tp1.mV);
 
-	gGL.getTexUnit(2)->setTextureColorBlend(LLTexUnit::TBO_LERP_PREV_ALPHA, LLTexUnit::TBS_TEX_COLOR, LLTexUnit::TBS_PREV_COLOR);
+	gGL.getTexUnit(2)->setTextureColorBlend(LLTexUnit::TBO_LERP_PREV_ALPHA,
+											LLTexUnit::TBS_TEX_COLOR,
+											LLTexUnit::TBS_PREV_COLOR);
 
 	//
 	// Stage 3: Generate alpha ramp for detail1/detail2 transition
@@ -581,8 +602,11 @@ void LLDrawPoolTerrain::renderFull4TU()
 	glTranslatef(-1.f, 0.f, 0.f);
 
 	// Set alpha texture and do lighting modulation
-	gGL.getTexUnit(3)->setTextureColorBlend(LLTexUnit::TBO_MULT, LLTexUnit::TBS_PREV_COLOR, LLTexUnit::TBS_VERT_COLOR);
-	gGL.getTexUnit(3)->setTextureAlphaBlend(LLTexUnit::TBO_REPLACE, LLTexUnit::TBS_TEX_ALPHA);
+	gGL.getTexUnit(3)->setTextureColorBlend(LLTexUnit::TBO_MULT,
+											LLTexUnit::TBS_PREV_COLOR,
+											LLTexUnit::TBS_VERT_COLOR);
+	gGL.getTexUnit(3)->setTextureAlphaBlend(LLTexUnit::TBO_REPLACE,
+											LLTexUnit::TBS_TEX_ALPHA);
 
 	gGL.getTexUnit(0)->activate();
 	{
@@ -626,7 +650,6 @@ void LLDrawPoolTerrain::renderFull4TU()
 
 	gGL.getTexUnit(0)->activate();
 	gGL.getTexUnit(0)->unbind(LLTexUnit::TT_TEXTURE);
-
 
 	glDisable(GL_TEXTURE_GEN_S);
 	glDisable(GL_TEXTURE_GEN_T);

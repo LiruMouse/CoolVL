@@ -1425,19 +1425,19 @@ LLViewerWindow::LLViewerWindow(const std::string& title,
 
 	if (!LLAppViewer::instance()->restoreErrorTrap())
 	{
-		LL_WARNS("Window") << " Someone took over my signal/exception handler (post createWindow)!"
-						   << LL_ENDL;
+		llwarns << " Someone took over my signal/exception handler (post createWindow) !"
+				<< llendl;
 	}
 
 	if (NULL == mWindow)
 	{
 		LLSplashScreen::update("Shutting down...");
 #if LL_LINUX || LL_SOLARIS
-		LL_WARNS("Window") << "Unable to create window, be sure screen is set at 32-bit color and your graphics driver is configured correctly. See README-linux.txt or README-solaris.txt for further information."
-						   << LL_ENDL;
+		llwarns << "Unable to create window, be sure screen is set at 32-bit color and your graphics driver is configured correctly. See README-linux.txt or README-solaris.txt for further information."
+				<< llendl;
 #else
-		LL_WARNS("Window") << "Unable to create window, be sure screen is set at 32-bit color in Control Panels->Display->Settings"
-						   << LL_ENDL;
+		llwarns << "Unable to create window, be sure screen is set at 32-bit color in Control Panels->Display->Settings"
+				<< llendl;
 #endif
         LLAppViewer::instance()->forceExit(1);
 	}
@@ -1936,7 +1936,7 @@ void LLViewerWindow::shutdownViews()
 	llinfos << "Global views cleaned up." << llendflush;
 
 	// DEV-40930: Clear sModalStack. Otherwise, any LLModalDialog left open
-	// will crump with LL_ERRS.
+	// will crump with llerrs.
 	LLModalDialog::shutdownModals();
 	llinfos << "LLModalDialog shut down." << llendflush; 
 

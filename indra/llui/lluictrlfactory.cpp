@@ -80,24 +80,32 @@ std::vector<std::string> LLUICtrlFactory::sXUIPaths;
 class LLUICtrlLocate : public LLUICtrl
 {
 public:
-	LLUICtrlLocate() : LLUICtrl(std::string("locate"), LLRect(0,0,0,0), FALSE, NULL, NULL) { setTabStop(FALSE); }
-	virtual void draw() { }
+	LLUICtrlLocate()
+	:	LLUICtrl(std::string("locate"), LLRect(0, 0, 0, 0), FALSE, NULL, NULL)
+	{
+		setTabStop(FALSE);
+	}
+
+	virtual void draw()
+	{
+	}
 
 	virtual LLXMLNodePtr getXML(bool save_children = true) const
 	{
 		LLXMLNodePtr node = LLUICtrl::getXML();
-	
+
 		node->setName(LL_UI_CTRL_LOCATE_TAG);
-	
+
 		return node;
 	}
 
-	static LLView *fromXML(LLXMLNodePtr node, LLView *parent, LLUICtrlFactory *factory)
+	static LLView* fromXML(LLXMLNodePtr node, LLView* parent,
+						   LLUICtrlFactory* factory)
 	{
 		std::string name("pad");
 		node->getAttributeString("name", name);
 
-		LLUICtrlLocate *new_ctrl = new LLUICtrlLocate();
+		LLUICtrlLocate* new_ctrl = new LLUICtrlLocate();
 		new_ctrl->setName(name);
 		new_ctrl->initFromXML(node, parent);
 		return new_ctrl;
@@ -111,7 +119,7 @@ static LLRegisterWidget<LLUICtrlLocate> r2("pad");
 // LLUICtrlFactory()
 //-----------------------------------------------------------------------------
 LLUICtrlFactory::LLUICtrlFactory()
-	: mDummyPanel(NULL)
+:	mDummyPanel(NULL)
 {
 	setupPaths();
 }
@@ -124,23 +132,26 @@ LLUICtrlFactory::~LLUICtrlFactory()
 
 void LLUICtrlFactory::setupPaths()
 {
-	std::string filename = gDirUtilp->getExpandedFilename(LL_PATH_SKINS, "paths.xml");
+	std::string filename = gDirUtilp->getExpandedFilename(LL_PATH_SKINS,
+														  "paths.xml");
 
 	LLXMLNodePtr root;
 	BOOL success  = LLXMLNode::parseFile(filename, root, NULL);
 	sXUIPaths.clear();
-	
+
 	if (success)
 	{
 		LLXMLNodePtr path;
-	
-		for (path = root->getFirstChild(); path.notNull(); path = path->getNextSibling())
+
+		for (path = root->getFirstChild(); path.notNull();
+			 path = path->getNextSibling())
 		{
 			LLUIString path_val_ui(path->getValue());
 			std::string language = LLUI::getLanguage();
 			path_val_ui.setArg("[LANGUAGE]", language);
 
-			if (std::find(sXUIPaths.begin(), sXUIPaths.end(), path_val_ui.getString()) == sXUIPaths.end())
+			if (std::find(sXUIPaths.begin(), sXUIPaths.end(),
+						  path_val_ui.getString()) == sXUIPaths.end())
 			{
 				sXUIPaths.push_back(path_val_ui.getString());
 			}
@@ -164,26 +175,32 @@ const std::vector<std::string>& LLUICtrlFactory::getXUIPaths()
 //-----------------------------------------------------------------------------
 // getLayeredXMLNode()
 //-----------------------------------------------------------------------------
-bool LLUICtrlFactory::getLayeredXMLNode(const std::string &xui_filename, LLXMLNodePtr& root)
+bool LLUICtrlFactory::getLayeredXMLNode(const std::string& xui_filename,
+										LLXMLNodePtr& root)
 {
-	std::string full_filename = gDirUtilp->findSkinnedFilename(sXUIPaths.front(), xui_filename);
+	std::string full_filename = gDirUtilp->findSkinnedFilename(sXUIPaths.front(),
+															   xui_filename);
 	if (full_filename.empty())
 	{
-		// try filename as passed in since sometimes we load an xml file from a user-supplied path
+		// try filename as passed in since sometimes we load an xml file from a
+		// user-supplied path
 		if (gDirUtilp->fileExists(xui_filename))
 		{
 			full_filename = xui_filename;
 		}
 		else
 		{
-			llwarns << "Couldn't find UI description file: " << sXUIPaths.front() + gDirUtilp->getDirDelimiter() + xui_filename << llendl;
+			llwarns << "Couldn't find UI description file: "
+					<< sXUIPaths.front() + gDirUtilp->getDirDelimiter() + xui_filename
+					<< llendl;
 			return false;
 		}
 	}
 
 	if (!LLXMLNode::parseFile(full_filename, root, NULL))
 	{
-		llwarns << "Problem reading UI description file: " << full_filename << llendl;
+		llwarns << "Problem reading UI description file: " << full_filename
+				<< llendl;
 		return false;
 	}
 
@@ -196,8 +213,9 @@ bool LLUICtrlFactory::getLayeredXMLNode(const std::string &xui_filename, LLXMLNo
 		std::string nodeName;
 		std::string updateName;
 
-		std::string layer_filename = gDirUtilp->findSkinnedFilename((*itor), xui_filename);
-		if(layer_filename.empty())
+		std::string layer_filename = gDirUtilp->findSkinnedFilename(*itor,
+																	xui_filename);
+		if (layer_filename.empty())
 		{
 			// no localized version of this file, that's ok, keep looking
 			continue;
@@ -205,7 +223,9 @@ bool LLUICtrlFactory::getLayeredXMLNode(const std::string &xui_filename, LLXMLNo
 
 		if (!LLXMLNode::parseFile(layer_filename, updateRoot, NULL))
 		{
-			llwarns << "Problem reading localized UI description file: " << (*itor) + gDirUtilp->getDirDelimiter() + xui_filename << llendl;
+			llwarns << "Problem reading localized UI description file: "
+					<< (*itor) + gDirUtilp->getDirDelimiter() + xui_filename
+					<< llendl;
 			return false;
 		}
 
@@ -221,12 +241,13 @@ bool LLUICtrlFactory::getLayeredXMLNode(const std::string &xui_filename, LLXMLNo
 	return true;
 }
 
-
 //-----------------------------------------------------------------------------
 // buildFloater()
 //-----------------------------------------------------------------------------
-void LLUICtrlFactory::buildFloater(LLFloater* floaterp, const std::string& filename, 
-									const LLCallbackMap::map_t* factory_map, BOOL open) /* Flawfinder: ignore */
+void LLUICtrlFactory::buildFloater(LLFloater* floaterp,
+								   const std::string& filename, 
+								   const LLCallbackMap::map_t* factory_map,
+								   BOOL open) /* Flawfinder: ignore */
 {
 	LLXMLNodePtr root;
 
@@ -234,11 +255,12 @@ void LLUICtrlFactory::buildFloater(LLFloater* floaterp, const std::string& filen
 	{
 		return;
 	}
-	
+
 	// root must be called floater
-	if( !(root->hasName("floater") || root->hasName("multi_floater") ) )
+	if (!(root->hasName("floater") || root->hasName("multi_floater")))
 	{
-		llwarns << "Root node should be named floater in: " << filename << llendl;
+		llwarns << "Root node should be named floater in: " << filename
+				<< llendl;
 		return;
 	}
 
@@ -289,7 +311,7 @@ S32 LLUICtrlFactory::saveToXML(LLView* viewp, const std::string& filename)
 // buildPanel()
 //-----------------------------------------------------------------------------
 BOOL LLUICtrlFactory::buildPanel(LLPanel* panelp, const std::string& filename,
-									const LLCallbackMap::map_t* factory_map)
+								 const LLCallbackMap::map_t* factory_map)
 {
 	BOOL didPost = FALSE;
 	LLXMLNodePtr root;
@@ -300,9 +322,10 @@ BOOL LLUICtrlFactory::buildPanel(LLPanel* panelp, const std::string& filename,
 	}
 
 	// root must be called panel
-	if( !root->hasName("panel" ) )
+	if (!root->hasName("panel"))
 	{
-		llwarns << "Root node should be named panel in : " << filename << llendl;
+		llwarns << "Root node should be named panel in : " << filename
+				<< llendl;
 		return didPost;
 	}
 
@@ -312,7 +335,7 @@ BOOL LLUICtrlFactory::buildPanel(LLPanel* panelp, const std::string& filename,
 	}
 
 	didPost = panelp->initPanelXML(root, NULL, this);
-	
+
 	if (LLUI::sShowXUINames)
 	{
 		panelp->setToolTip(filename);
@@ -332,11 +355,12 @@ BOOL LLUICtrlFactory::buildPanel(LLPanel* panelp, const std::string& filename,
 //-----------------------------------------------------------------------------
 // buildMenu()
 //-----------------------------------------------------------------------------
-LLMenuGL *LLUICtrlFactory::buildMenu(const std::string &filename, LLView* parentp)
+LLMenuGL* LLUICtrlFactory::buildMenu(const std::string& filename,
+									 LLView* parentp)
 {
 	// TomY TODO: Break this function into buildMenu and buildMenuBar
 	LLXMLNodePtr root;
-	LLMenuGL*    menu;
+	LLMenuGL* menu;
 
 	if (!LLUICtrlFactory::getLayeredXMLNode(filename, root))
 	{
@@ -344,9 +368,10 @@ LLMenuGL *LLUICtrlFactory::buildMenu(const std::string &filename, LLView* parent
 	}
 
 	// root must be called panel
-	if( !root->hasName( "menu_bar" ) && !root->hasName( "menu" ))
+	if (!root->hasName("menu_bar") && !root->hasName("menu"))
 	{
-		llwarns << "Root node should be named menu bar or menu in : " << filename << llendl;
+		llwarns << "Root node should be named menu bar or menu in: "
+				<< filename << llendl;
 		return NULL;
 	}
 
@@ -358,7 +383,7 @@ LLMenuGL *LLUICtrlFactory::buildMenu(const std::string &filename, LLView* parent
 	{
 		menu = (LLMenuGL*)LLMenuBarGL::fromXML(root, parentp, this);
 	}
-	
+
 	if (LLUI::sShowXUINames)
 	{
 		menu->setToolTip(filename);
@@ -370,7 +395,8 @@ LLMenuGL *LLUICtrlFactory::buildMenu(const std::string &filename, LLView* parent
 //-----------------------------------------------------------------------------
 // buildMenu()
 //-----------------------------------------------------------------------------
-LLPieMenu *LLUICtrlFactory::buildPieMenu(const std::string &filename, LLView* parentp)
+LLPieMenu* LLUICtrlFactory::buildPieMenu(const std::string& filename,
+										 LLView* parentp)
 {
 	LLXMLNodePtr root;
 
@@ -380,16 +406,17 @@ LLPieMenu *LLUICtrlFactory::buildPieMenu(const std::string &filename, LLView* pa
 	}
 
 	// root must be called panel
-	if( !root->hasName( LL_PIE_MENU_TAG ))
+	if (!root->hasName(LL_PIE_MENU_TAG))
 	{
-		llwarns << "Root node should be named " << LL_PIE_MENU_TAG << " in : " << filename << llendl;
+		llwarns << "Root node should be named " << LL_PIE_MENU_TAG << " in: "
+				<< filename << llendl;
 		return NULL;
 	}
 
 	std::string name("menu");
 	root->getAttributeString("name", name);
 
-	LLPieMenu *menu = new LLPieMenu(name);
+	LLPieMenu* menu = new LLPieMenu(name);
 	parentp->addChild(menu);
 	menu->initXML(root, parentp, this);
 
@@ -408,8 +435,7 @@ void LLUICtrlFactory::rebuild()
 {
 	built_panel_t::iterator built_panel_it;
 	for (built_panel_it = mBuiltPanels.begin();
-		built_panel_it != mBuiltPanels.end();
-		++built_panel_it)
+		 built_panel_it != mBuiltPanels.end(); ++built_panel_it)
 	{
 		std::string filename = built_panel_it->second;
 		LLPanel* panelp = built_panel_it->first.get();
@@ -431,8 +457,7 @@ void LLUICtrlFactory::rebuild()
 
 	built_floater_t::iterator built_floater_it;
 	for (built_floater_it = mBuiltFloaters.begin();
-		built_floater_it != mBuiltFloaters.end();
-		++built_floater_it)
+		 built_floater_it != mBuiltFloaters.end(); ++built_floater_it)
 	{
 		LLFloater* floaterp = built_floater_it->first.get();
 		if (!floaterp)
@@ -440,9 +465,8 @@ void LLUICtrlFactory::rebuild()
 			continue;
 		}
 		std::string filename = built_floater_it->second;
-		llinfos << "Rebuilding UI floater " << floaterp->getName()
-			<< " from " << filename
-			<< llendl;
+		llinfos << "Rebuilding UI floater " << floaterp->getName() << " from "
+				<< filename << llendl;
 		BOOL visible = floaterp->getVisible();
 		floaterp->setVisible(FALSE);
 		floaterp->setFocus(FALSE);
@@ -455,13 +479,12 @@ void LLUICtrlFactory::rebuild()
 }
 
 //-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
 
-LLView *LLUICtrlFactory::createCtrlWidget(LLPanel *parent, LLXMLNodePtr node)
+LLView* LLUICtrlFactory::createCtrlWidget(LLPanel* parent, LLXMLNodePtr node)
 {
 	std::string ctrl_type = node->getName()->mString;
 	LLStringUtil::toLower(ctrl_type);
-	
+
 	LLWidgetClassRegistry::factory_func_t func = LLWidgetClassRegistry::getInstance()->getCreatorFunc(ctrl_type);
 
 	if (func == NULL)
@@ -478,12 +501,12 @@ LLView *LLUICtrlFactory::createCtrlWidget(LLPanel *parent, LLXMLNodePtr node)
 		}
 		parent = mDummyPanel;
 	}
-	LLView *ctrl = func(node, parent, this);
+	LLView* ctrl = func(node, parent, this);
 
 	return ctrl;
 }
 
-LLView* LLUICtrlFactory::createWidget(LLPanel *parent, LLXMLNodePtr node)
+LLView* LLUICtrlFactory::createWidget(LLPanel* parent, LLXMLNodePtr node)
 {
 	LLView* view = createCtrlWidget(parent, node);
 
@@ -509,11 +532,12 @@ LLPanel* LLUICtrlFactory::createFactoryPanel(const std::string& name)
 		const LLCallbackMap::map_t* factory_map = *itor;
 
 		// Look up this panel's name in the map.
-		LLCallbackMap::map_const_iter_t iter = factory_map->find( name );
+		LLCallbackMap::map_const_iter_t iter = factory_map->find(name);
 		if (iter != factory_map->end())
 		{
-			// Use the factory to create the panel, instead of using a default LLPanel.
-			LLPanel *ret = (LLPanel*) iter->second.mCallback( iter->second.mData );
+			// Use the factory to create the panel, instead of using a default
+			// LLPanel.
+			LLPanel* ret = (LLPanel*)iter->second.mCallback(iter->second.mData);
 			return ret;
 		}
 	}
@@ -523,7 +547,9 @@ LLPanel* LLUICtrlFactory::createFactoryPanel(const std::string& name)
 //-----------------------------------------------------------------------------
 
 //static
-BOOL LLUICtrlFactory::getAttributeColor(LLXMLNodePtr node, const std::string& name, LLColor4& color)
+BOOL LLUICtrlFactory::getAttributeColor(LLXMLNodePtr node,
+										const std::string& name,
+										LLColor4& color)
 {
 	std::string colorstring;
 	BOOL res = node->getAttributeString(name.c_str(), colorstring);
@@ -541,11 +567,10 @@ BOOL LLUICtrlFactory::getAttributeColor(LLXMLNodePtr node, const std::string& na
 	if (!res)
 	{
 		res = LLColor4::parseColor(colorstring, &color);
-	}	
+	}
 	if (!res)
 	{
 		res = node->getAttributeColor(name.c_str(), color);
 	}
 	return res;
 }
-

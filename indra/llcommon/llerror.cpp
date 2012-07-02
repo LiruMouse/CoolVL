@@ -60,6 +60,8 @@
 #include "llstl.h"
 #include "lltimer.h"
 
+BOOL LLError::Log::sDebugMessages = TRUE;
+
 namespace {
 #if !LL_WINDOWS
 	class RecordToSyslog : public LLError::Recorder

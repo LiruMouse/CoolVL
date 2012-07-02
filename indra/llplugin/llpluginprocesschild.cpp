@@ -91,7 +91,8 @@ void LLPluginProcessChild::idle(void)
 		}
 		else if (mSocketError != APR_SUCCESS)
 		{
-			LL_INFOS("Plugin") << "message pipe is in error state (" << mSocketError << "), moving to STATE_ERROR"<< LL_ENDL;
+			llinfos << "message pipe is in error state (" << mSocketError
+					<< "), moving to STATE_ERROR"<< llendl;
 			setState(STATE_ERROR);
 		}
 
@@ -99,7 +100,8 @@ void LLPluginProcessChild::idle(void)
 		{
 			// The pipe has been closed -- we're done.
 			// TODO: This could be slightly more subtle, but I'm not sure it needs to be.
-			LL_INFOS("Plugin") << "message pipe went away, moving to STATE_ERROR"<< LL_ENDL;
+			llinfos << "message pipe went away, moving to STATE_ERROR"
+					<< llendl;
 			setState(STATE_ERROR);
 		}
 
@@ -298,7 +300,7 @@ void LLPluginProcessChild::sendMessageToPlugin(const LLPluginMessage &message)
 	}
 	else
 	{
-		LL_WARNS("Plugin") << "mInstance == NULL" << LL_ENDL;
+		llwarns << "mInstance == NULL" << llendl;
 	}
 }
 
@@ -363,7 +365,8 @@ void LLPluginProcessChild::receiveMessageRaw(const std::string &message)
 				if (iter != mSharedMemoryRegions.end())
 				{
 					// Need to remove the old region first
-					LL_WARNS("Plugin") << "Adding a duplicate shared memory segment!" << LL_ENDL;
+					llwarns << "Adding a duplicate shared memory segment!"
+							<< llendl;
 				}
 				else
 				{
@@ -390,7 +393,8 @@ void LLPluginProcessChild::receiveMessageRaw(const std::string &message)
 					}
 					else
 					{
-						LL_WARNS("Plugin") << "Couldn't create a shared memory segment!" << LL_ENDL;
+						llwarns << "Couldn't create a shared memory segment !"
+								<< llendl;
 						delete region;
 					}
 				}
@@ -409,7 +413,8 @@ void LLPluginProcessChild::receiveMessageRaw(const std::string &message)
 				}
 				else
 				{
-					LL_WARNS("Plugin") << "shm_remove for unknown memory segment!" << LL_ENDL;
+					llwarns << "shm_remove for unknown memory segment !"
+							<< llendl;
 				}
 			}
 			else if (message_name == "sleep_time")
@@ -419,12 +424,12 @@ void LLPluginProcessChild::receiveMessageRaw(const std::string &message)
 			else if (message_name == "crash")
 			{
 				// Crash the plugin
-				LL_ERRS("Plugin") << "Plugin crash requested." << LL_ENDL;
+				llerrs << "Plugin crash requested." << llendl;
 			}
 			else if (message_name == "hang")
 			{
 				// Hang the plugin
-				LL_WARNS("Plugin") << "Plugin hang requested." << LL_ENDL;
+				llwarns << "Plugin hang requested." << llendl;
 				while (1)
 				{
 					// wheeeeeeeee......
@@ -432,7 +437,8 @@ void LLPluginProcessChild::receiveMessageRaw(const std::string &message)
 			}
 			else
 			{
-				LL_WARNS("Plugin") << "Unknown internal message from parent: " << message_name << LL_ENDL;
+				llwarns << "Unknown internal message from parent: "
+						<< message_name << llendl;
 			}
 		}
 	}
@@ -455,7 +461,8 @@ void LLPluginProcessChild::receivePluginMessage(const std::string &message)
 	if (mBlockingRequest)
 	{
 		// 
-		LL_ERRS("Plugin") << "Can't send a message while already waiting on a blocking request -- aborting!" << LL_ENDL;
+		llerrs << "Can't send a message while already waiting on a blocking request -- aborting!"
+			   << llendl;
 	}
 
 	// Incoming message from the plugin instance
@@ -521,7 +528,8 @@ void LLPluginProcessChild::receivePluginMessage(const std::string &message)
 				}
 				else
 				{
-					LL_WARNS("Plugin") << "shm_remove_response for unknown memory segment!" << LL_ENDL;
+					llwarns << "shm_remove_response for unknown memory segment!"
+							<< llendl;
 				}
 			}
 		}

@@ -33,7 +33,6 @@
 #ifndef LL_MULTI_SLIDER_H
 #define LL_MULTI_SLIDER_H
 
-#include "llui.h"
 #include "lluictrl.h"
 #include "v4color.h"
 
@@ -98,8 +97,6 @@ public:
 	virtual void	draw();
 
 protected:
-	LLUIImagePtr	mRoundedSquare;
-
 	LLSD			mValue;
 	F32				mInitialValue;
 	F32				mMinValue;

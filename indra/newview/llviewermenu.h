@@ -148,12 +148,8 @@ extern LLPieMenu* gPieObject;
 extern LLPieMenu* gPieAttachment;
 extern LLPieMenu* gPieLand;
 
-// Pie menus
-extern LLPieMenu* gPieSelfSimple;
-extern LLPieMenu* gPieAvatarSimple;
-extern LLPieMenu* gPieObjectSimple;
-extern LLPieMenu* gPieAttachmentSimple;
-extern LLPieMenu* gPieLandSimple;
+// Sub-menu of gPieAvatar
+extern LLPieMenu* gMutesPieMenu;
 
 // Needed to build menus when attachment site list available
 extern LLMenuGL*  gAttachSubMenu;

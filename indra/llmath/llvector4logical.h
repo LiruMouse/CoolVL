@@ -33,6 +33,7 @@
 #ifndef	LL_VECTOR4LOGICAL_H
 #define	LL_VECTOR4LOGICAL_H
 
+#include "llmemory.h"
 
 ////////////////////////////
 // LLVector4Logical
@@ -68,7 +69,7 @@ public:
 	// Empty default ctor
 	LLVector4Logical() {}
 	
-	LLVector4Logical( const LLQuad& quad )
+	LLVector4Logical(const LLQuad& quad)
 	{
 		mQ = quad;
 	}
@@ -83,28 +84,29 @@ public:
 	inline LLVector4Logical& invert()
 	{
 		static const LL_ALIGN_16(U32 allOnes[4]) = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
-		mQ = _mm_andnot_ps( mQ, *(LLQuad*)(allOnes) );
+		ll_assert_aligned(allOnes, 16);
+		mQ = _mm_andnot_ps(mQ, *(LLQuad*)(allOnes));
 		return *this;
 	}
 	
-	inline LLBool32 areAllSet( U32 mask ) const
+	inline LLBool32 areAllSet(U32 mask) const
 	{
-		return ( getGatheredBits() & mask) == mask;
+		return (getGatheredBits() & mask) == mask;
 	}
 	
 	inline LLBool32 areAllSet() const
 	{
-		return areAllSet( MASK_XYZW );
+		return areAllSet(MASK_XYZW);
 	}
 		
-	inline LLBool32 areAnySet( U32 mask ) const
+	inline LLBool32 areAnySet(U32 mask) const
 	{
 		return getGatheredBits() & mask;
 	}
 	
 	inline LLBool32 areAnySet() const
 	{
-		return areAnySet( MASK_XYZW );
+		return areAnySet(MASK_XYZW);
 	}
 	
 	inline operator LLQuad() const
@@ -119,7 +121,7 @@ public:
 
 	template<int N> void setElement()
 	{
-		mQ = _mm_or_ps( mQ, *reinterpret_cast<const LLQuad*>(S_V4LOGICAL_MASK_TABLE + 4*N) );
+		mQ = _mm_or_ps(mQ, *reinterpret_cast<const LLQuad*>(S_V4LOGICAL_MASK_TABLE + 4 * N));
 	}
 	
 private:

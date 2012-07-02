@@ -35,7 +35,6 @@
 
 #include "llframetimer.h"
 #include "llcoord.h"
-#include "llui.h"
 #include "llview.h"
 
 #include "llviewerwindow.h"
@@ -81,9 +80,6 @@ protected:
 	void	updateText();
 
 protected:
-	LLUIImagePtr				mBoxImage;
-	LLUIImagePtr				mShadowImage;
-
 	LLFrameTimer				mStartHoverTimer;
 	BOOL						mStartHoverPickTimer;
 	BOOL						mDoneHoverPick;

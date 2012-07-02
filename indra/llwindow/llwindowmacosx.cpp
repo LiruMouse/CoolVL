@@ -58,7 +58,6 @@ const S32	WHEEL_DELTA = 1;     /* Value for rolling one detent */
 const S32	BITS_PER_PIXEL = 32;
 const S32	MAX_NUM_RESOLUTIONS = 32;
 
-
 //
 // LLWindowMacOSX
 //
@@ -106,9 +105,6 @@ BOOL check_for_card(const char* RENDERER, const char* bad_card)
 #define CAPTURE_ALL_DISPLAYS 0
 static double getDictDouble (CFDictionaryRef refDict, CFStringRef key);
 static long getDictLong (CFDictionaryRef refDict, CFStringRef key);
-
-
-
 
 // CarbonEvents we're interested in.
 static EventTypeSpec WindowHandlerEventList[] =
@@ -214,8 +210,6 @@ static EventTypeSpec CommandHandlerEventList[] =
 // This assumes that there will be only one object of this class at any time.  Hopefully this is true.
 static LLWindowMacOSX *gWindowImplementation = NULL;
 
-
-
 LLWindowMacOSX::LLWindowMacOSX(const std::string& title, const std::string& name, S32 x, S32 y, S32 width,
 							   S32 height, U32 flags,
 							   BOOL fullscreen, BOOL clearBg,
@@ -281,9 +275,9 @@ LLWindowMacOSX::LLWindowMacOSX(const std::string& title, const std::string& name
 	gWindowImplementation = this;
 
 	// Create the GL context and set it up for windowed or fullscreen, as appropriate.
-	if(createContext(x, y, width, height, 32, fullscreen, disable_vsync))
+	if (createContext(x, y, width, height, 32, fullscreen, disable_vsync))
 	{
-		if(mWindow != NULL)
+		if (mWindow != NULL)
 		{
 			// MBW -- XXX -- I think we can now do this here?
 			// Constrain the window to the screen it's mostly on, resizing if necessary.
@@ -328,10 +322,10 @@ void LLWindowMacOSX::setWindowTitle(std::string &title)
 
 BOOL LLWindowMacOSX::createContext(int x, int y, int width, int height, int bits, BOOL fullscreen, BOOL disable_vsync)
 {
-	OSStatus		err;
-	BOOL			glNeedsInit = FALSE;
+	OSStatus err;
+	BOOL glNeedsInit = FALSE;
 
-	if(mGlobalHandlerRef == NULL)
+	if (mGlobalHandlerRef == NULL)
 	{
 		InstallApplicationEventHandler(mEventHandlerUPP, GetEventTypeCount (CommandHandlerEventList), CommandHandlerEventList, (void*)this, &mGlobalHandlerRef);
 	}
@@ -340,13 +334,14 @@ BOOL LLWindowMacOSX::createContext(int x, int y, int width, int height, int bits
 
 	if (mFullscreen && (mOldDisplayMode == NULL))
 	{
-		LL_INFOS("Window") << "createContext: setting up fullscreen " << width << "x" << height << LL_ENDL;
+		llinfos << "createContext: setting up fullscreen " << width << "x"
+				<< height << llendl;
 
 		// NOTE: The refresh rate will be REPORTED AS 0 for many DVI and notebook displays.  Plan accordingly.
 		double refresh = getDictDouble (CGDisplayCurrentMode (mDisplay),  kCGDisplayRefreshRate);
 
 		// If the requested width or height is 0, find the best default for the monitor.
-		if((width == 0) || (height == 0))
+		if ((width == 0) || (height == 0))
 		{
 			// Scan through the list of modes, looking for one which has:
 			//		height between 700 and 800
@@ -354,23 +349,29 @@ BOOL LLWindowMacOSX::createContext(int x, int y, int width, int height, int bits
 			S32 resolutionCount = 0;
 			LLWindowResolution *resolutionList = getSupportedResolutions(resolutionCount);
 
-			if(resolutionList != NULL)
+			if (resolutionList != NULL)
 			{
 				F32 closestAspect = 0;
 				U32 closestHeight = 0;
 				U32 closestWidth = 0;
 				int i;
 
-				LL_DEBUGS("Window") << "createContext: searching for a display mode, original aspect is " << mOriginalAspectRatio << LL_ENDL;
+				LL_DEBUGS("Window") << "createContext: searching for a display mode, original aspect is "
+									<< mOriginalAspectRatio << LL_ENDL;
 
 				for(i=0; i < resolutionCount; i++)
 				{
 					F32 aspect = (F32)resolutionList[i].mWidth / (F32)resolutionList[i].mHeight;
 
-					LL_DEBUGS("Window") << "createContext: width " << resolutionList[i].mWidth << " height " << resolutionList[i].mHeight << " aspect " << aspect << LL_ENDL;
+					LL_DEBUGS("Window") << "createContext: width "
+										<< resolutionList[i].mWidth
+										<< " height "
+										<< resolutionList[i].mHeight
+										<< " aspect " << aspect << LL_ENDL;
 
-					if( (resolutionList[i].mHeight >= 700) && (resolutionList[i].mHeight <= 800) &&
-						(fabs(aspect - mOriginalAspectRatio) < fabs(closestAspect - mOriginalAspectRatio)))
+					if (resolutionList[i].mHeight >= 700 &&
+						resolutionList[i].mHeight <= 800 &&
+						fabs(aspect - mOriginalAspectRatio) < fabs(closestAspect - mOriginalAspectRatio))
 					{
 						LL_DEBUGS("Window") << " (new closest mode) " << LL_ENDL;
 
@@ -386,7 +387,7 @@ BOOL LLWindowMacOSX::createContext(int x, int y, int width, int height, int bits
 			}
 		}
 
-		if((width == 0) || (height == 0))
+		if ((width == 0) || (height == 0))
 		{
 			// Mode search failed for some reason.  Use the old-school default.
 			width = 1024;
@@ -426,18 +427,15 @@ BOOL LLWindowMacOSX::createContext(int x, int y, int width, int height, int bits
 				AddEventTypesToHandler(mGlobalHandlerRef, GetEventTypeCount (GlobalHandlerEventList), GlobalHandlerEventList);
 			}
 
-
 			mFullscreen = TRUE;
 			mFullscreenWidth   = CGDisplayPixelsWide(mDisplay);
 			mFullscreenHeight  = CGDisplayPixelsHigh(mDisplay);
 			mFullscreenBits    = CGDisplayBitsPerPixel(mDisplay);
 			mFullscreenRefresh = llround(getDictDouble (CGDisplayCurrentMode (mDisplay),  kCGDisplayRefreshRate));
 
-			LL_INFOS("Window") << "Running at " << mFullscreenWidth
-				<< "x"   << mFullscreenHeight
-				<< "x"   << mFullscreenBits
-				<< " @ " << mFullscreenRefresh
-				<< LL_ENDL;
+			llinfos << "Running at " << mFullscreenWidth << "x"
+					<< mFullscreenHeight << "x" << mFullscreenBits << " @ "
+					<< mFullscreenRefresh << llendl;
 		}
 		else
 		{
@@ -453,7 +451,7 @@ BOOL LLWindowMacOSX::createContext(int x, int y, int width, int height, int bits
 		}
 	}
 
-	if(!mFullscreen && (mWindow == NULL))
+	if (!mFullscreen && (mWindow == NULL))
 	{
 		Rect			window_rect;
 		//int				displayWidth = CGDisplayPixelsWide(mDisplay);
@@ -470,18 +468,16 @@ BOOL LLWindowMacOSX::createContext(int x, int y, int width, int height, int bits
 		//-----------------------------------------------------------------------
 		// Create the window
 		//-----------------------------------------------------------------------
-		mWindow = NewCWindow(
-			NULL,
-			&window_rect,
-			mWindowTitle,
-			false,				// Create the window invisible.  Whoever calls createContext() should show it after any moving/resizing.
-			//		noGrowDocProc,		// Window with no grow box and no zoom box
-			zoomDocProc,		// Window with a grow box and a zoom box
-			//		zoomNoGrow,			// Window with a zoom box but no grow box
-			kFirstWindowOfClass,
-			true,
-			(long)this);
-
+		mWindow = NewCWindow(NULL, &window_rect, mWindowTitle,
+							 // Create the window invisible.Whoever calls
+							 // createContext() should show it after any
+							 // moving/resizing.
+							 false,
+							 //noGrowDocProc, // Window with no grow box and no zoom box
+							 // Window with a grow box and a zoom box
+							 zoomDocProc,
+							 //zoomNoGrow,	// Window with a zoom box but no grow box
+							 kFirstWindowOfClass, true, (long)this);
 
 		if (!mWindow)
 		{
@@ -489,15 +485,20 @@ BOOL LLWindowMacOSX::createContext(int x, int y, int width, int height, int bits
 			return FALSE;
 		}
 
-		// Turn on live resize.
-		// For this to work correctly, we need to be able to call LLViewerWindow::draw from
-		// the event handler for kEventWindowBoundsChanged.  It's not clear that we have access from here.
-		//	err = ChangeWindowAttributes(mWindow, kWindowLiveResizeAttribute, 0);
+		// Turn on live resize. For this to work correctly, we need to be able
+		// to call LLViewerWindow::draw from the event handler for
+		// kEventWindowBoundsChanged. It's not clear that we have access from
+		// here.
+		//err = ChangeWindowAttributes(mWindow, kWindowLiveResizeAttribute, 0);
 
-		// Set up window event handlers (some window-related events ONLY go to window handlers.)
+		// Set up window event handlers (some window-related events ONLY go to
+		// window handlers.)
 		InstallStandardEventHandler(GetWindowEventTarget(mWindow));
-		InstallWindowEventHandler (mWindow, mEventHandlerUPP, GetEventTypeCount (WindowHandlerEventList), WindowHandlerEventList, (void*)this, &mWindowHandlerRef); // add event handler
-
+		// add event handler
+		InstallWindowEventHandler(mWindow, mEventHandlerUPP,
+								  GetEventTypeCount(WindowHandlerEventList),
+								  WindowHandlerEventList, (void*)this,
+								  &mWindowHandlerRef);
 	}
 
 	{
@@ -514,7 +515,8 @@ BOOL LLWindowMacOSX::createContext(int x, int y, int width, int height, int bits
 		err = NewTSMDocument(1, types, &mTSMDocument, 0);
 		if (err != noErr)
 		{
-			LL_WARNS("Window") << "createContext: couldn't create a TSMDocument (" << err << ")" << LL_ENDL;
+			llwarns << "createContext: couldn't create a TSMDocument ("
+					<< err << ")" << llendl;
 		}
 		if (mTSMDocument)
 		{
@@ -524,7 +526,7 @@ BOOL LLWindowMacOSX::createContext(int x, int y, int width, int height, int bits
 		}
 	}
 
-	if(mContext == NULL)
+	if (mContext == NULL)
 	{
 		AGLRendererInfo rendererInfo = NULL;
 
@@ -532,9 +534,9 @@ BOOL LLWindowMacOSX::createContext(int x, int y, int width, int height, int bits
 		// Create GL drawing context
 		//-----------------------------------------------------------------------
 
-		if(mPixelFormat == NULL)
+		if (mPixelFormat == NULL)
 		{
-			if(mFullscreen)
+			if (mFullscreen)
 			{
 				GLint fullscreenAttrib[] =
 				{
@@ -593,20 +595,20 @@ BOOL LLWindowMacOSX::createContext(int x, int y, int width, int height, int bits
 			// May want to get the real error text like this:
 			// (char *) aglErrorString(aglGetError());
 
-			if(aglGetError() != AGL_NO_ERROR)
+			if (aglGetError() != AGL_NO_ERROR)
 			{
 				setupFailure("Can't find suitable pixel format", "Error", OSMB_OK);
 				return FALSE;
 			}
 		}
 
-		if(mPixelFormat)
+		if (mPixelFormat)
 		{
 			LL_DEBUGS("Window") << "createContext: creating GL context" << LL_ENDL;
 			mContext = aglCreateContext(mPixelFormat, NULL);
 		}
 
-		if(mContext == NULL)
+		if (mContext == NULL)
 		{
 			setupFailure("Can't make GL context", "Error", OSMB_OK);
 			return FALSE;
@@ -614,11 +616,11 @@ BOOL LLWindowMacOSX::createContext(int x, int y, int width, int height, int bits
 
 		gGLManager.mVRAM = 0;
 
-		if(rendererInfo != NULL)
+		if (rendererInfo != NULL)
 		{
 			GLint result;
 
-			if(aglDescribeRenderer(rendererInfo, AGL_VIDEO_MEMORY, &result))
+			if (aglDescribeRenderer(rendererInfo, AGL_VIDEO_MEMORY, &result))
 			{
 				//				llinfos << "createContext: aglDescribeRenderer(AGL_VIDEO_MEMORY) returned " << result << llendl;
 				gGLManager.mVRAM = result / (1024 * 1024);
@@ -629,7 +631,7 @@ BOOL LLWindowMacOSX::createContext(int x, int y, int width, int height, int bits
 			}
 
 			// This could be useful at some point, if it takes into account the memory already used by screen buffers, etc...
-			if(aglDescribeRenderer(rendererInfo, AGL_TEXTURE_MEMORY, &result))
+			if (aglDescribeRenderer(rendererInfo, AGL_TEXTURE_MEMORY, &result))
 			{
 				//				llinfos << "createContext: aglDescribeRenderer(AGL_TEXTURE_MEMORY) returned " << result << llendl;
 			}
@@ -666,12 +668,12 @@ BOOL LLWindowMacOSX::createContext(int x, int y, int width, int height, int bits
 			return FALSE;
 		}
 	}
-	else if(!mFullscreen && (mWindow != NULL))
+	else if (!mFullscreen && (mWindow != NULL))
 	{
 		LL_DEBUGS("Window") << "createContext: attaching windowed drawable" << LL_ENDL;
 
 		// We created a window.  Use it as the drawable.
-		if(!aglSetDrawable(mContext, GetWindowPort (mWindow)))
+		if (!aglSetDrawable(mContext, GetWindowPort (mWindow)))
 		{
 			setupFailure("Can't set GL drawable", "Error", OSMB_OK);
 			return FALSE;
@@ -683,7 +685,7 @@ BOOL LLWindowMacOSX::createContext(int x, int y, int width, int height, int bits
 		return FALSE;
 	}
 
-	if(mContext != NULL)
+	if (mContext != NULL)
 	{
 		LL_DEBUGS("Window") << "createContext: setting current context" << LL_ENDL;
 
@@ -694,7 +696,7 @@ BOOL LLWindowMacOSX::createContext(int x, int y, int width, int height, int bits
 		}
 	}
 
-	if(glNeedsInit)
+	if (glNeedsInit)
 	{
 		// Check for some explicitly unsupported cards.
 		const char* RENDERER = (const char*) glGetString(GL_RENDERER);
@@ -716,8 +718,7 @@ BOOL LLWindowMacOSX::createContext(int x, int y, int width, int height, int bits
 		// ProSavage/Twister
 		// SuperSavage
 
-		S32 i;
-		for (i = 0; i < CARD_COUNT; i++)
+		for (S32 i = 0; i < CARD_COUNT; ++i)
 		{
 			if (check_for_card(RENDERER, CARD_LIST[i]))
 			{
@@ -729,7 +730,7 @@ BOOL LLWindowMacOSX::createContext(int x, int y, int width, int height, int bits
 
 	GLint colorBits, alphaBits, depthBits, stencilBits;
 
-	if(	!aglDescribePixelFormat(mPixelFormat, AGL_BUFFER_SIZE, &colorBits) ||
+	if (!aglDescribePixelFormat(mPixelFormat, AGL_BUFFER_SIZE, &colorBits) ||
 		!aglDescribePixelFormat(mPixelFormat, AGL_ALPHA_SIZE, &alphaBits) ||
 		!aglDescribePixelFormat(mPixelFormat, AGL_DEPTH_SIZE, &depthBits) ||
 		!aglDescribePixelFormat(mPixelFormat, AGL_STENCIL_SIZE, &stencilBits))
@@ -739,38 +740,32 @@ BOOL LLWindowMacOSX::createContext(int x, int y, int width, int height, int bits
 		return FALSE;
 	}
 
-	LL_INFOS("GLInit") << "GL buffer: Color Bits " << S32(colorBits)
-		<< " Alpha Bits " << S32(alphaBits)
-		<< " Depth Bits " << S32(depthBits)
-		<< " Stencil Bits" << S32(stencilBits)
-		<< LL_ENDL;
+	llinfos << "GL buffer: Color Bits " << S32(colorBits) << " Alpha Bits "
+			<< S32(alphaBits) << " Depth Bits " << S32(depthBits)
+			<< " Stencil Bits" << S32(stencilBits) << llendl;
 
 	if (colorBits < 32)
 	{
 		close();
-		setupFailure(
-			"Second Life requires True Color (32-bit) to run in a window.\n"
-			"Please go to Control Panels -> Display -> Settings and\n"
-			"set the screen to 32-bit color.\n"
-			"Alternately, if you choose to run fullscreen, Second Life\n"
-			"will automatically adjust the screen each time it runs.",
-			"Error",
-			OSMB_OK);
+		setupFailure("Second Life requires True Color (32-bit) to run in a window.\n"
+					 "Please go to Control Panels -> Display -> Settings and\n"
+					 "set the screen to 32-bit color.\n"
+					 "Alternately, if you choose to run fullscreen, Second Life\n"
+					 "will automatically adjust the screen each time it runs.",
+					 "Error", OSMB_OK);
 		return FALSE;
 	}
 
 	if (alphaBits < 8)
 	{
 		close();
-		setupFailure(
-			"Second Life is unable to run because it can't get an 8 bit alpha\n"
-			"channel.  Usually this is due to video card driver issues.\n"
-			"Please make sure you have the latest video card drivers installed.\n"
-			"Also be sure your monitor is set to True Color (32-bit) in\n"
-			"Control Panels -> Display -> Settings.\n"
-			"If you continue to receive this message, contact customer service.",
-			"Error",
-			OSMB_OK);
+		setupFailure("Second Life is unable to run because it can't get an 8 bit alpha\n"
+					 "channel. Usually this is due to video card driver issues.\n"
+					 "Please make sure you have the latest video card drivers installed.\n"
+					 "Also be sure your monitor is set to True Color (32-bit) in\n"
+					 "Control Panels -> Display -> Settings.\n"
+					 "If you continue to receive this message, contact customer service.",
+					 "Error", OSMB_OK);
 		return FALSE;
 	}
 
@@ -817,9 +812,9 @@ BOOL LLWindowMacOSX::switchContext(BOOL fullscreen, const LLCoordScreen &size, B
 	BOOL needsRebuild = FALSE;
 	BOOL result = true;
 
-	if(fullscreen)
+	if (fullscreen)
 	{
-		if(mFullscreen)
+		if (mFullscreen)
 		{
 			// Switching resolutions in fullscreen mode.  Don't need to rebuild for this.
 			// Fullscreen support
@@ -844,13 +839,12 @@ BOOL LLWindowMacOSX::switchContext(BOOL fullscreen, const LLCoordScreen &size, B
 			mFullscreenWidth   = CGDisplayPixelsWide(mDisplay);
 			mFullscreenHeight  = CGDisplayPixelsHigh(mDisplay);
 			mFullscreenBits    = CGDisplayBitsPerPixel(mDisplay);
-			mFullscreenRefresh = llround(getDictDouble (CGDisplayCurrentMode (mDisplay),  kCGDisplayRefreshRate));
+			mFullscreenRefresh = llround(getDictDouble(CGDisplayCurrentMode(mDisplay),
+										 kCGDisplayRefreshRate));
 
-			LL_INFOS("Window") << "Switched resolution to " << mFullscreenWidth
-				<< "x"   << mFullscreenHeight
-				<< "x"   << mFullscreenBits
-				<< " @ " << mFullscreenRefresh
-				<< LL_ENDL;
+			llinfos << "Switched resolution to " << mFullscreenWidth << "x"
+					<< mFullscreenHeight << "x" << mFullscreenBits << " @ "
+					<< mFullscreenRefresh << llendl;
 
 			// Update the GL context to the new screen size
 			if (!aglUpdateContext(mContext))
@@ -867,7 +861,7 @@ BOOL LLWindowMacOSX::switchContext(BOOL fullscreen, const LLCoordScreen &size, B
 	}
 	else
 	{
-		if(mFullscreen)
+		if (mFullscreen)
 		{
 			// Switching from fullscreen to windowed
 			needsRebuild = TRUE;
@@ -876,7 +870,7 @@ BOOL LLWindowMacOSX::switchContext(BOOL fullscreen, const LLCoordScreen &size, B
 		{
 			// Windowed to windowed -- not sure why we would be called like this.  Just change the window size.
 			// The bounds changed event handler will do the rest.
-			if(mWindow != NULL)
+			if (mWindow != NULL)
 			{
 				::SizeWindow(mWindow, size.mX, size.mY, true);
 			}
@@ -884,14 +878,14 @@ BOOL LLWindowMacOSX::switchContext(BOOL fullscreen, const LLCoordScreen &size, B
 	}
 
 	stop_glerror();
-	if(needsRebuild || mForceRebuild)
+	if (needsRebuild || mForceRebuild)
 	{
 		mForceRebuild = FALSE;
 		destroyContext();
 		result = createContext(0, 0, size.mX, size.mY, 0, fullscreen, disable_vsync);
 		if (result)
 		{
-			if(mWindow != NULL)
+			if (mWindow != NULL)
 			{
 				MacShowWindow(mWindow);
 				BringToFront(mWindow);
@@ -918,7 +912,7 @@ void LLWindowMacOSX::destroyContext()
 		return;
 	}
 	// Unhook the GL context from any drawable it may have
-	if(mContext != NULL)
+	if (mContext != NULL)
 	{
 		LL_DEBUGS("Window") << "destroyContext: unhooking drawable " << LL_ENDL;
 
@@ -927,7 +921,7 @@ void LLWindowMacOSX::destroyContext()
 	}
 
 	// Make sure the display resolution gets restored
-	if(mOldDisplayMode != NULL)
+	if (mOldDisplayMode != NULL)
 	{
 		LL_DEBUGS("Window") << "destroyContext: restoring display resolution " << LL_ENDL;
 
@@ -953,7 +947,7 @@ void LLWindowMacOSX::destroyContext()
 	gGLManager.shutdownGL();
 
 	// Clean up the pixel format
-	if(mPixelFormat != NULL)
+	if (mPixelFormat != NULL)
 	{
 		LL_DEBUGS("Window") << "destroyContext: destroying pixel format " << LL_ENDL;
 		aglDestroyPixelFormat(mPixelFormat);
@@ -961,14 +955,14 @@ void LLWindowMacOSX::destroyContext()
 	}
 
 	// Remove any Carbon Event handlers we installed
-	if(mGlobalHandlerRef != NULL)
+	if (mGlobalHandlerRef != NULL)
 	{
 		LL_DEBUGS("Window") << "destroyContext: removing global event handler" << LL_ENDL;
 		RemoveEventHandler(mGlobalHandlerRef);
 		mGlobalHandlerRef = NULL;
 	}
 
-	if(mWindowHandlerRef != NULL)
+	if (mWindowHandlerRef != NULL)
 	{
 		LL_DEBUGS("Window") << "destroyContext: removing window event handler" << LL_ENDL;
 		RemoveEventHandler(mWindowHandlerRef);
@@ -976,7 +970,7 @@ void LLWindowMacOSX::destroyContext()
 	}
 
 	// Cleanup any TSM document we created.
-	if(mTSMDocument != NULL)
+	if (mTSMDocument != NULL)
 	{
 		LL_DEBUGS("Window") << "destroyContext: deleting TSM document" << LL_ENDL;
 		DeactivateTSMDocument(mTSMDocument);
@@ -985,7 +979,7 @@ void LLWindowMacOSX::destroyContext()
 	}
 
 	// Close the window
-	if(mWindow != NULL)
+	if (mWindow != NULL)
 	{
 		LL_DEBUGS("Window") << "destroyContext: disposing window" << LL_ENDL;
 		DisposeWindow(mWindow);
@@ -993,7 +987,7 @@ void LLWindowMacOSX::destroyContext()
 	}
 
 	// Clean up the GL context
-	if(mContext != NULL)
+	if (mContext != NULL)
 	{
 		LL_DEBUGS("Window") << "destroyContext: destroying GL context" << LL_ENDL;
 		aglDestroyContext(mContext);
@@ -1006,7 +1000,7 @@ LLWindowMacOSX::~LLWindowMacOSX()
 {
 	destroyContext();
 
-	if(mSupportedResolutions != NULL)
+	if (mSupportedResolutions != NULL)
 	{
 		delete []mSupportedResolutions;
 	}
@@ -1018,7 +1012,7 @@ LLWindowMacOSX::~LLWindowMacOSX()
 
 void LLWindowMacOSX::show()
 {
-	if(IsWindowCollapsed(mWindow))
+	if (IsWindowCollapsed(mWindow))
 		CollapseWindow(mWindow, false);
 
 	MacShowWindow(mWindow);
@@ -1063,7 +1057,7 @@ void LLWindowMacOSX::close()
 
 BOOL LLWindowMacOSX::isValid()
 {
-	if(mFullscreen)
+	if (mFullscreen)
 	{
 		return(TRUE);
 	}
@@ -1075,12 +1069,12 @@ BOOL LLWindowMacOSX::getVisible()
 {
 	BOOL result = FALSE;
 
-	if(mFullscreen)
+	if (mFullscreen)
 	{
 		result = TRUE;
 	}if (mWindow)
 	{
-		if(MacIsWindowVisible(mWindow))
+		if (MacIsWindowVisible(mWindow))
 			result = TRUE;
 	}
 
@@ -1174,13 +1168,13 @@ BOOL LLWindowMacOSX::getPosition(LLCoordScreen *position)
 	Rect window_rect;
 	OSStatus err = -1;
 
-	if(mFullscreen)
+	if (mFullscreen)
 	{
 		position->mX = 0;
 		position->mY = 0;
 		err = noErr;
 	}
-	else if(mWindow)
+	else if (mWindow)
 	{
 		err = GetWindowBounds(mWindow, kWindowContentRgn, &window_rect);
 
@@ -1200,13 +1194,13 @@ BOOL LLWindowMacOSX::getSize(LLCoordScreen *size)
 	Rect window_rect;
 	OSStatus err = -1;
 
-	if(mFullscreen)
+	if (mFullscreen)
 	{
 		size->mX = mFullscreenWidth;
 		size->mY = mFullscreenHeight;
 		err = noErr;
 	}
-	else if(mWindow)
+	else if (mWindow)
 	{
 		err = GetWindowBounds(mWindow, kWindowContentRgn, &window_rect);
 
@@ -1226,13 +1220,13 @@ BOOL LLWindowMacOSX::getSize(LLCoordWindow *size)
 	Rect window_rect;
 	OSStatus err = -1;
 
-	if(mFullscreen)
+	if (mFullscreen)
 	{
 		size->mX = mFullscreenWidth;
 		size->mY = mFullscreenHeight;
 		err = noErr;
 	}
-	else if(mWindow)
+	else if (mWindow)
 	{
 		err = GetWindowBounds(mWindow, kWindowContentRgn, &window_rect);
 
@@ -1249,7 +1243,7 @@ BOOL LLWindowMacOSX::getSize(LLCoordWindow *size)
 
 BOOL LLWindowMacOSX::setPosition(const LLCoordScreen position)
 {
-	if(mWindow)
+	if (mWindow)
 	{
 		MacMoveWindow(mWindow, position.mX, position.mY, false);
 	}
@@ -1259,7 +1253,7 @@ BOOL LLWindowMacOSX::setPosition(const LLCoordScreen position)
 
 BOOL LLWindowMacOSX::setSize(const LLCoordScreen size)
 {
-	if(mWindow)
+	if (mWindow)
 	{
 		SizeWindow(mWindow, size.mX, size.mY, true);
 	}
@@ -1293,7 +1287,7 @@ F32 LLWindowMacOSX::getGamma()
 	CGGammaValue blueMax;
 	CGGammaValue blueGamma;
 
-	if(CGGetDisplayTransferByFormula(
+	if (CGGetDisplayTransferByFormula(
 		mDisplay,
 		&redMin,
 		&redMax,
@@ -1344,7 +1338,7 @@ BOOL LLWindowMacOSX::setGamma(const F32 gamma)
 
 	// MBW -- XXX -- Should we allow this in windowed mode?
 
-	if(CGGetDisplayTransferByFormula(
+	if (CGGetDisplayTransferByFormula(
 		mDisplay,
 		&redMin,
 		&redMax,
@@ -1359,7 +1353,7 @@ BOOL LLWindowMacOSX::setGamma(const F32 gamma)
 		return false;
 	}
 
-	if(CGSetDisplayTransferByFormula(
+	if (CGSetDisplayTransferByFormula(
 		mDisplay,
 		redMin,
 		redMax,
@@ -1391,7 +1385,7 @@ void LLWindowMacOSX::setMouseClipping( BOOL b )
 	// Just stash the requested state.  We'll simulate this when the cursor is hidden by decoupling.
 	mIsMouseClipping = b;
 
-	if(b)
+	if (b)
 	{
 		//		llinfos << "setMouseClipping(TRUE)" << llendl;
 	}
@@ -1421,7 +1415,7 @@ BOOL LLWindowMacOSX::setCursorPosition(const LLCoordWindow position)
 	newPosition.y = screen_pos.mY;
 
 	CGSetLocalEventsSuppressionInterval(0.0);
-	if(CGWarpMouseCursorPosition(newPosition) == noErr)
+	if (CGWarpMouseCursorPosition(newPosition) == noErr)
 	{
 		result = TRUE;
 	}
@@ -1444,7 +1438,7 @@ static void fixOrigin(void)
 
 	::GetPort(&port);	
 	::GetPortBounds(port, &portrect);
-	if((portrect.left != 0) || (portrect.top != 0))
+	if ((portrect.left != 0) || (portrect.top != 0))
 	{
 		// Mozilla sometimes changes our port origin.  Fuckers.
 		::SetOrigin(0,0);
@@ -1457,7 +1451,7 @@ BOOL LLWindowMacOSX::getCursorPosition(LLCoordWindow *position)
 	LLCoordScreen screen_pos;
 	GrafPtr save;
 	
-	if(mWindow == NULL)
+	if (mWindow == NULL)
 		return FALSE;
 		
 	::GetPort(&save);
@@ -1471,7 +1465,7 @@ BOOL LLWindowMacOSX::getCursorPosition(LLCoordWindow *position)
 
 	::SetPort(save);
 
-	if(mCursorDecoupled)
+	if (mCursorDecoupled)
 	{
 		//		CGMouseDelta x, y;
 
@@ -1494,12 +1488,12 @@ BOOL LLWindowMacOSX::getCursorPosition(LLCoordWindow *position)
 
 void LLWindowMacOSX::adjustCursorDecouple(bool warpingMouse)
 {
-	if(mIsMouseClipping && mCursorHidden)
+	if (mIsMouseClipping && mCursorHidden)
 	{
-		if(warpingMouse)
+		if (warpingMouse)
 		{
 			// The cursor should be decoupled.  Make sure it is.
-			if(!mCursorDecoupled)
+			if (!mCursorDecoupled)
 			{
 				//			llinfos << "adjustCursorDecouple: decoupling cursor" << llendl;
 				CGAssociateMouseAndMouseCursorPosition(false);
@@ -1512,7 +1506,7 @@ void LLWindowMacOSX::adjustCursorDecouple(bool warpingMouse)
 	else
 	{
 		// The cursor should not be decoupled.  Make sure it isn't.
-		if(mCursorDecoupled)
+		if (mCursorDecoupled)
 		{
 			//			llinfos << "adjustCursorDecouple: recoupling cursor" << llendl;
 			CGAssociateMouseAndMouseCursorPosition(true);
@@ -1553,7 +1547,7 @@ F32 LLWindowMacOSX::getPixelAspectRatio()
 
 void LLWindowMacOSX::beforeDialog()
 {
-	if(mFullscreen)
+	if (mFullscreen)
 	{
 
 #if CAPTURE_ALL_DISPLAYS
@@ -1580,7 +1574,7 @@ void LLWindowMacOSX::beforeDialog()
 
 void LLWindowMacOSX::afterDialog()
 {
-	if(mFullscreen)
+	if (mFullscreen)
 	{
 		mHandsOffEvents = FALSE;
 
@@ -1603,7 +1597,7 @@ void LLWindowMacOSX::afterDialog()
 void LLWindowMacOSX::flashIcon(F32 seconds)
 {
 	// Don't do this if we're already started, since this would try to install the NMRec twice.
-	if(!mBounceTimer.getStarted())
+	if (!mBounceTimer.getStarted())
 	{
 		OSErr err;
 
@@ -1612,7 +1606,7 @@ void LLWindowMacOSX::flashIcon(F32 seconds)
 		mBounceRec.qType = nmType;
 		mBounceRec.nmMark = 1;
 		err = NMInstall(&mBounceRec);
-		if(err == noErr)
+		if (err == noErr)
 		{
 			mBounceTimer.start();
 		}
@@ -1633,12 +1627,12 @@ BOOL LLWindowMacOSX::isClipboardTextAvailable()
 
 	err = GetCurrentScrap(&scrap);
 
-	if(err == noErr)
+	if (err == noErr)
 	{
 		err = GetScrapFlavorFlags(scrap, kScrapFlavorTypeUnicode, &flags);
 	}
 
-	if(err == noErr)
+	if (err == noErr)
 		result = true;
 
 	return result;
@@ -1653,12 +1647,12 @@ BOOL LLWindowMacOSX::pasteTextFromClipboard(LLWString &dst)
 
 	err = GetCurrentScrap(&scrap);
 
-	if(err == noErr)
+	if (err == noErr)
 	{
 		err = GetScrapFlavorSize(scrap, kScrapFlavorTypeUnicode, &len);
 	}
 
-	if((err == noErr) && (len > 0))
+	if ((err == noErr) && (len > 0))
 	{
 		int u16len = len / sizeof(U16);
 		U16 *temp = new U16[u16len + 1];
@@ -1672,9 +1666,9 @@ BOOL LLWindowMacOSX::pasteTextFromClipboard(LLWString &dst)
 				U16 *s, *d;
 				for(s = d = temp; s[0] != '\0'; s++, d++)
 				{
-					if(s[0] == '\r')
+					if (s[0] == '\r')
 					{
-						if(s[1] == '\n')
+						if (s[1] == '\n')
 						{
 							// CRLF, a.k.a. DOS newline.  Collapse to a single '\n'.
 							s++;
@@ -1743,7 +1737,7 @@ LLWindow::LLWindowResolution* LLWindowMacOSX::getSupportedResolutions(S32 &num_r
 	{
 		CFArrayRef modes = CGDisplayAvailableModes(mDisplay);
 
-		if(modes != NULL)
+		if (modes != NULL)
 		{
 			CFIndex index, cnt;
 
@@ -1761,7 +1755,7 @@ LLWindow::LLWindowResolution* LLWindowMacOSX::getSupportedResolutions(S32 &num_r
 				long height = getDictLong(mode, kCGDisplayHeight);
 				long bits = getDictLong(mode, kCGDisplayBitsPerPixel);
 
-				if(bits == BITS_PER_PIXEL && width >= 800 && height >= 600)
+				if (bits == BITS_PER_PIXEL && width >= 800 && height >= 600)
 				{
 					BOOL resolution_exists = FALSE;
 					for(S32 i = 0; i < mNumSupportedResolutions; i++)
@@ -1792,7 +1786,7 @@ BOOL LLWindowMacOSX::convertCoords(LLCoordGL from, LLCoordWindow *to)
 	S32		client_height;
 	Rect	client_rect;
 
-	if(mFullscreen)
+	if (mFullscreen)
 	{
 		// In the fullscreen case, the "window" is the entire screen.
 		client_rect.left = 0;
@@ -1819,7 +1813,7 @@ BOOL LLWindowMacOSX::convertCoords(LLCoordWindow from, LLCoordGL* to)
 	S32		client_height;
 	Rect	client_rect;
 
-	if(mFullscreen)
+	if (mFullscreen)
 	{
 		// In the fullscreen case, the "window" is the entire screen.
 		client_rect.left = 0;
@@ -1843,14 +1837,14 @@ BOOL LLWindowMacOSX::convertCoords(LLCoordWindow from, LLCoordGL* to)
 
 BOOL LLWindowMacOSX::convertCoords(LLCoordScreen from, LLCoordWindow* to)
 {
-	if(mFullscreen)
+	if (mFullscreen)
 	{
 		// In the fullscreen case, window and screen coordinates are the same.
 		to->mX = from.mX;
 		to->mY = from.mY;
 		return TRUE;
 	}
-	else if(mWindow)
+	else if (mWindow)
 	{
 		GrafPtr save;
 		Point mouse_point;
@@ -1877,14 +1871,14 @@ BOOL LLWindowMacOSX::convertCoords(LLCoordScreen from, LLCoordWindow* to)
 
 BOOL LLWindowMacOSX::convertCoords(LLCoordWindow from, LLCoordScreen *to)
 {
-	if(mFullscreen)
+	if (mFullscreen)
 	{
 		// In the fullscreen case, window and screen coordinates are the same.
 		to->mX = from.mX;
 		to->mY = from.mY;
 		return TRUE;
 	}
-	else if(mWindow)
+	else if (mWindow)
 	{
 		GrafPtr save;
 		Point mouse_point;
@@ -1963,7 +1957,7 @@ OSStatus LLWindowMacOSX::eventHandler (EventHandlerCallRef myHandler, EventRef e
 	UInt32 				evtKind = GetEventKind (event);
 
 	// Always handle command events, even in hands-off mode.
-	if((evtClass == kEventClassCommand) && (evtKind == kEventCommandProcess))
+	if ((evtClass == kEventClassCommand) && (evtKind == kEventCommandProcess))
 	{
 		HICommand command;
 		GetEventParameter (event, kEventParamDirectObject, typeHICommand, NULL, sizeof(command), NULL, &command);
@@ -1971,7 +1965,7 @@ OSStatus LLWindowMacOSX::eventHandler (EventHandlerCallRef myHandler, EventRef e
 		switch(command.commandID)
 		{
 		case kHICommandQuit:
-			if(mCallbacks->handleCloseRequest(this))
+			if (mCallbacks->handleCloseRequest(this))
 			{
 				// Get the app to initiate cleanup.
 				mCallbacks->handleQuit(this);
@@ -1986,7 +1980,7 @@ OSStatus LLWindowMacOSX::eventHandler (EventHandlerCallRef myHandler, EventRef e
 		}
 	}
 
-	if(mHandsOffEvents)
+	if (mHandsOffEvents)
 	{
 		return(result);
 	}
@@ -2161,7 +2155,7 @@ OSStatus LLWindowMacOSX::eventHandler (EventHandlerCallRef myHandler, EventRef e
 
 					// Get the size of the unicode data
 					err = GetEventParameter (event, kEventParamTextInputSendText, typeUnicodeText, &actualType, 0, &actualSize, NULL);
-					if(err == noErr)
+					if (err == noErr)
 					{
 						// allocate a buffer and get the actual data.
 						actualCount = actualSize / sizeof(U16);
@@ -2169,18 +2163,18 @@ OSStatus LLWindowMacOSX::eventHandler (EventHandlerCallRef myHandler, EventRef e
 						err = GetEventParameter (event, kEventParamTextInputSendText, typeUnicodeText, &actualType, actualSize, &actualSize, buffer);
 					}
 
-					if(err == noErr)
+					if (err == noErr)
 					{
-						if(modifiers & (cmdKey | controlKey))
+						if (modifiers & (cmdKey | controlKey))
 						{
 							// This was a menu key equivalent.  Ignore it.
 						}
 						else
 						{
 							MASK mask = 0;
-							if(modifiers & shiftKey) { mask |= MASK_SHIFT; }
-							if(modifiers & (cmdKey | controlKey)) { mask |= MASK_CONTROL; }
-							if(modifiers & optionKey) { mask |= MASK_ALT; }
+							if (modifiers & shiftKey) { mask |= MASK_SHIFT; }
+							if (modifiers & (cmdKey | controlKey)) { mask |= MASK_CONTROL; }
+							if (modifiers & optionKey) { mask |= MASK_ALT; }
 
 							llassert( actualType == typeUnicodeText );
 
@@ -2198,7 +2192,7 @@ OSStatus LLWindowMacOSX::eventHandler (EventHandlerCallRef myHandler, EventRef e
 						}
 					}
 
-					if(buffer != NULL)
+					if (buffer != NULL)
 					{
 						delete[] buffer;
 					}
@@ -2310,45 +2304,45 @@ OSStatus LLWindowMacOSX::eventHandler (EventHandlerCallRef myHandler, EventRef e
 				// Mac OS doesn't supply these directly, but can supply events when the collective modifier state changes.
 				// Use these events to generate up/down events for the modifiers.
 
-				if((modifiers & shiftKey) && !(mLastModifiers & shiftKey))
+				if ((modifiers & shiftKey) && !(mLastModifiers & shiftKey))
 				{
 					if (gDebugWindowProc) printf("Shift key down event\n");
 					gKeyboard->handleKeyDown(0x38, (modifiers & 0x00FFFFFF) | ((0x38 << 24) & 0xFF000000));
 				}
-				else if(!(modifiers & shiftKey) && (mLastModifiers & shiftKey))
+				else if (!(modifiers & shiftKey) && (mLastModifiers & shiftKey))
 				{
 					if (gDebugWindowProc) printf("Shift key up event\n");
 					gKeyboard->handleKeyUp(0x38, (modifiers & 0x00FFFFFF) | ((0x38 << 24) & 0xFF000000));
 				}
 
-				if((modifiers & alphaLock) && !(mLastModifiers & alphaLock))
+				if ((modifiers & alphaLock) && !(mLastModifiers & alphaLock))
 				{
 					if (gDebugWindowProc) printf("Caps lock down event\n");
 					gKeyboard->handleKeyDown(0x39, (modifiers & 0x00FFFFFF) | ((0x39 << 24) & 0xFF000000));
 				}
-				else if(!(modifiers & alphaLock) && (mLastModifiers & alphaLock))
+				else if (!(modifiers & alphaLock) && (mLastModifiers & alphaLock))
 				{
 					if (gDebugWindowProc) printf("Caps lock up event\n");
 					gKeyboard->handleKeyUp(0x39, (modifiers & 0x00FFFFFF) | ((0x39 << 24) & 0xFF000000));
 				}
 
-				if((modifiers & controlKey) && !(mLastModifiers & controlKey))
+				if ((modifiers & controlKey) && !(mLastModifiers & controlKey))
 				{
 					if (gDebugWindowProc) printf("Control key down event\n");
 					gKeyboard->handleKeyDown(0x3b, (modifiers & 0x00FFFFFF) | ((0x3b << 24) & 0xFF000000));
 				}
-				else if(!(modifiers & controlKey) && (mLastModifiers & controlKey))
+				else if (!(modifiers & controlKey) && (mLastModifiers & controlKey))
 				{
 					if (gDebugWindowProc) printf("Control key up event\n");
 					gKeyboard->handleKeyUp(0x3b, (modifiers & 0x00FFFFFF) | ((0x3b << 24) & 0xFF000000));
 				}
 
-				if((modifiers & optionKey) && !(mLastModifiers & optionKey))
+				if ((modifiers & optionKey) && !(mLastModifiers & optionKey))
 				{
 					if (gDebugWindowProc) printf("Option key down event\n");
 					gKeyboard->handleKeyDown(0x3a, (modifiers & 0x00FFFFFF) | ((0x3a << 24) & 0xFF000000));
 				}
-				else if(!(modifiers & optionKey) && (mLastModifiers & optionKey))
+				else if (!(modifiers & optionKey) && (mLastModifiers & optionKey))
 				{
 					if (gDebugWindowProc) printf("Option key up event\n");
 					gKeyboard->handleKeyUp(0x3a, (modifiers & 0x00FFFFFF) | ((0x3a << 24) & 0xFF000000));
@@ -2360,7 +2354,7 @@ OSStatus LLWindowMacOSX::eventHandler (EventHandlerCallRef myHandler, EventRef e
 				// This is an OS bug -- even the GetKeys() API doesn't tell you the key has been released.
 				// This workaround causes all held-down keys to be reset whenever the state of the Fn key changes.  This isn't
 				// exactly what we want, but it does avoid the case where you get stuck running forward.
-				if((modifiers & kEventKeyModifierFnMask) != (mLastModifiers & kEventKeyModifierFnMask))
+				if ((modifiers & kEventKeyModifierFnMask) != (mLastModifiers & kEventKeyModifierFnMask))
 				{
 					if (gDebugWindowProc) printf("Fn key state change event\n");
 					gKeyboard->resetKeys();
@@ -2398,11 +2392,11 @@ OSStatus LLWindowMacOSX::eventHandler (EventHandlerCallRef myHandler, EventRef e
 				inCoords.mX = llround(location.x);
 				inCoords.mY = llround(location.y);
 
-				if(modifiers & shiftKey) { mask |= MASK_SHIFT; }
-				if(modifiers & controlKey) { mask |= MASK_CONTROL; }
-				if(modifiers & optionKey) { mask |= MASK_ALT; }
+				if (modifiers & shiftKey) { mask |= MASK_SHIFT; }
+				if (modifiers & controlKey) { mask |= MASK_CONTROL; }
+				if (modifiers & optionKey) { mask |= MASK_ALT; }
 
-				if(mCursorDecoupled)
+				if (mCursorDecoupled)
 				{
 					CGMouseDelta x, y;
 
@@ -2411,7 +2405,7 @@ OSStatus LLWindowMacOSX::eventHandler (EventHandlerCallRef myHandler, EventRef e
 					mCursorLastEventDeltaX = x;
 					mCursorLastEventDeltaY = y;
 
-					if(mCursorIgnoreNextDelta)
+					if (mCursorIgnoreNextDelta)
 					{
 						mCursorLastEventDeltaX = 0;
 						mCursorLastEventDeltaY = 0;
@@ -2446,13 +2440,13 @@ OSStatus LLWindowMacOSX::eventHandler (EventHandlerCallRef myHandler, EventRef e
 					switch(button)
 					{
 					case kEventMouseButtonPrimary:
-						if(modifiers & cmdKey)
+						if (modifiers & cmdKey)
 						{
 							// Simulate a right click
 							mSimulatedRightClick = true;
 							mCallbacks->handleRightMouseDown(this, outCoords, mask);
 						}
-						else if(clickCount == 2)
+						else if (clickCount == 2)
 						{
 							// Windows double-click events replace the second mousedown event in a double-click.
 							mCallbacks->handleDoubleClick(this, outCoords, mask);
@@ -2477,7 +2471,7 @@ OSStatus LLWindowMacOSX::eventHandler (EventHandlerCallRef myHandler, EventRef e
 					switch(button)
 					{
 					case kEventMouseButtonPrimary:
-						if(mSimulatedRightClick)
+						if (mSimulatedRightClick)
 						{
 							// End of simulated right click
 							mSimulatedRightClick = false;
@@ -2551,7 +2545,7 @@ OSStatus LLWindowMacOSX::eventHandler (EventHandlerCallRef myHandler, EventRef e
 				GetEventParameter(event, kEventParamPreviousBounds, typeQDRectangle, NULL, sizeof(Rect), NULL, &previousBounds);
 
 				// This is where we would constrain move/resize to a particular screen
-				if(0)
+				if (0)
 				{
 					SetEventParameter(event, kEventParamCurrentBounds, typeQDRectangle, sizeof(Rect), &currentBounds);
 				}
@@ -2571,7 +2565,7 @@ OSStatus LLWindowMacOSX::eventHandler (EventHandlerCallRef myHandler, EventRef e
 			break;
 
 		case kEventWindowClose:
-			if(mCallbacks->handleCloseRequest(this))
+			if (mCallbacks->handleCloseRequest(this))
 			{
 				// Get the app to initiate cleanup.
 				mCallbacks->handleQuit(this);
@@ -2794,7 +2788,7 @@ void LLWindowMacOSX::setCursor(ECursorType cursor)
 		cursor = UI_CURSOR_WORKING;
 	}
 	
-	if(mCurrentCursor == cursor)
+	if (mCurrentCursor == cursor)
 		return;
 
 	// RN: replace multi-drag cursors with single versions
@@ -2925,7 +2919,7 @@ void LLWindowMacOSX::releaseMouse()
 
 void LLWindowMacOSX::hideCursor()
 {
-	if(!mCursorHidden)
+	if (!mCursorHidden)
 	{
 		//		llinfos << "hideCursor: hiding" << llendl;
 		mCursorHidden = TRUE;
@@ -2942,7 +2936,7 @@ void LLWindowMacOSX::hideCursor()
 
 void LLWindowMacOSX::showCursor()
 {
-	if(mCursorHidden)
+	if (mCursorHidden)
 	{
 		//		llinfos << "showCursor: showing" << llendl;
 		mCursorHidden = FALSE;
@@ -2997,14 +2991,14 @@ void LLSplashScreenMacOSX::showImpl()
 
 	err = CreateNibReference(CFSTR("SecondLife"), &nib);
 
-	if(err == noErr)
+	if (err == noErr)
 	{
 		CreateWindowFromNib(nib, CFSTR("Splash Screen"), &mWindow);
 
 		DisposeNibReference(nib);
 	}
 
-	if(mWindow != NULL)
+	if (mWindow != NULL)
 	{
 		ShowWindow(mWindow);
 	}
@@ -3013,13 +3007,13 @@ void LLSplashScreenMacOSX::showImpl()
 
 void LLSplashScreenMacOSX::updateImpl(const std::string& mesg)
 {
-	if(mWindow != NULL)
+	if (mWindow != NULL)
 	{
 		CFStringRef string = NULL;
 
 		string = CFStringCreateWithCString(NULL, mesg.c_str(), kCFStringEncodingUTF8);
 
-		if(string != NULL)
+		if (string != NULL)
 		{
 			ControlRef progressText = NULL;
 			ControlID id;
@@ -3029,7 +3023,7 @@ void LLSplashScreenMacOSX::updateImpl(const std::string& mesg)
 			id.id = 0;
 
 			err = GetControlByID(mWindow, &id, &progressText);
-			if(err == noErr)
+			if (err == noErr)
 			{
 				err = SetControlData(progressText, kControlEntireControl, kControlStaticTextCFStringTag, sizeof(CFStringRef), (Ptr)&string);
 				Draw1Control(progressText);
@@ -3043,7 +3037,7 @@ void LLSplashScreenMacOSX::updateImpl(const std::string& mesg)
 
 void LLSplashScreenMacOSX::hideImpl()
 {
-	if(mWindow != NULL)
+	if (mWindow != NULL)
 	{
 		DisposeWindow(mWindow);
 		mWindow = NULL;
@@ -3094,7 +3088,7 @@ S32 OSMessageBoxMacOSX(const std::string& text, const std::string& caption, U32 
 		break;
 	}
 
-	if(gWindowImplementation != NULL)
+	if (gWindowImplementation != NULL)
 		gWindowImplementation->beforeDialog();
 
 	err = CreateStandardAlert(
@@ -3104,7 +3098,7 @@ S32 OSMessageBoxMacOSX(const std::string& text, const std::string& caption, U32 
 		&params,
 		&alert);
 
-	if(err == noErr)
+	if (err == noErr)
 	{
 		err = RunStandardAlert(
 			alert,
@@ -3112,7 +3106,7 @@ S32 OSMessageBoxMacOSX(const std::string& text, const std::string& caption, U32 
 			&retval_mac);
 	}
 
-	if(gWindowImplementation != NULL)
+	if (gWindowImplementation != NULL)
 		gWindowImplementation->afterDialog();
 
 	switch(type)
@@ -3120,25 +3114,25 @@ S32 OSMessageBoxMacOSX(const std::string& text, const std::string& caption, U32 
 	case OSMB_OK:
 	case OSMB_OKCANCEL:
 	default:
-		if(retval_mac == 1)
+		if (retval_mac == 1)
 			result = OSBTN_OK;
 		else
 			result = OSBTN_CANCEL;
 		break;
 	case OSMB_YESNO:
-		if(retval_mac == 1)
+		if (retval_mac == 1)
 			result = OSBTN_YES;
 		else
 			result = OSBTN_NO;
 		break;
 	}
 
-	if(errorString != NULL)
+	if (errorString != NULL)
 	{
 		CFRelease(errorString);
 	}
 
-	if(explanationString != NULL)
+	if (explanationString != NULL)
 	{
 		CFRelease(explanationString);
 	}
@@ -3214,12 +3208,12 @@ BOOL LLWindowMacOSX::dialog_color_picker ( F32 *r, F32 *g, F32 *b)
 	info.theColor.color.rgb.blue = (UInt16)(*b * 65535.f);
 	info.placeWhere = kCenterOnMainScreen;
 
-	if(gWindowImplementation != NULL)
+	if (gWindowImplementation != NULL)
 		gWindowImplementation->beforeDialog();
 
 	error = NPickColor(&info);
 
-	if(gWindowImplementation != NULL)
+	if (gWindowImplementation != NULL)
 		gWindowImplementation->afterDialog();
 
 	if (error == noErr)
@@ -3235,14 +3229,13 @@ BOOL LLWindowMacOSX::dialog_color_picker ( F32 *r, F32 *g, F32 *b)
 	return (retval);
 }
 
-
-void *LLWindowMacOSX::getPlatformWindow()
+void* LLWindowMacOSX::getPlatformWindow()
 {
 	// NOTE: this will be NULL in fullscreen mode.  Plan accordingly.
 	return (void*)mWindow;
 }
 
-void *LLWindowMacOSX::getMediaWindow()
+void* LLWindowMacOSX::getMediaWindow()
 {
 	/* 
 		Mozilla needs to be initialized with a WindowRef to function properly.  
@@ -3255,7 +3248,7 @@ void *LLWindowMacOSX::getMediaWindow()
 		Note that we will never destroy this window (by design!), but since only one will ever be created per run of the application, that's okay.
 	*/
 	
-	if(sMediaWindow == NULL)
+	if (sMediaWindow == NULL)
 	{
 		Rect window_rect = {100, 100, 200, 200};
 

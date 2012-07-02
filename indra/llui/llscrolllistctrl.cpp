@@ -33,26 +33,24 @@
 #include <algorithm>
 
 #include "linden_common.h"
-#include "llstl.h"
-#include "llboost.h"
 
 #include "llscrolllistctrl.h"
 
 #include "indra_constants.h"
-
+#include "llboost.h"
 #include "llcheckboxctrl.h"
 #include "llclipboard.h"
+#include "llcontrol.h"
 #include "llfocusmgr.h"
+#include "llkeyboard.h"
 #include "llrender.h"
+#include "llresizebar.h"
 #include "llresmgr.h"
 #include "llscrollbar.h"
+#include "llstl.h"
 #include "llstring.h"
-#include "llui.h"
 #include "lluictrlfactory.h"
 #include "llwindow.h"
-#include "llcontrol.h"
-#include "llkeyboard.h"
-#include "llresizebar.h"
 
 const S32 MIN_COLUMN_WIDTH = 20;
 const S32 LIST_SNAP_PADDING = 5;
@@ -256,8 +254,7 @@ LLScrollListText::LLScrollListText(const std::string& text,
 	mFontAlignment(font_alignment),
 	mVisible(visible),
 	mHighlightCount(0),
-	mHighlightOffset(0),
-	mRoundedRectImage(LLUI::getUIImage("rounded_square.tga"))
+	mHighlightOffset(0)
 {
 	++sCount;
 }
@@ -323,6 +320,8 @@ const LLSD LLScrollListText::getValue() const
 void LLScrollListText::draw(const LLColor4& color,
 							const LLColor4& highlight_color) const
 {
+	static const LLUIImagePtr rounded_rect_image = LLUI::getUIImage("rounded_square.tga");
+
 	LLColor4 display_color;
 	if (mUseColor)
 	{
@@ -352,7 +351,7 @@ void LLScrollListText::draw(const LLColor4& color,
 		LLRect highlight_rect(left - 2, llround(mFont->getLineHeight()) + 1,
 							  left + mFont->getWidth(mText.getString(),
 							  mHighlightOffset, mHighlightCount) + 1, 1);
-		mRoundedRectImage->draw(highlight_rect, highlight_color);
+		rounded_rect_image->draw(highlight_rect, highlight_color);
 	}
 
 	// Try to draw the entire string
@@ -3690,12 +3689,15 @@ LLColumnHeader::~LLColumnHeader()
 
 void LLColumnHeader::draw()
 {
+	static const LLUIImagePtr up_arrow_image = LLUI::getUIImage("up_arrow.tga");
+	static const LLUIImagePtr down_arrow_image = LLUI::getUIImage("down_arrow.tga");
+
 	BOOL draw_arrow = !mColumn->mLabel.empty() &&
-					   mColumn->mParentCtrl->isSorted() &&
-					   mColumn->mParentCtrl->getSortColumnName() == mColumn->mSortingColumn;
+					  mColumn->mParentCtrl->isSorted() &&
+					  mColumn->mParentCtrl->getSortColumnName() == mColumn->mSortingColumn;
 
 	BOOL is_ascending = mColumn->mParentCtrl->getSortAscending();
-	mButton->setImageOverlay(is_ascending ? "up_arrow.tga" : "down_arrow.tga",
+	mButton->setImageOverlay(is_ascending ? up_arrow_image : down_arrow_image,
 							 LLFontGL::RIGHT, draw_arrow ? LLColor4::white
 														 : LLColor4::transparent);
 	mArrowImage = mButton->getImageOverlay();

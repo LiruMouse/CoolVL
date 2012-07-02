@@ -100,7 +100,7 @@ LLComboBox::LLComboBox(const std::string& name,
 	addChild(mList);
 
 	mArrowImage = LLUI::getUIImage("combobox_arrow.tga");
-	mButton->setImageOverlay("combobox_arrow.tga", LLFontGL::RIGHT);
+	mButton->setImageOverlay(mArrowImage, LLFontGL::RIGHT);
 
 	updateLayout();
 }

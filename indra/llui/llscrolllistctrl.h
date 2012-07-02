@@ -35,20 +35,20 @@
 #include <vector>
 #include <deque>
 
-#include "lluictrl.h"
-#include "llctrlselectioninterface.h"
-#include "lldarray.h"
-#include "llfontgl.h"
-#include "llui.h"
-#include "llstring.h"
-#include "llimagegl.h"
-#include "lleditmenuhandler.h"
-#include "llframetimer.h"
 #include "llcheckboxctrl.h"
 #include "llcombobox.h"
-#include "llscrollbar.h"
-#include "llresizebar.h"
+#include "llctrlselectioninterface.h"
+#include "lldarray.h"
 #include "lldate.h"
+#include "lleditmenuhandler.h"
+#include "llfontgl.h"
+#include "llframetimer.h"
+#include "llimagegl.h"
+#include "llresizebar.h"
+#include "llscrollbar.h"
+#include "llstring.h"
+#include "llui.h"
+#include "lluictrl.h"
 
 /*
  * Represents a cell in a scrollable table.
@@ -91,11 +91,11 @@ class LLScrollListSeparator : public LLScrollListCell
 {
 public:
 	LLScrollListSeparator(S32 width);
-	virtual ~LLScrollListSeparator()				{};
-	virtual void			draw(const LLColor4& color,
-								 const LLColor4& highlight_color) const;
-	virtual S32				getHeight() const;
-	virtual BOOL			isText() const			{ return FALSE; }
+	virtual				~LLScrollListSeparator()		{};
+	virtual void		draw(const LLColor4& color,
+							 const LLColor4& highlight_color) const;
+	virtual S32			getHeight() const;
+	virtual BOOL		isText() const					{ return FALSE; }
 };
 
 /*
@@ -111,35 +111,33 @@ public:
 					 BOOL visible = TRUE);
 	/*virtual*/ ~LLScrollListText();
 
-	virtual void    draw(const LLColor4& color,
-						 const LLColor4& highlight_color) const;
-	virtual S32		getContentWidth() const;
-	virtual S32		getHeight() const;
-	virtual void	setValue(const LLSD& value);
-	virtual const LLSD getValue() const;
-	virtual BOOL	getVisible() const;
-	virtual void	highlightText(S32 offset, S32 num_chars);
+	virtual void		draw(const LLColor4& color,
+							 const LLColor4& highlight_color) const;
+	virtual S32			getContentWidth() const;
+	virtual S32			getHeight() const;
+	virtual void		setValue(const LLSD& value);
+	virtual const LLSD	getValue() const;
+	virtual BOOL		getVisible() const;
+	virtual void		highlightText(S32 offset, S32 num_chars);
 
-	virtual void	setColor(const LLColor4&);
-	virtual BOOL	isText() const;
+	virtual void		setColor(const LLColor4&);
+	virtual BOOL		isText() const;
 
-	void			setText(const LLStringExplicit& text);
-	void			setFontStyle(const U8 font_style)	{ mFontStyle = font_style; }
+	void				setText(const LLStringExplicit& text);
+	void				setFontStyle(const U8 font_style)	{ mFontStyle = font_style; }
 
 private:
-	LLUIString		mText;
-	const LLFontGL*	mFont;
-	LLColor4		mColor;
-	U8				mUseColor;
-	U8				mFontStyle;
-	LLFontGL::HAlign mFontAlignment;
-	BOOL			mVisible;
-	S32				mHighlightCount;
-	S32				mHighlightOffset;
+	LLUIString			mText;
+	const LLFontGL*		mFont;
+	LLColor4			mColor;
+	U8					mUseColor;
+	U8					mFontStyle;
+	LLFontGL::HAlign	mFontAlignment;
+	BOOL				mVisible;
+	S32					mHighlightCount;
+	S32					mHighlightOffset;
 
-	LLPointer<LLUIImage> mRoundedRectImage;
-
-	static U32 sCount;
+	static U32			sCount;
 };
 
 
@@ -166,15 +164,16 @@ class LLScrollListIcon : public LLScrollListCell
 public:
 	LLScrollListIcon(LLUIImagePtr icon, S32 width = 0);
 	LLScrollListIcon(const LLSD& value, S32 width = 0);
-	/*virtual*/ ~LLScrollListIcon();
-	virtual void	draw(const LLColor4& color,
-						 const LLColor4& highlight_color) const;
-	virtual S32		getWidth() const;
-	virtual S32		getHeight() const				{ return mIcon ? mIcon->getHeight() : 0; }
-	virtual const LLSD		getValue() const		{ return mIcon.isNull() ? LLStringUtil::null : mIcon->getName(); }
-	virtual void	setColor(const LLColor4&);
-	virtual BOOL	isText()const					{ return FALSE; }
-	virtual void	setValue(const LLSD& value);
+	/*virtual*/			~LLScrollListIcon();
+	virtual void		draw(const LLColor4& color,
+							 const LLColor4& highlight_color) const;
+	virtual S32			getWidth() const;
+	virtual S32			getHeight() const				{ return mIcon ? mIcon->getHeight() : 0; }
+	virtual const LLSD	getValue() const				{ return mIcon.isNull() ? LLStringUtil::null : mIcon->getName(); }
+	virtual void		setColor(const LLColor4&);
+	virtual BOOL		isText()const					{ return FALSE; }
+	virtual void		setValue(const LLSD& value);
+	void				setImage(LLUIImagePtr image)	{ mIcon = image; }
 
 private:
 	LLUIImagePtr mIcon;
@@ -188,19 +187,19 @@ class LLScrollListCheck : public LLScrollListCell
 {
 public:
 	LLScrollListCheck(LLCheckBoxCtrl* check_box, S32 width = 0);
-	/*virtual*/ ~LLScrollListCheck();
-	virtual void	draw(const LLColor4& color,
-						 const LLColor4& highlight_color) const;
-	virtual S32		getHeight() const				{ return 0; }
-	virtual const LLSD	getValue() const			{ return mCheckBox->getValue(); }
-	virtual void	setValue(const LLSD& value)		{ mCheckBox->setValue(value); }
-	virtual void	onCommit()						{ mCheckBox->onCommit(); }
+	/*virtual*/			~LLScrollListCheck();
+	virtual void		draw(const LLColor4& color,
+							 const LLColor4& highlight_color) const;
+	virtual S32			getHeight() const				{ return 0; }
+	virtual const LLSD	getValue() const				{ return mCheckBox->getValue(); }
+	virtual void		setValue(const LLSD& value)		{ mCheckBox->setValue(value); }
+	virtual void		onCommit()						{ mCheckBox->onCommit(); }
 
-	virtual BOOL	handleClick();
-	virtual void	setEnabled(BOOL enable)			{ mCheckBox->setEnabled(enable); }
+	virtual BOOL		handleClick();
+	virtual void		setEnabled(BOOL enable)			{ mCheckBox->setEnabled(enable); }
 
-	LLCheckBoxCtrl*	getCheckBox()					{ return mCheckBox; }
-	virtual BOOL	isText() const					{ return FALSE; }
+	LLCheckBoxCtrl*		getCheckBox()					{ return mCheckBox; }
+	virtual BOOL		isText() const					{ return FALSE; }
 
 private:
 	LLCheckBoxCtrl* mCheckBox;
@@ -216,26 +215,25 @@ public:
 	LLScrollListColumn(const LLSD &sd, LLScrollListCtrl* parent);
 
 	void setWidth(S32 width);
-	S32 getWidth() const							{ return mWidth; }
+	S32 getWidth() const								{ return mWidth; }
 
 	// Public data is fine so long as this remains a simple struct-like data
 	// class. If it ever gets any smarter than that, these should all become
 	// private with protected or public accessor methods added as needed. -MG
-	std::string			mName;
-	std::string			mSortingColumn;
-	BOOL				mSortAscending;
-	std::string			mLabel;
-	F32					mRelWidth;
-	BOOL				mDynamicWidth;
-	S32					mMaxContentWidth;
-	S32					mIndex;
-	LLScrollListCtrl*	mParentCtrl;
-	class LLColumnHeader*		mHeader;
-	LLFontGL::HAlign	mFontAlignment;
+	std::string				mName;
+	std::string				mSortingColumn;
+	BOOL					mSortAscending;
+	std::string				mLabel;
+	F32						mRelWidth;
+	BOOL					mDynamicWidth;
+	S32						mMaxContentWidth;
+	S32						mIndex;
+	LLScrollListCtrl*		mParentCtrl;
+	class LLColumnHeader*	mHeader;
+	LLFontGL::HAlign		mFontAlignment;
 
 private:
-	S32					mWidth;
-
+	S32						mWidth;
 };
 
 class LLColumnHeader : public LLComboBox

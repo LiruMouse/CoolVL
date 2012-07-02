@@ -99,7 +99,8 @@ int LLProcessLauncher::launch(void)
 		args += " ";
 		args += mLaunchArguments[i];
 	}
-	LL_INFOS("Plugin") << "Executable: " << mExecutable << " arguments: " << args << LL_ENDL;
+	llinfos << "Executable: " << mExecutable << " arguments: " << args
+			<< llendl;
 	
 	// So retarded.  Windows requires that the second parameter to CreateProcessA be a writable (non-const) string...
 	char *args2 = new char[args.size() + 1];

@@ -37,9 +37,9 @@
 #include <sstream>
 #include <typeinfo>
 
-#include "llerrorlegacy.h"
 #include "stdtypes.h"
 
+#include "llerrorlegacy.h"
 
 /* Error Logging Facility
 
@@ -138,6 +138,9 @@ namespace LLError
 		static std::ostringstream* out();
 		static void flush(std::ostringstream* out, char* message)  ;
 		static void flush(std::ostringstream*, const CallSite&);
+
+		// When FALSE, skip all LL_DEBUGS/lldebugs checks, for speed.
+		static BOOL sDebugMessages;
 	};
 	
 	class LL_COMMON_API CallSite
@@ -238,19 +241,17 @@ typedef LLError::NoClassInfo _LL_CLASS_TO_LOG;
 	do { \
 		static LLError::CallSite _site( \
 			level, __FILE__, __LINE__, typeid(_LL_CLASS_TO_LOG), __FUNCTION__, broadTag, narrowTag, once);\
-		if (LL_UNLIKELY(_site.shouldLog())) \
+		if (LL_UNLIKELY((level != LLError::LEVEL_DEBUG || LLError::Log::sDebugMessages) && _site.shouldLog())) \
 		{ \
 			std::ostringstream* _out = LLError::Log::out(); \
 			(*_out)
 
-// DEPRECATED: Don't call directly, use LL_ENDL instead, which actually looks like a macro
 #define llendl \
 			LLError::End(); \
 			LLError::Log::flush(_out, _site); \
 		} \
 	} while(0)
 
-// DEPRECATED: Use the new macros that allow tags and *look* like macros.
 #define lldebugs	lllog(LLError::LEVEL_DEBUG, NULL, NULL, false)
 #define llinfos		lllog(LLError::LEVEL_INFO, NULL, NULL, false)
 #define llwarns		lllog(LLError::LEVEL_WARN, NULL, NULL, false)
@@ -273,11 +274,11 @@ typedef LLError::NoClassInfo _LL_CLASS_TO_LOG;
 // Only print the log message once (good for warnings or infos that would otherwise
 // spam the log file over and over, such as tighter loops).
 #define LL_DEBUGS_ONCE(broadTag)	lllog(LLError::LEVEL_DEBUG, broadTag, NULL, true)
-#define LL_INFOS_ONCE(broadTag)	lllog(LLError::LEVEL_INFO, broadTag, NULL, true)
-#define LL_WARNS_ONCE(broadTag)	lllog(LLError::LEVEL_WARN, broadTag, NULL, true)
+#define LL_INFOS_ONCE(broadTag)		lllog(LLError::LEVEL_INFO, broadTag, NULL, true)
+#define LL_WARNS_ONCE(broadTag)		lllog(LLError::LEVEL_WARN, broadTag, NULL, true)
 #define LL_DEBUGS2_ONCE(broadTag, narrowTag)	lllog(LLError::LEVEL_DEBUG, broadTag, narrowTag, true)
-#define LL_INFOS2_ONCE(broadTag, narrowTag)	lllog(LLError::LEVEL_INFO, broadTag, narrowTag, true)
-#define LL_WARNS2_ONCE(broadTag, narrowTag)	lllog(LLError::LEVEL_WARN, broadTag, narrowTag, true)
+#define LL_INFOS2_ONCE(broadTag, narrowTag)		lllog(LLError::LEVEL_INFO, broadTag, narrowTag, true)
+#define LL_WARNS2_ONCE(broadTag, narrowTag)		lllog(LLError::LEVEL_WARN, broadTag, narrowTag, true)
 
 #define LL_ENDL llendl
 #define LL_CONT	(*_out)

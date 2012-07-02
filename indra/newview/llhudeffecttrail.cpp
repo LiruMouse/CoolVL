@@ -34,7 +34,6 @@
 
 #include "llhudeffecttrail.h"
 
-#include "llviewercontrol.h"
 #include "llimagegl.h"
 #include "message.h"
 
@@ -42,21 +41,22 @@
 #include "llbox.h"
 #include "lldrawable.h"
 #include "llhudrender.h"
-#include "llviewertexturelist.h"
+#include "llviewercontrol.h"
 #include "llviewerobjectlist.h"
 #include "llviewerpartsim.h"
 #include "llviewerpartsource.h"
+#include "llviewertexturelist.h"
 #include "llvoavatar.h"
 #include "llworld.h"
-
 
 const F32 PARTICLE_SPACING = 0.01f;
 const F32 MAX_SIZE = 0.025f;
 const F32 START_POS_MAG = 1.f;
 const F32 END_POS_MAG = 1.2f;
 
-
-LLHUDEffectSpiral::LLHUDEffectSpiral(const U8 type) : LLHUDEffect(type), mbInit(FALSE)
+LLHUDEffectSpiral::LLHUDEffectSpiral(const U8 type)
+:	LLHUDEffect(type),
+	mbInit(FALSE)
 {
 	mKillTime = 10.f;
 	mVMag = 1.f;
@@ -88,7 +88,7 @@ void LLHUDEffectSpiral::markDead()
 	LLHUDEffect::markDead();
 }
 
-void LLHUDEffectSpiral::packData(LLMessageSystem *mesgsys)
+void LLHUDEffectSpiral::packData(LLMessageSystem* mesgsys)
 {
 	if (!mSourceObject)
 	{
@@ -134,7 +134,7 @@ void LLHUDEffectSpiral::unpackData(LLMessageSystem *mesgsys, S32 blocknum)
 	htonmemcpy(target_object_id.mData, packed_data + 16, MVT_LLUUID, 16);
 	htonmemcpy(mPositionGlobal.mdV, packed_data + 32, MVT_LLVector3d, 24);
 
-	LLViewerObject *objp = NULL;
+	LLViewerObject* objp = NULL;
 
 	if (object_id.isNull())
 	{
@@ -142,7 +142,7 @@ void LLHUDEffectSpiral::unpackData(LLMessageSystem *mesgsys, S32 blocknum)
 	}
 	else
 	{
-		LLViewerObject *objp = gObjectList.findObject(object_id);
+		LLViewerObject* objp = gObjectList.findObject(object_id);
 		if (objp)
 		{
 			setSourceObject(objp);
@@ -181,8 +181,8 @@ void LLHUDEffectSpiral::triggerLocal()
 {
 	mKillTime = mTimer.getElapsedTimeF32() + mDuration;
 
-	BOOL show_beam = gSavedSettings.getBOOL("ShowSelectionBeam");
-
+	static LLCachedControl<bool> show_beam(gSavedSettings,
+										   "ShowSelectionBeam");
 	LLColor4 color;
 	color.setVec(mColor);
 
@@ -245,7 +245,7 @@ void LLHUDEffectSpiral::triggerLocal()
 		LLPointer<LLViewerPartSource>& ps = mPartSourcep;
 		if (mPartSourcep->getType() == LLViewerPartSource::LL_PART_SOURCE_BEAM)
 		{
-			LLViewerPartSourceBeam *psb = (LLViewerPartSourceBeam *)ps.get();
+			LLViewerPartSourceBeam* psb = (LLViewerPartSourceBeam*)ps.get();
 			psb->setSourceObject(mSourceObject);
 			psb->setTargetObject(mTargetObject);
 			psb->setColor(color);
@@ -256,7 +256,7 @@ void LLHUDEffectSpiral::triggerLocal()
 		}
 		else
 		{
-			LLViewerPartSourceSpiral *pss = (LLViewerPartSourceSpiral *)ps.get();
+			LLViewerPartSourceSpiral* pss = (LLViewerPartSourceSpiral*)ps.get();
 			pss->setSourceObject(mSourceObject);
 		}
 	}
@@ -264,7 +264,7 @@ void LLHUDEffectSpiral::triggerLocal()
 	mbInit = TRUE;
 }
 
-void LLHUDEffectSpiral::setTargetObject(LLViewerObject *objp)
+void LLHUDEffectSpiral::setTargetObject(LLViewerObject* objp)
 {
 	if (objp == mTargetObject)
 	{
@@ -277,8 +277,8 @@ void LLHUDEffectSpiral::setTargetObject(LLViewerObject *objp)
 void LLHUDEffectSpiral::render()
 {
 	F32 time = mTimer.getElapsedTimeF32();
-	static LLCachedControl<bool> show_selection_beam(gSavedSettings, "ShowSelectionBeam");
-
+	static LLCachedControl<bool> show_selection_beam(gSavedSettings,
+													 "ShowSelectionBeam");
 	if (mKillTime < time ||
 		(!mSourceObject.isNull() && mSourceObject->isDead()) ||
 	    (!mTargetObject.isNull() && mTargetObject->isDead()) ||

@@ -1,11 +1,11 @@
-/** 
+/**
  * @file llvlcomposition.cpp
  * @brief Viewer-side representation of a composition layer...
  *
  * $LicenseInfo:firstyear=2001&license=viewergpl$
- * 
+ *
  * Copyright (c) 2001-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -36,35 +36,32 @@
 
 #include "imageids.h"
 #include "llerror.h"
+#include "llregionhandle.h" // for from_region_handle
 #include "v3math.h"
+
 #include "llsurface.h"
 #include "lltextureview.h"
-#include "llviewertexturelist.h"
-#include "llviewerregion.h"
-#include "noise.h"
-#include "llregionhandle.h" // for from_region_handle
 #include "llviewercontrol.h"
+#include "llviewerregion.h"
+#include "llviewertexturelist.h"
+#include "noise.h"
 
-
-
-F32 bilinear(const F32 v00, const F32 v01, const F32 v10, const F32 v11, const F32 x_frac, const F32 y_frac)
+F32 bilinear(const F32 v00, const F32 v01, const F32 v10, const F32 v11,
+			 const F32 x_frac, const F32 y_frac)
 {
 	// Not sure if this is the right math...
 	// Take weighted average of all four points (bilinear interpolation)
-	F32 result;
 
 	const F32 inv_x_frac = 1.f - x_frac;
 	const F32 inv_y_frac = 1.f - y_frac;
-	result = inv_x_frac*inv_y_frac*v00
-			+ x_frac*inv_y_frac*v10
-			+ inv_x_frac*y_frac*v01
-			+ x_frac*y_frac*v11;
+	F32 result = inv_x_frac * inv_y_frac * v00 + x_frac * inv_y_frac * v10 +
+				 inv_x_frac * y_frac * v01 + x_frac * y_frac * v11;
 
 	return result;
 }
 
-
-LLVLComposition::LLVLComposition(LLSurface *surfacep, const U32 width, const F32 scale)
+LLVLComposition::LLVLComposition(LLSurface* surfacep, const U32 width,
+								 const F32 scale)
 :	LLViewerLayer(width, scale),
 	mParamsReady(FALSE)
 {
@@ -76,28 +73,30 @@ LLVLComposition::LLVLComposition(LLSurface *surfacep, const U32 width, const F32
 	setDetailTextureID(2, TERRAIN_MOUNTAIN_DETAIL);
 	setDetailTextureID(3, TERRAIN_ROCK_DETAIL);
 
+	static LLCachedControl<F32> terrain_color_start_height(gSavedSettings,
+														   "TerrainColorStartHeight");
+	static LLCachedControl<F32> terrain_color_height_range(gSavedSettings,
+														   "TerrainColorHeightRange");
+
 	// Initialize the texture matrix to defaults.
 	for (S32 i = 0; i < CORNER_COUNT; ++i)
 	{
-		mStartHeight[i] = gSavedSettings.getF32("TerrainColorStartHeight");
-		mHeightRange[i] = gSavedSettings.getF32("TerrainColorHeightRange");
+		mStartHeight[i] = terrain_color_start_height;
+		mHeightRange[i] = terrain_color_height_range;
 	}
 	mTexScaleX = 16.f;
 	mTexScaleY = 16.f;
 	mTexturesLoaded = FALSE;
 }
 
-
 LLVLComposition::~LLVLComposition()
 {
 }
 
-
-void LLVLComposition::setSurface(LLSurface *surfacep)
+void LLVLComposition::setSurface(LLSurface* surfacep)
 {
 	mSurfacep = surfacep;
 }
-
 
 void LLVLComposition::setDetailTextureID(S32 corner, const LLUUID& id)
 {
@@ -115,13 +114,14 @@ BOOL LLVLComposition::generateHeights(const F32 x, const F32 y,
 {
 	if (!mParamsReady)
 	{
-		// All the parameters haven't been set yet (we haven't gotten the message from the sim)
+		// All the parameters haven't been set yet (we haven't gotten the
+		// message from the sim)
 		return FALSE;
 	}
 
 	llassert(mSurfacep);
 
-	if (!mSurfacep || !mSurfacep->getRegion()) 
+	if (!mSurfacep || !mSurfacep->getRegion())
 	{
 		// We don't always have the region yet here....
 		return FALSE;
@@ -150,8 +150,8 @@ BOOL LLVLComposition::generateHeights(const F32 x, const F32 y,
 	const F32 xyScale = 4.9215f; //0.93284f;
 	const F32 zScale = 4; //0.92165f;
 	const F32 z_offset = 0.f;
-	const F32 noise_magnitude = 2.f;		//  Degree to which noise modulates composition layer (versus
-											//  simple height)
+	// Degree to which noise modulates composition layer (versus simple height)
+	const F32 noise_magnitude = 2.f;
 
 	// Heights map into textures as 0-1 = first, 1-2 = second, etc.
 	// So we need to compress heights into this range.
@@ -162,52 +162,59 @@ BOOL LLVLComposition::generateHeights(const F32 x, const F32 y,
 
 	const F32 inv_width = 1.f/mWidth;
 
-	// OK, for now, just have the composition value equal the height at the point.
-	for (S32 j = y_begin; j < y_end; j++)
+	// OK, for now, just have the composition value equal the height at the
+	// point
+	for (S32 j = y_begin; j < y_end; ++j)
 	{
-		for (S32 i = x_begin; i < x_end; i++)
+		for (S32 i = x_begin; i < x_end; ++i)
 		{
 
 			F32 vec[3];
 			F32 vec1[3];
 			F32 twiddle;
 
-			// Bilinearly interpolate the start height and height range of the textures
+			// Bilinearly interpolate the start height and height range of the
+			// textures
 			F32 start_height = bilinear(mStartHeight[SOUTHWEST],
 										mStartHeight[SOUTHEAST],
 										mStartHeight[NORTHWEST],
 										mStartHeight[NORTHEAST],
-										i*inv_width, j*inv_width); // These will be bilinearly interpolated
+										// These will be bilinearly interpolated
+										i * inv_width, j * inv_width);
 			F32 height_range = bilinear(mHeightRange[SOUTHWEST],
 										mHeightRange[SOUTHEAST],
 										mHeightRange[NORTHWEST],
 										mHeightRange[NORTHEAST],
-										i*inv_width, j*inv_width); // These will be bilinearly interpolated
+										// These will be bilinearly interpolated
+										i * inv_width, j * inv_width);
 
-			LLVector3 location(i*mScale, j*mScale, 0.f);
+			LLVector3 location(i * mScale, j * mScale, 0.f);
 
 			F32 height = mSurfacep->resolveHeightRegion(location) + z_offset;
 
 			// Step 0: Measure the exact height at this texel
-			vec[0] = (F32)(origin_global.mdV[VX]+location.mV[VX])*xyScaleInv;	//  Adjust to non-integer lattice
-			vec[1] = (F32)(origin_global.mdV[VY]+location.mV[VY])*xyScaleInv;
+			//  Adjust to non-integer lattice
+			vec[0] = (F32)(origin_global.mdV[VX] + location.mV[VX]) * xyScaleInv;
+			vec[1] = (F32)(origin_global.mdV[VY] + location.mV[VY]) * xyScaleInv;
 			vec[2] = height*zScaleInv;
 			//
-			//  Choose material value by adding to the exact height a random value 
+			// Choose material value by adding to the exact height a random
+			// value
 			//
 			vec1[0] = vec[0]*(0.2222222222f);
 			vec1[1] = vec[1]*(0.2222222222f);
 			vec1[2] = vec[2]*(0.2222222222f);
-			twiddle = noise2(vec1)*6.5f;					//  Low freq component for large divisions
+			twiddle = noise2(vec1) * 6.5f;	//  Low freq component for large divisions
 
-			twiddle += turbulence2(vec, 2)*slope_squared;	//  High frequency component
+			twiddle += turbulence2(vec, 2) * slope_squared;	//  High frequency component
 			twiddle *= noise_magnitude;
 
-			F32 scaled_noisy_height = (height + twiddle - start_height) * F32(NUM_TEXTURES) / height_range;
+			F32 scaled_noisy_height = (height + twiddle - start_height) *
+									   F32(NUM_TEXTURES) / height_range;
 
 			scaled_noisy_height = llmax(0.f, scaled_noisy_height);
 			scaled_noisy_height = llmin(3.f, scaled_noisy_height);
-			*(mDatap + i + j*mWidth) = scaled_noisy_height;
+			*(mDatap + i + j * mWidth) = scaled_noisy_height;
 		}
 	}
 	return TRUE;
@@ -250,7 +257,7 @@ BOOL LLVLComposition::generateComposition()
 			return FALSE;
 		}
 	}
-	
+
 	return TRUE;
 }
 
@@ -273,7 +280,7 @@ BOOL LLVLComposition::generateTexture(const F32 x, const F32 y,
 	U8* st_data[4];
 	S32 st_data_size[4]; // for debugging
 
-	for (S32 i = 0; i < 4; i++)
+	for (S32 i = 0; i < 4; ++i)
 	{
 		if (mRawImages[i].isNull())
 		{
@@ -282,12 +289,12 @@ BOOL LLVLComposition::generateTexture(const F32 x, const F32 y,
 			S32 ddiscard = 0;
 			while (min_dim > BASE_SIZE && ddiscard < MAX_DISCARD_LEVEL)
 			{
-				ddiscard++;
+				++ddiscard;
 				min_dim /= 2;
 			}
 			BOOL delete_raw = (mDetailTextures[i]->reloadRawImage(ddiscard) != NULL);
-			if (mDetailTextures[i]->getRawImageLevel() != ddiscard)	//raw iamge is not ready, will enter here again later.
-			{
+			if (mDetailTextures[i]->getRawImageLevel() != ddiscard)
+			{	// raw iamge is not ready, will enter here again later.
 				if(delete_raw)
 				{
 					mDetailTextures[i]->destroyRawImage();
@@ -307,7 +314,8 @@ BOOL LLVLComposition::generateTexture(const F32 x, const F32 y,
 				mDetailTextures[i]->getHeight(ddiscard) != BASE_SIZE ||
 				mDetailTextures[i]->getComponents() != 3)
 			{
-				LLPointer<LLImageRaw> newraw = new LLImageRaw(BASE_SIZE, BASE_SIZE, 3);
+				LLPointer<LLImageRaw> newraw = new LLImageRaw(BASE_SIZE,
+															  BASE_SIZE, 3);
 				newraw->composite(mRawImages[i]);
 				mRawImages[i] = newraw; // deletes old
 			}
@@ -325,8 +333,8 @@ BOOL LLVLComposition::generateTexture(const F32 x, const F32 y,
 	S32 x_begin, y_begin, x_end, y_end;
 	x_begin = (S32)(x * mScaleInv);
 	y_begin = (S32)(y * mScaleInv);
-	x_end = llround( (x + width) * mScaleInv );
-	y_end = llround( (y + width) * mScaleInv );
+	x_end = llround((x + width) * mScaleInv);
+	y_end = llround((y + width) * mScaleInv);
 
 	if (x_end > mWidth)
 	{
@@ -339,14 +347,13 @@ BOOL LLVLComposition::generateTexture(const F32 x, const F32 y,
 		y_end = mWidth;
 	}
 
-
 	///////////////////////////////////////////
 	//
 	// Generate target texture information, stride ratios.
 	//
 	//
 
-	LLViewerTexture *texturep;
+	LLViewerTexture* texturep;
 	U32 tex_width, tex_height, tex_comps;
 	U32 tex_stride;
 	F32 tex_x_scalef, tex_y_scalef;
@@ -362,7 +369,7 @@ BOOL LLVLComposition::generateTexture(const F32 x, const F32 y,
 	U32 st_comps = 3;
 	U32 st_width = BASE_SIZE;
 	U32 st_height = BASE_SIZE;
-	
+
 	if (tex_comps != st_comps)
 	{
 		llwarns << "Base texture comps != input texture comps" << llendl;
@@ -379,7 +386,8 @@ BOOL LLVLComposition::generateTexture(const F32 x, const F32 y,
 	tex_x_ratiof = (F32)mWidth*mScale / (F32)tex_width;
 	tex_y_ratiof = (F32)mWidth*mScale / (F32)tex_height;
 
-	LLPointer<LLImageRaw> raw = new LLImageRaw(tex_width, tex_height, tex_comps);
+	LLPointer<LLImageRaw> raw = new LLImageRaw(tex_width, tex_height,
+											   tex_comps);
 	U8 *rawp = raw->getData();
 
 	F32 tex_width_inv = 1.f/tex_width;
@@ -400,20 +408,20 @@ BOOL LLVLComposition::generateTexture(const F32 x, const F32 y,
 
 	F32 sti, stj;
 	S32 st_offset;
-	sti = (tex_x_begin * st_x_stride) - st_width*(llfloor((tex_x_begin * st_x_stride)/st_width));
-	stj = (tex_y_begin * st_y_stride) - st_height*(llfloor((tex_y_begin * st_y_stride)/st_height));
+	sti = tex_x_begin * st_x_stride - st_width * llfloor(tex_x_begin * st_x_stride / st_width);
+	stj = tex_y_begin * st_y_stride - st_height * llfloor(tex_y_begin * st_y_stride / st_height);
 
 	st_offset = (llfloor(stj * st_width) + llfloor(sti)) * st_comps;
-	for (S32 j = tex_y_begin; j < tex_y_end; j++)
+	for (S32 j = tex_y_begin; j < tex_y_end; ++j)
 	{
 		U32 offset = j * tex_stride + tex_x_begin * tex_comps;
-		sti = (tex_x_begin * st_x_stride) - st_width*((U32)(tex_x_begin * st_x_stride)/st_width);
-		for (S32 i = tex_x_begin; i < tex_x_end; i++)
+		sti = tex_x_begin * st_x_stride - st_width * ((U32)(tex_x_begin * st_x_stride) / st_width);
+		for (S32 i = tex_x_begin; i < tex_x_end; ++i)
 		{
 			S32 tex0, tex1;
-			F32 composition = getValueScaled(i*tex_x_ratiof, j*tex_y_ratiof);
+			F32 composition = getValueScaled(i * tex_x_ratiof, j * tex_y_ratiof);
 
-			tex0 = llfloor( composition );
+			tex0 = llfloor(composition);
 			tex0 = llclamp(tex0, 0, 3);
 			composition -= tex0;
 			tex1 = tex0 + 1;
@@ -424,21 +432,25 @@ BOOL LLVLComposition::generateTexture(const F32 x, const F32 y,
 			xy_int_i = i * tex_width_inv;
 			xy_int_j = j * tex_height_inv;
 
-			st_offset = (lltrunc(sti) + lltrunc(stj)*st_width) * st_comps;
-			for (U32 k = 0; k < tex_comps; k++)
+			st_offset = (lltrunc(sti) + lltrunc(stj) * st_width) * st_comps;
+			for (U32 k = 0; k < tex_comps; ++k)
 			{
 				// Linearly interpolate based on composition.
-				if (st_offset >= st_data_size[tex0] || st_offset >= st_data_size[tex1])
+				if (st_offset >= st_data_size[tex0] ||
+					st_offset >= st_data_size[tex1])
 				{
-					// SJB: This shouldn't be happening, but does... Rounding error?
-					//llwarns << "offset 0 [" << tex0 << "] =" << st_offset << " >= size=" << st_data_size[tex0] << llendl;
-					//llwarns << "offset 1 [" << tex1 << "] =" << st_offset << " >= size=" << st_data_size[tex1] << llendl;
+					// SJB: This shouldn't be happening, but does... Rounding
+					// error ?
+					//llwarns << "offset 0 [" << tex0 << "] =" << st_offset
+					//		<< " >= size=" << st_data_size[tex0] << llendl;
+					//llwarns << "offset 1 [" << tex1 << "] =" << st_offset
+					//		<< " >= size=" << st_data_size[tex1] << llendl;
 				}
 				else
 				{
 					F32 a = *(st_data[tex0] + st_offset);
 					F32 b = *(st_data[tex1] + st_offset);
-					rawp[ offset ] = (U8)lltrunc( a + composition * (b - a) );
+					rawp[offset] = (U8)lltrunc(a + composition * (b - a));
 				}
 				offset++;
 				st_offset++;
@@ -462,17 +474,19 @@ BOOL LLVLComposition::generateTexture(const F32 x, const F32 y,
 	{
 		texturep->createGLTexture(0, raw);
 	}
-	texturep->setSubImage(raw, tex_x_begin, tex_y_begin, tex_x_end - tex_x_begin, tex_y_end - tex_y_begin);
+	texturep->setSubImage(raw, tex_x_begin, tex_y_begin,
+						  tex_x_end - tex_x_begin, tex_y_end - tex_y_begin);
 	LLSurface::sTextureUpdateTime += gen_timer.getElapsedTimeF32();
 	LLSurface::sTexelsUpdated += (tex_x_end - tex_x_begin) * (tex_y_end - tex_y_begin);
 
-	for (S32 i = 0; i < 4; i++)
+	for (S32 i = 0; i < 4; ++i)
 	{
-		// Un-boost detatil textures (will get re-boosted if rendering in high detail)
+		// Un-boost detatil textures (will get re-boosted if rendering in high
+		// detail)
 		mDetailTextures[i]->setBoostLevel(LLViewerTexture::BOOST_NONE);
 		mDetailTextures[i]->setMinDiscardLevel(MAX_DISCARD_LEVEL + 1);
 	}
-	
+
 	return TRUE;
 }
 

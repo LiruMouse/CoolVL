@@ -66,7 +66,8 @@ std::string getHistoryFileName()
 	}
 	else
 	{
-		LL_WARNS("Teleport") << "Teleport History: Could not find the path to the history file. History not saved." << LL_ENDL;
+		llwarns << "Teleport History: Could not find the path to the history file. History not saved."
+				<< llendl;
 		path = "";
 	}
 	return path;  
@@ -121,7 +122,8 @@ BOOL LLFloaterTeleportHistory::postBuild()
 	mPlacesList = getChild<LLScrollListCtrl>("places_list");
 	if (!mPlacesList)
 	{
-		LL_WARNS("Teleport") << "Bad floater XML file: could not get pointer to places list" << LL_ENDL;
+		llwarns << "Bad floater XML file: could not get pointer to places list"
+				<< llendl;
 		return FALSE;
 	}
 
@@ -148,8 +150,7 @@ void LLFloaterTeleportHistory::loadEntries()
 	file.open(filename.c_str());
 	if (file.is_open())
 	{
-		LL_INFOS("Teleport") << "Loading the teleport history from: " << filename
-							 << LL_ENDL;
+		llinfos << "Loading the teleport history from: " << filename << llendl;
 		LLSDSerialize::fromXML(mTPlist, file);
 	}
 	file.close();
@@ -268,7 +269,8 @@ void LLFloaterTeleportHistory::addSourceEntry(const std::string& sourceSURL, con
 		pos = slurl.rfind('/', pos);
 		if (pos == std::string::npos || pos == 0)
 		{
-			LL_WARNS("Teleport") << "Could not parse the source SLURL (" << sourceSURL << "): TP history entry not added" << LL_ENDL;
+			llwarns << "Could not parse the source SLURL (" << sourceSURL
+					<< "): TP history entry not added" << llendl;
 			return;
 		}
 		pos--;

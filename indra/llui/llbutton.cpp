@@ -41,7 +41,6 @@
 #include "llrender.h"
 #include "llresmgr.h"
 #include "llstring.h"
-#include "llui.h"
 #include "lluiconstants.h"
 #include "llwindow.h"
 
@@ -49,13 +48,13 @@ static LLRegisterWidget<LLButton> r("button");
 
 // globals loaded from settings.xml
 S32	LLBUTTON_ORIG_H_PAD	= 6; // Pre-zoomable UI
-S32	LLBUTTON_H_PAD	= 0;
-S32	LLBUTTON_V_PAD	= 0;
-S32 BTN_HEIGHT_SMALL= 0;
-S32 BTN_HEIGHT		= 0;
+S32	LLBUTTON_H_PAD		= 0;
+S32	LLBUTTON_V_PAD		= 0;
+S32 BTN_HEIGHT_SMALL	= 0;
+S32 BTN_HEIGHT			= 0;
 
-S32 BTN_GRID		= 12;
-S32 BORDER_SIZE = 1;
+S32 BTN_GRID			= 12;
+S32 BORDER_SIZE			= 1;
 
 LLButton::LLButton(const std::string& name,
 				   const LLRect& rect,
@@ -270,8 +269,7 @@ void LLButton::onCommit()
 BOOL LLButton::handleUnicodeCharHere(llwchar uni_char)
 {
 	BOOL handled = FALSE;
-	if (' ' == uni_char
-		&& !gKeyboard->getKeyRepeated(' '))
+	if (uni_char == ' ' && !gKeyboard->getKeyRepeated(' '))
 	{
 		if (mIsToggle)
 		{
@@ -913,6 +911,15 @@ void LLButton::setImageOverlay(const std::string& image_name,
 		mImageOverlayAlignment = alignment;
 		mImageOverlayColor = color;
 	}
+}
+
+void LLButton::setImageOverlay(LLUIImagePtr image,
+							   LLFontGL::HAlign alignment,
+							   const LLColor4& color)
+{
+	mImageOverlay = image;
+	mImageOverlayAlignment = alignment;
+	mImageOverlayColor = color;
 }
 
 void LLButton::onMouseCaptureLost()

@@ -125,7 +125,7 @@ void LLDrawable::destroy()
 
 	if (isDead())
 	{
-		sNumZombieDrawables--;
+		--sNumZombieDrawables;
 	}
 
 	std::for_each(mFaces.begin(), mFaces.end(), DeletePointer());
@@ -174,7 +174,8 @@ LLVOVolume* LLDrawable::getVOVolume() const
 
 const LLMatrix4& LLDrawable::getRenderMatrix() const
 {
-	return isRoot() ? getWorldMatrix() : getParent()->getWorldMatrix();
+	return isRoot() || !getParent() ? getWorldMatrix()
+									: getParent()->getWorldMatrix();
 }
 
 BOOL LLDrawable::isLight() const

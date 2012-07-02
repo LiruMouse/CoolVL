@@ -141,9 +141,8 @@ public:
 	{
 		if (mRetries > 0)
 		{
-			LL_WARNS("Voice") << "ProvisionVoiceAccountRequest returned an error, retrying. status = "
-							  << status << ", reason = \"" << reason << "\""
-							  << LL_ENDL;
+			llwarns << "ProvisionVoiceAccountRequest returned an error, retrying. status = "
+					<< status << ", reason = \"" << reason << "\"" << llendl;
 			if (LLVoiceClient::instanceExists())
 			{
 				LLVoiceClient::getInstance()->requestVoiceAccountProvision(mRetries - 1);
@@ -151,9 +150,8 @@ public:
 		}
 		else
 		{
-			LL_WARNS("Voice") << "ProvisionVoiceAccountRequest returned an error, too many retries (giving up). status = "
-							  << status << ", reason = \"" << reason << "\""
-							  << LL_ENDL;
+			llwarns << "ProvisionVoiceAccountRequest returned an error, too many retries (giving up). status = "
+					<< status << ", reason = \"" << reason << "\"" << llendl;
 			if (LLVoiceClient::instanceExists())
 			{
 				LLVoiceClient::getInstance()->giveUp();
@@ -385,7 +383,7 @@ LLIOPipe::EStatus LLVivoxProtocolParser::process_impl(const LLChannelDescriptors
 	{
 		// If voice has been disabled, we just want to close the socket.
 		// This does so.
-		LL_INFOS("Voice") << "returning STATUS_STOP" << LL_ENDL;
+		llinfos << "returning STATUS_STOP" << llendl;
 		return STATUS_STOP;
 	}
 
@@ -1025,8 +1023,7 @@ void LLVivoxProtocolParser::processResponse(std::string tag)
 		}
 		else
 		{
-			LL_WARNS("VivoxProtocolParser") << "Unknown event type "
-											<< eventTypeString << LL_ENDL;
+			llwarns << "Unknown event type " << eventTypeString << llendl;
 		}
 	}
 	else
@@ -1191,8 +1188,8 @@ private:
 
 void LLVoiceClientCapResponder::error(U32 status, const std::string& reason)
 {
-	LL_WARNS("Voice") << "LLVoiceClientCapResponder::error(" << status << ": "
-					  << reason << ")" << LL_ENDL;
+	llwarns << "LLVoiceClientCapResponder::error(" << status << ": " << reason
+			<< ")" << llendl;
 }
 
 void LLVoiceClientCapResponder::result(const LLSD& content)
@@ -1436,9 +1433,9 @@ bool LLVoiceClient::writeString(const std::string& str)
 			// Assume any socket error means something bad. For now, just close
 			// the socket.
 			char buf[MAX_STRING];
-			LL_WARNS("Voice") << "apr error " << err << " ("
-							  << apr_strerror(err, buf, MAX_STRING)
-							  << ") sending data to vivox daemon." << LL_ENDL;
+			llwarns << "apr error " << err << " ("
+					<< apr_strerror(err, buf, MAX_STRING)
+					<< ") sending data to vivox daemon." << llendl;
 			daemonDied();
 		}
 	}
@@ -1512,8 +1509,8 @@ void LLVoiceClient::userAuthorized(const std::string& firstName,
 	mAccountDisplayName += " ";
 	mAccountDisplayName += lastName;
 
-	LL_INFOS("Voice") << "name \"" << mAccountDisplayName << "\" , ID "
-					  << agentID << LL_ENDL;
+	llinfos << "name \"" << mAccountDisplayName << "\" , ID " << agentID
+			<< llendl;
 
 	sConnectingToAgni = LLViewerLogin::getInstance()->isInProductionGrid();
 
@@ -1547,7 +1544,7 @@ void LLVoiceClient::login(const std::string& account_name,
 	if (!mAccountHandle.empty())
 	{
 		// Already logged in.
-		LL_WARNS("Voice") << "Called while already logged in." << LL_ENDL;
+		llwarns << "Called while already logged in." << llendl;
 
 		// Don't process another login.
 		return;
@@ -1555,8 +1552,8 @@ void LLVoiceClient::login(const std::string& account_name,
 	else if (account_name != mAccountName)
 	{
 		// TODO: error?
-		LL_WARNS("Voice") << "Wrong account name! " << account_name
-						  << " instead of " << mAccountName << LL_ENDL;
+		llwarns << "Wrong account name! " << account_name << " instead of "
+				<< mAccountName << llendl;
 	}
 	else
 	{
@@ -1725,8 +1722,8 @@ void LLVoiceClient::stateMachine()
 			{
 				// if voice was turned off after the daemon was launched but
 				// before we could connect to it, we may need to issue a kill.
-				LL_INFOS("Voice") << "Disabling voice before connection to daemon, terminating."
-								  << LL_ENDL;
+				llinfos << "Disabling voice before connection to daemon, terminating."
+						<< llendl;
 				killGateway();
 			}
 
@@ -1938,7 +1935,7 @@ void LLVoiceClient::stateMachine()
 					}
 					else
 					{
-						LL_INFOS("Voice") << exe_path << " not found." << LL_ENDL;
+						llinfos << exe_path << " not found." << llendl;
 					}
 				}
 				else
@@ -2122,8 +2119,8 @@ void LLVoiceClient::stateMachine()
 
 					if (mTuningMicVolumeDirty)
 					{
-						LL_INFOS("Voice") << "setting tuning mic level to "
-										  << mTuningMicVolume << LL_ENDL;
+						llinfos << "setting tuning mic level to "
+								<< mTuningMicVolume << llendl;
 						stream
 						<< "<Request requestId=\"" << mCommandCookie++ << "\" action=\"Aux.SetMicLevel.1\">"
 						<< "<Level>" << mTuningMicVolume << "</Level>"
@@ -2209,15 +2206,13 @@ void LLVoiceClient::stateMachine()
 
 			if (mLoginRetryCount > MAX_LOGIN_RETRIES)
 			{
-				LL_WARNS("Voice") << "too many login retries, giving up."
-								  << LL_ENDL;
+				llwarns << "too many login retries, giving up." << llendl;
 				setState(stateLoginFailed);
 			}
 			else
 			{
-				LL_INFOS("Voice") << "will retry login in "
-								  << LOGIN_RETRY_SECONDS << " seconds."
-								  << LL_ENDL;
+				llinfos << "will retry login in " << LOGIN_RETRY_SECONDS
+						<< " seconds." << llendl;
 				mUpdateTimer.start();
 				mUpdateTimer.setTimerExpirySec(LOGIN_RETRY_SECONDS);
 				setState(stateLoginRetryWait);
@@ -2551,8 +2546,8 @@ void LLVoiceClient::stateMachine()
 			}
 			else
 			{
-				LL_WARNS("Voice") << "stateSessionTerminated with NULL mAudioSession"
-								  << LL_ENDL;
+				llwarns << "stateSessionTerminated with NULL mAudioSession"
+						<< llendl;
 			}
 
 			// Always reset the terminate request flag when we get here.
@@ -2642,15 +2637,14 @@ void LLVoiceClient::stateMachine()
 			// Transition to error state.  Send out any notifications here.
 			if (mAudioSession)
 			{
-				LL_WARNS("Voice") << "stateJoinSessionFailed: ("
-								  << mAudioSession->mErrorStatusCode
-								  << "): " << mAudioSession->mErrorStatusString
-								  << LL_ENDL;
+				llwarns << "stateJoinSessionFailed: ("
+						<< mAudioSession->mErrorStatusCode << "): "
+						<< mAudioSession->mErrorStatusString << llendl;
 			}
 			else
 			{
-				LL_WARNS("Voice") << "stateJoinSessionFailed with no current session"
-								  << LL_ENDL;
+				llwarns << "stateJoinSessionFailed with no current session"
+						<< llendl;
 			}
 			notifyStatusObservers(LLVoiceClientStatusObserver::ERROR_UNKNOWN);
 			setState(stateJoinSessionFailedWaiting);
@@ -2957,8 +2951,7 @@ void LLVoiceClient::leaveAudioSession()
 				}
 				else
 				{
-					LL_WARNS("Voice") << "called with no session handle"
-									  << LL_ENDL;
+					llwarns << "called with no session handle" << llendl;
 					setState(stateSessionTerminated);
 				}
 				break;
@@ -2969,13 +2962,13 @@ void LLVoiceClient::leaveAudioSession()
 				break;
 
 			default:
-				LL_WARNS("Voice") << "called from unknown state" << LL_ENDL;
+				llwarns << "called from unknown state" << llendl;
 				break;
 		}
 	}
 	else
 	{
-		LL_WARNS("Voice") << "called with no active session" << LL_ENDL;
+		llwarns << "called with no active session" << llendl;
 		setState(stateSessionTerminated);
 	}
 }
@@ -3262,8 +3255,7 @@ void LLVoiceClient::daemonDied()
 {
 	// The daemon died, so the connection is gone.  Reset everything and start
 	// over.
-	LL_WARNS("Voice") << "Connection to vivox daemon lost.  Resetting state."
-					  << LL_ENDL;
+	llwarns << "Connection to vivox daemon lost. Resetting state." << llendl;
 
 	// Try to relaunch the daemon
 	setState(stateDisableCleanup);
@@ -3681,7 +3673,7 @@ void LLVoiceClient::buildLocalAudioUpdates(std::ostringstream &stream)
 
 		mSpeakerMuteDirty = false;
 
-		LL_INFOS("Voice") << "Setting speaker mute to " << muteval << LL_ENDL;
+		llinfos << "Setting speaker mute to " << muteval << llendl;
 
 		stream << "<Request requestId=\"" << mCommandCookie++ << "\" action=\"Connector.MuteLocalSpeaker.1\">"
 			<< "<ConnectorHandle>" << mConnectorHandle << "</ConnectorHandle>"
@@ -3693,20 +3685,21 @@ void LLVoiceClient::buildLocalAudioUpdates(std::ostringstream &stream)
 	{
 		mSpeakerVolumeDirty = false;
 
-		LL_INFOS("Voice") << "Setting speaker volume to " << mSpeakerVolume
-						  << LL_ENDL;
+		llinfos << "Setting speaker volume to " << mSpeakerVolume << llendl;
 
-		stream << "<Request requestId=\"" << mCommandCookie++ << "\" action=\"Connector.SetLocalSpeakerVolume.1\">"
-			<< "<ConnectorHandle>" << mConnectorHandle << "</ConnectorHandle>"
-			<< "<Value>" << mSpeakerVolume << "</Value>"
-			<< "</Request>\n\n\n";
+		stream 	<< "<Request requestId=\"" << mCommandCookie++
+				<< "\" action=\"Connector.SetLocalSpeakerVolume.1\">"
+				<< "<ConnectorHandle>" << mConnectorHandle
+				<< "</ConnectorHandle>"
+				<< "<Value>" << mSpeakerVolume << "</Value>"
+				<< "</Request>\n\n\n";
 	}
 
 	if (mMicVolumeDirty)
 	{
 		mMicVolumeDirty = false;
 
-		LL_INFOS("Voice") << "Setting mic volume to " << mMicVolume << LL_ENDL;
+		llinfos << "Setting mic volume to " << mMicVolume << llendl;
 
 		stream << "<Request requestId=\"" << mCommandCookie++ << "\" action=\"Connector.SetLocalMicVolume.1\">"
 			<< "<ConnectorHandle>" << mConnectorHandle << "</ConnectorHandle>"
@@ -3743,9 +3736,9 @@ void LLVoiceClient::checkFriend(const LLUUID& id)
 			{
 				// The buddy is in the list with the wrong name. Update it
 				// with the correct name.
-				LL_WARNS("Voice") << "Buddy " << id << " has wrong name (\""
-								  << buddy->mLegacyName << "\" should be \""
-								  << name << "\"), updating."<< LL_ENDL;
+				llwarns << "Buddy " << id << " has wrong name (\""
+						<< buddy->mLegacyName << "\" should be \"" << name
+						<< "\"), updating."<< llendl;
 				buddy->mLegacyName = name;
 				// This will cause the buddy to be resent.
 				buddy->mNeedsNameUpdate = true;
@@ -3847,8 +3840,8 @@ void LLVoiceClient::sendFriendsListUpdates()
 		return;
 #endif
 
-		LL_INFOS("Voice") << "Checking vivox buddy list against friends list..."
-						  << LL_ENDL;
+		llinfos << "Checking vivox buddy list against friends list..."
+				<< llendl;
 
 		buddyListMap::iterator buddy_it;
 		for (buddy_it = mBuddyListMap.begin(); buddy_it != mBuddyListMap.end();
@@ -3877,7 +3870,7 @@ void LLVoiceClient::sendFriendsListUpdates()
 			}
 		}
 
-		LL_INFOS("Voice") << "Sending friend list updates..." << LL_ENDL;
+		llinfos << "Sending friend list updates..." << llendl;
 
 		for (buddy_it = mBuddyListMap.begin();
 			 buddy_it != mBuddyListMap.end(); )
@@ -4039,15 +4032,15 @@ void LLVoiceClient::connectorCreateResponse(int statusCode,
 {
 	if (statusCode != 0)
 	{
-		LL_WARNS("Voice") << "Connector.Create response failure: "
-						  << statusString << LL_ENDL;
+		llwarns << "Connector.Create response failure: " << statusString
+				<< llendl;
 		setState(stateConnectorFailed);
 	}
 	else
 	{
 		// Connector created, move forward.
-		LL_INFOS("Voice") << "Connector.Create succeeded, Vivox SDK version is "
-						  << versionID << LL_ENDL;
+		llinfos << "Connector.Create succeeded, Vivox SDK version is "
+				<< versionID << llendl;
 		mConnectorHandle = connectorHandle;
 		if (getState() == stateConnectorStarting)
 		{
@@ -4070,14 +4063,14 @@ void LLVoiceClient::loginResponse(int statusCode,
 	{
 		// Login failure which is probably caused by the delay after a user's
 		// password being updated.
-		LL_INFOS("Voice") << "Account.Login response failure (" << statusCode
-						  << "): " << statusString << LL_ENDL;
+		llinfos << "Account.Login response failure (" << statusCode << "): "
+				<< statusString << llendl;
 		setState(stateLoginRetry);
 	}
 	else if (statusCode != 0)
 	{
-		LL_WARNS("Voice") << "Account.Login response failure (" << statusCode
-						  << "): " << statusString << LL_ENDL;
+		llwarns << "Account.Login response failure (" << statusCode << "): "
+				<< statusString << llendl;
 		setState(stateLoginFailed);
 	}
 	else
@@ -4098,9 +4091,8 @@ void LLVoiceClient::sessionCreateResponse(std::string& requestId,
 										  std::string& statusString,
 										  std::string& sessionHandle)
 {
-	LL_INFOS("Voice") << "Got Session.Create response for request Id: "
-					  << requestId << " with session handle "
-					  << sessionHandle << LL_ENDL;
+	llinfos << "Got Session.Create response for request Id: " << requestId
+			<< " with session handle " << sessionHandle << llendl;
 
 	sessionState* session = findSessionBeingCreatedByURI(requestId);
 
@@ -4113,8 +4105,8 @@ void LLVoiceClient::sessionCreateResponse(std::string& requestId,
 
 	if (statusCode != 0)
 	{
-		LL_WARNS("Voice") << "Session.Create response failure (" << statusCode
-						  << "): " << statusString << LL_ENDL;
+		llwarns << "Session.Create response failure (" << statusCode << "): "
+				<< statusString << llendl;
 		if (session)
 		{
 			session->mErrorStatusCode = statusCode;
@@ -4131,8 +4123,8 @@ void LLVoiceClient::sessionCreateResponse(std::string& requestId,
 	}
 	else
 	{
-		LL_INFOS("Voice") << "Session.Create response received (success), session handle is "
-						  << sessionHandle << LL_ENDL;
+		llinfos << "Session.Create response received (success), session handle is "
+				<< sessionHandle << llendl;
 		if (session)
 		{
 			setSessionHandle(session, sessionHandle);
@@ -4154,8 +4146,8 @@ void LLVoiceClient::sessionGroupAddSessionResponse(std::string& requestId,
 
 	if (statusCode != 0)
 	{
-		LL_WARNS("Voice") << "SessionGroup.AddSession response failure ("
-						  << statusCode << "): " << statusString << LL_ENDL;
+		llwarns << "SessionGroup.AddSession response failure (" << statusCode
+				<< "): " << statusString << llendl;
 		if (session)
 		{
 			session->mErrorStatusCode = statusCode;
@@ -4188,8 +4180,8 @@ void LLVoiceClient::sessionConnectResponse(std::string& requestId,
 	sessionState* session = findSession(requestId);
 	if (statusCode != 0)
 	{
-		LL_WARNS("Voice") << "Session.Connect response failure (" << statusCode
-						  << "): " << statusString << LL_ENDL;
+		llwarns << "Session.Connect response failure (" << statusCode << "): "
+				<< statusString << llendl;
 		if (session)
 		{
 			session->mMediaConnectInProgress = false;
@@ -4212,8 +4204,8 @@ void LLVoiceClient::logoutResponse(int statusCode, std::string& statusString)
 {
 	if (statusCode != 0)
 	{
-		LL_WARNS("Voice") << "Account.Logout response failure: "
-						  << statusString << LL_ENDL;
+		llwarns << "Account.Logout response failure: " << statusString
+				<< llendl;
 		// Should this ever fail?  do we care if it does?
 	}
 }
@@ -4223,8 +4215,8 @@ void LLVoiceClient::connectorShutdownResponse(int statusCode,
 {
 	if (statusCode != 0)
 	{
-		LL_WARNS("Voice") << "Connector.InitiateShutdown response failure: "
-						  << statusString << LL_ENDL;
+		llwarns << "Connector.InitiateShutdown response failure: "
+				<< statusString << llendl;
 		// Should this ever fail?  do we care if it does?
 	}
 
@@ -4247,9 +4239,8 @@ void LLVoiceClient::sessionAddedEvent(std::string& uriString,
 {
 	sessionState* session = NULL;
 
-	LL_INFOS("Voice") << "session " << uriString << ", alias " << alias
-					  << ", name " << nameString << ", handle " << sessionHandle
-					  << LL_ENDL;
+	llinfos << "session " << uriString << ", alias " << alias << ", name "
+			<< nameString << ", handle " << sessionHandle << llendl;
 
 	session = addSession(uriString, sessionHandle);
 	if (session)
@@ -4278,8 +4269,8 @@ void LLVoiceClient::sessionAddedEvent(std::string& uriString,
 			}
 			else
 			{
-				LL_INFOS("Voice") << "Could not generate caller id from uri, using hash of uri "
-								  << session->mSIPURI << LL_ENDL;
+				llinfos << "Could not generate caller id from uri, using hash of uri "
+						<< session->mSIPURI << llendl;
 				setUUIDFromStringHash(session->mCallerID, session->mSIPURI);
 				session->mSynthesizedCallerID = true;
 
@@ -4302,8 +4293,7 @@ void LLVoiceClient::sessionAddedEvent(std::string& uriString,
 				avatarNameResolved(session->mCallerID, namePortion);
 			}
 
-			LL_INFOS("Voice") << "caller ID: " << session->mCallerID
-							  << LL_ENDL;
+			llinfos << "caller ID: " << session->mCallerID << llendl;
 
 			if (!session->mSynthesizedCallerID)
 			{
@@ -4360,9 +4350,9 @@ void LLVoiceClient::joinedAudioSession(sessionState* session)
 			participant->mIsSelf = true;
 			lookupName(participant->mAvatarID);
 
-			LL_INFOS("Voice") << "added self as participant \""
-							  << participant->mAccountName << "\" ("
-							  << participant->mAvatarID << ")" << LL_ENDL;
+			llinfos << "added self as participant \""
+					<< participant->mAccountName << "\" ("
+					<< participant->mAvatarID << ")" << llendl;
 		}
 
 		if (!session->mIsChannel)
@@ -4384,9 +4374,9 @@ void LLVoiceClient::joinedAudioSession(sessionState* session)
 
 				// TODO: Question: Do we need to set up mAvatarID/mAvatarIDValid
 				//                 here ?
-				LL_INFOS("Voice") << "added caller as participant \""
-								  << participant->mAccountName << "\" ("
-								  << participant->mAvatarID << ")" << LL_ENDL;
+				llinfos << "added caller as participant \""
+						<< participant->mAccountName << "\" ("
+						<< participant->mAvatarID << ")" << llendl;
 			}
 		}
 	}
@@ -4395,7 +4385,7 @@ void LLVoiceClient::joinedAudioSession(sessionState* session)
 void LLVoiceClient::sessionRemovedEvent(std::string& sessionHandle, 
 										std::string& sessionGroupHandle)
 {
-	LL_INFOS("Voice") << "handle " << sessionHandle << LL_ENDL;
+	llinfos << "handle " << sessionHandle << llendl;
 
 	sessionState* session = findSession(sessionHandle);
 	if (session)
@@ -4418,8 +4408,7 @@ void LLVoiceClient::sessionRemovedEvent(std::string& sessionHandle,
 	}
 	else
 	{
-		LL_WARNS("Voice") << "unknown session " << sessionHandle << " removed"
-						  << LL_ENDL;
+		llwarns << "unknown session " << sessionHandle << " removed" << llendl;
 	}
 }
 
@@ -4530,14 +4519,13 @@ void LLVoiceClient::leftAudioSession(sessionState* session)
 			case stateSessionTerminated:
 				// this will happen sometimes -- there are cases where we send
 				// the terminate and then go straight to this state.
-				LL_WARNS("Voice") << "left session " << session->mHandle
-								  << " in state " << state2string(getState())
-								  << LL_ENDL;
+				llwarns << "left session " << session->mHandle << " in state "
+						<< state2string(getState()) << llendl;
 				break;
 
 			default:
-				LL_WARNS("Voice") << "unexpected SessionStateChangeEvent (left session) in state "
-								  << state2string(getState()) << LL_ENDL;
+				llwarns << "unexpected SessionStateChangeEvent (left session) in state "
+						<< state2string(getState()) << llendl;
 				setState(stateSessionTerminated);
 				break;
 		}
@@ -4657,13 +4645,13 @@ void LLVoiceClient::mediaStreamUpdatedEvent(std::string& sessionHandle,
 				break;
 
 			default:
-				LL_WARNS("Voice") << "unknown state " << state << LL_ENDL;
+				llwarns << "unknown state " << state << llendl;
 				break;
 		}
 	}
 	else
 	{
-		LL_WARNS("Voice") << "session " << sessionHandle << " not found"<< LL_ENDL;
+		llwarns << "session " << sessionHandle << " not found"<< llendl;
 	}
 }
 
@@ -4706,7 +4694,7 @@ void LLVoiceClient::textStreamUpdatedEvent(std::string& sessionHandle,
 				break;
 
 			default:
-				LL_WARNS("Voice") << "unknown state " << state << LL_ENDL;
+				llwarns << "unknown state " << state << llendl;
 				break;
 		}
 	}
@@ -4823,13 +4811,12 @@ void LLVoiceClient::participantUpdatedEvent(std::string& sessionHandle,
 		}
 		else
 		{
-			LL_WARNS("Voice") << "unknown participant: " << uriString
-							  << LL_ENDL;
+			llwarns << "unknown participant: " << uriString << llendl;
 		}
 	}
 	else
 	{
-		LL_INFOS("Voice") << "unknown session " << sessionHandle << LL_ENDL;
+		llinfos << "unknown session " << sessionHandle << llendl;
 	}
 }
 
@@ -5375,20 +5362,17 @@ void LLVoiceClient::sessionState::removeParticipant(LLVoiceClient::participantSt
 
 		if (iter == mParticipantsByURI.end())
 		{
-			LL_ERRS("Voice") << "Internal error: participant "
-							 << participant->mURI << " not in URI map"
-							 << LL_ENDL;
+			llerrs << "Internal error: participant " << participant->mURI
+				   << " not in URI map" << llendl;
 		}
 		else if (iter2 == mParticipantsByUUID.end())
 		{
-			LL_ERRS("Voice") << "Internal error: participant ID "
-							 << participant->mAvatarID
-							 << " not in UUID map" << LL_ENDL;
+			llerrs << "Internal error: participant ID "
+				   << participant->mAvatarID << " not in UUID map" << llendl;
 		}
 		else if (iter->second != iter2->second)
 		{
-			LL_ERRS("Voice") << "Internal error: participant mismatch!"
-							 << LL_ENDL;
+			llerrs << "Internal error: participant mismatch!" << llendl;
 		}
 		else
 		{
@@ -5412,8 +5396,8 @@ void LLVoiceClient::sessionState::removeAllParticipants()
 
 	if (!mParticipantsByUUID.empty())
 	{
-		LL_ERRS("Voice") << "Internal error: empty URI map, non-empty UUID map"
-						 << LL_ENDL;
+		llerrs << "Internal error: empty URI map, non-empty UUID map"
+			   << llendl;
 	}
 }
 
@@ -5502,7 +5486,7 @@ void LLVoiceClient::parcelChanged()
 	else
 	{
 		// The transition to stateNoChannel needs to kick this off again.
-		LL_INFOS("Voice") << "not logged in yet, deferring" << LL_ENDL;
+		llinfos << "not logged in yet, deferring" << llendl;
 	}
 }
 
@@ -5570,7 +5554,7 @@ void LLVoiceClient::switchChannel(std::string uri,
 						// would cause this.
 						// For now, log it as a warning and see if it ever
 						// crops up.
-						LL_WARNS("Voice") << "No current audio session." << LL_ENDL;
+						llwarns << "No current audio session." << llendl;
 					}
 				}
 			}
@@ -5650,8 +5634,7 @@ void LLVoiceClient::setSpatialChannel(const std::string& uri,
 	{
 		// User is in a non-spatial chat or joining a non-spatial chat. Don't
 		// switch channels.
-		LL_INFOS("Voice") << "in non-spatial chat, not switching channels"
-						  << LL_ENDL;
+		llinfos << "in non-spatial chat, not switching channels" << llendl;
 	}
 	else
 	{
@@ -6935,16 +6918,15 @@ void LLVoiceClient::setSessionHandle(sessionState* session,
 		{
 			if (iter->second != session)
 			{
-				LL_ERRS("Voice") << "Internal error: session mismatch!"
-								 << LL_ENDL;
+				llerrs << "Internal error: session mismatch !" << llendl;
 			}
 
 			mSessionsByHandle.erase(iter);
 		}
 		else
 		{
-			LL_ERRS("Voice") << "Internal error: session handle not found in map!"
-							 << LL_ENDL;
+			llerrs << "Internal error: session handle not found in map !"
+				   << llendl;
 		}
 	}
 
@@ -6979,8 +6961,7 @@ void LLVoiceClient::deleteSession(sessionState* session)
 		{
 			if (iter->second != session)
 			{
-				LL_ERRS("Voice") << "Internal error: session mismatch"
-								 << LL_ENDL;
+				llerrs << "Internal error: session mismatch !" << llendl;
 			}
 			mSessionsByHandle.erase(iter);
 		}
@@ -7022,8 +7003,8 @@ void LLVoiceClient::deleteAllSessions()
 
 	if (!mSessionsByHandle.empty())
 	{
-		LL_ERRS("Voice") << "Internal error: empty session map, non-empty handle map"
-						 << LL_ENDL;
+		llerrs << "Internal error: empty session map, non-empty handle map"
+			   << llendl;
 	}
 }
 
@@ -7034,7 +7015,9 @@ void LLVoiceClient::verifySessionState(void)
 					   << " , session handle map size: "
 					   << mSessionsByHandle.size() << LL_ENDL;
 
-	for (sessionIterator iter = sessionsBegin(); iter != sessionsEnd(); iter++)
+	sessionMap::iterator map_end = mSessionsByHandle.end();
+	sessionIterator end = sessionsEnd();
+	for (sessionIterator iter = sessionsBegin(); iter != end; ++iter)
 	{
 		sessionState* session = *iter;
 
@@ -7046,20 +7029,18 @@ void LLVoiceClient::verifySessionState(void)
 		{
 			// every session with a non-empty handle needs to be in the handle map
 			sessionMap::iterator i2 = mSessionsByHandle.find(&(session->mHandle));
-			if (i2 == mSessionsByHandle.end())
+			if (i2 == map_end)
 			{
-				LL_ERRS("Voice") << "internal error (handle "
-								 << session->mHandle
-								 << " not found in session map)" << LL_ENDL;
+				llerrs << "internal error (handle " << session->mHandle
+					   << " not found in session map)" << llendl;
 			}
 			else
 			{
 				if (i2->second != session)
 				{
-					LL_ERRS("Voice") << "internal error (handle "
-									 << session->mHandle
-									 << " in session map points to another session)"
-									 << LL_ENDL;
+					llerrs << "internal error (handle " << session->mHandle
+						   << " in session map points to another session)"
+						   << llendl;
 				}
 			}
 		}
@@ -7068,24 +7049,23 @@ void LLVoiceClient::verifySessionState(void)
 	// check that every entry in the handle map points to a valid session in
 	// the session set
 	for (sessionMap::iterator iter = mSessionsByHandle.begin();
-		 iter != mSessionsByHandle.end(); iter++)
+		 iter != map_end; ++iter)
 	{
 		sessionState* session = iter->second;
 		sessionIterator i2 = mSessions.find(session);
 		if (i2 == mSessions.end())
 		{
-			LL_ERRS("Voice") << "internal error (session for handle "
-							 << session->mHandle
-							 << " not found in session map)" << LL_ENDL;
+			llerrs << "internal error (session for handle " << session->mHandle
+				   << " not found in session map)" << llendl;
 		}
 		else
 		{
 			if (session->mHandle != (*i2)->mHandle)
 			{
-				LL_ERRS("Voice") << "internal error (session for handle "
-								 << session->mHandle
-								 << " points to session with different handle "
-								 << (*i2)->mHandle << ")" << LL_ENDL;
+				llerrs << "internal error (session for handle "
+					   << session->mHandle
+					   << " points to session with different handle "
+					   << (*i2)->mHandle << ")" << llendl;
 			}
 		}
 	}

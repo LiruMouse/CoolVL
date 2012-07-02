@@ -592,18 +592,14 @@ void QLToolAlign::align()
 
 					if (overlaps_this)
 					{
-						LL_WARNS("ToolAlign") << "Overlap: "
-											  << new_bbox.getCenterAgent()
-											  << " / "
-											  << other_bbox.getCenterAgent()
-											  << " - Extent: "
-											  << new_bbox.getExtentLocal()
-											  << " / "
-											  << other_bbox.getExtentLocal()
-											  << LL_ENDL;
+						llwarns << "Overlap: " << new_bbox.getCenterAgent()
+								<< " / " << other_bbox.getCenterAgent()
+								<< " - Extent: " << new_bbox.getExtentLocal()
+								<< " / " << other_bbox.getExtentLocal()
+								<< llendl;
 					}
 
-					overlap = (overlap || overlaps_this);
+					overlap = overlap || overlaps_this;
 				}
 			}
 

@@ -43,6 +43,7 @@
 #include "llrender.h"
 #include "lltextbox.h"
 #include "lltexteditor.h"
+#include "llui.h"
 #include "lluiconstants.h"
 #include "lluictrlfactory.h"
 #include "llxmlnode.h"
@@ -204,8 +205,6 @@ LLNotifyBox::LLNotifyBox(LLNotificationPtr notification,
 		sFontSmall = LLFontGL::getFontSansSerifSmall();
 	}
 
-	mRoundedSquare = LLUI::getUIImage("rounded_square.tga");
-
 	// setup paramaters
 	mMessage = notification->getMessage();
 
@@ -344,9 +343,11 @@ LLNotifyBox::LLNotifyBox(LLNotificationPtr notification,
 		text->setBorderVisible(FALSE);
 		text->setTakesNonScrollClicks(FALSE);
 		text->setHideScrollbarForShortDocs(TRUE);
-		text->setReadOnlyBgColor(LLColor4::transparent); // the background color of the box is manually 
-															// rendered under the text box, therefore we want 
-															// the actual text box to be transparent
+
+		// The background color of the box is manually rendered under the text
+		// box, therefore we want the actual text box to be transparent :
+		text->setReadOnlyBgColor(LLColor4::transparent); 
+
 		text->setReadOnlyFgColor(gColors.getColor("NotifyTextColor"));
 		text->setEnabled(FALSE); // makes it read-only
 		text->setTabStop(FALSE); // can't tab to it (may be a problem for scrolling via keyboard)
@@ -456,7 +457,9 @@ LLNotifyBox::~LLNotifyBox()
 }
 
 // virtual
-LLButton* LLNotifyBox::addButton(const std::string& name, const std::string& label, BOOL is_option, BOOL is_default)
+LLButton* LLNotifyBox::addButton(const std::string& name,
+								 const std::string& label,
+								 BOOL is_option, BOOL is_default)
 {
 	// make caution notification buttons slightly narrower
 	// so that 3 of them can fit without overlapping the "next" button
@@ -506,8 +509,10 @@ LLButton* LLNotifyBox::addButton(const std::string& name, const std::string& lab
 
 	if (mIsCaution)
 	{
-		btn->setImageColor(LLUI::sColorsGroup->getColor("ButtonCautionImageColor"));
-		btn->setDisabledImageColor(LLUI::sColorsGroup->getColor("ButtonCautionImageColor"));
+		static LLCachedControl<LLColor4U> color(gColors,
+												"ButtonCautionImageColor");
+		btn->setImageColor(LLColor4(color));
+		btn->setDisabledImageColor(LLColor4(color));
 	}
 
 	addChild(btn, -1);
@@ -550,7 +555,8 @@ BOOL LLNotifyBox::handleRightMouseDown(S32 x, S32 y, MASK mask)
 // virtual
 void LLNotifyBox::draw()
 {
-	// If we are teleporting, stop the timer and restart it when the teleporting completes
+	// If we are teleporting, stop the timer and restart it when the
+	// teleporting completes
 	if (gTeleportDisplay)
 	{
 		mEventTimer.stop();
@@ -603,69 +609,77 @@ void LLNotifyBox::draw()
 
 void LLNotifyBox::drawBackground() const
 {
-	if (mRoundedSquare)
+	static LLCachedControl<LLColor4U> notify_caution_box_color(gColors,
+															   "NotifyCautionBoxColor");
+	static LLCachedControl<LLColor4U> notify_box_color(gColors,
+													   "NotifyBoxColor");
+	static LLCachedControl<LLColor4U> floater_focus_border_color(gColors,
+																 "FloaterFocusBorderColor");
+	static LLCachedControl<LLColor4U> color_drop_shadow(gColors,
+														"ColorDropShadow");
+
+	static const LLUIImagePtr rounded_square = LLUI::getUIImage("rounded_square.tga");
+	if (!rounded_square)
 	{
-		gGL.getTexUnit(0)->bind(mRoundedSquare->getImage());
-		// set proper background color depending on whether notify box is a caution or not
-		static LLCachedControl<LLColor4U> notify_caution_box_color(gColors, "NotifyCautionBoxColor");
-		static LLCachedControl<LLColor4U> notify_box_color(gColors, "NotifyBoxColor");
-		LLColor4 color = mIsCaution? LLColor4(notify_caution_box_color) : LLColor4(notify_box_color);
-		if (gFocusMgr.childHasKeyboardFocus(this))
-		{
-			static LLCachedControl<LLColor4U> floater_focus_border_color(gColors, "FloaterFocusBorderColor");
-			static LLCachedControl<LLColor4U> color_drop_shadow(gColors, "ColorDropShadow");
-			const S32 focus_width = 2;
-			color = LLColor4(floater_focus_border_color);
-			gGL.color4fv(color.mV);
-			gl_segmented_rect_2d_tex(-focus_width,
-									 getRect().getHeight() + focus_width,
-									 getRect().getWidth() + focus_width,
-									 -focus_width,
-									 mRoundedSquare->getTextureWidth(),
-									 mRoundedSquare->getTextureHeight(),
-									 16,
-									 mIsTip ? ROUNDED_RECT_TOP :
-											  ROUNDED_RECT_BOTTOM);
-			color = LLColor4(color_drop_shadow);
-			gGL.color4fv(color.mV);
-			gl_segmented_rect_2d_tex(0,
-									 getRect().getHeight(),
-									 getRect().getWidth(),
-									 0,
-									 mRoundedSquare->getTextureWidth(),
-									 mRoundedSquare->getTextureHeight(),
-									 16,
-									 mIsTip ? ROUNDED_RECT_TOP :
-											  ROUNDED_RECT_BOTTOM);
+		llerrs << "Missing UI image: rounded_square.tga" << llendl;
+	}
 
-			static LLCachedControl<LLColor4U> notify_caution_box_color(gColors, "NotifyCautionBoxColor");
-			static LLCachedControl<LLColor4U> notify_box_color(gColors, "NotifyBoxColor");
-			color = mIsCaution ? LLColor4(notify_caution_box_color) : LLColor4(notify_box_color);
+	gGL.getTexUnit(0)->bind(rounded_square->getImage());
 
-			gGL.color4fv(color.mV);
-			gl_segmented_rect_2d_tex(1,
-									 getRect().getHeight() - 1,
-									 getRect().getWidth() - 1,
-									 1,
-									 mRoundedSquare->getTextureWidth(),
-									 mRoundedSquare->getTextureHeight(),
-									 16,
-									 mIsTip ? ROUNDED_RECT_TOP :
-											  ROUNDED_RECT_BOTTOM);
-		}
-		else
-		{
-			gGL.color4fv(color.mV);
-			gl_segmented_rect_2d_tex(0,
-									 getRect().getHeight(),
-									 getRect().getWidth(),
-									 0,
-									 mRoundedSquare->getTextureWidth(),
-									 mRoundedSquare->getTextureHeight(),
-									 16,
-									 mIsTip ? ROUNDED_RECT_TOP :
-											  ROUNDED_RECT_BOTTOM);
-		}
+	// set proper background color depending on whether notify box is a caution
+	// or not
+	LLColor4 bgcolor = mIsCaution ? LLColor4(notify_caution_box_color)
+								  : LLColor4(notify_box_color);
+
+	if (gFocusMgr.childHasKeyboardFocus(this))
+	{
+		const S32 focus_width = 2;
+		LLColor4 color = LLColor4(floater_focus_border_color);
+		gGL.color4fv(color.mV);
+		gl_segmented_rect_2d_tex(-focus_width,
+								 getRect().getHeight() + focus_width,
+								 getRect().getWidth() + focus_width,
+								 -focus_width,
+								 rounded_square->getTextureWidth(),
+								 rounded_square->getTextureHeight(),
+								 16,
+								 mIsTip ? ROUNDED_RECT_TOP :
+										  ROUNDED_RECT_BOTTOM);
+		color = LLColor4(color_drop_shadow);
+		gGL.color4fv(color.mV);
+		gl_segmented_rect_2d_tex(0,
+								 getRect().getHeight(),
+								 getRect().getWidth(),
+								 0,
+								 rounded_square->getTextureWidth(),
+								 rounded_square->getTextureHeight(),
+								 16,
+								 mIsTip ? ROUNDED_RECT_TOP :
+										  ROUNDED_RECT_BOTTOM);
+
+		gGL.color4fv(bgcolor.mV);
+		gl_segmented_rect_2d_tex(1,
+								 getRect().getHeight() - 1,
+								 getRect().getWidth() - 1,
+								 1,
+								 rounded_square->getTextureWidth(),
+								 rounded_square->getTextureHeight(),
+								 16,
+								 mIsTip ? ROUNDED_RECT_TOP :
+										  ROUNDED_RECT_BOTTOM);
+	}
+	else
+	{
+		gGL.color4fv(bgcolor.mV);
+		gl_segmented_rect_2d_tex(0,
+								 getRect().getHeight(),
+								 getRect().getWidth(),
+								 0,
+								 rounded_square->getTextureWidth(),
+								 rounded_square->getTextureHeight(),
+								 16,
+								 mIsTip ? ROUNDED_RECT_TOP :
+										  ROUNDED_RECT_BOTTOM);
 	}
 }
 

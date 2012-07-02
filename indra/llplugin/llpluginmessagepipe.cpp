@@ -1,11 +1,11 @@
-/** 
+/**
  * @file llpluginmessagepipe.cpp
  * @brief Classes that implement connections from the plugin system to pipes/pumps.
  *
  * $LicenseInfo:firstyear=2008&license=viewergpl$
- * 
+ *
  * Copyright (c) 2008-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -39,27 +39,27 @@
 
 static const char MESSAGE_DELIMITER = '\0';
 
-LLPluginMessagePipeOwner::LLPluginMessagePipeOwner() :
-	mMessagePipe(NULL),
+LLPluginMessagePipeOwner::LLPluginMessagePipeOwner()
+:	mMessagePipe(NULL),
 	mSocketError(APR_SUCCESS)
 {
 }
 
-// virtual 
+// virtual
 LLPluginMessagePipeOwner::~LLPluginMessagePipeOwner()
 {
 	killMessagePipe();
 }
 
-// virtual 
+// virtual
 apr_status_t LLPluginMessagePipeOwner::socketError(apr_status_t error)
-{ 
+{
 	mSocketError = error;
-	return error; 
-};
+	return error;
+}
 
-//virtual 
-void LLPluginMessagePipeOwner::setMessagePipe(LLPluginMessagePipe *read_pipe)
+//virtual
+void LLPluginMessagePipeOwner::setMessagePipe(LLPluginMessagePipe* read_pipe)
 {
 	// Save a reference to this pipe
 	mMessagePipe = read_pipe;
@@ -70,7 +70,7 @@ bool LLPluginMessagePipeOwner::canSendMessage(void)
 	return (mMessagePipe != NULL);
 }
 
-bool LLPluginMessagePipeOwner::writeMessageRaw(const std::string &message)
+bool LLPluginMessagePipeOwner::writeMessageRaw(const std::string& message)
 {
 	bool result = true;
 	if (mMessagePipe != NULL)
@@ -79,7 +79,7 @@ bool LLPluginMessagePipeOwner::writeMessageRaw(const std::string &message)
 	}
 	else
 	{
-		LL_WARNS("Plugin") << "dropping message: " << message << LL_ENDL;
+		llwarns << "dropping message: " << message << llendl;
 		result = false;
 	}
 
@@ -95,7 +95,8 @@ void LLPluginMessagePipeOwner::killMessagePipe(void)
 	}
 }
 
-LLPluginMessagePipe::LLPluginMessagePipe(LLPluginMessagePipeOwner *owner, LLSocket::ptr_t socket)
+LLPluginMessagePipe::LLPluginMessagePipe(LLPluginMessagePipeOwner* owner,
+										 LLSocket::ptr_t socket)
 :	mInputMutex(gAPRPoolp),
 	mOutputMutex(gAPRPoolp),
 	mOutputStartIndex(0),
@@ -113,7 +114,7 @@ LLPluginMessagePipe::~LLPluginMessagePipe()
 	}
 }
 
-bool LLPluginMessagePipe::addMessage(const std::string &message)
+bool LLPluginMessagePipe::addMessage(const std::string& message)
 {
 	// queue the message for later output
 	LLMutexLock lock(&mOutputMutex);
@@ -133,15 +134,18 @@ bool LLPluginMessagePipe::addMessage(const std::string &message)
 
 void LLPluginMessagePipe::clearOwner(void)
 {
-	// The owner is done with this pipe.  The next call to process_impl should send any remaining data and exit.
+	// The owner is done with this pipe. The next call to process_impl should
+	// send any remaining data and exit.
 	mOwner = NULL;
 }
 
 void LLPluginMessagePipe::setSocketTimeout(apr_interval_time_t timeout_usec)
 {
-	// We never want to sleep forever, so force negative timeouts to become non-blocking.
+	// We never want to sleep forever, so force negative timeouts to become
+	// non-blocking.
 
-	// according to this page: http://dev.ariel-networks.com/apr/apr-tutorial/html/apr-tutorial-13.html
+	// according to this page:
+	// http://dev.ariel-networks.com/apr/apr-tutorial/html/apr-tutorial-13.html
 	// blocking/non-blocking with apr sockets is somewhat non-portable.
 
 	if (timeout_usec <= 0)
@@ -190,13 +194,13 @@ bool LLPluginMessagePipe::pumpOutput()
 
 			setSocketTimeout(0);
 
-//			LL_INFOS("Plugin") << "before apr_socket_send, size = " << size << LL_ENDL;
+//			llinfos << "before apr_socket_send, size = " << size << llendl;
 
 			status = apr_socket_send(mSocket->getSocket(),
 									 output_data,
 									 &out_size);
 
-//			LL_INFOS("Plugin") << "after apr_socket_send, size = " << size << LL_ENDL;
+//			llinfos << "after apr_socket_send, size = " << size << llendl;
 
 			if (status == APR_SUCCESS || APR_STATUS_IS_EAGAIN(status))
 			{
@@ -212,7 +216,8 @@ bool LLPluginMessagePipe::pumpOutput()
 				{
 					llassert(in_size > out_size);
 
-					// Remove the written part from the buffer and try again later.
+					// Remove the written part from the buffer and try again
+					// later.
 					mOutputStartIndex += out_size;
 				}
 			}
@@ -227,10 +232,9 @@ bool LLPluginMessagePipe::pumpOutput()
 				}
 				result = false;
 			}
-			else 
+			else
 			{
-				// some other error
-				// Treat this as fatal.
+				// Some other error. Treat this as fatal.
 				ll_apr_warn_status(status);
 
 				if (mOwner)
@@ -254,8 +258,9 @@ bool LLPluginMessagePipe::pumpInput(F64 timeout)
 		apr_status_t status;
 		apr_size_t size;
 
-		// FIXME: For some reason, the apr timeout stuff isn't working properly on windows.
-		// Until such time as we figure out why, don't try to use the socket timeout -- just sleep here instead.
+		// FIXME: For some reason, the apr timeout stuff isn't working properly
+		// on windows. Until such time as we figure out why, don't try to use
+		// the socket timeout -- just sleep here instead.
 #if LL_WINDOWS
 		if (result)
 		{
@@ -280,7 +285,8 @@ bool LLPluginMessagePipe::pumpInput(F64 timeout)
 			}
 			else
 			{
-				// Start out by reading one byte, so that any data received will wake us up.
+				// Start out by reading one byte, so that any data received
+				// will wake us up.
 				request_size = 1;
 			}
 
@@ -291,14 +297,12 @@ bool LLPluginMessagePipe::pumpInput(F64 timeout)
 			{
 				size = request_size;
 
-//				LL_INFOS("Plugin") << "before apr_socket_recv, size = " << size << LL_ENDL;
+//				llinfos << "before apr_socket_recv, size = " << size << llendl;
 
-				status = apr_socket_recv(
-						mSocket->getSocket(), 
-						input_buf, 
-						&size);
+				status = apr_socket_recv(mSocket->getSocket(), input_buf,
+										 &size);
 
-//				LL_INFOS("Plugin") << "after apr_socket_recv, size = " << size << LL_ENDL;
+//				llinfos << "after apr_socket_recv, size = " << size << llendl;
 
 				if (size > 0)
 				{
@@ -308,7 +312,8 @@ bool LLPluginMessagePipe::pumpInput(F64 timeout)
 
 				if (status == APR_SUCCESS)
 				{
-					LL_DEBUGS("PluginSocket") << "success, read " << size << LL_ENDL;
+					LL_DEBUGS("PluginSocket") << "success, read " << size
+											  << LL_ENDL;
 
 					if (size != request_size)
 					{
@@ -318,14 +323,17 @@ bool LLPluginMessagePipe::pumpInput(F64 timeout)
 				}
 				else if (APR_STATUS_IS_TIMEUP(status))
 				{
-					LL_DEBUGS("PluginSocket") << "TIMEUP, read " << size << LL_ENDL;
+					LL_DEBUGS("PluginSocket") << "TIMEUP, read " << size
+											  << LL_ENDL;
 
-					// Timeout was hit.  Since the initial read is 1 byte, this should never be a partial read.
+					// Timeout was hit.  Since the initial read is 1 byte, this
+					// should never be a partial read.
 					break;
 				}
 				else if (APR_STATUS_IS_EAGAIN(status))
 				{
-					LL_DEBUGS("PluginSocket") << "EAGAIN, read " << size << LL_ENDL;
+					LL_DEBUGS("PluginSocket") << "EAGAIN, read " << size
+											  << LL_ENDL;
 
 					// Non-blocking read returned immediately.
 					break;
@@ -333,7 +341,7 @@ bool LLPluginMessagePipe::pumpInput(F64 timeout)
 				else if (APR_STATUS_IS_EOF(status))
 				{
 					// This is what we normally expect when a plugin exits.
-					LL_INFOS("PluginSocket") << "Got EOF from plugin socket. " << LL_ENDL;
+					llinfos << "Got EOF from plugin socket. " << llendl;
 
 					if (mOwner)
 					{
@@ -382,9 +390,11 @@ void LLPluginMessagePipe::processInput(void)
 		// Let the owner process this message
 		if (mOwner)
 		{
-			// Pull the message out of the input buffer before calling receiveMessageRaw.
-			// It's now possible for this function to get called recursively (in the case where the plugin makes a blocking request)
-			// and this guarantees that the messages will get dequeued correctly.
+			// Pull the message out of the input buffer before calling
+			// receiveMessageRaw. It's now possible for this function to get
+			// called recursively (in the case where the plugin makes a
+			// blocking request) and this guarantees that the messages will get
+			// dequeued correctly.
 			std::string message(mInput, 0, delim);
 			mInput.erase(0, delim + 1);
 			mInputMutex.unlock();
@@ -393,7 +403,7 @@ void LLPluginMessagePipe::processInput(void)
 		}
 		else
 		{
-			LL_WARNS("Plugin") << "!mOwner" << LL_ENDL;
+			llwarns << "NULL owner" << llendl;
 		}
 	}
 	mInputMutex.unlock();

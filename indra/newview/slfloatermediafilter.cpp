@@ -95,7 +95,8 @@ void SLFloaterMediaFilter::draw()
 		LLSD element;
 		element["columns"][0]["font"] = "SANSSERIF";
 		element["columns"][0]["font-style"] = "BOLD";
-		for (S32 i = 0; i < (S32)LLViewerParcelMedia::sMediaFilterList.size(); i++)
+		for (S32 i = 0, count = LLViewerParcelMedia::sMediaFilterList.size();
+			 i < count; ++i)
 		{
 			domain = LLViewerParcelMedia::sMediaFilterList[i]["domain"].asString();
 			if (sShowIPs && update_timer.getElapsedTimeF32() < 1.0f)
@@ -126,18 +127,19 @@ void SLFloaterMediaFilter::draw()
 			}
 			else
 			{
-				LL_WARNS("MediaFilter") << "Bad media filter list: removing corrupted entry for \""
-										<< domain << "\"" << LL_ENDL;
+				llwarns << "Bad media filter list: removing corrupted entry for \""
+						<< domain << "\"" << llendl;
 				LLViewerParcelMedia::sMediaFilterList.erase(i--);
 			}
 		}
-		std::set<std::string>::iterator it;
 		element["columns"][0]["font"] = "SANSSERIF";
 		element["columns"][0]["font-style"] = "ITALIC";
 		//element["columns"][0]["color"] = LLColor4::green3.getValue();
 		element["columns"][0]["column"] = "whitelist_col";
-		for (it = LLViewerParcelMedia::sAllowedMedia.begin();
-			 it != LLViewerParcelMedia::sAllowedMedia.end(); it++)
+		for (std::set<std::string>::iterator
+				it = LLViewerParcelMedia::sAllowedMedia.begin(),
+				end = LLViewerParcelMedia::sAllowedMedia.end();
+			 it != end; ++it)
 		{
 			domain = *it;
 			if (sShowIPs && update_timer.getElapsedTimeF32() < 1.0f)
@@ -155,7 +157,10 @@ void SLFloaterMediaFilter::draw()
 			}
 		}
 		element["columns"][0]["column"] = "blacklist_col";
-		for (it = LLViewerParcelMedia::sDeniedMedia.begin(); it != LLViewerParcelMedia::sDeniedMedia.end(); it++)
+		for (std::set<std::string>::iterator
+				it = LLViewerParcelMedia::sDeniedMedia.begin(),
+				end = LLViewerParcelMedia::sDeniedMedia.end();
+			 it != end; ++it)
 		{
 			domain = *it;
 			if (sShowIPs && update_timer.getElapsedTimeF32() < 1.0f)

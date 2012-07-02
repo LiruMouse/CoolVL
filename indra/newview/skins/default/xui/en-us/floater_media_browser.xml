@@ -14,14 +14,14 @@
 			 left_delta="64" bottom_delta="0" width="60" height="20" follows="left|top" />
 			<combo_box name="address" allow_text_entry="true" max_chars="255"
 			 left_delta="64" bottom_delta="0" width="556" height="20" follows="left|top|right" />
-			<text type="string" name="loading" font="SansSerifSmall" halign="left" length="1"
+			<text type="string" name="loading" font="SansSerif" halign="left" length="1"
 			 visible="false" mouse_opaque="false" h_pad="0" v_pad="0" drop_shadow_visible="true"
 			 bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
-			 left_delta="0" bottom_delta="0" width="556" height="18" follows="left|top">
+			 left_delta="20" bottom_delta="0" width="100" height="18" follows="left|top">
 				Loading...
 			</text>
 			<button name="go" label="Go" enabled="false"
-			 left_delta="560" bottom_delta="0" width="50" height="20" follows="right|top" />
+			 left_delta="540" bottom_delta="0" width="50" height="20" follows="right|top" />
 		</layout_panel>
 		<layout_panel name="time_controls" auto_resize="false" user_resize="false"
 		 left="0" bottom="0" width="804" height="20">
@@ -64,8 +64,5 @@
 	</string>
 	<string name="support_page_url">
 		http://wiki.secondlife.com/wiki/Knowledge_Base
-	</string>
-	<string name="loading">
-		Loading...
 	</string>
 </floater>

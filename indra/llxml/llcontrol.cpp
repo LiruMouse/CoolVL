@@ -308,6 +308,12 @@ LLSD LLControlVariable::getSaveValue() const
 	return mValues[0];
 }
 
+/*	This is just here so that scripts/list-ll_debugs.pl registers the
+	"Controls" debug tag that is used in llcontrol.h (*.h files are not scanned
+	for debug tags)...
+	LL_DEBUGS("GetControlCalls") << "Dummy" << LL_ENDL;
+*/
+
 LLControlVariablePtr LLControlGroup::getControl(const std::string& name)
 {
 	ctrl_name_table_t::iterator iter = mNameTable.find(name);

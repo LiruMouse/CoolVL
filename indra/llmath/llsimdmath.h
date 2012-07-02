@@ -78,6 +78,7 @@ template <typename T> T* LL_NEXT_ALIGNED_ADDRESS_64(T* address)
 #include <xmmintrin.h>
 #include <emmintrin.h>
 
+#include "llmemory.h"
 #include "llsimdtypes.h"
 #include "llsimdtypes.inl"
 

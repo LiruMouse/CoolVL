@@ -32,12 +32,13 @@
 #include "llviewerprecompiledheaders.h"
 
 #include "llagentaccess.h"
-#include "indra_constants.h"
-#include "llcontrol.h"
 
-LLAgentAccess::LLAgentAccess(LLControlGroup& savedSettings) :
-	mSavedSettings(savedSettings),
-	mAccess(SIM_ACCESS_PG),
+#include "indra_constants.h"
+
+#include "llviewercontrol.h"
+
+LLAgentAccess::LLAgentAccess()
+:	mAccess(SIM_ACCESS_PG),
 	mAdminOverride(false),
 	mGodLevel(GOD_NOT)
 {
@@ -95,20 +96,20 @@ bool LLAgentAccess::canAccessAdult() const
 
 bool LLAgentAccess::prefersPG() const
 {
-	U32 access = mSavedSettings.getU32("PreferredMaturity");
-	return access < SIM_ACCESS_MATURE;
+	static LLCachedControl<U32> maturity(gSavedSettings, "PreferredMaturity");
+	return maturity < SIM_ACCESS_MATURE;
 }
 
 bool LLAgentAccess::prefersMature() const
 {
-	U32 access = mSavedSettings.getU32("PreferredMaturity");
-	return access >= SIM_ACCESS_MATURE;
+	static LLCachedControl<U32> maturity(gSavedSettings, "PreferredMaturity");
+	return maturity >= SIM_ACCESS_MATURE;
 }
 
 bool LLAgentAccess::prefersAdult() const
 {
-	U32 access = mSavedSettings.getU32("PreferredMaturity");
-	return access >= SIM_ACCESS_ADULT;
+	static LLCachedControl<U32> maturity(gSavedSettings, "PreferredMaturity");
+	return maturity >= SIM_ACCESS_ADULT;
 }
 
 bool LLAgentAccess::isTeen() const

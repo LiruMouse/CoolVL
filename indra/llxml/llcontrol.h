@@ -241,7 +241,6 @@ public:
 	LLRect		getRect(const std::string& name);
 	LLSD        getLLSD(const std::string& name);
 
-
 	LLColor4	getColor(const std::string& name);
 	LLColor4	getColor4(const std::string& name);
 	LLColor4U	getColor4U(const std::string& name);
@@ -250,6 +249,7 @@ public:
 	// generic getter
 	template<typename T> T get(const std::string& name)
 	{
+		LL_DEBUGS("GetControlCalls") << "Requested control: " << name << LL_ENDL;
 		LLControlVariable* control = getControl(name);
 		LLSD value;
 		eControlType type = TYPE_COUNT;

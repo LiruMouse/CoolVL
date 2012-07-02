@@ -32,17 +32,17 @@
 
 #include "linden_common.h"
 
-#include "llmultislider.h"
-#include "llui.h"
-
-#include "llgl.h"
-#include "llwindow.h"
-#include "llfocusmgr.h"
-#include "llkeyboard.h"			// for the MASK constants
-#include "llcontrol.h"
-#include "llimagegl.h"
-
 #include <sstream>
+
+#include "llmultislider.h"
+
+#include "llcontrol.h"
+#include "llfocusmgr.h"
+#include "llgl.h"
+#include "llimagegl.h"
+#include "llkeyboard.h"			// for the MASK constants
+#include "llui.h"
+#include "llwindow.h"
 
 static LLRegisterWidget<LLMultiSlider> r("multi_slider_bar");
 
@@ -85,7 +85,6 @@ LLMultiSlider::LLMultiSlider(const std::string& name,
 	mThumbCenterSelectedColor(LLUI::sColorsGroup->getColor("MultiSliderThumbCenterSelectedColor")),
 	mDisabledThumbColor(LLUI::sColorsGroup->getColor("MultiSliderDisabledThumbColor")),
 	mTriangleColor(LLUI::sColorsGroup->getColor("MultiSliderTriangleColor")),
-	mRoundedSquare(LLUI::getUIImage("rounded_square.tga")),
 	mMouseDownCallback(NULL),
 	mMouseUpCallback(NULL)
 {
@@ -443,8 +442,11 @@ BOOL LLMultiSlider::handleKeyHere(KEY key, MASK mask)
 
 void LLMultiSlider::draw()
 {
-	// This should never happen: if it does, UI textures are missing !
-	if (!mRoundedSquare) return;
+	static const LLUIImagePtr rounded_square = LLUI::getUIImage("rounded_square.tga");
+	if (!rounded_square)
+	{
+		llerrs << "Missing UI image: rounded_square.tga" << llendl;
+	}
 
 	LLColor4 curThumbColor;
 
@@ -471,7 +473,7 @@ void LLMultiSlider::draw()
 	if (mDrawTrack)
 	{
 		track_rect.stretch(-1);
-		mRoundedSquare->draw(track_rect, mTrackColor % opacity);
+		rounded_square->draw(track_rect, mTrackColor % opacity);
 	}
 
 	// if we're supposed to use a drawn triangle
@@ -492,13 +494,13 @@ void LLMultiSlider::draw()
 	else if (gFocusMgr.getMouseCapture() == this)
 	{
 		// draw drag start
-		mRoundedSquare->drawSolid(mDragStartThumbRect,
+		rounded_square->drawSolid(mDragStartThumbRect,
 								  mThumbCenterColor % 0.3f);
 
 		// draw the highlight
 		if (hasFocus())
 		{
-			mRoundedSquare->drawBorder(mThumbRects[mCurSlider],
+			rounded_square->drawBorder(mThumbRects[mCurSlider],
 									   gFocusMgr.getFocusColor(),
 									   gFocusMgr.getFocusFlashWidth());
 		}
@@ -517,13 +519,13 @@ void LLMultiSlider::draw()
 			}
 
 			// the draw command
-			mRoundedSquare->drawSolid(it->second, curThumbColor);
+			rounded_square->drawSolid(it->second, curThumbColor);
 		}
 
 		// draw cur slider last
 		if (cur_sldr_it != end)
 		{
-			mRoundedSquare->drawSolid(cur_sldr_it->second,
+			rounded_square->drawSolid(cur_sldr_it->second,
 									  mThumbCenterSelectedColor);
 		}
 	}
@@ -532,7 +534,7 @@ void LLMultiSlider::draw()
 		// draw highlight
 		if (hasFocus())
 		{
-			mRoundedSquare->drawBorder(mThumbRects[mCurSlider],
+			rounded_square->drawBorder(mThumbRects[mCurSlider],
 									   gFocusMgr.getFocusColor(),
 									   gFocusMgr.getFocusFlashWidth());
 		}
@@ -550,12 +552,12 @@ void LLMultiSlider::draw()
 				//curThumbColor = mThumbCenterSelectedColor;
 			}
 
-			mRoundedSquare->drawSolid(it->second, curThumbColor % opacity);
+			rounded_square->drawSolid(it->second, curThumbColor % opacity);
 		}
 
 		if (cur_sldr_it != end)
 		{
-			mRoundedSquare->drawSolid(cur_sldr_it->second,
+			rounded_square->drawSolid(cur_sldr_it->second,
 									  mThumbCenterSelectedColor % opacity);
 		}
 	}

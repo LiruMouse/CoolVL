@@ -315,8 +315,9 @@ BOOL LLDXHardware::getInfo(BOOL vram_only)
 
 	if (FAILED(hr))
 	{
-		LL_WARNS("AppInit") << "No DXDiag provider found!  DirectX 9 not installed!" << LL_ENDL;
-		gWriteDebug("No DXDiag provider found!  DirectX 9 not installed!\n");
+		llwarns << "No DXDiag provider found !  DirectX 9 not installed !"
+				<< llendl;
+		gWriteDebug("No DXDiag provider found !  DirectX 9 not installed !\n");
 		goto LCleanup;
 	}
     if (SUCCEEDED(hr)) // if FAILED(hr) then dx9 is not installed
@@ -375,7 +376,7 @@ BOOL LLDXHardware::getInfo(BOOL vram_only)
 		  // Dump the string as an int into the structure
 		  char *stopstring;
 		  mVRAM = strtol(ram_str.c_str(), &stopstring, 10); 
-		  LL_INFOS("AppInit") << "VRAM Detected: " << mVRAM << " DX9 string: " << ram_str << LL_ENDL;
+		  llinfos << "VRAM Detected: " << mVRAM << " DX9 string: " << ram_str << llendl;
 		}
 
 		if (vram_only)
@@ -524,7 +525,7 @@ BOOL LLDXHardware::getInfo(BOOL vram_only)
 LCleanup:
 	if (!ok)
 	{
-		LL_WARNS("AppInit") << "DX9 probe failed" << LL_ENDL;
+		llwarns << "DX9 probe failed" << llendl;
 		gWriteDebug("DX9 probe failed\n");
 	}
 

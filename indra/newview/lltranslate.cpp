@@ -96,8 +96,8 @@ void LLTranslate::stringReplaceAll(std::string& context, const std::string& from
 	size_t lookHere = 0;
 	size_t foundHere;
 
-	while((foundHere = context.find(from, lookHere))
-		!= std::string::npos) {
+	while((foundHere = context.find(from, lookHere)) != std::string::npos)
+	{
 			context.replace(foundHere, from.size(), to);
 			lookHere = foundHere + to.size();
 	}
@@ -111,7 +111,7 @@ BOOL LLTranslate::parseGoogleTranslate(const std::string result, std::string &tr
 	BOOL parsingSuccessful = reader.parse(result, root );
 	if ( !parsingSuccessful )
 	{
-		LL_WARNS("JSON") << reader.getFormatedErrorMessages() << LL_ENDL;
+		llwarns << reader.getFormatedErrorMessages() << llendl;
 		return FALSE;
 	}
 

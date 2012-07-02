@@ -61,6 +61,15 @@ const F32 MIN_TEX_ANIM_SIZE = 512.f;
 class LLFace
 {
 public:
+	void* operator new(size_t size)
+	{
+		return ll_aligned_malloc_16(size);
+	}
+
+	void operator delete(void* ptr)
+	{
+		ll_aligned_free_16(ptr);
+	}
 
 	LLFace(const LLFace& rhs)
 	{

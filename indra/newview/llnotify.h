@@ -33,12 +33,12 @@
 #ifndef LL_LLNOTIFY_H
 #define LL_LLNOTIFY_H
 
+#include <vector>
+
 #include "lleventtimer.h"
 #include "llfontgl.h"
 #include "llnotifications.h"
 #include "llpanel.h"
-#include "llui.h"
-#include <vector>
 
 class LLButton;
 class LLNotifyBoxTemplate;
@@ -105,8 +105,6 @@ protected:
 private:
 	static bool onNotification(const LLSD& notify);
 	void drawBackground() const;
-
-	LLUIImagePtr mRoundedSquare;
 
 protected:
 	std::string mMessage;

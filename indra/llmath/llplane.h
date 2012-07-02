@@ -42,6 +42,7 @@
 // The plane normal = [A, B, C]
 // The closest approach = D / sqrt(A*A + B*B + C*C)
 
+LL_ALIGN_PREFIX(16)
 class LLPlane
 {
 public:
@@ -100,6 +101,6 @@ public:
 
 private:
 	LLVector4a mV;
-};
+} LL_ALIGN_POSTFIX(16);
 
 #endif // LL_LLPLANE_H

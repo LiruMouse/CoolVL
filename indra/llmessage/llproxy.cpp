@@ -98,16 +98,16 @@ S32 LLProxy::proxyHandshake(LLHost proxy)
 									sizeof(socks_auth_response));
 	if (result != APR_SUCCESS)
 	{
-		LL_WARNS("Proxy") << "SOCKS authentication request failed, error on TCP control channel : "
-						  << result << LL_ENDL;
+		llwarns << "SOCKS authentication request failed, error on TCP control channel : "
+				<< result << llendl;
 		stopSOCKSProxy();
 		return SOCKS_CONNECT_ERROR;
 	}
 
 	if (socks_auth_response.method == AUTH_NOT_ACCEPTABLE)
 	{
-		LL_WARNS("Proxy") << "SOCKS 5 server refused all our authentication methods."
-						  << LL_ENDL;
+		llwarns << "SOCKS 5 server refused all our authentication methods."
+				<< llendl;
 		stopSOCKSProxy();
 		return SOCKS_NOT_ACCEPTABLE;
 	}
@@ -137,15 +137,15 @@ S32 LLProxy::proxyHandshake(LLHost proxy)
 
 		if (result != APR_SUCCESS)
 		{
-			LL_WARNS("Proxy") << "SOCKS authentication failed, error on TCP control channel : "
-							  << result << LL_ENDL;
+			llwarns << "SOCKS authentication failed, error on TCP control channel : "
+					<< result << llendl;
 			stopSOCKSProxy();
 			return SOCKS_CONNECT_ERROR;
 		}
 
 		if (password_reply.status != AUTH_SUCCESS)
 		{
-			LL_WARNS("Proxy") << "SOCKS authentication failed" << LL_ENDL;
+			llwarns << "SOCKS authentication failed" << llendl;
 			stopSOCKSProxy();
 			return SOCKS_AUTH_FAIL;
 		}
@@ -172,16 +172,16 @@ S32 LLProxy::proxyHandshake(LLHost proxy)
 									sizeof(connect_reply));
 	if (result != APR_SUCCESS)
 	{
-		LL_WARNS("Proxy") << "SOCKS connect request failed, error on TCP control channel : "
-						  << result << LL_ENDL;
+		llwarns << "SOCKS connect request failed, error on TCP control channel : "
+				<< result << llendl;
 		stopSOCKSProxy();
 		return SOCKS_CONNECT_ERROR;
 	}
 
 	if (connect_reply.reply != REPLY_REQUEST_GRANTED)
 	{
-		LL_WARNS("Proxy") << "Connection to SOCKS 5 server failed, UDP forward request not granted"
-						  << LL_ENDL;
+		llwarns << "Connection to SOCKS 5 server failed, UDP forward request not granted"
+				<< llendl;
 		stopSOCKSProxy();
 		return SOCKS_UDP_FWD_NOT_GRANTED;
 	}
@@ -189,8 +189,7 @@ S32 LLProxy::proxyHandshake(LLHost proxy)
 	mUDPProxy.setPort(ntohs(connect_reply.port)); // reply port is in network byte order
 	mUDPProxy.setAddress(proxy.getAddress());
 	// The connection was successful. We now have the UDP port to send requests that need forwarding to.
-	LL_INFOS("Proxy") << "SOCKS 5 UDP proxy connected on " << mUDPProxy
-					  << LL_ENDL;
+	llinfos << "SOCKS 5 UDP proxy connected on " << mUDPProxy << llendl;
 
 	return SOCKS_OK;
 }
@@ -295,7 +294,7 @@ bool LLProxy::setAuthPassword(const std::string &username, const std::string &pa
 	if (username.length() > SOCKSMAXUSERNAMELEN || password.length() > SOCKSMAXPASSWORDLEN ||
 			username.length() < SOCKSMINUSERNAMELEN || password.length() < SOCKSMINPASSWORDLEN)
 	{
-		LL_WARNS("Proxy") << "Invalid SOCKS 5 password or username length." << LL_ENDL;
+		llwarns << "Invalid SOCKS 5 password or username length." << llendl;
 		return false;
 	}
 
@@ -321,7 +320,7 @@ bool LLProxy::enableHTTPProxy(LLHost httpHost, LLHttpProxyType type)
 {
 	if (!httpHost.isOk())
 	{
-		LL_WARNS("Proxy") << "Invalid SOCKS 5 Server" << LL_ENDL;
+		llwarns << "Invalid SOCKS 5 Server" << llendl;
 		return false;
 	}
 
@@ -493,14 +492,14 @@ static apr_status_t tcp_blocking_handshake(LLSocket::ptr_t handle, char * dataou
   	rv = apr_socket_send(apr_socket, dataout, &outlen);
 	if (APR_SUCCESS != rv)
 	{
-		LL_WARNS("Proxy") << "Error sending data to proxy control channel, status: "
-						  << rv << LL_ENDL;
+		llwarns << "Error sending data to proxy control channel, status: "
+				<< rv << llendl;
 		ll_apr_warn_status(rv);
 	}
 	else if (expected_len != outlen)
 	{
-		LL_WARNS("Proxy") << "Incorrect data length sent. Expected: "
-						  << expected_len << " Sent: " << outlen << LL_ENDL;
+		llwarns << "Incorrect data length sent. Expected: " << expected_len
+				<< " Sent: " << outlen << llendl;
 		rv = -1;
 	}
 
@@ -510,15 +509,14 @@ static apr_status_t tcp_blocking_handshake(LLSocket::ptr_t handle, char * dataou
 		rv = apr_socket_recv(apr_socket, datain, &maxinlen);
 		if (rv != APR_SUCCESS)
 		{
-			LL_WARNS("Proxy") << "Error receiving data from proxy control channel, status: "
-							  << rv << LL_ENDL;
+			llwarns << "Error receiving data from proxy control channel, status: "
+					<< rv << llendl;
 			ll_apr_warn_status(rv);
 		}
 		else if (expected_len < maxinlen)
 		{
-			LL_WARNS("Proxy") << "Incorrect data length received. Expected: "
-							  << expected_len << " Received: " << maxinlen
-							  << LL_ENDL;
+			llwarns << "Incorrect data length received. Expected: "
+					<< expected_len << " Received: " << maxinlen << llendl;
 			rv = -1;
 		}
 	}

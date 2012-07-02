@@ -210,7 +210,8 @@ S32 start_net(S32& socket_out, int& nPort)
 	{
 		S32 err = WSAGetLastError();
 		WSACleanup();
-		LL_WARNS("AppInit") << "Windows Sockets initialization failed, err " << err << LL_ENDL;
+		llwarns << "Windows Sockets initialization failed, err " << err
+				<< llendl;
 		return 1;
 	}
 
@@ -220,7 +221,7 @@ S32 start_net(S32& socket_out, int& nPort)
 	{
 		S32 err = WSAGetLastError();
 		WSACleanup();
-		LL_WARNS("AppInit") << "socket() failed, err " << err << LL_ENDL;
+		llwarns << "socket() failed, err " << err << llendl;
 		return 2;
 	}
 
@@ -239,9 +240,8 @@ S32 start_net(S32& socket_out, int& nPort)
 		if (WSAGetLastError() == WSAEADDRINUSE)
 		{
 			// Try all ports from PORT_DISCOVERY_RANGE_MIN to PORT_DISCOVERY_RANGE_MAX
-			for(attempt_port = PORT_DISCOVERY_RANGE_MIN;
-				attempt_port <= PORT_DISCOVERY_RANGE_MAX;
-				attempt_port++)
+			for (attempt_port = PORT_DISCOVERY_RANGE_MIN;
+				 attempt_port <= PORT_DISCOVERY_RANGE_MAX; ++attempt_port)
 			{
 				stLclAddr.sin_port = htons(attempt_port);
 				LL_DEBUGS("AppInit") << "trying port " << attempt_port << LL_ENDL;
@@ -256,7 +256,8 @@ S32 start_net(S32& socket_out, int& nPort)
 
 			if (nRet == SOCKET_ERROR)
 			{
-				LL_WARNS("AppInit") << "startNet() : Couldn't find available network port." << LL_ENDL;
+				llwarns << "startNet() : Couldn't find available network port."
+						<< llendl;
 				// Fail gracefully here in release
 				return 3;
 			}
@@ -264,7 +265,8 @@ S32 start_net(S32& socket_out, int& nPort)
 		else
 		// Some other socket error
 		{
-			LL_WARNS("AppInit") << llformat("bind() port: %d failed, Err: %d\n", nPort, WSAGetLastError()) << LL_ENDL;
+			llwarns << llformat("bind() port: %d failed, Err: %d\n", nPort,
+								WSAGetLastError()) << llendl;
 			// Fail gracefully in release.
 			return 4;
 		}
@@ -275,7 +277,7 @@ S32 start_net(S32& socket_out, int& nPort)
 	getsockname(hSocket, (SOCKADDR*) &socket_address, &socket_address_size);
 	attempt_port = ntohs(socket_address.sin_port);
 
-	LL_INFOS("AppInit") << "connected on port " << attempt_port << LL_ENDL;
+	llinfos << "connected on port " << attempt_port << llendl;
 	nPort = attempt_port;
 	
 	// Set socket to be non-blocking
@@ -291,13 +293,13 @@ S32 start_net(S32& socket_out, int& nPort)
 	nRet = setsockopt(hSocket, SOL_SOCKET, SO_RCVBUF, (char *)&rec_size, buff_size);
 	if (nRet)
 	{
-		LL_INFOS("AppInit") << "Can't set receive buffer size!" << LL_ENDL;
+		llinfos << "Can't set receive buffer size!" << llendl;
 	}
 
 	nRet = setsockopt(hSocket, SOL_SOCKET, SO_SNDBUF, (char *)&snd_size, buff_size);
 	if (nRet)
 	{
-		LL_INFOS("AppInit") << "Can't set send buffer size!" << LL_ENDL;
+		llinfos << "Can't set send buffer size!" << llendl;
 	}
 
 	getsockopt(hSocket, SOL_SOCKET, SO_RCVBUF, (char *)&rec_size, &buff_size);

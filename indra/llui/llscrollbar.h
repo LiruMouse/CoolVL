@@ -35,7 +35,6 @@
 
 #include "stdtypes.h"
 
-#include "llui.h"
 #include "lluictrl.h"
 #include "v4color.h"
 
@@ -150,7 +149,6 @@ private:
 	LLColor4			mFocusColor;
 	LLColor4			mHighlightColor;
 	LLColor4			mShadowColor;
-	LLUIImagePtr		mImageBar;
 };
 
 #endif  // LL_SCROLLBAR_H

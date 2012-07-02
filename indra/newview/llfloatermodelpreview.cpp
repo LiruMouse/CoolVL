@@ -5038,23 +5038,24 @@ void LLModelPreview::genBuffers(S32 lod, bool include_skin_weights)
 				vb->getWeight4Strider(weights_strider);
 			}
 
-			LLVector4a::memcpyNonAliased16((F32*) vertex_strider.get(), (F32*) vf.mPositions, num_vertices*4*sizeof(F32));
+			LLVector4a::memcpyNonAliased16((F32*)vertex_strider.get(), (F32*)vf.mPositions, num_vertices * 4 * sizeof(F32));
 
 			if (vf.mTexCoords)
 			{
 				vb->getTexCoord0Strider(tc_strider);
-				LLVector4a::memcpyNonAliased16((F32*) tc_strider.get(), (F32*) vf.mTexCoords, num_vertices*2*sizeof(F32));
+				S32 tex_size = (num_vertices * 2 * sizeof(F32) + 0xF) & ~0xF;
+				LLVector4a::memcpyNonAliased16((F32*)tc_strider.get(), (F32*)vf.mTexCoords, tex_size);
 			}
 
 			if (vf.mNormals)
 			{
 				vb->getNormalStrider(normal_strider);
-				LLVector4a::memcpyNonAliased16((F32*) normal_strider.get(), (F32*) vf.mNormals, num_vertices*4*sizeof(F32));
+				LLVector4a::memcpyNonAliased16((F32*)normal_strider.get(), (F32*)vf.mNormals, num_vertices * 4 * sizeof(F32));
 			}
 
 			if (skinned)
 			{
-				for (U32 i = 0; i < num_vertices; i++)
+				for (U32 i = 0; i < num_vertices; ++i)
 				{
 					//find closest weight to vf.mVertices[i].mPosition
 					LLVector3 pos(vf.mPositions[i].getF32ptr());

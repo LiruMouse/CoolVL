@@ -61,12 +61,12 @@
 // Local constants...
 const S32 VERTICAL_OFFSET = 50;
 
-F32		LLManip::sHelpTextVisibleTime = 2.f;
-F32		LLManip::sHelpTextFadeTime = 2.f;
-S32		LLManip::sNumTimesHelpTextShown = 0;
-S32		LLManip::sMaxTimesShowHelpText = 5;
-F32		LLManip::sGridMaxSubdivisionLevel = 32.f;
-F32		LLManip::sGridMinSubdivisionLevel = 1.f;
+F32 LLManip::sHelpTextVisibleTime = 2.f;
+F32 LLManip::sHelpTextFadeTime = 2.f;
+S32 LLManip::sNumTimesHelpTextShown = 0;
+S32 LLManip::sMaxTimesShowHelpText = 5;
+F32 LLManip::sGridMaxSubdivisionLevel = 32.f;
+F32 LLManip::sGridMinSubdivisionLevel = 1.f;
 LLVector2 LLManip::sTickLabelSpacing(60.f, 25.f);
 
 //static
@@ -75,13 +75,14 @@ void LLManip::rebuild(LLViewerObject* vobj)
 	LLDrawable* drawablep = vobj->mDrawable;
 	if (drawablep && drawablep->getVOVolume())
 	{
-		gPipeline.markRebuild(drawablep,LLDrawable::REBUILD_VOLUME, TRUE);
+		gPipeline.markRebuild(drawablep, LLDrawable::REBUILD_VOLUME, TRUE);
 		drawablep->setState(LLDrawable::MOVE_UNDAMPED); // force to UNDAMPED
 		drawablep->updateMove();
 		LLSpatialGroup* group = drawablep->getSpatialGroup();
 		if (group)
 		{
 			group->dirtyGeom();
+			gPipeline.markRebuild(group, TRUE);
 		}
 	}
 }
@@ -460,12 +461,16 @@ void LLManip::renderXYZ(const LLVector3 &vec)
 
 	glPushMatrix();
 	{
-		static LLUIImagePtr imagep = LLUI::getUIImage("rounded_square.tga");
 		gViewerWindow->setup2DRender();
 		const LLVector2& display_scale = gViewerWindow->getDisplayScale();
 		glScalef(display_scale.mV[VX], display_scale.mV[VY], 1.f);
 		gGL.color4f(0.f, 0.f, 0.f, 0.7f);
 
+		static const LLUIImagePtr imagep = LLUI::getUIImage("rounded_square.tga");
+		if (!imagep)
+		{
+			llerrs << "Missing UI image: rounded_square.tga" << llendl;
+		}
 		imagep->draw(window_center_x - 115,
 					 window_center_y + vertical_offset - PAD,
 					 235, PAD * 2 + 10, LLColor4(0.f, 0.f, 0.f, 0.7f));

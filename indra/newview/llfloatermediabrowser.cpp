@@ -1,11 +1,11 @@
-/** 
+/**
  * @file llfloaterhtmlhelp.cpp
  * @brief HTML Help floater - uses embedded web browser control
  *
  * $LicenseInfo:firstyear=2006&license=viewergpl$
- * 
+ *
  * Copyright (c) 2006-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -34,11 +34,11 @@
 
 #include "llfloatermediabrowser.h"
 
-
 #include "llcombobox.h"
 #include "llparcel.h"
 #include "llpluginclassmedia.h"
 #include "llsdutil.h"
+#include "lltextbox.h"
 #include "llui.h"
 #include "lluictrlfactory.h"
 #include "roles_constants.h"
@@ -54,21 +54,95 @@
 #include "llweb.h"
 
 LLFloaterMediaBrowser::LLFloaterMediaBrowser(const LLSD& media_data)
+:	mBrowser(NULL),
+	mBackButton(NULL),
+	mForwardButton(NULL),
+	mReloadButton(NULL),
+	mRewindButton(NULL),
+	mPlayButton(NULL),
+	mPauseButton(NULL),
+	mStopButton(NULL),
+	mSeekButton(NULL),
+	mGoButton(NULL),
+	mCloseButton(NULL),
+	mBrowserButton(NULL),
+	mAssignButton(NULL),
+	mAddressCombo(NULL),
+	mLoadingText(NULL)
 {
-	LLUICtrlFactory::getInstance()->buildFloater(this, "floater_media_browser.xml");
-
+	LLUICtrlFactory::getInstance()->buildFloater(this,
+												 "floater_media_browser.xml");
 }
 
-void LLFloaterMediaBrowser::geometryChanged(S32 x, S32 y, S32 width, S32 height)
+BOOL LLFloaterMediaBrowser::postBuild()
 {
-	// Make sure the layout of the browser control is updated, so this calculation is correct.
+	// Note: we use the "build dummy widget if missing" version of getChild<T>
+	// so that all pointers are non-NULL and warnings are issued in the log
+	// about missing UI elements. All the UI elements are considered mandatory.
+
+	mBrowser = getChild<LLMediaCtrl>("browser");
+	mBrowser->addObserver(this);
+
+	mAddressCombo = getChild<LLComboBox>("address");
+	mAddressCombo->setCommitCallback(onEnterAddress);
+	mAddressCombo->setCallbackUserData(this);
+
+	mBackButton = getChild<LLButton>("back");
+	mBackButton->setClickedCallback(onClickBack, this);
+
+	mForwardButton = getChild<LLButton>("forward");
+	mForwardButton->setClickedCallback(onClickForward, this);
+
+	mReloadButton = getChild<LLButton>("reload");
+	mReloadButton->setClickedCallback(onClickRefresh, this);
+
+	mRewindButton = getChild<LLButton>("rewind");
+	mRewindButton->setClickedCallback(onClickRewind, this);
+
+	mPlayButton = getChild<LLButton>("play");
+	mPlayButton->setClickedCallback(onClickPlay, this);
+
+	mPauseButton = getChild<LLButton>("pause");
+	mPauseButton->setClickedCallback(onClickPlay, this);
+
+	mStopButton = getChild<LLButton>("stop");
+	mStopButton->setClickedCallback(onClickStop, this);
+
+	mSeekButton = getChild<LLButton>("seek");
+	mSeekButton->setClickedCallback(onClickSeek, this);
+
+	mGoButton = getChild<LLButton>("go");
+	mGoButton->setClickedCallback(onClickGo, this);
+
+	mCloseButton = getChild<LLButton>("close");
+	mCloseButton->setClickedCallback(onClickClose, this);
+
+	mBrowserButton = getChild<LLButton>("open_browser");
+	mBrowserButton->setClickedCallback(onClickOpenWebBrowser, this);
+
+	mAssignButton = getChild<LLButton>("assign");
+	mAssignButton->setClickedCallback(onClickAssign, this);
+
+	mLoadingText = getChild<LLTextBox>("loading");
+
+	buildURLHistory();
+	return TRUE;
+}
+
+void LLFloaterMediaBrowser::geometryChanged(S32 x, S32 y, S32 width,
+											S32 height)
+{
+	// Make sure the layout of the browser control is updated, so this
+	// calculation is correct.
 	LLLayoutStack::updateClass();
 
-	// TODO: need to adjust size and constrain position to make sure floaters aren't moved outside the window view, etc.
+	// TODO: need to adjust size and constrain position to make sure floaters
+	// aren't moved outside the window view, etc.
 	LLCoordWindow window_size;
 	getWindow()->getSize(&window_size);
 
-	// Adjust width and height for the size of the chrome on the Media Browser window.
+	// Adjust width and height for the size of the chrome on the Media Browser
+	// window.
 	width += getRect().getWidth() - mBrowser->getRect().getWidth();
 	height += getRect().getHeight() - mBrowser->getRect().getHeight();
 
@@ -82,73 +156,55 @@ void LLFloaterMediaBrowser::geometryChanged(S32 x, S32 y, S32 width, S32 height)
 
 void LLFloaterMediaBrowser::draw()
 {
-	bool can_go = !mAddressCombo->getValue().asString().empty();
-	if (mBrowser)
+	if (!mBrowser)
 	{
-		can_go &= !mBrowser->isTrusted();
+		// There's something *very* wrong: abort
+		LL_WARNS_ONCE("MediaBrowser") << "Incomplete floater media browser !"
+									  << LL_ENDL;
+		LLFloater::draw();
+		return;
 	}
-	childSetEnabled("go", can_go);
+
+	mBackButton->setEnabled(mBrowser->canNavigateBack());
+	mForwardButton->setEnabled(mBrowser->canNavigateForward());
+
+	BOOL can_go = !mAddressCombo->getValue().asString().empty();
+	can_go &= !mBrowser->isTrusted();
+	mGoButton->setEnabled(can_go);
+
 	LLParcel* parcel = LLViewerParcelMgr::getInstance()->getAgentParcel();
 	if (parcel)
 	{
-		childSetVisible("assign", LLViewerParcelMgr::isParcelModifiableByAgent(parcel, GP_LAND_CHANGE_MEDIA));
-		childSetEnabled("assign", !mAddressCombo->getValue().asString().empty());
+		BOOL can_change = LLViewerParcelMgr::isParcelModifiableByAgent(parcel,
+																	   GP_LAND_CHANGE_MEDIA);
+		mAssignButton->setVisible(can_change);
+		BOOL not_empty = !mAddressCombo->getValue().asString().empty();
+		mAssignButton->setEnabled(not_empty);
 	}
-	bool show_time_controls = false;
-	bool media_playing = false;
-	if (mBrowser)
+
+	BOOL show_time_controls = FALSE;
+	BOOL media_playing = FALSE;
+	LLPluginClassMedia* media_plugin = mBrowser->getMediaPlugin();
+	if (media_plugin)
 	{
-		LLPluginClassMedia* media_plugin = mBrowser->getMediaPlugin();
-		if (media_plugin)
-		{
-			show_time_controls = media_plugin->pluginSupportsMediaTime();
-			media_playing = media_plugin->getStatus() == LLPluginClassMediaOwner::MEDIA_PLAYING;
-		}
+		show_time_controls = media_plugin->pluginSupportsMediaTime();
+		media_playing = media_plugin->getStatus() == LLPluginClassMediaOwner::MEDIA_PLAYING;
 	}
-	childSetVisible("rewind", show_time_controls);
-	childSetVisible("play", show_time_controls && ! media_playing);
-	childSetVisible("pause", show_time_controls && media_playing);
-	childSetVisible("stop", show_time_controls);
-	childSetVisible("seek", show_time_controls);
 
-	childSetEnabled("play", ! media_playing);
-	childSetEnabled("stop", media_playing);
-
-	childSetEnabled("back", mBrowser->canNavigateBack());
-	childSetEnabled("forward", mBrowser->canNavigateForward());
+	mRewindButton->setVisible(show_time_controls);
+	mPlayButton->setVisible(show_time_controls && !media_playing);
+	mPlayButton->setEnabled(!media_playing);
+	mPauseButton->setVisible(show_time_controls && media_playing);
+	mStopButton->setVisible(show_time_controls);
+	mStopButton->setEnabled(media_playing);
+	mSeekButton->setVisible(show_time_controls);
 
 	LLFloater::draw();
 }
 
-BOOL LLFloaterMediaBrowser::postBuild()
-{
-	mBrowser = getChild<LLMediaCtrl>("browser");
-	mBrowser->addObserver(this);
-
-	mAddressCombo = getChild<LLComboBox>("address");
-	mAddressCombo->setCommitCallback(onEnterAddress);
-	mAddressCombo->setCallbackUserData(this);
-
-	childSetAction("back", onClickBack, this);
-	childSetAction("forward", onClickForward, this);
-	childSetAction("reload", onClickRefresh, this);
-	childSetAction("rewind", onClickRewind, this);
-	childSetAction("play", onClickPlay, this);
-	childSetAction("stop", onClickStop, this);
-	childSetAction("pause", onClickPlay, this);
-	childSetAction("seek", onClickSeek, this);
-	childSetAction("go", onClickGo, this);
-	childSetAction("close", onClickClose, this);
-	childSetAction("open_browser", onClickOpenWebBrowser, this);
-	childSetAction("assign", onClickAssign, this);
-
-	buildURLHistory();
-	return TRUE;
-}
-
 void LLFloaterMediaBrowser::buildURLHistory()
 {
-	LLCtrlListInterface* url_list = childGetListInterface("address");
+	LLCtrlListInterface* url_list = mAddressCombo->getListInterface();
 	if (url_list)
 	{
 		url_list->operateOnAll(LLCtrlListInterface::OP_DELETE);
@@ -157,15 +213,15 @@ void LLFloaterMediaBrowser::buildURLHistory()
 	// Get all of the entries in the "browser" collection
 	LLSD browser_history = LLURLHistory::getURLHistory("browser");
 
-	LLSD::array_iterator iter_history =
-		browser_history.beginArray();
-	LLSD::array_iterator end_history =
-		browser_history.endArray();
-	for(; iter_history != end_history; ++iter_history)
+	for(LLSD::array_iterator iter_history = browser_history.beginArray(),
+							 end_history = browser_history.endArray();
+		iter_history != end_history; ++iter_history)
 	{
 		std::string url = (*iter_history).asString();
 		if (! url.empty())
+		{
 			url_list->addSimpleElement(url);
+		}
 	}
 
 	// initialize URL history in the plugin
@@ -176,27 +232,29 @@ std::string LLFloaterMediaBrowser::getSupportURL()
 {
 	return getString("support_page_url");
 }
+
 void LLFloaterMediaBrowser::onClose(bool app_quitting)
 {
 	//setVisible(FALSE);
 	destroy();
 }
 
-void LLFloaterMediaBrowser::handleMediaEvent(LLPluginClassMedia* self, EMediaEvent event)
+void LLFloaterMediaBrowser::handleMediaEvent(LLPluginClassMedia* self,
+											 EMediaEvent event)
 {
 	if (event == MEDIA_EVENT_LOCATION_CHANGED)
 	{
 		setCurrentURL(self->getLocation());
-		childSetVisible("address", false);
-		childSetVisible("loading", true);
+		mAddressCombo->setVisible(FALSE);
+		mLoadingText->setVisible(true);
 	}
 	else if (event == MEDIA_EVENT_NAVIGATE_COMPLETE)
 	{
 		// This is the event these flags are sent with.
-		childSetEnabled("back", self->getHistoryBackAvailable());
-		childSetEnabled("forward", self->getHistoryForwardAvailable());
-		childSetVisible("address", true);
-		childSetVisible("loading", false);
+		mBackButton->setEnabled(self->getHistoryBackAvailable());
+		mForwardButton->setEnabled(self->getHistoryForwardAvailable());
+		mAddressCombo->setVisible(TRUE);
+		mLoadingText->setVisible(FALSE);
 	}
 	else if (event == MEDIA_EVENT_CLOSE_REQUEST)
 	{
@@ -213,8 +271,7 @@ void LLFloaterMediaBrowser::handleMediaEvent(LLPluginClassMedia* self, EMediaEve
 void LLFloaterMediaBrowser::setCurrentURL(const std::string& url)
 {
 	mCurrentURL = url;
-
-	// redirects will navigate momentarily to about:blank, don't add to history
+	// redirects will navigate momentarily to about:blank: don't add to history
 	if (mCurrentURL != "about:blank")
 	{
 		mAddressCombo->remove(mCurrentURL);
@@ -225,52 +282,64 @@ void LLFloaterMediaBrowser::setCurrentURL(const std::string& url)
 		LLURLHistory::removeURL("browser", mCurrentURL);
 		LLURLHistory::addURL("browser", mCurrentURL);
 	}
-	childSetEnabled("back", mBrowser->canNavigateBack());
-	childSetEnabled("forward", mBrowser->canNavigateForward());
-	childSetEnabled("reload", true);
+
+	mBackButton->setEnabled(mBrowser->canNavigateBack());
+	mForwardButton->setEnabled(mBrowser->canNavigateForward());
+	mReloadButton->setEnabled(TRUE);
 }
 
-LLFloaterMediaBrowser* LLFloaterMediaBrowser::showInstance(const LLSD& media_url, bool trusted)
+LLFloaterMediaBrowser* LLFloaterMediaBrowser::showInstance(const LLSD& media_url,
+														   bool trusted)
 {
-	LLFloaterMediaBrowser* floaterp = LLUISingleton<LLFloaterMediaBrowser, VisibilityPolicy<LLFloater> >::showInstance(media_url);
+	LLFloaterMediaBrowser* floaterp = LLUISingleton<LLFloaterMediaBrowser,
+													VisibilityPolicy<LLFloater> >::showInstance(media_url);
 
 	floaterp->openMedia(media_url.asString(), trusted);
 	return floaterp;
 }
 
-//static 
+//static
 void LLFloaterMediaBrowser::onEnterAddress(LLUICtrl* ctrl, void* user_data)
 {
 	LLFloaterMediaBrowser* self = (LLFloaterMediaBrowser*)user_data;
-	self->mBrowser->navigateTo(self->mAddressCombo->getValue().asString());
+	if (self)
+	{
+		self->mBrowser->navigateTo(self->mAddressCombo->getValue().asString());
+	}
 }
 
-//static 
+//static
 void LLFloaterMediaBrowser::onClickRefresh(void* user_data)
 {
 	LLFloaterMediaBrowser* self = (LLFloaterMediaBrowser*)user_data;
-
-	self->mAddressCombo->remove(0);
-	self->mBrowser->navigateTo(self->mCurrentURL);
+	if (self)
+	{
+		self->mAddressCombo->remove(0);
+		self->mBrowser->navigateTo(self->mCurrentURL);
+	}
 }
 
-//static 
+//static
 void LLFloaterMediaBrowser::onClickForward(void* user_data)
 {
 	LLFloaterMediaBrowser* self = (LLFloaterMediaBrowser*)user_data;
-
-	self->mBrowser->navigateForward();
+	if (self)
+	{
+		self->mBrowser->navigateForward();
+	}
 }
 
-//static 
+//static
 void LLFloaterMediaBrowser::onClickBack(void* user_data)
 {
 	LLFloaterMediaBrowser* self = (LLFloaterMediaBrowser*)user_data;
-
-	self->mBrowser->navigateBack();
+	if (self)
+	{
+		self->mBrowser->navigateBack();
+	}
 }
 
-//static 
+//static
 void LLFloaterMediaBrowser::onClickGo(void* user_data)
 {
 	LLFloaterMediaBrowser* self = (LLFloaterMediaBrowser*)user_data;
@@ -278,33 +347,39 @@ void LLFloaterMediaBrowser::onClickGo(void* user_data)
 	self->mBrowser->navigateTo(self->mAddressCombo->getValue().asString());
 }
 
-//static 
+//static
 void LLFloaterMediaBrowser::onClickClose(void* user_data)
 {
 	LLFloaterMediaBrowser* self = (LLFloaterMediaBrowser*)user_data;
-
-	self->close();
+	if (self)
+	{
+		self->close();
+	}
 }
 
-//static 
+//static
 void LLFloaterMediaBrowser::onClickOpenWebBrowser(void* user_data)
 {
 	LLFloaterMediaBrowser* self = (LLFloaterMediaBrowser*)user_data;
-
-	std::string url = self->mCurrentURL.empty() ?
-					  self->mBrowser->getHomePageUrl() : self->mCurrentURL;
-	LLWeb::loadURLExternal(url);
+	if (self)
+	{
+		std::string url = self->mCurrentURL.empty() ? self->mBrowser->getHomePageUrl()
+													: self->mCurrentURL;
+		LLWeb::loadURLExternal(url);
+	}
 }
 
 void LLFloaterMediaBrowser::onClickAssign(void* user_data)
 {
 	LLFloaterMediaBrowser* self = (LLFloaterMediaBrowser*)user_data;
+	if (!self) return;
 
 	LLParcel* parcel = LLViewerParcelMgr::getInstance()->getAgentParcel();
 	if (!parcel)
 	{
 		return;
 	}
+
 	std::string media_url = self->mAddressCombo->getValue().asString();
 	LLStringUtil::trim(media_url);
 
@@ -313,7 +388,8 @@ void LLFloaterMediaBrowser::onClickAssign(void* user_data)
 		parcel->setMediaURL(media_url);
 		parcel->setMediaCurrentURL(media_url);
 		parcel->setMediaType(std::string("text/html"));
-		LLViewerParcelMgr::getInstance()->sendParcelPropertiesUpdate(parcel, true);
+		LLViewerParcelMgr::getInstance()->sendParcelPropertiesUpdate(parcel,
+																	 true);
 		LLViewerParcelMedia::sendMediaNavigateMessage(media_url);
 		LLViewerParcelMedia::stop();
 		// LLViewerParcelMedia::update(parcel);
@@ -321,19 +397,22 @@ void LLFloaterMediaBrowser::onClickAssign(void* user_data)
 	LLViewerParcelMedia::sendMediaNavigateMessage(media_url);
 }
 
-//static 
+//static
 void LLFloaterMediaBrowser::onClickRewind(void* user_data)
 {
 	LLFloaterMediaBrowser* self = (LLFloaterMediaBrowser*)user_data;
 
-	if (self->mBrowser->getMediaPlugin())
+	if (self && self->mBrowser->getMediaPlugin())
+	{
 		self->mBrowser->getMediaPlugin()->start(-2.0f);
+	}
 }
 
-//static 
+//static
 void LLFloaterMediaBrowser::onClickPlay(void* user_data)
 {
 	LLFloaterMediaBrowser* self = (LLFloaterMediaBrowser*)user_data;
+	if (!self) return;
 
 	LLPluginClassMedia* plugin = self->mBrowser->getMediaPlugin();
 	if (plugin)
@@ -349,58 +428,61 @@ void LLFloaterMediaBrowser::onClickPlay(void* user_data)
 	}
 }
 
-//static 
+//static
 void LLFloaterMediaBrowser::onClickStop(void* user_data)
 {
 	LLFloaterMediaBrowser* self = (LLFloaterMediaBrowser*)user_data;
 
-	if (self->mBrowser->getMediaPlugin())
+	if (self && self->mBrowser->getMediaPlugin())
+	{
 		self->mBrowser->getMediaPlugin()->stop();
+	}
 }
 
-//static 
+//static
 void LLFloaterMediaBrowser::onClickSeek(void* user_data)
 {
 	LLFloaterMediaBrowser* self = (LLFloaterMediaBrowser*)user_data;
 
-	if (self->mBrowser->getMediaPlugin())
+	if (self && self->mBrowser->getMediaPlugin())
+	{
 		self->mBrowser->getMediaPlugin()->start(2.0f);
+	}
 }
 
-void LLFloaterMediaBrowser::openMedia(const std::string& media_url, bool trusted)
+void LLFloaterMediaBrowser::openMedia(const std::string& media_url,
+									  bool trusted)
 {
 	openMedia(media_url, "", trusted);
 }
 
-void LLFloaterMediaBrowser::openMedia(const std::string& media_url, const std::string& target, bool trusted)
+void LLFloaterMediaBrowser::openMedia(const std::string& media_url,
+									  const std::string& target,
+									  bool trusted)
 {
 	mBrowser->setHomePageUrl(media_url);
 	mBrowser->setTarget(target);
 	mBrowser->setTrusted(trusted);
-	childSetEnabled("address", !trusted);
-	childSetEnabled("go", !trusted);
-	childSetVisible("address", false);
-	childSetVisible("loading", true);
+	mAddressCombo->setEnabled(!trusted);
+	mGoButton->setEnabled(!trusted);
+	mAddressCombo->setVisible(FALSE);
+	mLoadingText->setVisible(TRUE);
 	mBrowser->navigateTo(media_url);
 	setCurrentURL(media_url);
 }
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 
 LLViewerHtmlHelp gViewerHtmlHelp;
 
-
-////////////////////////////////////////////////////////////////////////////////
-//
 LLViewerHtmlHelp::LLViewerHtmlHelp()
 {
-
 	LLUI::setHtmlHelp(this);
 }
 
 LLViewerHtmlHelp::~LLViewerHtmlHelp()
 {
-
 	LLUI::setHtmlHelp(NULL);
 }
 
@@ -422,9 +504,11 @@ void LLViewerHtmlHelp::show(std::string url)
 	if (gSavedSettings.getBOOL("UseExternalBrowser"))
 	{
 		LLSD notificationData;
-		notificationData["url"] = url;                                                                     	    
+		notificationData["url"] = url;                                                                     	
 
-		LLNotifications::instance().add("ClickOpenF1Help", notificationData, LLSD(), onClickF1HelpLoadURL);	    
+		LLNotifications::instance().add("ClickOpenF1Help",
+										notificationData, LLSD(),
+										onClickF1HelpLoadURL);	
 		floater_html->close();
 	}
 	else
@@ -434,8 +518,10 @@ void LLViewerHtmlHelp::show(std::string url)
 		floater_html->openMedia(url);
 	}
 }
-// static 
-bool LLViewerHtmlHelp::onClickF1HelpLoadURL(const LLSD& notification, const LLSD& response)
+
+//static
+bool LLViewerHtmlHelp::onClickF1HelpLoadURL(const LLSD& notification,
+											const LLSD& response)
 {
 	LLFloaterMediaBrowser* floater_html = LLFloaterMediaBrowser::getInstance();
 	floater_html->setVisible(FALSE);

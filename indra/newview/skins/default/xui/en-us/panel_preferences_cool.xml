@@ -60,7 +60,7 @@
 			 label_width="250" font="SansSerifSmall" enabled="true" mouse_opaque="true"
 			 decimal_digits="0" min_val="0" max_val="990" initial_val="0" increment="5"
 			 left="18" bottom_delta="-20" width="300" height="16" follows="left|top" />
-			<text name="private_look_at_limit_meters" type="string" length="1"
+			<text name="fade_mouselook_exit_seconds" type="string" length="1"
 			 enabled="true" mouse_opaque="true"
 			 bg_visible="false" border_visible="false" border_drop_shadow_visible="false"
 			 drop_shadow_visible="true" h_pad="0" v_pad="0" halign="left"
@@ -218,7 +218,7 @@
 			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
 			<check_box name="add_avatar_names_to_ignore_check" control_name="AddAvatarNamesToIgnore"
 			 label="Add surrounding avatars' names to the Ignore list"
-			 tool_tip="When this setting is enabled, each time you attempt to auto-complete an avatar name by hitting the TAB key in the chat input (see the corresponding option in the Text Chat settings), the names of the surrounding avatars (avatars within chat range) are automatically added to the ignore list of the spell checker (keep in mind that this list not kept after logout, so it won't affect next sessions), thus avoiding getting the names wrongly flagged as mispelled by the spell checker."
+			 tool_tip="When this setting is enabled, each time you attempt to auto-complete an avatar name by hitting the TAB key in the chat input (see the corresponding option in the Text Chat settings), the names of the surrounding avatars (avatars within chat range) are automatically added to the ignore list of the spell checker (keep in mind that this list is not kept after logout, so it won't affect next sessions), thus avoiding getting the names wrongly flagged as mispelled by the spell checker."
 			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
 			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
 			<text name="language_label" font="SansSerifSmall"
@@ -282,19 +282,35 @@
 			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
 			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
 			<check_box name="private_look_at_check" control_name="PrivateLookAt"
-			 label="Do not look at or point to objects beyond:"
-			 tool_tip="When this setting is enabled, hovering the mouse pointer on or editing an object that is beyond the configured distance does not make your avatar 'looking' or 'pointing' at it, thus not broadcasting this info to surrounding avatars' viewers. This defeats the 'ShowLookAt' and 'ShowPointAt' features/hacks that others could use to find out (or make wrong assumptions about) what you are 'looking at' (when it's most often just your mouse pointer hovering on some random object)."
+			 label="Do not look at objects beyond:"
+			 tool_tip="When this setting is enabled, hovering the mouse pointer on an object that is beyond the configured distance does not make your avatar 'looking' at it, thus not broadcasting this info to surrounding avatars' viewers. This defeats the 'ShowLookAt' feature/hack that others could use to find out (or make wrong assumptions about) what you are 'looking at' (when it's most often just your mouse pointer hovering on some random object)."
 			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
 			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
 			<spinner name="private_look_at_limit" control_name="PrivateLookAtLimit"
 			 font="SansSerifSmall" label="" label_width="0" enabled="true" mouse_opaque="true"
-			 decimal_digits="0" min_val="5" max_val="100" initial_val="20" increment="5"
-			 left="270" bottom_delta="0" width="50" height="16" follows="left|top" />
+			 decimal_digits="0" min_val="0" max_val="500" initial_val="20" increment="5"
+			 left="220" bottom_delta="0" width="50" height="16" follows="left|top" />
 			<text name="private_look_at_limit_meters" type="string" length="1"
 			 enabled="true" mouse_opaque="true"
 			 bg_visible="false" border_visible="false" border_drop_shadow_visible="false"
 			 drop_shadow_visible="true" h_pad="0" v_pad="0" halign="left"
-			 left="325" bottom_delta="0" width="30" height="16" follows="left|top">
+			 left="275" bottom_delta="0" width="30" height="16" follows="left|top">
+				m
+			</text>
+			<check_box name="private_point_at_check" control_name="PrivatePointAt"
+			 label="Do not point to objects beyond:"
+			 tool_tip="When this setting is enabled, touching or editing an object that is beyond the configured distance does not make your avatar 'pointing' at it (no selection beam drawn either), thus not broadcasting this info to surrounding avatars' viewers."
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
+			<spinner name="private_point_at_limit" control_name="PrivatePointAtLimit"
+			 font="SansSerifSmall" label="" label_width="0" enabled="true" mouse_opaque="true"
+			 decimal_digits="0" min_val="0" max_val="500" initial_val="20" increment="5"
+			 left="220" bottom_delta="0" width="50" height="16" follows="left|top" />
+			<text name="private_point_at_limit_meters" type="string" length="1"
+			 enabled="true" mouse_opaque="true"
+			 bg_visible="false" border_visible="false" border_drop_shadow_visible="false"
+			 drop_shadow_visible="true" h_pad="0" v_pad="0" halign="left"
+			 left="275" bottom_delta="0" width="30" height="16" follows="left|top">
 				m
 			</text>
 			<check_box name="revoke_perms_on_stand_up_check" control_name="RevokePermsOnStandUp"

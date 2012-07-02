@@ -43,6 +43,7 @@
 #include "llparcel.h"
 #include "llrender.h"
 #include "lltextbox.h"
+#include "llui.h"
 #include "lluictrlfactory.h"
 
 #include "llagent.h"
@@ -154,8 +155,6 @@ LLOverlayBar::LLOverlayBar(const std::string& name, const LLRect& rect)
 	setFocusRoot(TRUE);
 	mBuilt = true;
 
-	mRoundedSquare = LLUI::getUIImage("rounded_square.tga");
-
 	// make overlay bar conform to window size
 	setRect(rect);
 	layoutButtons();
@@ -256,9 +255,15 @@ void LLOverlayBar::layoutButtons()
 
 void LLOverlayBar::draw()
 {
-	if (mRoundedSquare && gBottomPanel)
+	static const LLUIImagePtr rounded_square = LLUI::getUIImage("rounded_square.tga");
+	if (!rounded_square)
 	{
-		gGL.getTexUnit(0)->bind(mRoundedSquare->getImage());
+		llerrs << "Missing UI image: rounded_square.tga" << llendl;
+	}
+
+	if (gBottomPanel)
+	{
+		gGL.getTexUnit(0)->bind(rounded_square->getImage());
 
 		// draw rounded rect tabs behind all children
 		LLRect r;
@@ -281,8 +286,8 @@ void LLOverlayBar::draw()
 											 r.mTop + 3,
 											 r.mRight + mStatusBarPad / 3 + 1,
 											 r.mBottom,
-											 mRoundedSquare->getTextureWidth(),
-											 mRoundedSquare->getTextureHeight(),
+											 rounded_square->getTextureWidth(),
+											 rounded_square->getTextureHeight(),
 											 16,
 											 ROUNDED_RECT_TOP);
 				}
@@ -306,8 +311,8 @@ void LLOverlayBar::draw()
 				gl_segmented_rect_2d_tex(r.mLeft - mStatusBarPad / 3 + 1,
 										 r.mTop + 2, r.mRight + mStatusBarPad / 3,
 										 r.mBottom,
-										 mRoundedSquare->getTextureWidth(),
-										 mRoundedSquare->getTextureHeight(),
+										 rounded_square->getTextureWidth(),
+										 rounded_square->getTextureHeight(),
 										 16, ROUNDED_RECT_TOP);
 				static LLCachedControl<LLColor4U> default_highlight_light(gColors,
 																		  "DefaultHighlightLight");
@@ -317,8 +322,8 @@ void LLOverlayBar::draw()
 										 r.mTop + 2,
 										 r.mRight + mStatusBarPad / 3 - 3,
 										 r.mBottom,
-										 mRoundedSquare->getTextureWidth(),
-										 mRoundedSquare->getTextureHeight(),
+										 rounded_square->getTextureWidth(),
+										 rounded_square->getTextureHeight(),
 										 16, ROUNDED_RECT_TOP);
 				// here's the main background.  Note that it overhangs on the
 				// bottom so as to hide the focus highlight on the bottom
@@ -332,8 +337,8 @@ void LLOverlayBar::draw()
 										 r.mTop + 1,
 										 r.mRight + mStatusBarPad / 3 - 1,
 										 r.mBottom - 1,
-										 mRoundedSquare->getTextureWidth(),
-										 mRoundedSquare->getTextureHeight(),
+										 rounded_square->getTextureWidth(),
+										 rounded_square->getTextureHeight(),
 										 16, ROUNDED_RECT_TOP);
 			}
 		}

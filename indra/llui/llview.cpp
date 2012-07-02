@@ -1755,6 +1755,8 @@ LLView* LLView::getChildView(const std::string& name, BOOL recurse,
 	// richard: should we allow empty names?
 	//if (name.empty()) return NULL;
 
+	LL_DEBUGS("GetChildCalls") << "Requested child name: " << name << LL_ENDL;
+
 	// Look for direct children *first*
 	for (child_list_const_iter_t child_it = mChildList.begin(),
 								  end = mChildList.end();

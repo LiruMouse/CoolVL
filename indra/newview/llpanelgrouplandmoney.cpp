@@ -274,7 +274,7 @@ bool LLPanelGroupLandMoney::impl::applyContribution()
 		if (!gAgent.setGroupContribution(mGroupID, new_contribution))
 		{
 			// should never happen...
-			LL_WARNS("GroupPanel") << "Unable to set contribution." << LL_ENDL;
+			llwarns << "Unable to set contribution." << llendl;
 			return false;
 		}
 	}
@@ -1038,7 +1038,7 @@ void LLGroupMoneyDetailsTabEventHandler::processReply(LLMessageSystem* msg,
 	msg->getUUIDFast(_PREHASH_AgentData, _PREHASH_GroupID, group_id);
 	if (mImplementationp->mGroupID != group_id) 
 	{
-		LL_WARNS("GroupPanel") << "Group Account details not for this group!" << LL_ENDL;
+		llwarns << "Group Account details not for this group !" << llendl;
 		return;
 	}
 
@@ -1101,7 +1101,7 @@ void LLPanelGroupLandMoney::processGroupAccountDetailsReply(LLMessageSystem* msg
 	msg->getUUIDFast(_PREHASH_AgentData, _PREHASH_AgentID, agent_id);
 	if (gAgent.getID() != agent_id)
 	{
-		LL_WARNS("GroupPanel") << "Got group L$ history reply for another agent!" << LL_ENDL;
+		llwarns << "Got group L$ history reply for another agent !" << llendl;
 		return;
 	}
 
@@ -1110,7 +1110,8 @@ void LLPanelGroupLandMoney::processGroupAccountDetailsReply(LLMessageSystem* msg
 	LLGroupMoneyTabEventHandler* selfp = LLGroupMoneyTabEventHandler::sInstanceIDs.getIfThere(request_id);
 	if (!selfp)
 	{
-		LL_WARNS("GroupPanel") << "GroupAccountDetails recieved for non-existent group panel." << LL_ENDL;
+		llwarns << "GroupAccountDetails recieved for non-existent group panel."
+				<< llendl;
 		return;
 	}
 
@@ -1173,7 +1174,7 @@ void LLGroupMoneySalesTabEventHandler::processReply(LLMessageSystem* msg,
 	msg->getUUIDFast(_PREHASH_AgentData, _PREHASH_GroupID, group_id);
 	if (mImplementationp->mGroupID != group_id) 
 	{
-		LL_WARNS("GroupPanel") << "Group Account Transactions not for this group!" << LL_ENDL;
+		llwarns << "Group Account Transactions not for this group !" << llendl;
 		return;
 	}
 
@@ -1274,7 +1275,7 @@ void LLPanelGroupLandMoney::processGroupAccountTransactionsReply(LLMessageSystem
 	msg->getUUIDFast(_PREHASH_AgentData, _PREHASH_AgentID, agent_id);
 	if (gAgent.getID() != agent_id)
 	{
-		LL_WARNS("GroupPanel") << "Got group L$ history reply for another agent!" << LL_ENDL;
+		llwarns << "Got group L$ history reply for another agent !" << llendl;
 		return;
 	}
 
@@ -1286,7 +1287,8 @@ void LLPanelGroupLandMoney::processGroupAccountTransactionsReply(LLMessageSystem
 	self = LLGroupMoneyTabEventHandler::sInstanceIDs.getIfThere(request_id);
 	if (!self)
 	{
-		LL_WARNS("GroupPanel") << "GroupAccountTransactions recieved for non-existent group panel." << LL_ENDL;
+		llwarns << "GroupAccountTransactions recieved for non-existent group panel."
+				<< llendl;
 		return;
 	}
 
@@ -1340,14 +1342,15 @@ void LLGroupMoneyPlanningTabEventHandler::requestData(LLMessageSystem* msg)
 	LLGroupMoneyTabEventHandler::requestData(msg);
 }
 
-void LLGroupMoneyPlanningTabEventHandler::processReply(LLMessageSystem* msg, 
-															void** data)
+void LLGroupMoneyPlanningTabEventHandler::processReply(LLMessageSystem* msg,
+													   void** data)
 {
 	LLUUID group_id;
 	msg->getUUIDFast(_PREHASH_AgentData, _PREHASH_GroupID, group_id);
 	if (mImplementationp->mGroupID != group_id) 
 	{
-		LL_WARNS("GroupPanel") << "Group Account Summary received not for this group!" << LL_ENDL;
+		llwarns << "Group Account Summary received not for this group !"
+				<< llendl;
 		return;
 	}
 
@@ -1445,7 +1448,7 @@ void LLPanelGroupLandMoney::processGroupAccountSummaryReply(LLMessageSystem* msg
 	msg->getUUIDFast(_PREHASH_AgentData, _PREHASH_AgentID, agent_id);
 	if (gAgent.getID() != agent_id)
 	{
-		LL_WARNS("GroupPanel") << "Got group L$ history reply for another agent!" << LL_ENDL;
+		llwarns << "Got group L$ history reply for another agent!" << LL_ENDL;
 		return;
 	}
 
@@ -1457,7 +1460,8 @@ void LLPanelGroupLandMoney::processGroupAccountSummaryReply(LLMessageSystem* msg
 	self = LLGroupMoneyTabEventHandler::sInstanceIDs.getIfThere(request_id);
 	if (!self)
 	{
-		LL_WARNS("GroupPanel") << "GroupAccountSummary recieved for non-existent group L$ planning tab." << LL_ENDL;
+		llwarns << "GroupAccountSummary recieved for non-existent group L$ planning tab."
+				<< llendl;
 		return;
 	}
 

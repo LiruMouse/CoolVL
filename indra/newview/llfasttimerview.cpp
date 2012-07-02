@@ -506,6 +506,12 @@ void LLFastTimerView::draw()
 {
 	LLFastTimer t(LLFastTimer::FTM_RENDER_TIMER);
 
+	static const LLUIImagePtr box_imagep = LLUI::getUIImage("rounded_square.tga");
+	if (!box_imagep)
+	{
+		llerrs << "Missing UI image: rounded_square.tga" << llendl;
+	}
+
 	std::string tdesc;
 
 	F64 clock_freq = (F64)LLFastTimer::countsPerSecond();
@@ -522,7 +528,6 @@ void LLFastTimerView::draw()
 	S32 left, top, right, bottom;
 	S32 x, y, barw, barh, dx, dy;
 	S32 texth, textw;
-	static LLPointer<LLUIImage> box_imagep = LLUI::getUIImage("rounded_square.tga");
 
 	// Make sure all timers are accounted for
 	// Set 'FTM_OTHER' to unaccounted ticks last frame

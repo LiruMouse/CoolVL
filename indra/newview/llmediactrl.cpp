@@ -113,7 +113,6 @@ LLMediaCtrl::LLMediaCtrl(const std::string& name, const LLRect& rect) :
 // note: this is now a singleton and destruction happens via initClass() now
 LLMediaCtrl::~LLMediaCtrl()
 {
-
 	if (mMediaSource)
 	{
 		mMediaSource->remObserver(this);
@@ -133,8 +132,8 @@ void LLMediaCtrl::setBorderVisible(BOOL border_visible)
 	if (mBorder)
 	{
 		mBorder->setVisible(border_visible);
-	};
-};
+	}
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -160,7 +159,9 @@ BOOL LLMediaCtrl::handleHover(S32 x, S32 y, MASK mask)
 	convertInputCoords(x, y);
 
 	if (mMediaSource)
+	{
 		mMediaSource->mouseMove(x, y, mask);
+	}
 
 	gViewerWindow->setCursor(mLastSetCursor);
 
@@ -172,7 +173,10 @@ BOOL LLMediaCtrl::handleHover(S32 x, S32 y, MASK mask)
 BOOL LLMediaCtrl::handleScrollWheel(S32 x, S32 y, S32 clicks)
 {
 	if (mMediaSource && mMediaSource->hasMedia())
-		mMediaSource->getMediaPlugin()->scrollEvent(0, clicks, gKeyboard->currentMask(TRUE));
+	{
+		mMediaSource->getMediaPlugin()->scrollEvent(0, clicks,
+													gKeyboard->currentMask(TRUE));
+	}
 
 	return TRUE;
 }
@@ -324,7 +328,8 @@ BOOL LLMediaCtrl::handleKeyHere(KEY key, MASK mask)
 	BOOL result = FALSE;
 
 	// FIXME: THIS IS SO WRONG.
-	// Menu keys should be handled by the menu system and not passed to UI elements, but this is how LLTextEditor and LLLineEditor do it...
+	// Menu keys should be handled by the menu system and not passed to UI
+	// elements, but this is how LLTextEditor and LLLineEditor do it...
 
 	if (mMediaSource)
 	{
@@ -335,14 +340,12 @@ BOOL LLMediaCtrl::handleKeyHere(KEY key, MASK mask)
 				mMediaSource->copy();
 				result = TRUE;
 			}
-			else
-			if ('V' == key)
+			else if ('V' == key)
 			{
 				mMediaSource->paste();
 				result = TRUE;
 			}
-			else
-			if ('X' == key)
+			else if ('X' == key)
 			{
 				mMediaSource->cut();
 				result = TRUE;
@@ -362,7 +365,8 @@ BOOL LLMediaCtrl::handleKeyHere(KEY key, MASK mask)
 //
 void LLMediaCtrl::handleVisibilityChange (BOOL new_visibility)
 {
-	llinfos << "visibility changed to " << (new_visibility?"true":"false") << llendl;
+	llinfos << "visibility changed to " << (new_visibility ? "true" : "false")
+			<< llendl;
 	if (mMediaSource)
 	{
 		mMediaSource->setVisible(new_visibility);
@@ -475,11 +479,12 @@ void LLMediaCtrl::navigateTo(std::string url_in, std::string mime_type)
 	// don't browse to anything that starts with secondlife:// or sl://
 	const std::string protocol1 = "secondlife://";
 	const std::string protocol2 = "sl://";
-	if ((LLStringUtil::compareInsensitive(url_in.substr(0, protocol1.length()), protocol1) == 0) ||
-	    (LLStringUtil::compareInsensitive(url_in.substr(0, protocol2.length()), protocol2) == 0))
+	if (LLStringUtil::compareInsensitive(url_in.substr(0, protocol1.length()), protocol1) == 0 ||
+		LLStringUtil::compareInsensitive(url_in.substr(0, protocol2.length()), protocol2) == 0)
 	{
 		// TODO: Print out/log this attempt?
-		// llinfos << "Rejecting attempt to load restricted website :" << urlIn << llendl;
+		// llinfos << "Rejecting attempt to load restricted website :" << urlIn
+		//		<< llendl;
 		return;
 	}
 
@@ -492,7 +497,8 @@ void LLMediaCtrl::navigateTo(std::string url_in, std::string mime_type)
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-void LLMediaCtrl::navigateToLocalPage(const std::string& subdir, const std::string& filename_in)
+void LLMediaCtrl::navigateToLocalPage(const std::string& subdir,
+									  const std::string& filename_in)
 {
 	std::string language = LLUI::getLanguage();
 	std::string delim = gDirUtilp->getDirDelimiter();
@@ -502,7 +508,9 @@ void LLMediaCtrl::navigateToLocalPage(const std::string& subdir, const std::stri
 	filename += delim;
 	filename += filename_in;
 
-	std::string expanded_filename = gDirUtilp->findSkinnedFilename("html", language, filename);
+	std::string expanded_filename = gDirUtilp->findSkinnedFilename("html",
+																   language,
+																   filename);
 
 	if (! gDirUtilp->fileExists(expanded_filename))
 	{
@@ -511,13 +519,15 @@ void LLMediaCtrl::navigateToLocalPage(const std::string& subdir, const std::stri
 			expanded_filename = gDirUtilp->findSkinnedFilename("html", "en-us", filename);
 			if (! gDirUtilp->fileExists(expanded_filename))
 			{
-				llwarns << "File " << subdir << delim << filename_in << "not found" << llendl;
+				llwarns << "File " << subdir << delim << filename_in
+						<< "not found" << llendl;
 				return;
 			}
 		}
 		else
 		{
-			llwarns << "File " << subdir << delim << filename_in << "not found" << llendl;
+			llwarns << "File " << subdir << delim << filename_in << "not found"
+					<< llendl;
 			return;
 		}
 	}
@@ -533,11 +543,10 @@ void LLMediaCtrl::navigateToLocalPage(const std::string& subdir, const std::stri
 //
 void LLMediaCtrl::navigateHome()
 {
-	if (mHomePageUrl.length())
+	if (mHomePageUrl.length() && mMediaSource)
 	{
-		if (mMediaSource)
-			mMediaSource->navigateTo(mHomePageUrl);
-	};
+		mMediaSource->navigateTo(mHomePageUrl);
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -558,7 +567,8 @@ void LLMediaCtrl::setTarget(const std::string& target)
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-bool LLMediaCtrl::setCaretColor(unsigned int red, unsigned int green, unsigned int blue)
+bool LLMediaCtrl::setCaretColor(unsigned int red, unsigned int green,
+								unsigned int blue)
 {
 	//NOOP
 	return false;
@@ -618,11 +628,12 @@ void LLMediaCtrl::draw()
 		if (mIgnoreUIScale)
 		{
 			glLoadIdentity();
-			// font system stores true screen origin, need to scale this by UI scale factor
-			// to get render origin for this view (with unit scale)
+			// font system stores true screen origin, need to scale this by UI
+			// scale factor to get render origin for this view (with unit
+			// scale).
 			gGL.translatef(floorf(LLFontGL::sCurOrigin.mX * LLUI::sGLScaleFactor.mV[VX]),
-						floorf(LLFontGL::sCurOrigin.mY * LLUI::sGLScaleFactor.mV[VY]),
-						LLFontGL::sCurOrigin.mZ);
+						   floorf(LLFontGL::sCurOrigin.mY * LLUI::sGLScaleFactor.mV[VY]),
+						   LLFontGL::sCurOrigin.mZ);
 		}
 
 		// scale texture to fit the space using texture coords
@@ -681,7 +692,7 @@ void LLMediaCtrl::draw()
 		// draw the browser
 		gGL.setSceneBlendType(LLRender::BT_REPLACE);
 		gGL.begin(LLRender::QUADS);
-		if (! mWebBrowserImage->getTextureCoordsOpenGL())
+		if (!mWebBrowserImage->getTextureCoordsOpenGL())
 		{
 			// render using web browser reported width and height, instead of trying to invert GL scale
 			gGL.texCoord2f(max_u, 0.f);
@@ -728,14 +739,15 @@ void LLMediaCtrl::draw()
 void LLMediaCtrl::convertInputCoords(S32& x, S32& y)
 {
 	x = mIgnoreUIScale ? llround((F32)x * LLUI::sGLScaleFactor.mV[VX]) : x;
-	if (! mWebBrowserImage->getTextureCoordsOpenGL())
+	if (!mWebBrowserImage->getTextureCoordsOpenGL())
 	{
 		y = mIgnoreUIScale ? llround((F32)(y) * LLUI::sGLScaleFactor.mV[VY]) : y;
 	}
 	else
 	{
-		y = mIgnoreUIScale ? llround((F32)(getRect().getHeight() - y) * LLUI::sGLScaleFactor.mV[VY]) : getRect().getHeight() - y;
-	};
+		y = mIgnoreUIScale ? llround((F32)(getRect().getHeight() - y) * LLUI::sGLScaleFactor.mV[VY])
+						   : getRect().getHeight() - y;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -747,19 +759,23 @@ void LLMediaCtrl::handleMediaEvent(LLPluginClassMedia* self, EMediaEvent event)
 	{
 		case MEDIA_EVENT_CONTENT_UPDATED:
 		{
-			// LL_DEBUGS("Media") <<  "Media event:  MEDIA_EVENT_CONTENT_UPDATED " << LL_ENDL;
+			//LL_DEBUGS("Media") << "Media event: MEDIA_EVENT_CONTENT_UPDATED"
+			//					  << LL_ENDL;
 			break;
 		}
 
 		case MEDIA_EVENT_TIME_DURATION_UPDATED:
 		{
-			// LL_DEBUGS("Media") <<  "Media event:  MEDIA_EVENT_TIME_DURATION_UPDATED, time is " << self->getCurrentTime() << " of " << self->getDuration() << LL_ENDL;
+			//LL_DEBUGS("Media") << "Media event: MEDIA_EVENT_TIME_DURATION_UPDATED, time is "
+			//					  << self->getCurrentTime() << " of "
+			//					  << self->getDuration() << LL_ENDL;
 			break;
 		}
 
 		case MEDIA_EVENT_SIZE_CHANGED:
 		{
-			LL_DEBUGS("Media") <<  "Media event:  MEDIA_EVENT_SIZE_CHANGED " << LL_ENDL;
+			LL_DEBUGS("Media") << "Media event: MEDIA_EVENT_SIZE_CHANGED"
+							   << LL_ENDL;
 			LLRect r = getRect();
 			reshape(r.getWidth(), r.getHeight(), FALSE);
 			break;
@@ -767,7 +783,8 @@ void LLMediaCtrl::handleMediaEvent(LLPluginClassMedia* self, EMediaEvent event)
 
 		case MEDIA_EVENT_CURSOR_CHANGED:
 		{
-			LL_DEBUGS("Media") <<  "Media event:  MEDIA_EVENT_CURSOR_CHANGED, new cursor is " << self->getCursorName() << LL_ENDL;
+			LL_DEBUGS("Media") << "Media event: MEDIA_EVENT_CURSOR_CHANGED, new cursor is "
+							   << self->getCursorName() << LL_ENDL;
 
 			std::string cursor = self->getCursorName();
 
@@ -788,13 +805,15 @@ void LLMediaCtrl::handleMediaEvent(LLPluginClassMedia* self, EMediaEvent event)
 
 		case MEDIA_EVENT_NAVIGATE_BEGIN:
 		{
-			LL_INFOS("Media") <<  "Media event:  MEDIA_EVENT_NAVIGATE_BEGIN, url is " << self->getNavigateURI() << LL_ENDL;
+			llinfos << "Media event: MEDIA_EVENT_NAVIGATE_BEGIN, url is "
+					<< self->getNavigateURI() << llendl;
 			break;
 		}
 
 		case MEDIA_EVENT_NAVIGATE_COMPLETE:
 		{
-			LL_INFOS("Media") <<  "Media event:  MEDIA_EVENT_NAVIGATE_COMPLETE, result string is: " << self->getNavigateResultString() << LL_ENDL;
+			llinfos << "Media event: MEDIA_EVENT_NAVIGATE_COMPLETE, result string is: "
+					<< self->getNavigateResultString() << llendl;
 			if (mHidingInitialLoad)
 			{
 				mHidingInitialLoad = false;
@@ -804,7 +823,8 @@ void LLMediaCtrl::handleMediaEvent(LLPluginClassMedia* self, EMediaEvent event)
 
 		case MEDIA_EVENT_NAVIGATE_ERROR_PAGE:
 		{
-			LL_DEBUGS("Media") <<  "Media event:  MEDIA_EVENT_NAVIGATE_ERROR_PAGE" << LL_ENDL;
+			LL_DEBUGS("Media") << "Media event: MEDIA_EVENT_NAVIGATE_ERROR_PAGE"
+							   << LL_ENDL;
 			if (mErrorPageURL.length() > 0)
 			{
 				navigateTo(mErrorPageURL, "text/html");
@@ -814,32 +834,38 @@ void LLMediaCtrl::handleMediaEvent(LLPluginClassMedia* self, EMediaEvent event)
 
 		case MEDIA_EVENT_PROGRESS_UPDATED:
 		{
-			LL_DEBUGS("Media") <<  "Media event:  MEDIA_EVENT_PROGRESS_UPDATED, loading at " << self->getProgressPercent() << "%" << LL_ENDL;
+			LL_DEBUGS("Media") << "Media event: MEDIA_EVENT_PROGRESS_UPDATED, loading at "
+							   << self->getProgressPercent() << "%" << LL_ENDL;
 			break;
 		}
 
 		case MEDIA_EVENT_STATUS_TEXT_CHANGED:
 		{
-			LL_DEBUGS("Media") <<  "Media event:  MEDIA_EVENT_STATUS_TEXT_CHANGED, new status text is: " << self->getStatusText() << LL_ENDL;
+			LL_DEBUGS("Media") << "Media event: MEDIA_EVENT_STATUS_TEXT_CHANGED, new status text is: "
+							   << self->getStatusText() << LL_ENDL;
 			break;
 		}
 
 		case MEDIA_EVENT_LOCATION_CHANGED:
 		{
-			LL_DEBUGS("Media") <<  "Media event:  MEDIA_EVENT_LOCATION_CHANGED, new uri is: " << self->getLocation() << LL_ENDL;
+			LL_DEBUGS("Media") << "Media event: MEDIA_EVENT_LOCATION_CHANGED, new uri is: "
+							   << self->getLocation() << LL_ENDL;
 			break;
 		}
 
 		case MEDIA_EVENT_CLICK_LINK_HREF:
 		{
-			LL_DEBUGS("Media") <<  "Media event:  MEDIA_EVENT_CLICK_LINK_HREF, target is \"" << self->getClickTarget() << "\", uri is " << self->getClickURL() << LL_ENDL;
+			LL_DEBUGS("Media") << "Media event: MEDIA_EVENT_CLICK_LINK_HREF, target is \""
+							   << self->getClickTarget() << "\", uri is "
+							   << self->getClickURL() << LL_ENDL;
 			break;
 		}
 
 		case MEDIA_EVENT_CLICK_LINK_NOFOLLOW:
 		{
 			std::string url = self->getClickURL();
-			LL_DEBUGS("Media") <<  "Media event:  MEDIA_EVENT_CLICK_LINK_NOFOLLOW, uri is " << url << LL_ENDL;
+			LL_DEBUGS("Media") << "Media event: MEDIA_EVENT_CLICK_LINK_NOFOLLOW, uri is "
+							   << url << LL_ENDL;
 			if (!mTrusted && LLURLDispatcher::isSLURLCommand(url))
 			{
 				// block handling of this secondlife:///app/ URL
@@ -854,52 +880,60 @@ void LLMediaCtrl::handleMediaEvent(LLPluginClassMedia* self, EMediaEvent event)
 
 		case MEDIA_EVENT_PLUGIN_FAILED:
 		{
-			LL_DEBUGS("Media") <<  "Media event:  MEDIA_EVENT_PLUGIN_FAILED" << LL_ENDL;
+			LL_DEBUGS("Media") << "Media event: MEDIA_EVENT_PLUGIN_FAILED"
+							   << LL_ENDL;
 			break;
 		}
 
 		case MEDIA_EVENT_PLUGIN_FAILED_LAUNCH:
 		{
-			LL_DEBUGS("Media") <<  "Media event:  MEDIA_EVENT_PLUGIN_FAILED_LAUNCH" << LL_ENDL;
+			LL_DEBUGS("Media") <<  "Media event: MEDIA_EVENT_PLUGIN_FAILED_LAUNCH"
+							   << LL_ENDL;
 			break;
 		}
 
 		case MEDIA_EVENT_NAME_CHANGED:
 		{
-			LL_DEBUGS("Media") <<  "Media event:  MEDIA_EVENT_NAME_CHANGED" << LL_ENDL;
+			LL_DEBUGS("Media") << "Media event: MEDIA_EVENT_NAME_CHANGED"
+							   << LL_ENDL;
 			break;
 		}
 
 		case MEDIA_EVENT_CLOSE_REQUEST:
 		{
-			LL_DEBUGS("Media") <<  "Media event:  MEDIA_EVENT_CLOSE_REQUEST" << LL_ENDL;
+			LL_DEBUGS("Media") << "Media event: MEDIA_EVENT_CLOSE_REQUEST"
+							   << LL_ENDL;
 			break;
 		}
 
 		case MEDIA_EVENT_PICK_FILE_REQUEST:
 		{
-			LL_DEBUGS("Media") <<  "Media event:  MEDIA_EVENT_PICK_FILE_REQUEST" << LL_ENDL;
+			LL_DEBUGS("Media") << "Media event: MEDIA_EVENT_PICK_FILE_REQUEST"
+							   << LL_ENDL;
 			break;
 		}
 
 		case MEDIA_EVENT_GEOMETRY_CHANGE:
 		{
-			LL_DEBUGS("Media") << "Media event:  MEDIA_EVENT_GEOMETRY_CHANGE, uuid is " << self->getClickUUID() << LL_ENDL;
+			LL_DEBUGS("Media") << "Media event: MEDIA_EVENT_GEOMETRY_CHANGE, uuid is "
+							   << self->getClickUUID() << LL_ENDL;
 			break;
 		}
 
 		case MEDIA_EVENT_AUTH_REQUEST:
 		{
-			LL_WARNS("Media") <<  "Unimplemented Media event:  MEDIA_EVENT_AUTH_REQUEST" << LL_ENDL;
+			llwarns << "Unimplemented Media event: MEDIA_EVENT_AUTH_REQUEST"
+					<< llendl;
 			break;
 		}
 
 		case MEDIA_EVENT_LINK_HOVERED:
 		{
-			LL_DEBUGS("Media") <<  "Unimplemented Media event:  MEDIA_EVENT_LINK_HOVERED" << LL_ENDL;
+			LL_DEBUGS("Media") << "Unimplemented Media event: MEDIA_EVENT_LINK_HOVERED"
+							   << LL_ENDL;
 			break;
 		}
-	};
+	}
 
 	// chain all events to any potential observers of this object.
 	emitEvent(self, event);
@@ -907,8 +941,10 @@ void LLMediaCtrl::handleMediaEvent(LLPluginClassMedia* self, EMediaEvent event)
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-LLWebBrowserTexture::LLWebBrowserTexture(S32 width, S32 height, LLMediaCtrl* browserCtrl, viewer_media_t media_source) :
-	LLViewerDynamicTexture(512, 512, 4, ORDER_FIRST, TRUE),
+LLWebBrowserTexture::LLWebBrowserTexture(S32 width, S32 height,
+										 LLMediaCtrl* browserCtrl,
+										 viewer_media_t media_source)
+:	LLViewerDynamicTexture(512, 512, 4, ORDER_FIRST, TRUE),
 	mNeedsUpdate(true),
 	mNeedsResize(false),
 	mTextureCoordsOpenGL(true),
@@ -961,13 +997,15 @@ BOOL LLWebBrowserTexture::render()
 {
 	if (updateBrowserTexture())
 	{
-		// updateBrowserTexture already verified that the media plugin is there and the texture is valid.
+		// updateBrowserTexture already verified that the media plugin is there
+		// and the texture is valid.
 		LLPluginClassMedia* media_plugin = mMediaSource->getMediaPlugin();
 		LLRect dirty_rect;
 
 		if (mNeedsUpdate)
 		{
-			// If we need an update, use the whole rect instead of the dirty rect.
+			// If we need an update, use the whole rect instead of the dirty
+			// rect.
 			dirty_rect.mLeft = 0;
 			dirty_rect.mBottom = 0;
 			dirty_rect.mRight = media_plugin->getWidth();
@@ -994,25 +1032,20 @@ BOOL LLWebBrowserTexture::render()
 				U8* data = media_plugin->getBitsData();
 
 				// Offset the pixels pointer to match x_pos and y_pos
-				data += (x_pos * media_plugin->getTextureDepth() * media_plugin->getBitsWidth());
-				data += (y_pos * media_plugin->getTextureDepth());
+				data += x_pos * media_plugin->getTextureDepth() * media_plugin->getBitsWidth();
+				data += y_pos * media_plugin->getTextureDepth();
 
-				setSubImage(
-						data,
-						media_plugin->getBitsWidth(),
-						media_plugin->getBitsHeight(),
-						x_pos,
-						y_pos,
-						width,
-						height,
-						TRUE);	// force a fast update (i.e. don't call analyzeAlpha, etc.)
+				setSubImage(data, media_plugin->getBitsWidth(),
+							media_plugin->getBitsHeight(),
+							x_pos, y_pos, width, height,
+							TRUE);	// force a fast update (i.e. don't call analyzeAlpha, etc.)
 			}
 
 			media_plugin->resetDirty();
 
 			return TRUE;
-		};
-	};
+		}
+	}
 
 	return FALSE;
 }

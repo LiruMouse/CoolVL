@@ -4952,7 +4952,7 @@ void LLSelectMgr::updateSilhouettes()
 {
 	S32 num_sils_genned = 0;
 
-	LLVector3d	cameraPos = gAgent.getCameraPositionGlobal();
+	LLVector3d cameraPos = gAgent.getCameraPositionGlobal();
 	F32 currentCameraZoom = gAgent.getCurrentCameraBuildOffset();
 
 	if (!mSilhouetteImagep)
@@ -5126,7 +5126,9 @@ void LLSelectMgr::updateSilhouettes()
 				LLSelectNode* node = *iter;
 				LLViewerObject* objectp = node->getObject();
 				if (!objectp)
+				{
 					continue;
+				}
 
 				// do roots first, then children so that root flags are cleared ASAP
 				BOOL roots_only = (pass == 0);
@@ -5759,7 +5761,7 @@ void LLSelectNode::renderOneWireframe(const LLColor4& color)
 		LLGLEnable fog(GL_FOG);
 		glFogi(GL_FOG_MODE, GL_LINEAR);
 		LLViewerCamera* camera = LLViewerCamera::getInstance();
-		float d = (camera->getPointOfInterest()-camera->getOrigin()).magVec();
+		float d = (camera->getPointOfInterest() - camera->getOrigin()).magVec();
 		LLColor4 fogCol = color * (F32)llclamp((LLSelectMgr::getInstance()->getSelectionCenterGlobal() - gAgent.getCameraPositionGlobal()).magVec() / (LLSelectMgr::getInstance()->getBBoxOfSelection().getExtentLocal().magVec() * 4), 0.0, 1.0);
 		glFogf(GL_FOG_START, d);
 		glFogf(GL_FOG_END, d * (1 + (camera->getView() / camera->getDefaultFOV())));
@@ -7042,26 +7044,27 @@ bool LLSelectMgr::selectionMove(const LLVector3& displ, F32 roll, F32 pitch,
 	if (update_position)
 	{
 		// calculate the distance of the object closest to the camera origin
-		F32 min_dist = F32_MAX; // value will be overridden in the loop
+		F32 min_dist_squared = F32_MAX; // value will be overridden in the loop
 		LLVector3 obj_pos;
-		for (LLObjectSelection::root_iterator it = getSelection()->root_begin();
-			 it != getSelection()->root_end(); ++it)
+		for (LLObjectSelection::root_iterator
+				it = getSelection()->root_begin(),
+				end = getSelection()->root_end();
+			 it != end; ++it)
 		{
 			obj_pos = (*it)->getObject()->getPositionEdit();
 
-			F32 obj_dist = dist_vec(obj_pos, camera->getOrigin());
-			if (obj_dist < min_dist)
+			F32 obj_dist_squared = dist_vec_squared(obj_pos, camera->getOrigin());
+			if (obj_dist_squared < min_dist_squared)
 			{
-				min_dist = obj_dist;
+				min_dist_squared = obj_dist_squared;
 			}
 		}
 
 		// factor the distance inside the displacement vector. This will get us
 		// equally visible movements for both close and far away selections.
-		min_dist = sqrt(min_dist) / 2;
-		displ_global.setVec(displ.mV[0]*min_dist, 
-							displ.mV[1]*min_dist, 
-							displ.mV[2]*min_dist);
+		F32 min_dist = sqrt((F32) sqrtf(min_dist_squared)) / 2;
+		displ_global.setVec(displ.mV[0] * min_dist,  displ.mV[1] * min_dist,
+							displ.mV[2] * min_dist);
 
 		// equates to: Displ_global = Displ * M_cam_axes_in_global_frame
 		displ_global = camera->rotateToAbsolute(displ_global);
@@ -7077,10 +7080,11 @@ bool LLSelectMgr::selectionMove(const LLVector3& displ, F32 roll, F32 pitch,
 		new_rot.setQuat(qx * qy * qz);
 	}
 
-	LLViewerObject *obj;
+	LLViewerObject* obj;
 	S32 obj_count = getSelection()->getObjectCount();
-	for (LLObjectSelection::root_iterator it = getSelection()->root_begin();
-		 it != getSelection()->root_end(); ++it)
+	for (LLObjectSelection::root_iterator it = getSelection()->root_begin(),
+										  end = getSelection()->root_end();
+		 it != end; ++it)
 	{
 		obj = (*it)->getObject();
 		bool enable_pos = false, enable_rot = false;
@@ -7091,19 +7095,21 @@ bool LLSelectMgr::selectionMove(const LLVector3& displ, F32 roll, F32 pitch,
 
 		if (update_rotation)
 		{
-			enable_rot = perm_move 
-				&& ((perm_mod && !obj->isAttachment()) || noedit_linked_parts);
+			enable_rot = perm_move &&
+						 ((perm_mod && !obj->isAttachment()) ||
+						   noedit_linked_parts);
 
 			if (enable_rot)
 			{
-				int children_count = obj->getChildren().size();
+				S32 children_count = obj->getChildren().size();
 				if (obj_count > 1 && children_count > 0)
 				{
 					// for linked sets, rotate around the group center
 					const LLVector3 t(obj->getPositionGlobal() - sel_center);
 
 					// Ra = T x R x T^-1
-					LLMatrix4 mt;	mt.setTranslation(t);
+					LLMatrix4 mt;
+					mt.setTranslation(t);
 					const LLMatrix4 mnew_rot(new_rot);
 					LLMatrix4 mt_1;	mt_1.setTranslation(-t);
 					mt *= mnew_rot;
@@ -7127,8 +7133,8 @@ bool LLSelectMgr::selectionMove(const LLVector3& displ, F32 roll, F32 pitch,
 		if (update_position)
 		{
 			// establish if object can be moved or not
-			enable_pos = perm_move && !obj->isAttachment() 
-			&& (perm_mod || noedit_linked_parts);
+			enable_pos = perm_move && !obj->isAttachment() &&
+						 (perm_mod || noedit_linked_parts);
 
 			if (enable_pos)
 			{
@@ -7156,7 +7162,7 @@ bool LLSelectMgr::selectionMove(const LLVector3& displ, F32 roll, F32 pitch,
 
 void LLSelectMgr::sendSelectionMove()
 {
-	LLSelectNode *node = mSelectedObjects->getFirstRootNode();
+	LLSelectNode* node = mSelectedObjects->getFirstRootNode();
 	if (node == NULL)
 	{
 		return;
@@ -7179,7 +7185,7 @@ void LLSelectMgr::sendSelectionMove()
 	gMessageSystem->newMessage("MultipleObjectUpdate");
 	packAgentAndSessionID(&update_type);
 
-	LLViewerObject *obj = NULL;
+	LLViewerObject* obj = NULL;
 	for (LLObjectSelection::root_iterator it = getSelection()->root_begin();
 		 it != getSelection()->root_end(); ++it)
 	{

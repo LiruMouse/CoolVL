@@ -99,7 +99,7 @@ InstallPassword
 {}
 
 InstallVersion
-{1.26.4.19}
+{1.26.4.20}
 
 Language,ca
 {No}
@@ -2062,7 +2062,7 @@ ActionGroup 80ACC115-0DE1-4AAE-B4D6-4232728C81EB -active Yes -name 80acc115-0de1
 Action 08919EE0-21F7-4260-9564-55A9C822F13B -active Yes -name 08919ee0-21f7-4260-9564-55a9c822f13b -type action -parent 80ACC115-0DE1-4AAE-B4D6-4232728C81EB -setup Install -title {Create Install Panes} -component CreateInstallPanes
 ActionGroup 3C21DA1A-D305-47D2-838F-CA155241BD62 -active Yes -name 3c21da1a-d305-47d2-838f-ca155241bd62 -type actiongroup -parent ActionGroupsInstall -setup Install -title {Install Actions}
 Action 41881E4D-B791-45D9-A8D3-34340544D840 -active Yes -name 41881e4d-b791-45d9-a8d3-34340544d840 -type action -parent 3C21DA1A-D305-47D2-838F-CA155241BD62 -setup Install -title {Delete File} -component DeleteFile
-Condition 22973765-D3A9-4DE7-942E-7BA59B008177 -active Yes -name 22973765-d3a9-4de7-942e-7ba59b008177 -parent 41881E4D-B791-45D9-A8D3-34340544D840 -title {File Exists Condition} -component FileExistsCondition
+Condition 22973765-D3A9-4DE7-942E-7BA59B008177 -active Yes -name 22973765-d3a9-4de7-942e-7ba59b008177 -parent 41881E4D-B791-45D9-A8D3-34340544D840 -setup Install -title {File Exists Condition} -component FileExistsCondition
 Action 8CBADBD3-FD0E-4920-B122-AD7599A264EB -active Yes -name 8cbadbd3-fd0e-4920-b122-ad7599a264eb -type action -parent 3C21DA1A-D305-47D2-838F-CA155241BD62 -setup Install -title {Install Selected Files} -component InstallSelectedFiles
 Action 64C8BAA8-D636-4FFF-996B-0ED728F6B664 -active Yes -name 64c8baa8-d636-4fff-996b-0ed728f6b664 -type action -parent 3C21DA1A-D305-47D2-838F-CA155241BD62 -setup Install -title {Set Need Components flag} -operator OR -component SetVirtualText
 Condition C217928D-4719-44C1-90DD-C19A418CCF99 -active Yes -name c217928d-4719-44c1-90dd-c19a418ccf99 -parent 64C8BAA8-D636-4FFF-996B-0ED728F6B664 -setup Install -title {File Exists Condition} -component FileExistsCondition
@@ -2645,7 +2645,7 @@ array set Properties {
 {<%InstallDir%>}
 
 4BD78D4C-6617-4C3F-8DC8-E11325B1ED0F,FileSize
-{77154465}
+{77169729}
 
 4BD78D4C-6617-4C3F-8DC8-E11325B1ED0F,Name
 {Program Files}

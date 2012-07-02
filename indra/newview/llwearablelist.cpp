@@ -117,7 +117,7 @@ void LLWearableList::processGetAssetReply(const char* filename,
 
 	if (!filename)
 	{
-		LL_WARNS("Wearable") << "Bad Wearable Asset: missing file." << LL_ENDL;
+		llwarns << "Bad Wearable Asset: missing file." << llendl;
 	}
 	else if (status >= 0)
 	{
@@ -125,8 +125,8 @@ void LLWearableList::processGetAssetReply(const char* filename,
 		LLFILE* fp = LLFile::fopen(std::string(filename), "rb");		/*Flawfinder: ignore*/
 		if (!fp)
 		{
-			LL_WARNS("Wearable") << "Bad Wearable Asset: unable to open file: '"
-								 << filename << "'" << LL_ENDL;
+			llwarns << "Bad Wearable Asset: unable to open file: '" << filename
+					<< "'" << llendl;
 		}
 		else
 		{
@@ -157,9 +157,10 @@ void LLWearableList::processGetAssetReply(const char* filename,
 		}
 		LLViewerStats::getInstance()->incStat(LLViewerStats::ST_DOWNLOAD_FAILED);
 
-		LL_WARNS("Wearable") << "Wearable download failed: "
-							 << LLAssetStorage::getErrorString(status) << " "
-							 << uuid << LL_ENDL;
+		llwarns << "Wearable download failed: "
+				<< LLAssetStorage::getErrorString(status) << " " << uuid
+				<< llendl;
+
 		switch (status)
 		{
 			case LL_ERR_ASSET_REQUEST_NOT_IN_DATABASE:

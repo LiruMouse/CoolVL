@@ -304,10 +304,8 @@ public:
 
 	void error(U32 statusNum, const std::string& reason)
 	{
-		LL_INFOS("Inventory") << " status = " << statusNum << " " << reason
-							  << " for cap " 
-							  << gAgent.getCapability("agent/inventory-skeleton")
-							  << LL_ENDL;
+		llinfos << " status = " << statusNum << " " << reason << " for cap "
+				<< gAgent.getCapability("agent/inventory-skeleton") << llendl;
 		// wasn't sure, but maybe we should continue in spite of error
 
 		LLStartUp::setStartupState(STATE_LOGIN_PROCESS_RESPONSE);
@@ -344,10 +342,9 @@ public:
 
 	void error(U32 statusNum, const std::string& reason)
 	{
-		LL_INFOS("Inventory") << " status = "
-							  << statusNum << " " << reason << " for cap "
-							  << gAgent.getCapability("agent/inventory_library_skeleton")
-							  << LL_ENDL;
+		llinfos << " status = " << statusNum << " " << reason << " for cap "
+				<< gAgent.getCapability("agent/inventory_library_skeleton")
+				<< llendl;
 		// wasn't sure, but maybe we should continue in spite of error
 		LLStartUp::setStartupState(STATE_LOGIN_PROCESS_RESPONSE);
 	}
@@ -372,6 +369,8 @@ public:
 // result() smarter
 class LLPlaceAvatarLoginResponder : public LLHTTPClient::Responder
 {
+	LOG_CLASS(LLPlaceAvatarLoginResponder);
+
 public:
 	LLPlaceAvatarLoginResponder()
 	{
@@ -383,10 +382,10 @@ public:
 
 	void error(U32 statusNum, const std::string& reason)
 	{
-		LL_INFOS("OGPX") << "LLPlaceAvatarLoginResponder error "
-				<< statusNum << " " << reason << " for URI " << gSavedSettings.getString("CmdLineRegionURI") << LL_ENDL;
+		llinfos << "Error " << statusNum << " " << reason << " for URI "
+				<< gSavedSettings.getString("CmdLineRegionURI") << llendl;
 
-		login_error("PlaceAvatarLoginResponder got an error "+reason);
+		login_error("PlaceAvatarLoginResponder got an error " + reason);
 	}
 
 	void result(const LLSD& content)
@@ -427,18 +426,20 @@ public:
 		// inventory-skeleton is now a proper cap on agentd, and the dangerous assumption that the
 		//    top of your inventory-skeleton is inventory-root is made. 
 		// LL_DEBUGS("OGPX") << "inventory-root" << result["inventory-root"] << LL_ENDL; // note the switch in - to _
-		// LL_INFOS("OGPX") << "inventory-lib-root" << result["inventory-lib-root"] << LL_ENDL;
-		// LL_INFOS("OGPX") << "inventory-lib-owner" << result["inventory-lib-owner"]  << LL_ENDL;
-		// LL_INFOS("OGPX") << "inventory-skel-lib" << result["inventory-skel-lib"] << LL_ENDL;
-		// LL_INFOS("OGPX") << "inventory-skeleton" << result["inventory-skeleton"] << LL_ENDL;
+		// llinfos << "inventory-lib-root" << result["inventory-lib-root"] << llendl;
+		// llinfos << "inventory-lib-owner" << result["inventory-lib-owner"]  << llendl;
+		// llinfos << "inventory-skel-lib" << result["inventory-skel-lib"] << llendl;
+		// llinfos << "inventory-skeleton" << result["inventory-skeleton"] << llendl;
 
-		LL_INFOS("OGPX") << " All the LLSD PlaceAvatar content: \n " << ll_pretty_print_sd(content) << LL_ENDL;
+		llinfos << " All the LLSD PlaceAvatar content: \n "
+				<< ll_pretty_print_sd(content) << llendl;
 
 		// check "connect" to make sure place_avatar fully successful
 		if (!content["connect"].asBoolean()) 
 		{
 			// place_avatar failed somewhere
-			LL_INFOS("OGPX") << "Login failed, connect false in PlaceAvatarResponder " << LL_ENDL;
+			llinfos << "Login failed, connect false in PlaceAvatarResponder"
+					<< llendl;
 
 			LLSD args;
 			args["ERROR_MESSAGE"] = "Place Avatar Failed, CONNECT=0";
@@ -450,7 +451,7 @@ public:
 		}
 		LLUserAuth::getInstance()->mAuthResponse = LLUserAuth::E_OK;
 		LLUserAuth::getInstance()->mResult = result;
-		LL_INFOS("OGPX") << "startup is "<< LLStartUp::getStartupState() << LL_ENDL;
+		llinfos << "startup is "<< LLStartUp::getStartupState() << llendl;
 		// OGPX : fetch the library skeleton
 		std::string skeleton_cap = gAgent.getCapability("agent/inventory_library_skeleton");
 		if (!skeleton_cap.empty())
@@ -483,6 +484,7 @@ public:
 // authenticate.
 class LLAgentHostSeedCapResponder : public LLHTTPClient::Responder
 {
+	LOG_CLASS(LLAgentHostSeedCapResponder);
 public:
 	LLAgentHostSeedCapResponder()
 	{
@@ -494,18 +496,19 @@ public:
 
 	void error(U32 statusNum, const std::string& reason)
 	{
-		LL_INFOS("OGPX") << "LLAgentHostSeedCapResponder error "
-				<< statusNum << " " << reason << LL_ENDL;
+		llinfos << "Error " << statusNum << " " << reason << llendl;
 
 		login_error("Agent Domain seed cap responded with an error " + reason);
 	}
 
 	void result(const LLSD& content)
 	{
-		LL_DEBUGS("OGPX") << " Response to AgentHostSeedCap: " << LLSDOStreamer<LLSDXMLFormatter>(content) << LL_ENDL;
+		LL_DEBUGS("OGPX") << " Response to AgentHostSeedCap: "
+						  << LLSDOStreamer<LLSDXMLFormatter>(content)
+						  << LL_ENDL;
 		std::string agentEventQueue = content["capabilities"]["event_queue"].asString();
 
-		LL_INFOS("OGPX") << "Agent Event queue is:  " << agentEventQueue << LL_ENDL;
+		llinfos << "Agent Event queue is:  " << agentEventQueue << llendl;
 
 		LLAgentEventPoll* agentPoll;
 		// OGPX TODO: should this be inside an if OGPX login type check??
@@ -518,7 +521,8 @@ public:
 		}
 
 		std::string	regionuri	= gSavedSettings.getString("CmdLineRegionURI");
-		LL_INFOS("OGPX") << "llagenthostseedcapresponder content: " << LLSDOStreamer<LLSDXMLFormatter>(content) << LL_ENDL;
+		llinfos << "llagenthostseedcapresponder content: "
+				<< LLSDOStreamer<LLSDXMLFormatter>(content) << llendl;
 		// Can't we assume OGP only inside the agent seed cap responder?
 		if (!regionuri.empty()&& gSavedSettings.getBOOL("OpenGridProtocol"))
 		{
@@ -556,14 +560,16 @@ public:
 			if (placeAvatarCap.empty())
 			{
 				llwarns << "PlaceAvatarLogin capability not returned" << llendl;
-				LL_INFOS("OGPX") << " agenthostseedcap content: " << LLSDOStreamer<LLSDXMLFormatter>(content) << LL_ENDL;
+				llinfos << " agenthostseedcap content: "
+						<< LLSDOStreamer<LLSDXMLFormatter>(content) << llendl;
 				login_error("Agent Domain didn't return a rez_avatar/place cap");
 			}
 			else
 			{
 				LLAppViewer::instance()->setPlaceAvatarCap(placeAvatarCap); // save so it can be used on tp
 				LLHTTPClient::post(placeAvatarCap, args, new LLPlaceAvatarLoginResponder());
-				LL_INFOS("OGPX") << " args to placeavatar on login: " << LLSDOStreamer<LLSDXMLFormatter>(args) << LL_ENDL;
+				llinfos << " args to placeavatar on login: "
+						<< LLSDOStreamer<LLSDXMLFormatter>(args) << llendl;
 				// we should have gotten back both rez_avatar/place and agent/info 
 				// TODO: do a GET here using "agent/info" seed cap after agent domain implements it. 
 				//      after we are successfully getting agent,session,securesession via "agent/info"
@@ -591,6 +597,8 @@ public:
 
 class LLAgentHostAuthResponder : public LLHTTPClient::Responder
 {
+	LOG_CLASS(LLAgentHostAuthResponder);
+
 public:
 	LLAgentHostAuthResponder()
 	{
@@ -602,8 +610,8 @@ public:
 
 	void completed(U32 status, const std::string& reason, const LLSD& content)
 	{ 
-		LL_INFOS("OGPX") << " Response From AgentHostAuth: "
-						 << LLSDOStreamer<LLSDXMLFormatter>(content) << LL_ENDL;
+		llinfos << " Response from AgentHostAuth: "
+				<< LLSDOStreamer<LLSDXMLFormatter>(content) << llendl;
 		if (content.has("authenticated") &&
 			content["authenticated"].asBoolean())
 		{
@@ -632,9 +640,12 @@ public:
 					args["capabilities"]["legacy_login"] = true;
 				}
 
-				LL_INFOS("OGPX") << "completedHeader content: " << LLSDOStreamer<LLSDXMLFormatter>(content) << LL_ENDL;
-				LL_INFOS("OGPX") << " Post to AgentHostSeed Cap: " << LLSDOStreamer<LLSDXMLFormatter>(args) << LL_ENDL;
-				LLHTTPClient::post(content["agent_seed_capability"].asString(), args, new LLAgentHostSeedCapResponder());
+				llinfos << "completedHeader content: "
+						<< LLSDOStreamer<LLSDXMLFormatter>(content)
+						<< " - Post to AgentHostSeed Cap: "
+						<< LLSDOStreamer<LLSDXMLFormatter>(args) << llendl;
+				LLHTTPClient::post(content["agent_seed_capability"].asString(),
+								   args, new LLAgentHostSeedCapResponder());
 
 				return;
 			}
@@ -660,8 +671,7 @@ public:
 			}
 		}
 	    
-		LL_INFOS("OGPX") << "LLAgentHostAuthResponder error " << status << " "
-						 << reason << LL_ENDL;
+		llinfos << "Error " << status << " " << reason << llendl;
 		LL_DEBUGS("OGPX") << "completedHeader content: "
 						  << LLSDOStreamer<LLSDXMLFormatter>(content)
 						  << LL_ENDL;
@@ -697,8 +707,8 @@ namespace
 						  const std::string& message, const LLSD& body, 
 						  LLHTTPClient::ResponderPtr response) const
 		{
-			LL_WARNS("AppInit") << " attemped to send " << message << " to "
-								<< host << " with null sender" << LL_ENDL;
+			llwarns << "Attemped to send " << message << " to " << host
+					<< " with null sender" << llendl;
 		}
 	};
 }
@@ -706,7 +716,10 @@ namespace
 class LLGestureInventoryFetchObserver : public LLInventoryFetchObserver
 {
 public:
-	LLGestureInventoryFetchObserver() {}
+	LLGestureInventoryFetchObserver()
+	{
+	}
+
 	virtual void done()
 	{
 		// we've downloaded all the items, so repaint the dialog
@@ -864,8 +877,10 @@ bool idle_startup()
 		if (ll_init_ares() == NULL || !gAres->isInitialized())
 		{
 			std::string diagnostic = "Could not start address resolution system";
-			LL_WARNS("AppInit") << diagnostic << LL_ENDL;
-			LLAppViewer::instance()->earlyExit("LoginFailedNoNetwork", LLSD().with("DIAGNOSTIC", diagnostic));
+			llwarns << diagnostic << llendl;
+			LLAppViewer::instance()->earlyExit("LoginFailedNoNetwork",
+											   LLSD().with("DIAGNOSTIC",
+														   diagnostic));
 		}
 
 		//
@@ -873,7 +888,8 @@ bool idle_startup()
 		//
 		LL_DEBUGS("AppInit") << "Initializing messaging system..." << LL_ENDL;
 
-		std::string message_template_path = gDirUtilp->getExpandedFilename(LL_PATH_APP_SETTINGS,"message_template.msg");
+		std::string message_template_path = gDirUtilp->getExpandedFilename(LL_PATH_APP_SETTINGS,
+																		   "message_template.msg");
 
 		LLFILE* found_template = NULL;
 		found_template = LLFile::fopen(message_template_path, "r");		/* Flawfinder: ignore */
@@ -919,7 +935,7 @@ bool idle_startup()
 										circuit_timeout))
 			{
 				std::string diagnostic = llformat(" Error: %d", gMessageSystem->getErrorCode());
-				LL_WARNS("AppInit") << diagnostic << LL_ENDL;
+				llwarns << diagnostic << llendl;
 				LLAppViewer::instance()->earlyExit("LoginFailedNoNetwork", LLSD().with("DIAGNOSTIC", diagnostic));
 			}
 
@@ -1001,19 +1017,21 @@ bool idle_startup()
             F32 outBandwidth = gSavedSettings.getF32("OutBandwidth"); 
 			if (inBandwidth != 0.f)
 			{
-				LL_DEBUGS("AppInit") << "Setting packetring incoming bandwidth to " << inBandwidth << LL_ENDL;
+				LL_DEBUGS("AppInit") << "Setting packetring incoming bandwidth to "
+									 << inBandwidth << LL_ENDL;
 				msg->mPacketRing.setUseInThrottle(TRUE);
 				msg->mPacketRing.setInBandwidth(inBandwidth);
 			}
 			if (outBandwidth != 0.f)
 			{
-				LL_DEBUGS("AppInit") << "Setting packetring outgoing bandwidth to " << outBandwidth << LL_ENDL;
+				LL_DEBUGS("AppInit") << "Setting packetring outgoing bandwidth to "
+									 << outBandwidth << LL_ENDL;
 				msg->mPacketRing.setUseOutThrottle(TRUE);
 				msg->mPacketRing.setOutBandwidth(outBandwidth);
 			}
 		}
 
-		LL_INFOS("AppInit") << "Message System Initialized." << LL_ENDL;
+		llinfos << "Message System Initialized." << llendl;
 
 		//-------------------------------------------------
 		// Init audio, which may be needed for prefs dialog
@@ -1063,26 +1081,26 @@ bool idle_startup()
 					// streaming audio implementation which uses media plugins
 					if (gAudiop->getStreamingAudioImpl() == NULL)
 					{
-						LL_INFOS("AppInit") << "Using media plugins to render streaming audio"
-											<< LL_ENDL;
+						llinfos << "Using media plugins to render streaming audio"
+								<< llendl;
 						gAudiop->setStreamingAudioImpl(new LLStreamingAudio_MediaPlugins());
 					}
 				}
 				else
 				{
-					LL_WARNS("AppInit") << "Unable to initialize audio engine"
-										<< LL_ENDL;
+					llwarns << "Unable to initialize audio engine" << llendl;
 					delete gAudiop;
 					gAudiop = NULL;
 				}
 			}
 		}
 
-		LL_INFOS("AppInit") << "Audio Engine Initialized." << LL_ENDL;
+		llinfos << "Audio Engine Initialized." << llendl;
 
 		if (LLTimer::knownBadTimer())
 		{
-			LL_WARNS("AppInit") << "Unreliable timers detected (may be bad PCI chipset)!!" << LL_ENDL;
+			llwarns << "Unreliable timers detected (may be bad PCI chipset) !"
+					<< llendl;
 		}
 
 		//
@@ -1204,7 +1222,8 @@ bool idle_startup()
 
 			if (gNoRender)
 			{
-				LL_ERRS("AppInit") << "Need to autologin or use command line with norender!" << LL_ENDL;
+				llerrs << "Need to autologin or use command line with norender !"
+						<< llendl;
 			}
 			// Make sure the process dialog doesn't hide things
 			gViewerWindow->setShowProgress(FALSE);
@@ -1336,8 +1355,8 @@ bool idle_startup()
 			gSavedSettings.setBOOL("RememberLogin",
 								   LLPanelLogin::getRememberLogin());
 
-			LL_INFOS("AppInit") << "Attempting login as: " << firstname << " "
-								<< lastname << LL_ENDL;
+			llinfos << "Attempting login as: " << firstname << " " << lastname
+					<< llendl;
 			gDebugInfo["LoginName"] = firstname + " " + lastname;
 		}
 
@@ -1605,9 +1624,10 @@ bool idle_startup()
 		LLViewerLogin* vl = LLViewerLogin::getInstance();
 		std::string grid_uri = vl->getCurrentGridURI();
 
-		LL_INFOS("OGPX") << " URI to POST to : " << grid_uri << LL_ENDL;
+		llinfos << " URI to POST to : " << grid_uri << llendl;
 
-		LL_INFOS("OGPX") << " Post to AgentHostAuth: " << LLSDOStreamer<LLSDXMLFormatter>(args) << LL_ENDL;
+		llinfos << " Post to AgentHostAuth: "
+				<< LLSDOStreamer<LLSDXMLFormatter>(args) << llendl;
 		LLHTTPClient::post(grid_uri, args, new LLAgentHostAuthResponder());
 
 		gAcceptTOS = FALSE;
@@ -1814,7 +1834,7 @@ bool idle_startup()
 			}
 			else if (login_response == "indeterminate") // OGPX : this is XML-RPC auth only, PlaceAV bails with alert if not successful
 			{
-				LL_INFOS("AppInit") << "Indeterminate login..." << LL_ENDL;
+				llinfos << "Indeterminate login..." << llendl;
 				LLViewerLogin::getInstance()->setGridURIs(LLSRV::rewriteURI(LLUserAuth::getInstance()->getResponse("next_url")));
 
 				auth_method = LLUserAuth::getInstance()->getResponse("next_method");
@@ -1865,10 +1885,12 @@ bool idle_startup()
 				{
 					if (show_connect_box)
 					{
-						LL_DEBUGS("AppInit") << "Need tos agreement" << LL_ENDL;
+						LL_DEBUGS("AppInit") << "Need tos agreement"
+											 << LL_ENDL;
 						LLStartUp::setStartupState(STATE_UPDATE_CHECK);
-						LLFloaterTOS* tos_dialog = LLFloaterTOS::show(LLFloaterTOS::TOS_TOS,
-																	message_response);
+						LLFloaterTOS* tos_dialog;
+						tos_dialog = LLFloaterTOS::show(LLFloaterTOS::TOS_TOS,
+														message_response);
 						tos_dialog->startModal();
 						// LLFloaterTOS deletes itself.
 						return false;
@@ -1882,10 +1904,12 @@ bool idle_startup()
 				{
 					if (show_connect_box)
 					{
-						LL_DEBUGS("AppInit") << "Need critical message" << LL_ENDL;
+						LL_DEBUGS("AppInit") << "Need critical message"
+											 << LL_ENDL;
 						LLStartUp::setStartupState(STATE_UPDATE_CHECK);
-						LLFloaterTOS* tos_dialog = LLFloaterTOS::show(LLFloaterTOS::TOS_CRITICAL_MESSAGE,
-																	message_response);
+						LLFloaterTOS* tos_dialog;
+						tos_dialog = LLFloaterTOS::show(LLFloaterTOS::TOS_CRITICAL_MESSAGE,
+														message_response);
 						tos_dialog->startModal();
 						// LLFloaterTOS deletes itself.
 						return false;
@@ -2102,14 +2126,15 @@ bool idle_startup()
  			{
  				if (!gInventory.loadSkeleton(LLUserAuth::getInstance()->mResult["inventory-skel-lib"], gInventory.getLibraryOwnerID()))
  				{
- 					LL_WARNS("AppInit") << "Problem loading inventory-skel-lib" << LL_ENDL;
+ 					llwarns << "Problem loading inventory-skel-lib" << llendl;
  				}
  			}
 			if (LLUserAuth::getInstance()->mResult["inventory-skeleton"].isArray())
  			{
- 				if (!gInventory.loadSkeleton(LLUserAuth::getInstance()->mResult["inventory-skeleton"], gAgent.getID()))
+ 				if (!gInventory.loadSkeleton(LLUserAuth::getInstance()->mResult["inventory-skeleton"], gAgentID))
  				{
- 					LL_WARNS("AppInit") << "Problem loading inventory-skel-targets" << LL_ENDL;
+ 					llwarns << "Problem loading inventory-skel-targets"
+							<< llendl;
  				}
  			}
 
@@ -2433,12 +2458,15 @@ bool idle_startup()
 			if (!max_agent_groups.empty())
 			{
 				gMaxAgentGroups = atoi(max_agent_groups.c_str());
-				LL_INFOS("LLStartup") << "gMaxAgentGroups read from login.cgi: " << gMaxAgentGroups << LL_ENDL;
+				llinfos << "gMaxAgentGroups read from login.cgi: "
+						<< gMaxAgentGroups << llendl;
 			}
 			else
 			{
-				gMaxAgentGroups = (gIsInSecondLife ? DEFAULT_MAX_AGENT_GROUPS : OPENSIM_DEFAULT_MAX_AGENT_GROUPS);
-				LL_INFOS("LLStartup") << "gMaxAgentGroups set to default: " << gMaxAgentGroups << LL_ENDL;
+				gMaxAgentGroups = (gIsInSecondLife ? DEFAULT_MAX_AGENT_GROUPS
+												   : OPENSIM_DEFAULT_MAX_AGENT_GROUPS);
+				llinfos << "gMaxAgentGroups set to default: "
+						<< gMaxAgentGroups << llendl;
 			}
 
 			std::string map_server_url = LLUserAuth::getInstance()->getResponse("map-server-url");
@@ -2475,8 +2503,8 @@ bool idle_startup()
 			{
 				if (gNoRender)
 				{
-					LL_WARNS("AppInit") << "Bad login - missing return values" << LL_ENDL;
-					LL_WARNS("AppInit") << emsg << LL_ENDL;
+					llwarns << "Bad login - missing return values: " << emsg
+							<< llendl;
 					exit(0);
 				}
 				// Bounce back to the login screen.
@@ -2495,8 +2523,7 @@ bool idle_startup()
 		{
 			if (gNoRender)
 			{
-				LL_WARNS("AppInit") << "Failed to login!" << LL_ENDL;
-				LL_WARNS("AppInit") << emsg << LL_ENDL;
+				llwarns << "Failed to login !  Message: " << emsg << llendl;
 				exit(0);
 			}
 			// Bounce back to the login screen.
@@ -2565,8 +2592,9 @@ bool idle_startup()
 
 		LLWorld::getInstance()->addRegion(first_sim_handle, first_sim);
 
-		LLViewerRegion *regionp = LLWorld::getInstance()->getRegionFromHandle(first_sim_handle);
-		LL_INFOS("AppInit") << "Adding initial simulator " << regionp->getOriginGlobal() << LL_ENDL;
+		LLViewerRegion* regionp = LLWorld::getInstance()->getRegionFromHandle(first_sim_handle);
+		llinfos << "Adding initial simulator "
+				<< regionp->getOriginGlobal() << llendl;
 
 		regionp->setSeedCapability(first_sim_seed_cap);
 		LL_DEBUGS("AppInit") << "Waiting for seed grant ...." << LL_ENDL;
@@ -2668,7 +2696,7 @@ bool idle_startup()
 		//
 		// Set message handlers
 		//
-		LL_INFOS("AppInit") << "Initializing communications..." << LL_ENDL;
+		llinfos << "Initializing communications..." << llendl;
 
 		// register callbacks for messages. . . do this after initial handshake to make sure that we don't catch any unwanted
 		register_viewer_callbacks(gMessageSystem);
@@ -2795,22 +2823,21 @@ bool idle_startup()
 		LLMessageSystem* msg = gMessageSystem;
 		if (!msg->mOurCircuitCode)
 		{
-			LL_WARNS("AppInit") << "Attempting to connect to simulator with a zero circuit code!"
-								<< LL_ENDL;
+			llwarns << "Attempting to connect to simulator with a zero circuit code !"
+					<< llendl;
 		}
 
 		gUseCircuitCallbackCalled = FALSE;
 
 		msg->enableCircuit(first_sim, TRUE);
 		// now, use the circuit info to tell simulator about us!
-		LL_INFOS("AppInit") << "viewer: UserLoginLocationReply() Enabling "
-							<< first_sim << " with code "
-							<< msg->mOurCircuitCode << LL_ENDL;
+		llinfos << "viewer: UserLoginLocationReply() Enabling " << first_sim
+				<< " with code " << msg->mOurCircuitCode << llendl;
 		msg->newMessageFast(_PREHASH_UseCircuitCode);
 		msg->nextBlockFast(_PREHASH_CircuitCode);
 		msg->addU32Fast(_PREHASH_Code, msg->mOurCircuitCode);
 		msg->addUUIDFast(_PREHASH_SessionID, gAgent.getSessionID());
-		msg->addUUIDFast(_PREHASH_ID, gAgent.getID());
+		msg->addUUIDFast(_PREHASH_ID, gAgentID);
 		msg->sendReliable(first_sim, MAX_TIMEOUT_COUNT, FALSE, TIMEOUT_SECONDS,
 						  use_circuit_callback, NULL);
 
@@ -2958,17 +2985,15 @@ bool idle_startup()
  		{
  			if (!gInventory.loadSkeleton(options, gInventory.getLibraryOwnerID()))
  			{
- 				LL_WARNS("AppInit") << "Problem loading inventory-skel-lib"
-									<< LL_ENDL;
+ 				llwarns << "Problem loading inventory-skel-lib" << llendl;
  			}
  		}
  		options.clear();
  		if (LLUserAuth::getInstance()->getOptions("inventory-skeleton", options))
  		{
- 			if (!gInventory.loadSkeleton(options, gAgent.getID()))
+ 			if (!gInventory.loadSkeleton(options, gAgentID))
  			{
- 				LL_WARNS("AppInit") << "Problem loading inventory-skel-targets"
-									<< LL_ENDL;
+ 				llwarns << "Problem loading inventory-skel-targets" << llendl;
  			}
  		}
 
@@ -3089,12 +3114,12 @@ bool idle_startup()
 		LLMuteList* ml = LLMuteList::getInstance();
 		if (ml)
 		{
-			LLMuteList::getInstance()->requestFromServer(gAgent.getID());
+			LLMuteList::getInstance()->requestFromServer(gAgentID);
 		}
 		else
 		{
-			LL_WARNS("AppInit") << "Failure to populate the mute list: mute list instance is absent !"
-								<< LL_ENDL;
+			llwarns << "Failure to populate the mute list: mute list instance is absent !"
+					<< llendl;
 		}
 
 		// Get L$ and ownership credit information
@@ -3183,8 +3208,8 @@ bool idle_startup()
 			LLUserAuth::options_t gesture_options;
 			if (LLUserAuth::getInstance()->getOptions("gestures", gesture_options))
 			{
-				LL_DEBUGS("AppInit") << "Gesture Manager loading " << gesture_options.size()
-					<< LL_ENDL;
+				LL_DEBUGS("AppInit") << "Gesture Manager loading "
+									 << gesture_options.size() << LL_ENDL;
 				std::vector<LLUUID> item_ids;
 				LLUserAuth::options_t::iterator resp_it;
 				for (resp_it = gesture_options.begin();
@@ -3489,9 +3514,9 @@ bool idle_startup()
 		// Unmute audio if desired and setup volumes.
 		// This is a not-uncommon crash site, so surround it with
 		// llinfos output to aid diagnosis.
-		LL_INFOS("AppInit") << "Doing first audio_update_volume..." << LL_ENDL;
+		llinfos << "Doing first audio_update_volume..." << llendl;
 		audio_update_volume();
-		LL_INFOS("AppInit") << "Done first audio_update_volume." << LL_ENDL;
+		llinfos << "Done first audio_update_volume." << llendl;
 
 		// reset keyboard focus to sane state of pointing at world
 		gFocusMgr.setKeyboardFocus(NULL);
@@ -3502,10 +3527,15 @@ bool idle_startup()
 
 		LLAppViewer::instance()->handleLoginComplete();
 
+		// We can now disable those (the user may re-enable them from the
+		// Advanced menu, now that the UI is showing).
+		LLError::Log::sDebugMessages = FALSE;
+
 		return TRUE;
 	}
 
-	LL_WARNS("AppInit") << "Reached end of idle_startup for state " << LLStartUp::getStartupState() << LL_ENDL;
+	llwarns << "Reached end of idle_startup for state "
+			<< LLStartUp::getStartupState() << llendl;
 	return TRUE;
 }
 
@@ -3525,14 +3555,14 @@ bool login_show(LLSavedLogins const& saved_logins)
 {
 	if (!LLPanelLogin::getInstance())
 	{
-		LL_INFOS("AppInit") << "Initializing the Login Screen" << LL_ENDL;
+		llinfos << "Initializing the Login Screen" << llendl;
 		// This creates the LLPanelLogin instance.
 		LLPanelLogin::show(gViewerWindow->getVirtualWindowRect(),
 						   FALSE, login_callback, NULL);
 	}
 	else
 	{
-		LL_INFOS("AppInit") << "Refreshing the Login Screen" << LL_ENDL;
+		llinfos << "Refreshing the Login Screen" << llendl;
 	}
 
 	// Now that the LLPanelLogin instance is created,
@@ -3642,7 +3672,7 @@ void login_callback(S32 option, void *userdata)
 	}
 	else
 	{
-		LL_WARNS("AppInit") << "Unknown login button clicked" << LL_ENDL;
+		llwarns << "Unknown login button clicked" << llendl;
 	}
 }
 
@@ -3730,7 +3760,7 @@ void LLStartUp::savePasswordToDisk(const std::string& hashed_password)
 
 	if (fwrite(buffer, HASHED_LENGTH, 1, fp) != 1)
 	{
-		LL_WARNS("AppInit") << "Short write" << LL_ENDL;
+		llwarns << "Short write" << llendl;
 	}
 
 	fclose(fp);
@@ -3799,7 +3829,7 @@ bool login_alert_status(const LLSD& notification, const LLSD& response)
             break;
 		}
         default:
-            LL_WARNS("AppInit") << "Missing case in login_alert_status switch" << LL_ENDL;
+            llwarns << "Missing case in login_alert_status switch" << llendl;
     }
 
 	LLPanelLogin::giveFocus();
@@ -3816,8 +3846,10 @@ void use_circuit_callback(void**, S32 result)
 		if (result)
 		{
 			// Make sure user knows something bad happened. JC
-			LL_WARNS("AppInit") << "Backing up to login screen!" << LL_ENDL;
-			LLNotifications::instance().add("LoginPacketNeverReceived", LLSD(), LLSD(), login_alert_status);
+			llwarns << "Backing up to login screen!" << llendl;
+			LLNotifications::instance().add("LoginPacketNeverReceived",
+											LLSD(), LLSD(),
+											login_alert_status);
 			reset_login();
 		}
 		else
@@ -4108,7 +4140,7 @@ void init_start_screen(S32 location_id)
 	if (gStartTexture.notNull())
 	{
 		gStartTexture = NULL;
-		LL_INFOS("AppInit") << "re-initializing start screen" << LL_ENDL;
+		llinfos << "re-initializing start screen" << llendl;
 	}
 
 	LL_DEBUGS("AppInit") << "Loading startup bitmap..." << LL_ENDL;
@@ -4130,12 +4162,12 @@ void init_start_screen(S32 location_id)
 	// driver bug
 	if (!gSavedSettings.getBOOL("UseStartScreen"))
 	{
-		LL_INFOS("AppInit")  << "Bitmap load disabled" << LL_ENDL;
+		llinfos  << "Bitmap load disabled" << llendl;
 		return;
 	}
 	else if (!start_image_bmp->load(temp_str))
 	{
-		LL_WARNS("AppInit") << "Bitmap load failed" << LL_ENDL;
+		llwarns << "Bitmap load failed" << llendl;
 		return;
 	}
 
@@ -4145,7 +4177,7 @@ void init_start_screen(S32 location_id)
 	LLPointer<LLImageRaw> raw = new LLImageRaw;
 	if (!start_image_bmp->decode(raw, 0.0f))
 	{
-		LL_WARNS("AppInit") << "Bitmap decode failed" << LL_ENDL;
+		llwarns << "Bitmap decode failed" << llendl;
 		gStartTexture = NULL;
 		return;
 	}
@@ -4199,9 +4231,9 @@ std::string LLStartUp::startupStateToString(EStartupState state)
 // static
 void LLStartUp::setStartupState(EStartupState state)
 {
-	LL_INFOS("AppInit") << "Startup state changing from " <<  
-		startupStateToString(gStartupState) << " to " <<  
-		startupStateToString(state) << LL_ENDL;
+	llinfos << "Startup state changing from "
+			<< startupStateToString(gStartupState) << " to "
+			<< startupStateToString(state) << llendl;
 	gStartupState = state;
 }
 
@@ -4342,8 +4374,7 @@ bool LLStartUp::startLLProxy()
 		else
 		{
 			// Unknown or missing setting.
-			LL_WARNS("Proxy") << "Invalid SOCKS 5 authentication type."
-							  << LL_ENDL;
+			llwarns << "Invalid SOCKS 5 authentication type." << llendl;
 			gSavedSettings.setString("Socks5AuthType", "None");
 			LLProxy::getInstance()->setAuthNone();
 		}
@@ -4406,8 +4437,8 @@ bool LLStartUp::startLLProxy()
 					default:
 						// Something strange happened
 						error_string = "SOCKS_UNKNOWN_STATUS";
-						LL_WARNS("Proxy") << "Unknown return from LLProxy::startProxy(): "
-										  << status << LL_ENDL;
+						llwarns << "Unknown return from LLProxy::startProxy(): "
+								<< status << llendl;
 						break;
 				}
 
@@ -4461,7 +4492,7 @@ bool LLStartUp::startLLProxy()
 		}
 		else
 		{
-			LL_WARNS("Proxy") << "Invalid other HTTP proxy configuration."<< LL_ENDL;
+			llwarns << "Invalid other HTTP proxy configuration."<< llendl;
 
 			// Set the missing or wrong configuration back to something valid.
 			gSavedSettings.setString("HttpProxyType", "None");

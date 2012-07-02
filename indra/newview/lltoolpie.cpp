@@ -145,8 +145,8 @@ BOOL LLToolPie::pickAndShowMenu(BOOL always_show)
 		if (parcel)
 		{
 			LLViewerParcelMgr::getInstance()->selectCollisionParcel();
-			if (parcel->getParcelFlag(PF_USE_PASS_LIST)
-				&& !LLViewerParcelMgr::getInstance()->isCollisionBanned())
+			if (parcel->getParcelFlag(PF_USE_PASS_LIST)	&&
+				!LLViewerParcelMgr::getInstance()->isCollisionBanned())
 			{
 				// if selling passes, just buy one
 				void* deselect_when_done = (void*)TRUE;
@@ -169,8 +169,8 @@ BOOL LLToolPie::pickAndShowMenu(BOOL always_show)
 	}
 
 	// didn't click in any UI object, so must have clicked in the world
-	LLViewerObject *object = mPick.getObject();
-	LLViewerObject *parent = NULL;
+	LLViewerObject* object = mPick.getObject();
+	LLViewerObject* parent = NULL;
 
 	if (mPick.mPickType != LLPickInfo::PICK_LAND)
 	{
@@ -382,6 +382,20 @@ BOOL LLToolPie::pickAndShowMenu(BOOL always_show)
 	}
 	else if (mPick.mObjectID == gAgent.getID())
 	{
+		LLMenuItemGL* item = gPieSelf->getChild<LLMenuItemGL>("Self Sit",
+															  TRUE, FALSE);
+		if (item)
+		{
+			if (isAgentAvatarValid() && gAgentAvatarp->mIsSitting)
+			{
+				item->setValue(LLTrans::getString("stand_up"));
+			}
+			else
+			{
+				item->setValue(LLTrans::getString("sit_here"));
+			}
+		}
+
 		gPieSelf->show(x, y, mPieMouseButtonDown);
 	}
 	else if (object)
@@ -399,61 +413,86 @@ BOOL LLToolPie::pickAndShowMenu(BOOL always_show)
 				if (!object) return TRUE;	// Orphaned object ?
 			}
 
-			// Object is an avatar, so check for mute by id.
-			LLVOAvatar* avatar = (LLVOAvatar*)object;
-			std::string name = avatar->getFullname();
 			if (ml)
 			{
+				// Object is an avatar, so check for mute by id.
+				LLVOAvatar* avatar = (LLVOAvatar*)object;
 				LLUUID id = avatar->getID();
-				if (ml->isMuted(id, name))
+				std::string name = avatar->getFullname();
+
+				if (gMutesPieMenu)
 				{
-					gMenuHolder->childSetText("Avatar Mute",
-											  LLTrans::getString("unmute_all"));
-				}
-				else
-				{
-					gMenuHolder->childSetText("Avatar Mute",
-											  LLTrans::getString("mute_all"));
-				}
-				if (ml->isMuted(id, name, LLMute::flagTextChat))
-				{
-					gMenuHolder->childSetText("Avatar Mute chat",
-											  LLTrans::getString("unmute_chat"));
-				}
-				else
-				{
-					gMenuHolder->childSetText("Avatar Mute chat",
-											  LLTrans::getString("mute_chat"));
-				}
-				if (ml->isMuted(id, name, LLMute::flagVoiceChat))
-				{
-					gMenuHolder->childSetText("Avatar Mute voice",
-											  LLTrans::getString("unmute_voice"));
-				}
-				else
-				{
-					gMenuHolder->childSetText("Avatar Mute voice",
-											  LLTrans::getString("mute_voice"));
-				}
-				if (ml->isMuted(id, name, LLMute::flagObjectSounds))
-				{
-					gMenuHolder->childSetText("Avatar Mute sounds",
-											  LLTrans::getString("unmute_sounds"));
-				}
-				else
-				{
-					gMenuHolder->childSetText("Avatar Mute sounds",
-											  LLTrans::getString("mute_sounds"));
-				}
-				if (ml->isMuted(id, name, LLMute::flagParticles))
-				{
-					gMenuHolder->childSetText("Avatar Mute particles",
-											  LLTrans::getString("unmute_particles"));
-				}
-				else
-				{
-					gMenuHolder->childSetText("Avatar Mute particles",
-											  LLTrans::getString("mute_particles"));
+					LLMenuItemGL* item;
+
+					item = gMutesPieMenu->getChild<LLMenuItemGL>("Avatar Mute",
+																 TRUE, FALSE);
+					if (item)
+					{
+						if (ml->isMuted(id, name))
+						{
+							item->setValue(LLTrans::getString("unmute_all"));
+						}
+						else
+						{
+							item->setValue(LLTrans::getString("mute_all"));
+						}
+					}
+
+					item = gMutesPieMenu->getChild<LLMenuItemGL>("Avatar Mute chat",
+																 TRUE, FALSE);
+					if (item)
+					{
+						if (ml->isMuted(id, name, LLMute::flagTextChat))
+						{
+							item->setValue(LLTrans::getString("unmute_chat"));
+						}
+						else
+						{
+							item->setValue(LLTrans::getString("mute_chat"));
+						}
+					}
+
+					item = gMutesPieMenu->getChild<LLMenuItemGL>("Avatar Mute voice",
+																 TRUE, FALSE);
+					if (item)
+					{
+						if (ml->isMuted(id, name, LLMute::flagVoiceChat))
+						{
+							item->setValue(LLTrans::getString("unmute_voice"));
+						}
+						else
+						{
+							item->setValue(LLTrans::getString("mute_voice"));
+						}
+					}
+
+					item = gMutesPieMenu->getChild<LLMenuItemGL>("Avatar Mute sounds",
+																 TRUE, FALSE);
+					if (item)
+					{
+						if (ml->isMuted(id, name, LLMute::flagObjectSounds))
+						{
+							item->setValue(LLTrans::getString("unmute_sounds"));
+						}
+						else
+						{
+							item->setValue(LLTrans::getString("mute_sounds"));
+						}
+					}
+
+					item = gMutesPieMenu->getChild<LLMenuItemGL>("Avatar Mute particles",
+																 TRUE, FALSE);
+					if (item)
+					{
+						if (ml->isMuted(id, name, LLMute::flagParticles))
+						{
+							item->setValue(LLTrans::getString("unmute_particles"));
+						}
+						else
+						{
+							item->setValue(LLTrans::getString("mute_particles"));
+						}
+					}
 				}
 			}
 
@@ -461,6 +500,20 @@ BOOL LLToolPie::pickAndShowMenu(BOOL always_show)
 		}
 		else if (object->isAttachment())
 		{
+			LLMenuItemGL* item = gPieAttachment->getChild<LLMenuItemGL>("Self Sit Attachment",
+																		TRUE, FALSE);
+			if (item)
+			{
+				if (isAgentAvatarValid() && gAgentAvatarp->mIsSitting)
+				{
+					item->setValue(LLTrans::getString("stand_up"));
+				}
+				else
+				{
+					item->setValue(LLTrans::getString("sit_here"));
+				}
+			}
+
 			gPieAttachment->show(x, y, mPieMouseButtonDown);
 		}
 		else

@@ -211,9 +211,9 @@ void LLPreview::onCommit()
 		if (!item->isFinished())
 		{
 			// We are attempting to save an item that was never loaded
-			LL_WARNS("Preview") << "LLPreview::onCommit() called with mIsComplete == FALSE"
-								<< " Type: " << item->getType() << " ID: "
-								<< item->getUUID() << LL_ENDL;
+			llwarns << "Call done for an unfinished asset - Type: "
+					<< item->getType() << " - ID: " << item->getUUID()
+					<< llendl;
 			return;
 		}
 
@@ -660,8 +660,8 @@ void LLPreview::setAssetId(const LLUUID& asset_id)
 		LLViewerObject* object = gObjectList.findObject(mObjectUUID);
 		if (NULL == object)
 		{
-			LL_WARNS("Preview") << "LLPreview::setAssetId() called on unrecognized object, UUID : "
-								<< mObjectUUID << LL_ENDL;
+			llwarns << "Call done with unrecognized object, UUID: "
+					<< mObjectUUID << llendl;
 			return;
 		}
 		object->updateViewerInventoryAsset(item, asset_id);

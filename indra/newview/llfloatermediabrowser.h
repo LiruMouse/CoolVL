@@ -38,6 +38,10 @@
 
 #include "llmediactrl.h"
 
+class LLButton;
+class LLComboBox;
+class LLTextBox;
+
 class LLViewerHtmlHelp : public LLHtmlHelp
 {
 public:
@@ -48,39 +52,43 @@ public:
 	/*virtual*/ void show(std::string start_url);
 	void show(std::string start_url, std::string title);
 
-	static bool onClickF1HelpLoadURL(const LLSD& notification, const LLSD& response);
-
+	static bool onClickF1HelpLoadURL(const LLSD& notification,
+									 const LLSD& response);
 };
 
-class LLComboBox;
-class LLMediaCtrl;
-
-class LLFloaterMediaBrowser : 
-	public LLFloater, 
-	public LLUISingleton<LLFloaterMediaBrowser, 
-	VisibilityPolicy<LLFloater> >, 
-	public LLViewerMediaObserver
+class LLFloaterMediaBrowser : public LLFloater,
+							  public LLUISingleton<LLFloaterMediaBrowser, 
+							  VisibilityPolicy<LLFloater> >, 
+							  public LLViewerMediaObserver
 {
 	friend class LLUISingleton<LLFloaterMediaBrowser, VisibilityPolicy<LLFloater> >;
+
 public:
 	LLFloaterMediaBrowser(const LLSD& media_data);
-
-	void geometryChanged(S32 x, S32 y, S32 width, S32 height);
 
 	/*virtual*/ BOOL postBuild();
 	/*virtual*/ void onClose(bool app_quitting);
 	/*virtual*/ void draw();
 
 	// inherited from LLViewerMediaObserver
-	/*virtual*/ void handleMediaEvent(LLPluginClassMedia* self, EMediaEvent event);
+	/*virtual*/ void handleMediaEvent(LLPluginClassMedia* self,
+									  EMediaEvent event);
 
 	void openMedia(const std::string& media_url, bool trusted = false);
-	void openMedia(const std::string& media_url, const std::string& target, bool trusted = false);
-	void buildURLHistory();
-	std::string getSupportURL();
+	void openMedia(const std::string& media_url, const std::string& target,
+				   bool trusted = false);
+
 	void setCurrentURL(const std::string& url);
 
-	static LLFloaterMediaBrowser* showInstance(const LLSD& id, bool trusted = false);
+	static LLFloaterMediaBrowser* showInstance(const LLSD& id,
+											   bool trusted = false);
+
+	std::string getSupportURL();
+
+private:
+	void buildURLHistory();
+	void geometryChanged(S32 x, S32 y, S32 width, S32 height);
+
 	static void onEnterAddress(LLUICtrl* ctrl, void* user_data);
 	static void onClickRefresh(void* user_data);
 	static void onClickBack(void* user_data);
@@ -95,9 +103,22 @@ public:
 	static void onClickSeek(void* user_data);
 
 private:
-	LLMediaCtrl* mBrowser;
-	LLComboBox* mAddressCombo;
-	std::string mCurrentURL;
+	LLMediaCtrl*	mBrowser;
+	LLButton*		mBackButton;
+	LLButton*		mForwardButton;
+	LLButton*		mReloadButton;
+	LLButton*		mRewindButton;
+	LLButton*		mPlayButton;
+	LLButton*		mPauseButton;
+	LLButton*		mStopButton;
+	LLButton*		mSeekButton;
+	LLButton*		mGoButton;
+	LLButton*		mCloseButton;
+	LLButton*		mBrowserButton;
+	LLButton*		mAssignButton;
+	LLComboBox* 	mAddressCombo;
+	LLTextBox*		mLoadingText;
+	std::string		mCurrentURL;
 };
 
 extern LLViewerHtmlHelp gViewerHtmlHelp;

@@ -41,7 +41,7 @@ class LLControlGroup;
 class LLAgentAccess
 {
 public:
-	LLAgentAccess(LLControlGroup& savedSettings);
+	LLAgentAccess();
 
 	bool getAdminOverride() const;
 	void setAdminOverride(bool b);
@@ -70,11 +70,9 @@ public:
 	static int convertTextToMaturity(char text);
 
 private:
-	U8 mAccess;	// SIM_ACCESS_MATURE etc
-	U8 mGodLevel;
-	bool mAdminOverride;
-
-	LLControlGroup& mSavedSettings;
+	U8						mAccess;	// SIM_ACCESS_MATURE etc
+	U8						mGodLevel;
+	bool					mAdminOverride;
 };
 
 #endif // LL_LLAGENTACCESS_H

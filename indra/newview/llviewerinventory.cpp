@@ -269,7 +269,9 @@ void LLViewerInventoryItem::setTransactionID(const LLTransactionID& transaction_
 // virtual
 void LLViewerInventoryItem::packMessage(LLMessageSystem* msg) const
 {
-	LL_INFOS("Inventory") << " UDP Rez/UpdateObject of UUID " << mUUID << " parent = " << mParentUUID << " type= " << mType << " transaction= "<< mTransactionID << LL_ENDL; // OGPX
+	llinfos << "UDP Rez/UpdateObject of UUID " << mUUID << " - parent = "
+			<< mParentUUID << " - type = " << mType << " - transaction = "
+			<< mTransactionID << llendl; // OGPX
 	msg->addUUIDFast(_PREHASH_ItemID, mUUID);
 	msg->addUUIDFast(_PREHASH_FolderID, mParentUUID);
 	mPermissions.packMessage(msg);
@@ -932,7 +934,8 @@ void copy_inventory_from_notecard(const LLUUID& object_id, const LLUUID& notecar
         return;
     }
 
-	// check capability to prevent a crash while LL_ERRS in LLCapabilityListener::capListener. See EXT-8459.
+	// check capability to prevent a crash while llerrs in
+	// LLCapabilityListener::capListener. See EXT-8459.
 	std::string url = viewer_region->getCapability("CopyInventoryFromNotecard");
 	if (url.empty())
 	{

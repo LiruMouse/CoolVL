@@ -1333,45 +1333,28 @@ void LLVOAvatar::initInstance(void)
 
 const LLVector3 LLVOAvatar::getRenderPosition() const
 {
+	LLVector3 pos;
+
 	if (mDrawable.isNull() || mDrawable->getGeneration() < 0)
 	{
-		if (isRoot() && mHasPelvisOffset)
-		{
-			// Apply a pelvis fixup (as defined by the avs skin)
-			LLVector3 pos = getPositionAgent();
-			pos[VZ] += mPelvisFixup;
-			return pos;
-		}
-		else
-		{
-			return getPositionAgent();
-		}
+		pos = getPositionAgent();
 	}
-	else if (isRoot())
+	else if (isRoot() || !mDrawable->getParent())
 	{
-		if (!mHasPelvisOffset)
-		{
-			return mDrawable->getPositionAgent();
-		}
-		else
-		{
-			// Apply a pelvis fixup (as defined by the avs skin)
-			LLVector3 pos = mDrawable->getPositionAgent();
-			pos[VZ] += mPelvisFixup;
-			return pos;
-		}
+		pos = mDrawable->getPositionAgent();
 	}
 	else
 	{
-		if (mDrawable->getParent())
-		{
-			return getPosition() * mDrawable->getParent()->getRenderMatrix();
-		}
-		else
-		{
-			return getPositionAgent();
-		}
+		pos = getPosition() * mDrawable->getParent()->getRenderMatrix();
 	}
+
+	if (mHasPelvisOffset)
+	{
+		// Apply a pelvis fixup (as defined by the avs skin)
+		pos[VZ] += mPelvisFixup;
+	}
+
+	return pos;
 }
 
 void LLVOAvatar::updateDrawable(BOOL force_damped)
@@ -2649,7 +2632,7 @@ void LLVOAvatar::idleUpdateMisc(bool detailed_update)
 
 	if (isImpostor() && !mNeedsImpostorUpdate)
 	{
-		LLVector4a ext[2];
+		LL_ALIGN_16(LLVector4a ext[2]);
 		F32 distance;
 		LLVector3 angle;
 
@@ -5685,8 +5668,8 @@ BOOL LLVOAvatar::loadMeshNodes()
 			else
 			{
 				// This should never happen
-				LL_WARNS("Avatar") << "Could not find avatar mesh: "
-								   << info->mReferenceMeshName << LL_ENDL;
+				llwarns << "Could not find avatar mesh: "
+						<< info->mReferenceMeshName << llendl;
 			}
 		}
 		else
@@ -7321,9 +7304,11 @@ bool LLVOAvatar::visualParamWeightsAreDefault()
 //-----------------------------------------------------------------------------
 void LLVOAvatar::processAvatarAppearance(LLMessageSystem* mesgsys)
 {
-	if (gSavedSettings.getBOOL("BlockAvatarAppearanceMessages"))
+	static LLCachedControl<bool> block_messages(gSavedSettings,
+												"BlockAvatarAppearanceMessages");
+	if (block_messages)
 	{
-		llwarns << "Blocking AvatarAppearance message" << llendl;
+		llwarns << "DEBUG: Blocking AvatarAppearance message" << llendl;
 		return;
 	}
 

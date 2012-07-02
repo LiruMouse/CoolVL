@@ -57,6 +57,9 @@
 	<string name="TooltipMustSingleDrop">Only a single item can be dragged here</string>	
 
 	<!-- Toolpie, lltoolpie.cpp -->
+	<string name="sit_here">Sit Here</string>
+	<string name="stand_up">Stand Up</string>
+
 	<string name="mute">Mute</string>
 	<string name="unmute">Unmute</string>
 	<string name="mute_all">Full mute</string>

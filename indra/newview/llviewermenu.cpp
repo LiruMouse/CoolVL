@@ -67,6 +67,7 @@
 #include "lltimer.h"
 #include "lltransactiontypes.h"
 #include "llui.h"
+#include "lluictrl.h"
 #include "lluictrlfactory.h"
 #include "lluuid.h"
 #include "llvfile.h"
@@ -277,6 +278,7 @@ LLPieMenu* gAttachBodyPartPieMenus[8];
 LLPieMenu* gDetachPieMenu = NULL;
 LLPieMenu* gDetachScreenPieMenu = NULL;
 LLPieMenu* gDetachBodyPartPieMenus[8];
+LLPieMenu* gMutesPieMenu = NULL;
 
 LLMenuItemCallGL* gAFKMenu = NULL;
 LLMenuItemCallGL* gBusyMenu = NULL;
@@ -589,15 +591,13 @@ void init_menus()
 	/// Pie menus
 	///
 	gPieSelf = LLUICtrlFactory::getInstance()->buildPieMenu("menu_pie_self.xml", gMenuHolder);
-
-	// TomY TODO: what shall we do about these?
 	gDetachScreenPieMenu = gMenuHolder->getChild<LLPieMenu>("Object Detach HUD", true);
 	gDetachPieMenu = gMenuHolder->getChild<LLPieMenu>("Object Detach", true);
 
 	gPieAvatar = LLUICtrlFactory::getInstance()->buildPieMenu("menu_pie_avatar.xml", gMenuHolder);
+	gMutesPieMenu = gMenuHolder->getChild<LLPieMenu>("Mutes", TRUE, FALSE);
 
 	gPieObject = LLUICtrlFactory::getInstance()->buildPieMenu("menu_pie_object.xml", gMenuHolder);
-
 	gAttachScreenPieMenu = gMenuHolder->getChild<LLPieMenu>("Object Attach HUD");
 	gAttachPieMenu = gMenuHolder->getChild<LLPieMenu>("Object Attach");
 
@@ -764,6 +764,8 @@ void init_client_menu(LLMenuGL* menu)
 										  NULL, &get_visibility,
 										  debugview,
 										  '4', MASK_CONTROL|MASK_SHIFT));
+		sub->append(new LLMenuItemToggleGL("Allow DEBUG messages",
+										   &LLError::Log::sDebugMessages));
 		sub->append(new LLMenuItemCallGL("Debug tags", &handle_debug_tags, NULL));
 		{
 			LLMenuGL* sub2 = new LLMenuGL("Info to Debug Console");
@@ -2329,20 +2331,25 @@ class LLEnableEdit : public view_listener_t
 {
 	bool handleEvent(LLPointer<LLEvent> event, const LLSD& userdata)
 	{
-		// *HACK: See LLViewerParcelMgr::agentCanBuild() for the "false" flag.
-		bool enable = LLViewerParcelMgr::getInstance()->agentCanBuild(false) ||
-					  LLSelectMgr::getInstance()->getSelection()->isAttachment();
-//MK
-		if (enable && gRRenabled)
+		bool enable = false;
+		LLViewerObject* obj;
+		obj = LLSelectMgr::getInstance()->getSelection()->getPrimaryObject();
+		if (obj)
 		{
-			LLViewerObject* obj;
-			obj = LLSelectMgr::getInstance()->getSelection()->getPrimaryObject();
-			if (obj && !gAgent.mRRInterface.canEdit(obj))
+			enable = true;
+//MK
+			if (gRRenabled && !gAgent.mRRInterface.canEdit(obj))
 			{
 				enable = false;
 			}
-		}
 //mk
+		}
+		else
+		{
+			// *HACK: See LLViewerParcelMgr::agentCanBuild() for the "false"
+			// flag.
+			enable = LLViewerParcelMgr::getInstance()->agentCanBuild(false);
+		}
 		gMenuHolder->findControl(userdata["control"].asString())->setValue(enable);
 		return true;
 	}
@@ -3256,35 +3263,6 @@ class LLSelfEnableSitOrStand : public view_listener_t
 	{
 		bool new_value = isAgentAvatarValid() && !gAgent.getFlying();
 		gMenuHolder->findControl(userdata["control"].asString())->setValue(new_value);
-
-		std::string label;
-		std::string sit_text;
-		std::string stand_text;
-		std::string param = userdata["data"].asString();
-		std::string::size_type offset = param.find(",");
-		if (offset != param.npos)
-		{
-			sit_text = param.substr(0, offset);
-			stand_text = param.substr(offset+1);
-		}
-
-		if (isAgentAvatarValid() && gAgentAvatarp->mIsSitting)
-		{
-			label = stand_text;
-		}
-		else
-		{
-			label = sit_text;
-		}
-
-		if (gMenuHolder->getChild<LLView>("Self Sit", TRUE, FALSE))
-		{
-			gMenuHolder->childSetText("Self Sit", label);
-		}
-		if (gMenuHolder->getChild<LLView>("Self Sit Attachment", TRUE, FALSE))
-		{
-			gMenuHolder->childSetText("Self Sit Attachment", label);
-		}
 
 		return true;
 	}
@@ -7822,8 +7800,8 @@ void handle_grab_baked_texture(void* data)
 	if (isAgentAvatarValid())
 	{
 		const LLUUID& asset_id = gAgentAvatarp->grabBakedTexture(index);
-		LL_INFOS("texture") << "Adding baked texture " << asset_id
-							<< " to inventory." << llendl;
+		llinfos << "Adding baked texture " << asset_id << " to inventory."
+				<< llendl;
 		LLAssetType::EType asset_type = LLAssetType::AT_TEXTURE;
 		LLInventoryType::EType inv_type = LLInventoryType::IT_TEXTURE;
 		LLUUID folder_id(gInventory.findCategoryUUIDForType(LLFolderType::FT_TEXTURE));

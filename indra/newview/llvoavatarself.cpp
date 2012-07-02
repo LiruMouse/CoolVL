@@ -1226,8 +1226,8 @@ void LLVOAvatarSelf::localTextureLoaded(BOOL success,
 	// fix for EXT-268. Preventing using of NULL pointer
 	if (!local_tex_obj)
 	{
-		LL_WARNS("TAG") << "There is no Local Texture Object with index: "
-						<< index << ", final: " << final << LL_ENDL;
+		llwarns << "There is no Local Texture Object with index: " << index
+				<< ", final: " << final << llendl;
 		return;
 	}
 	if (success)
@@ -2410,13 +2410,13 @@ BOOL LLVOAvatarSelf::needsRenderBeam()
 	}
 
 	// No beam for selected far objects when PrivateLookAt is TRUE
-	static LLCachedControl<bool> private_look_at(gSavedSettings, "PrivateLookAt");
-	static LLCachedControl<U32> private_look_at_limit(gSavedSettings, "PrivateLookAtLimit");
+	static LLCachedControl<bool> private_point_at(gSavedSettings, "PrivatePointAt");
+	static LLCachedControl<U32> point_at_limit(gSavedSettings, "PrivatePointAtLimit");
 	LLObjectSelectionHandle selection = LLSelectMgr::getInstance()->getSelection();
 	LLViewerObject* object = selection->getFirstObject();
 	LLVector3d agent_pos = gAgent.getPositionGlobal();
-	if (object && private_look_at &&
-		(object->getPositionGlobal() - agent_pos).magVec() > private_look_at_limit)
+	if (object && private_point_at &&
+		(object->getPositionGlobal() - agent_pos).magVec() > point_at_limit)
 	{
 		return FALSE;
 	}
@@ -2426,7 +2426,7 @@ BOOL LLVOAvatarSelf::needsRenderBeam()
 									LLToolGrab::getInstance()->isEditing());
 	object = LLToolGrab::getInstance()->getEditingObject();
 	if (object && (object->isAttachment() ||
-				   (object->getPositionGlobal() - agent_pos).magVec() > private_look_at_limit))
+				   (object->getPositionGlobal() - agent_pos).magVec() > point_at_limit))
 	{
 		// Don't render selection beam on hud objects, or on far objects when
 		// PrivateLookAt is TRUE

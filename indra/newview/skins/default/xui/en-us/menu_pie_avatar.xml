@@ -3,7 +3,7 @@
 	<menu_item_call enabled="false" label="Profile..." mouse_opaque="true" name="Profile...">
 		<on_click function="ShowAgentProfile" userdata="hit object" />
 	</menu_item_call>
-	<pie_menu label="Mutes &gt;" name="Mutes &gt;">
+	<pie_menu label="Mutes &gt;" name="Mutes">
 		<menu_item_call enabled="false" label="Full mute" mouse_opaque="true" name="Avatar Mute">
 			<on_click function="Avatar.Mute" userdata="" />
 			<on_enable function="Avatar.EnableMute" />

@@ -32,8 +32,11 @@ set(debug_files
     libhunspell.dll
     glod.dll
     openjpegd.dll
-    libtcmalloc_minimal-debug.dll
     )
+
+if(USE_TCMALLOC)
+    set(debug_files ${debug_files} libtcmalloc_minimal-debug.dll)
+endif(USE_TCMALLOC)
 
 copy_if_different(
     ${debug_src_dir} 
@@ -221,9 +224,12 @@ set(release_files
     libhunspell.dll
     glod.dll
     openjpeg.dll
-    libtcmalloc_minimal.dll
     )
     
+if(USE_TCMALLOC)
+    set(release_files ${release_files} libtcmalloc_minimal.dll)
+endif(USE_TCMALLOC)
+
 copy_if_different(
     ${release_src_dir} 
     "${CMAKE_CURRENT_BINARY_DIR}/Release"

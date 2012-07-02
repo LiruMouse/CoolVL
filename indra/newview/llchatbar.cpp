@@ -987,7 +987,7 @@ void LLChatBar::sendChatFromViewer(const LLWString &wtext, EChatType type, BOOL 
 		}
 		else
 		{
-			LL_WARNS("SendChat") << "sendChatFromViewer() - invalid volume" << LL_ENDL;
+			llwarns << "sendChatFromViewer() - invalid volume" << llendl;
 			return;
 		}
 		U32 play_anim = gSavedSettings.getU32("PlayChatAnims");
@@ -1011,7 +1011,8 @@ void LLChatBar::sendChatFromViewer(const LLWString &wtext, EChatType type, BOOL 
 	}
 	if (channel != 0 && type != CHAT_TYPE_START && type != CHAT_TYPE_STOP)
 	{
-		LL_DEBUGS("SendChat") << "Chat channel: " << channel << " - Text: " << utf8_text << LL_ENDL;
+		LL_DEBUGS("SendChat") << "Chat channel: " << channel << " - Text: "
+							  << utf8_text << LL_ENDL;
 	}
 
 	send_chat_from_viewer(utf8_out_text, type, channel);

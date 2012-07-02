@@ -318,10 +318,8 @@ void LLPreviewNotecard::loadAsset()
 					{
 						// The object that we're trying to look at disappeared,
 						// bail.
-						LL_WARNS("Notecard") << "Can't find object "
-											 << mObjectUUID
-											 << " associated with notecard."
-											 << LL_ENDL;
+						llwarns << "Can't find object " << mObjectUUID
+								<< " associated with notecard." << llendl;
 						mAssetID.setNull();
 						mEditor->setText(getString("no_object"));
 						mEditor->makePristine();
@@ -403,8 +401,7 @@ void LLPreviewNotecard::onLoadComplete(LLVFS* vfs,
 			{
 				if (!preview->mEditor->importBuffer(buffer, file_length + 1))
 				{
-					LL_WARNS("Notecard") << "Problem importing notecard"
-										 << LL_ENDL;
+					llwarns << "Problem importing notecard" << llendl;
 				}
 			}
 			else
@@ -446,8 +443,7 @@ void LLPreviewNotecard::onLoadComplete(LLVFS* vfs,
 				LLNotifications::instance().add("UnableToLoadNotecard");
 			}
 
-			LL_WARNS("Notecard") << "Problem loading notecard: "
-								 << status << LL_ENDL;
+			llwarns << "Problem loading notecard: " << status << llendl;
 			preview->mAssetStatus = PREVIEW_ASSET_ERROR;
 		}
 	}
@@ -505,8 +501,7 @@ bool LLPreviewNotecard::saveIfNeeded(LLInventoryItem* copyitem)
 
 	if (!gAssetStorage)
 	{
-		LL_WARNS("Notecard") << "Not connected to an asset storage system."
-							 << LL_ENDL;
+		llwarns << "Not connected to an asset storage system." << llendl;
 		return false;
 	}
 
@@ -608,10 +603,8 @@ void LLPreviewNotecard::onSaveComplete(const LLUUID& asset_uuid,
 			}
 			else
 			{
-				LL_WARNS("Notecard") << "Inventory item for notecard "
-									 << info->mItemUUID
-									 << " is no longer in agent inventory."
-									 << LL_ENDL;
+				llwarns << "Inventory item for notecard " << info->mItemUUID
+						<< " is no longer in agent inventory." << llendl;
 			}
 		}
 		else
@@ -653,8 +646,7 @@ void LLPreviewNotecard::onSaveComplete(const LLUUID& asset_uuid,
 	}
 	else
 	{
-		LL_WARNS("Notecard") << "Problem saving notecard: " << status
-							 << LL_ENDL;
+		llwarns << "Problem saving notecard: " << status << llendl;
 		LLSD args;
 		args["REASON"] = std::string(LLAssetStorage::getErrorString(status));
 		LLNotifications::instance().add("SaveNotecardFailReason", args);

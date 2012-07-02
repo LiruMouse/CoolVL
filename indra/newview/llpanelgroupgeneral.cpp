@@ -381,8 +381,8 @@ void LLPanelGroupGeneral::onClickJoin(void *userdata)
 	}
 	else
 	{
-		LL_WARNS("GroupPanel") << "LLGroupMgr::getInstance()->getGroupData("
-							   << self->mGroupID << ") was NULL" << LL_ENDL;
+		llwarns << "LLGroupMgr::getInstance()->getGroupData(" << self->mGroupID
+				<< ") was NULL" << llendl;
 	}
 }
 

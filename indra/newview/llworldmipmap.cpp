@@ -32,17 +32,17 @@
 
 #include "llviewerprecompiledheaders.h"
 
-#include "llworldmipmap.h"
+#include "math.h"	// log()
 
 #include "llviewercontrol.h"
 #include "llviewertexturelist.h"
-#include "math.h"	// log()
+#include "llworldmipmap.h"
 
 // Turn this on to output tile stats in the standard output
 #define DEBUG_TILES_STAT 0
 
-LLWorldMipmap::LLWorldMipmap() :
-	mCurrentLevel(0)
+LLWorldMipmap::LLWorldMipmap()
+:	mCurrentLevel(0)
 {
 }
 
@@ -54,16 +54,18 @@ LLWorldMipmap::~LLWorldMipmap()
 // Delete all sublevel maps and clean them
 void LLWorldMipmap::reset()
 {
-	for (int level = 0; level < MAP_LEVELS; level++)
+	for (S32 level = 0; level < MAP_LEVELS; ++level)
 	{
 		mWorldObjectsMipMap[level].clear();
 	}
 }
 
-// This method should be called before each use of the mipmap (typically, before each draw), so that to let
-// the boost level of unused tiles to drop to 0 (BOOST_NONE).
-// Tiles that are accessed have had their boost level pushed to BOOST_MAP_VISIBLE so we can identify them.
-// The result of this strategy is that if a tile is not used during 2 consecutive loops, its boost level drops to 0.
+// This method should be called before each use of the mipmap (typically,
+// before each draw), so that to let the boost level of unused tiles to drop
+// to 0 (BOOST_NONE). Tiles that are accessed have had their boost level pushed
+// to BOOST_MAP_VISIBLE so we can identify them. The result of this strategy is
+// that if a tile is not used during 2 consecutive loops, its boost level drops
+// to 0.
 void LLWorldMipmap::equalizeBoostLevels()
 {
 #if DEBUG_TILES_STAT
@@ -72,45 +74,52 @@ void LLWorldMipmap::equalizeBoostLevels()
 	S32 nb_visible = 0;
 #endif // DEBUG_TILES_STAT
 	// For each level
-	for (S32 level = 0; level < MAP_LEVELS; level++)
+	for (S32 level = 0; level < MAP_LEVELS; ++level)
 	{
 		sublevel_tiles_t& level_mipmap = mWorldObjectsMipMap[level];
 		// For each tile
-		for (sublevel_tiles_t::iterator iter = level_mipmap.begin(); iter != level_mipmap.end(); iter++)
+		for (sublevel_tiles_t::iterator iter = level_mipmap.begin(),
+										end = level_mipmap.end();
+			 iter != end; ++iter)
 		{
 			LLPointer<LLViewerTexture> img = iter->second;
 			S32 current_boost_level = img->getBoostLevel();
 			if (current_boost_level == LLViewerTexture::BOOST_MAP_VISIBLE)
 			{
-				// If level was BOOST_MAP_VISIBLE, the tile has been used in the last draw so keep it high
+				// If level was BOOST_MAP_VISIBLE, the tile has been used in
+				// the last draw so keep it high
 				img->setBoostLevel(LLViewerTexture::BOOST_MAP);
 			}
 			else
 			{
-				// If level was BOOST_MAP only (or anything else...), the tile wasn't used in the last draw 
-				// so we drop its boost level to BOOST_NONE.
+				// If level was BOOST_MAP only (or anything else...), the tile
+				// wasn't used in the last draw so we drop its boost level to
+				// BOOST_NONE.
 				img->setBoostLevel(LLViewerTexture::BOOST_NONE);
 			}
 #if DEBUG_TILES_STAT
 			// Increment some stats if compile option on
-			nb_tiles++;
+			++nb_tiles;
 			if (current_boost_level == LLViewerTexture::BOOST_MAP_VISIBLE)
 			{
-				nb_visible++;
+				++nb_visible;
 			}
 			if (img->isMissingAsset())
 			{
-				nb_missing++;
+				++nb_missing;
 			}
 #endif // DEBUG_TILES_STAT
 		}
 	}
 #if DEBUG_TILES_STAT
-	LL_INFOS("World Map") << "LLWorldMipmap tile stats : total requested = " << nb_tiles << ", visible = " << nb_visible << ", missing = " << nb_missing << LL_ENDL;
+	llinfos << "LLWorldMipmap tile stats : total requested = " << nb_tiles
+			<< ", visible = " << nb_visible << ", missing = " << nb_missing
+			<< llendl;
 #endif // DEBUG_TILES_STAT
 }
 
-// This method should be used when the mipmap is not actively used for a while, e.g., the map UI is hidden
+// This method should be used when the mipmap is not actively used for a while,
+// e.g., the map UI is hidden
 void LLWorldMipmap::dropBoostLevels()
 {
 	// For each level
@@ -118,7 +127,9 @@ void LLWorldMipmap::dropBoostLevels()
 	{
 		sublevel_tiles_t& level_mipmap = mWorldObjectsMipMap[level];
 		// For each tile
-		for (sublevel_tiles_t::iterator iter = level_mipmap.begin(); iter != level_mipmap.end(); iter++)
+		for (sublevel_tiles_t::iterator iter = level_mipmap.begin(),
+										end = level_mipmap.end();
+			 iter != end; ++iter)
 		{
 			LLPointer<LLViewerTexture> img = iter->second;
 			img->setBoostLevel(LLViewerTexture::BOOST_NONE);
@@ -126,14 +137,17 @@ void LLWorldMipmap::dropBoostLevels()
 	}
 }
 
-LLPointer<LLViewerFetchedTexture> LLWorldMipmap::getObjectsTile(U32 grid_x, U32 grid_y, S32 level, bool load)
+LLPointer<LLViewerFetchedTexture> LLWorldMipmap::getObjectsTile(U32 grid_x,
+																U32 grid_y,
+																S32 level,
+																bool load)
 {
 	// Check the input data
 	llassert(level <= MAP_LEVELS);
 	llassert(level >= 1);
 
-	// If the *loading* level changed, cleared the new level from "missed" tiles
-	// so that we get a chance to reload them
+	// If the *loading* level changed, cleared the new level from "missed"
+	// tiles so that we get a chance to reload them
 	if (load && (level != mCurrentLevel))
 	{
 		cleanMissedTilesFromLevel(level);
@@ -153,9 +167,10 @@ LLPointer<LLViewerFetchedTexture> LLWorldMipmap::getObjectsTile(U32 grid_x, U32 
 		if (load)
 		{
 			// Load it 
-			LLPointer<LLViewerFetchedTexture> img = loadObjectsTile(grid_x, grid_y, level);
+			LLPointer<LLViewerFetchedTexture> img;
+			img = loadObjectsTile(grid_x, grid_y, level);
 			// Insert the image in the map
-			level_mipmap.insert(sublevel_tiles_t::value_type( handle, img ));
+			level_mipmap.insert(sublevel_tiles_t::value_type(handle, img));
 			// Find the element again in the map (it's there now...)
 			found = level_mipmap.find(handle);
 		}
@@ -184,20 +199,18 @@ LLPointer<LLViewerFetchedTexture> LLWorldMipmap::getObjectsTile(U32 grid_x, U32 
 	}
 }
 
-LLPointer<LLViewerFetchedTexture> LLWorldMipmap::loadObjectsTile(U32 grid_x, U32 grid_y, S32 level)
+LLPointer<LLViewerFetchedTexture> LLWorldMipmap::loadObjectsTile(U32 grid_x,
+																 U32 grid_y,
+																 S32 level)
 {
 	// Get the grid coordinates
-	static LLCachedControl<std::string> map_server_url(gSavedSettings, "MapServerURL");
+	static LLCachedControl<std::string> map_server_url(gSavedSettings,
+													   "MapServerURL");
 	std::string imageurl = map_server_url;
 	imageurl += llformat("map-%d-%d-%d-objects.jpg", level, grid_x, grid_y);
 
-	// DO NOT COMMIT!! DEBUG ONLY!!!
-	// Use a local jpeg for every tile to test map speed without S3 access
-	//imageurl = "file://C:\\Develop\\mapserver-distribute-3\\indra\\build-vc80\\mapserver\\relwithdebinfo\\regions\\00995\\01001\\region-995-1001-prims.jpg";
-	// END DEBUG
-	//LL_INFOS("World Map") << "LLWorldMipmap::loadObjectsTile(), URL = " << imageurl << LL_ENDL;
-
-	LLPointer<LLViewerFetchedTexture> img = LLViewerTextureManager::getFetchedTextureFromUrl(imageurl);
+	LLPointer<LLViewerFetchedTexture> img;
+	img = LLViewerTextureManager::getFetchedTextureFromUrl(imageurl);
 	img->setBoostLevel(LLViewerTexture::BOOST_MAP);
 
 	// Return the smart pointer
@@ -205,9 +218,11 @@ LLPointer<LLViewerFetchedTexture> LLWorldMipmap::loadObjectsTile(U32 grid_x, U32
 }
 
 // This method is used to clean up a level from tiles marked as "missing".
-// The idea is to allow tiles that have been improperly marked missing to be reloaded when retraversing the level again.
-// When zooming in and out rapidly, some tiles are never properly loaded and, eventually marked missing.
-// This creates "blue" areas in a subresolution that never got a chance to reload if we don't clean up the level.
+// The idea is to allow tiles that have been improperly marked missing to be
+// reloaded when retraversing the level again. When zooming in and out rapidly,
+// some tiles are never properly loaded and, eventually marked missing. This
+// creates "blue" areas in a subresolution that never got a chance to reload if
+// we don't clean up the level.
 void LLWorldMipmap::cleanMissedTilesFromLevel(S32 level)
 {
 	// Check the input data
@@ -220,8 +235,9 @@ void LLWorldMipmap::cleanMissedTilesFromLevel(S32 level)
 		return;
 	}
 
-	// Iterate through the subresolution level and suppress the tiles that are marked as missing
-	// Note: erasing in a map while iterating through it is bug prone. Using a postfix increment is mandatory here.
+	// Iterate through the subresolution level and suppress the tiles that are
+	// marked as missing. Note: erasing in a map while iterating through it is
+	// bug prone. Using a postfix increment is mandatory here.
 	sublevel_tiles_t& level_mipmap = mWorldObjectsMipMap[level-1];
 	sublevel_tiles_t::iterator it = level_mipmap.begin();
 	while (it != level_mipmap.end())
@@ -240,25 +256,37 @@ void LLWorldMipmap::cleanMissedTilesFromLevel(S32 level)
 }
 
 // static methods
-// Compute the level in the world mipmap (between 1 and MAP_LEVELS, as in the URL) given the scale (size of a sim in screen pixels)
+// Compute the level in the world mipmap (between 1 and MAP_LEVELS, as in the
+// URL) given the scale (size of a sim in screen pixels)
 S32 LLWorldMipmap::scaleToLevel(F32 scale)
 {
-	// If scale really small, picks up the higest level there is (lowest resolution)
+	// If scale really small, picks up the higest level there is (lowest
+	// resolution)
 	if (scale <= F32_MIN)
+	{
 		return MAP_LEVELS;
+	}
 	// Compute the power of two resolution level knowing the base level
-	S32 level = llfloor((log(REGION_WIDTH_METERS/scale)/log(2.0f)) + 1.0f);
+	S32 level = llfloor((log(REGION_WIDTH_METERS / scale) / log(2.0f)) + 1.0f);
 	// Check bounds and return the value
 	if (level > MAP_LEVELS)
+	{
 		return MAP_LEVELS;
+	}
 	else if (level < 1)
+	{
 		return 1;
+	}
 	else
+	{
 		return level;
+	}
 }
 
-// Convert world coordinates to mipmap grid coordinates at a given level (between 1 and MAP_LEVELS)
-void LLWorldMipmap::globalToMipmap(F64 global_x, F64 global_y, S32 level, U32* grid_x, U32* grid_y)
+// Convert world coordinates to mipmap grid coordinates at a given level
+// (between 1 and MAP_LEVELS)
+void LLWorldMipmap::globalToMipmap(F64 global_x, F64 global_y, S32 level,
+								   U32* grid_x, U32* grid_y)
 {
 	// Check the input data
 	llassert(level <= MAP_LEVELS);
@@ -272,5 +300,3 @@ void LLWorldMipmap::globalToMipmap(F64 global_x, F64 global_y, S32 level, U32* g
 	*grid_x = *grid_x - (*grid_x % regions_in_tile);
 	*grid_y = *grid_y - (*grid_y % regions_in_tile);
 }
-
-

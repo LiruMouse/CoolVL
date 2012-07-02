@@ -187,8 +187,8 @@ public:
 	/*virtual*/ void completedHeader(U32 status, const std::string& reason,
 									   const LLSD& content)
 	{
-		LL_DEBUGS("Media") << "status = " << status << ", reason = " << reason << LL_ENDL;
-		LL_DEBUGS("Media") << content << LL_ENDL;
+		LL_DEBUGS("Media") << "status = " << status << ", reason = " << reason
+						   << ", content = " << content << LL_ENDL;
 		std::string cookie = content["set-cookie"].asString();
 
 		LLViewerMedia::openIDCookieResponse(cookie);
@@ -221,8 +221,8 @@ public:
 	/*virtual*/ void completedHeader(U32 status, const std::string& reason,
 									   const LLSD& content)
 	{
-		LL_DEBUGS("Media") << "status = " << status << ", reason = " << reason << LL_ENDL;
-		LL_DEBUGS("Media") << content << LL_ENDL;
+		LL_DEBUGS("Media") << "status = " << status << ", reason = " << reason
+						   << ", content = " << content << LL_ENDL;
 
 		std::string cookie = content["set-cookie"].asString();
 
@@ -600,8 +600,8 @@ void LLViewerMedia::loadCookieFile()
 	llifstream file(resolved_filename);
 	if (!file.is_open())
 	{
-		LL_WARNS("Media") << "Can't load plugin cookies from file \""
-						  << PLUGIN_COOKIE_FILE_NAME << "\"" << LL_ENDL;
+		llwarns << "Can't load plugin cookies from file \""
+				<< PLUGIN_COOKIE_FILE_NAME << "\"" << llendl;
 		return;
 	}
 
@@ -650,9 +650,8 @@ void LLViewerMedia::saveCookieFile()
 	llofstream file (resolved_filename);
 	if (!file.is_open())
 	{
-		LL_WARNS("Media") << "Can't open plugin cookie file \""
-						  << PLUGIN_COOKIE_FILE_NAME << "\" for writing"
-						  << LL_ENDL;
+		llwarns << "Can't open plugin cookie file \""
+				<< PLUGIN_COOKIE_FILE_NAME << "\" for writing" << llendl;
 		return;
 	}
 
@@ -882,8 +881,8 @@ bool LLViewerMediaImpl::initializeMedia(const std::string& mime_type)
 	{
 		if (!initializePlugin(mime_type))
 		{
-			LL_WARNS("Plugin") << "plugin intialization failed for mime type: "
-							   << mime_type << LL_ENDL;
+			llwarns << "plugin intialization failed for mime type: "
+					<< mime_type << llendl;
 			return false;
 		}
 	}
@@ -909,8 +908,8 @@ void LLViewerMediaImpl::createMediaSource()
 	{
 		if (!initializeMedia(mMimeType))
 		{
-			LL_WARNS("Media") << "Failed to initialize media for mime type "
-							  << mMimeType << LL_ENDL;
+			llwarns << "Failed to initialize media for mime type " << mMimeType
+					<< llendl;
 		}
 	}
 }
@@ -947,7 +946,8 @@ LLPluginClassMedia* LLViewerMediaImpl::newSourceFromMediaType(std::string media_
 
 	if (plugin_basename.empty())
 	{
-		LL_WARNS("Media") << "Couldn't find plugin for media type " << media_type << LL_ENDL;
+		llwarns << "Couldn't find plugin for media type " << media_type
+				<< llendl;
 	}
 	else
 	{
@@ -973,11 +973,11 @@ LLPluginClassMedia* LLViewerMediaImpl::newSourceFromMediaType(std::string media_
 		llstat s;
 		if (LLFile::stat(launcher_name, &s))
 		{
-			LL_WARNS("Media") << "Couldn't find launcher at " << launcher_name << LL_ENDL;
+			llwarns << "Couldn't find launcher at " << launcher_name << llendl;
 		}
 		else if (LLFile::stat(plugin_name, &s))
 		{
-			LL_WARNS("Media") << "Couldn't find plugin at " << plugin_name << LL_ENDL;
+			llwarns << "Couldn't find plugin at " << plugin_name << llendl;
 		}
 		else
 		{
@@ -998,13 +998,14 @@ LLPluginClassMedia* LLViewerMediaImpl::newSourceFromMediaType(std::string media_
 			}
 			else
 			{
-				LL_WARNS("Media") << "Failed to init plugin.  Destroying." << LL_ENDL;
+				llwarns << "Failed to init plugin.  Destroying." << llendl;
 				delete media_source;
 			}
 		}
 	}
 
-	LL_WARNS("Media") << "Plugin intialization failed for mime type: " << media_type << LL_ENDL;
+	llwarns << "Plugin intialization failed for mime type: " << media_type
+			<< llendl;
 	LLSD args;
 	args["MIME_TYPE"] = media_type;
 	LLNotifications::instance().add("NoPlugin", args);
@@ -1428,9 +1429,8 @@ void LLViewerMediaImpl::navigateTo(const std::string& _url,
 	}
 	else
 	{
-		LL_WARNS("Media") << "Couldn't navigate to: " << url
-						  << " as there is no media type for: " << mime_type
-						  << LL_ENDL;
+		llwarns << "Couldn't navigate to: " << url
+				<< " as there is no media type for: " << mime_type << llendl;
 		return;
 	}
 	mMediaURL = url;
@@ -1840,12 +1840,15 @@ void LLViewerMediaImpl::handleMediaEvent(LLPluginClassMedia* plugin,
 
 		case MEDIA_EVENT_CLICK_LINK_HREF:
 		{
-			LL_DEBUGS("Media") <<  "Media event:  MEDIA_EVENT_CLICK_LINK_HREF, target is \"" << plugin->getClickTarget() << "\", uri is " << plugin->getClickURL() << LL_ENDL;
+			LL_DEBUGS("Media") << "Media event: MEDIA_EVENT_CLICK_LINK_HREF, target is \""
+							   << plugin->getClickTarget() << "\", uri is "
+							   << plugin->getClickURL() << LL_ENDL;
 			// retrieve the event parameters
 			std::string url = plugin->getClickURL();
 			std::string target = plugin->getClickTarget();
-//			std::string uuid = plugin->getClickUUID();
-			// loadURL now handles distinguishing between _blank, _external, and other named targets.
+			//std::string uuid = plugin->getClickUUID();
+			// loadURL now handles distinguishing between _blank, _external,
+			// and other named targets.
 			LLWeb::loadURL(url, target);
 			break;
 		}

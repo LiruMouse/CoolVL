@@ -44,11 +44,17 @@
 #include "llmapimagetype.h"
 #include "lltracker.h"
 
+class LLButton;
+class LLComboBox;
+class LLCheckBoxCtrl;
 class LLEventInfo;
 class LLFriendObserver;
+class LLIconCtrl;
 class LLInventoryModel;
 class LLInventoryObserver;
 class LLItemInfo;
+class LLScrollListCtrl;
+class LLSliderCtrl;
 class LLTabContainer;
 class LLWorldMapView;
 
@@ -138,8 +144,6 @@ protected:
 	static void		onShowAgentBtn(void*);
 	static void		onCopySLURL(void*);
 
-	static void onCheckEvents(LLUICtrl* ctrl, void*);
-
 	void			centerOnTarget(BOOL animate);
 	void			updateLocation();
 
@@ -194,6 +198,22 @@ protected:
 	std::string				mTrackedSimName;
 	std::string				mTrackedAvatarName;
 	std::string				mSLURL;
+
+	LLComboBox*				mLandmarkCombo;
+	LLComboBox*				mFriendCombo;
+	LLScrollListCtrl*		mSearchResultsList;
+	LLIconCtrl*				mEventsMatureIcon;
+	LLIconCtrl*				mEventsAdultIcon;
+	LLIconCtrl*				mAvatarIcon;
+	LLIconCtrl*				mLandmarkIcon;
+	LLIconCtrl*				mLocationIcon;
+	LLCheckBoxCtrl*			mEventsMatureCheck;
+	LLCheckBoxCtrl*			mEventsAdultCheck;
+	LLButton*				mGoHomeButton;
+	LLButton*				mTeleportButton;
+	LLButton*				mShowDestinationButton;
+	LLButton*				mCopySLURLButton;
+	LLSliderCtrl*			mZoomSlider;
 };
 
 extern LLFloaterWorldMap* gFloaterWorldMap;

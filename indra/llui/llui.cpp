@@ -83,7 +83,7 @@ void make_ui_sound(const char* namep)
 	std::string name = ll_safe_string(namep);
 	if (!LLUI::sConfigGroup->controlExists(name))
 	{
-		llwarns << "tried to make ui sound for unknown sound name: " << name << llendl;
+		llwarns << "tried to make UI sound for unknown sound name: " << name << llendl;
 	}
 	else
 	{
@@ -92,25 +92,19 @@ void make_ui_sound(const char* namep)
 		{
 			if (LLUI::sConfigGroup->getString(name) == LLUUID::null.asString())
 			{
-				if (LLUI::sConfigGroup->getBOOL("UISndDebugSpamToggle"))
-				{
-					llinfos << "ui sound name: " << name
-							<< " triggered but silent (null uuid)" << llendl;
-				}
+				LL_DEBUGS("UISounds") << "UI sound name: " << name
+									  << " triggered but silent (null uuid)" << LL_ENDL;
 			}
 			else
 			{
-				llwarns << "ui sound named: " << name
+				llwarns << "UI sound named: " << name
 						<< " does not translate to a valid uuid" << llendl;
 			}
 
 		}
 		else if (LLUI::sAudioCallback != NULL)
 		{
-			if (LLUI::sConfigGroup->getBOOL("UISndDebugSpamToggle"))
-			{
-				llinfos << "ui sound name: " << name << llendl;
-			}
+			LL_DEBUGS("UISounds") << "UI sound name: " << name << LL_ENDL;
 			LLUI::sAudioCallback(uuid);
 		}
 	}

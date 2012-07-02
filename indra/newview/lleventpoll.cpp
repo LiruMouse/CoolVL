@@ -255,17 +255,18 @@ namespace
 	//virtual
 	void LLEventPollResponder::result(const LLSD& content)
 	{
-		LL_DEBUGS("OGPX") <<	"LLEventPollResponder::result <" << mCount	<< ">" 
-				 <<	(mDone ? " -- done"	: "") << ll_pretty_print_sd(content)  << LL_ENDL; 
+		LL_DEBUGS("OGPX") << "LLEventPollResponder::result <" << mCount	<< ">"
+						  << (mDone ? " -- done" : "")
+						  << ll_pretty_print_sd(content) << LL_ENDL; 
 		
 		if (mDone) return;
 
 		mErrorCount = 0;
 
-		if (!content.get("events") ||
-			!content.get("id"))
+		if (!content.get("events") || !content.get("id"))
 		{
-			llwarns << "received event poll with no events or id key" << llendl;
+			llwarns << "received event poll with no events or id key"
+					<< llendl;
 			makeRequest();
 			return;
 		}
@@ -278,7 +279,8 @@ namespace
 			llwarns << "LLEventPollResponder: id undefined" << llendl;
 		}
 		
-		// was llinfos but now that CoarseRegionUpdate is TCP @ 1/second, it'd be too verbose for viewer logs. -MG
+		// was llinfos but now that CoarseRegionUpdate is TCP @ 1/second, it'd
+		// be too verbose for viewer logs. -MG
 		LL_DEBUGS("EventPoll") << "LLEventPollResponder::completed <" << mCount
 							   << "> " << events.size() << "events (id "
 							   << LLSDXMLStreamer(mAcknowledge) << ")"
@@ -286,7 +288,7 @@ namespace
 		
 		LLSD::array_const_iterator i = events.beginArray();
 		LLSD::array_const_iterator end = events.endArray();
-		for	(; i !=	end; ++i)
+		for	( ; i != end; ++i)
 		{
 			if (i->has("message"))
 			{
@@ -313,6 +315,7 @@ namespace
 
 	class LLAgentEventPollResponder : public LLHTTPClient::Responder
 	{
+		LOG_CLASS(LLAgentEventPollResponder);
 	public:
 		
 		static LLHTTPClient::ResponderPtr start(const std::string& pollURL);
@@ -331,9 +334,10 @@ namespace
 	private:
 
 		bool	mDone;
-		int		mAcknowledge ;  // OGPX : id of request to send back along with the response to Agent Domain.
-								// We will probably change the specifics of returning the result of
-								// a resource request. 
+		int		mAcknowledge;	// OGPX : id of request to send back along with
+								// the response to Agent Domain. We will
+								// probably change the specifics of returning
+								// the result of a resource request. 
 
 		std::string			mPollURL;
 		
@@ -342,21 +346,19 @@ namespace
 		int	mCount;
 	};
 
-
 	//static
-	LLHTTPClient::ResponderPtr LLAgentEventPollResponder::start(
-		const std::string& pollURL)
+	LLHTTPClient::ResponderPtr LLAgentEventPollResponder::start(const std::string& pollURL)
 	{
 		LLHTTPClient::ResponderPtr result = new LLAgentEventPollResponder(pollURL);
-		LL_INFOS("OGPX")	<< "LLAgentEventPollResponder::start <" << sCount << "> "
-				<< pollURL << LL_ENDL;
+		llinfos	<< "LLAgentEventPollResponder::start <" << sCount << "> "
+				<< pollURL << llendl;
 		return result;
 	}
 
 	void LLAgentEventPollResponder::stop()
 	{
-		LL_INFOS("OGPX")	<< "LLAgentEventPollResponder::stop	<" << mCount <<	"> "
-				<< mPollURL	<< LL_ENDL;
+		llinfos	<< "LLAgentEventPollResponder::stop	<" << mCount <<	"> "
+				<< mPollURL	<< llendl;
 		// there should	be a way to	stop a LLHTTPClient	request	in progress
 		mDone =	true;
 	}
@@ -364,10 +366,10 @@ namespace
 	int	LLAgentEventPollResponder::sCount =	0;
 
 	LLAgentEventPollResponder::LLAgentEventPollResponder(const std::string& pollURL)
-		: mDone(false),
-		  mPollURL(pollURL),
-		  mAcknowledge(0),
-		  mCount(++sCount)
+	:	mDone(false),
+		mPollURL(pollURL),
+		mAcknowledge(0),
+		mCount(++sCount)
 	{
 		
 		makeRequest();
@@ -376,8 +378,8 @@ namespace
 	LLAgentEventPollResponder::~LLAgentEventPollResponder()
 	{
 		stop();
-		LL_DEBUGS("OGPX") <<	"LLAgentEventPollResponder::~Impl <" <<	mCount << "> "
-				 <<	mPollURL <<	LL_ENDL;
+		LL_DEBUGS("OGPX") << "LLAgentEventPollResponder::~Impl <" << mCount << "> "
+						  << mPollURL << LL_ENDL;
 	}
 
 	// OGPX : Should LLAgentEventPollResponder inherits from normal EventPollResponder,
@@ -388,7 +390,8 @@ namespace
 	// adding OGP code, because that minimizes risk to breaking something in the legacy path.
 	void LLAgentEventPollResponder::makeRequest()
 	{		
-		LL_DEBUGS("OGPX") <<	"LLAgentEventPollResponder::makeRequest	<" << mCount << "> "<< LL_ENDL;
+		LL_DEBUGS("OGPX") << "LLAgentEventPollResponder::makeRequest <"
+						  << mCount << "> " << LL_ENDL;
 		LLSD request;
 		request["ack"] = mAcknowledge;
 		request["done"]	= mDone;
@@ -413,7 +416,9 @@ namespace
 		args["ack"] = mAcknowledge;
 		args["done"] = mDone;
 		args["result"] = result_for_agentd;
-		LL_DEBUGS("OGPX") <<	"LLAgentEventPollResponder::makeRequest	<" << mCount << "> " << ll_pretty_print_sd(result_for_agentd) << LL_ENDL;
+		LL_DEBUGS("OGPX") << "LLAgentEventPollResponder::makeRequest <"
+						  << mCount << "> "
+						  << ll_pretty_print_sd(result_for_agentd) << LL_ENDL;
 		LLHTTPClient::post(mPollURL, args, this);
 	}
 
@@ -424,9 +429,9 @@ namespace
 
 		if (status != 499)
 		{
-			LL_WARNS("OGPX") <<	"LLAgentEventPollResponder::error: <" << mCount << "> got "
-					<<	status << " : " << reason
-					<<	(mDone ? " -- done"	: "") << LL_ENDL;
+			llwarns << "LLAgentEventPollResponder::error: <" << mCount
+					<< "> got "	<< status << " : " << reason
+					<< (mDone ? " -- done"	: "") << llendl;
 			stop();
 			return;
 		}
@@ -434,24 +439,26 @@ namespace
 		makeRequest();
 	}
 
-
 	//virtual
 	void LLAgentEventPollResponder::result(const LLSD& content)
 	{
 		LLSD result_for_agentd;
-		LL_DEBUGS("OGPX") <<	"LLAgentEventPollResponder::result <" << mCount	<< ">"
-				 <<	(mDone ? " -- done"	: "") << LL_ENDL;
+		LL_DEBUGS("OGPX") << "LLAgentEventPollResponder::result <" << mCount
+						  << ">" <<	(mDone ? " -- done"	: "") << LL_ENDL;
 		
 		if (mDone) return;
 		
-		// was llinfos but now that CoarseRegionUpdate is TCP @ 1/second, it'd be too verbose for viewer logs. -MG
-		LL_DEBUGS("OGPX")  << "LLAgentEventPollResponder::completed <" <<	mCount << "> "  << LL_ENDL;
+		// was llinfos but now that CoarseRegionUpdate is TCP @ 1/second, it'd
+		// be too verbose for viewer logs. -MG
+		LL_DEBUGS("OGPX") << "LLAgentEventPollResponder::completed <" << mCount
+						  << "> " << LL_ENDL;
 
 
-		if (!content.get("events") ||
-			!content.get("id"))
+		if (!content.get("events") || !content.get("id"))
 		{
-			LL_INFOS("OGPX") << "Received event poll with no events or id key" << LL_ENDL; // was llwarns, but too frequent
+			// was llwarns, but too frequent ("usual"):
+			llinfos << "Received event poll with no events or id key"
+					<< llendl;
 			makeRequest();
 			return;
 		}
@@ -461,28 +468,34 @@ namespace
 
 		if (mAcknowledge!=0)
 		{
-			LL_WARNS("OGPX") << " : id undefined" << LL_ENDL;
+			llwarns << " : id undefined" << llendl;
 		}
 		
-		// was llinfos but now that CoarseRegionUpdate is TCP @ 1/second, it'd be too verbose for viewer logs. -MG
-		LL_DEBUGS("OGPX")  << "LLEventPollResponder::completed <" <<	mCount << "> " << events.size() << "events (id "
-				 <<	LLSDXMLStreamer(mAcknowledge) << ")" << LL_ENDL;
+		// was llinfos but now that CoarseRegionUpdate is TCP @ 1/second, it'd
+		// be too verbose for viewer logs. -MG
+		LL_DEBUGS("OGPX") << "LLEventPollResponder::completed <" <<	mCount
+						  << "> " << events.size() << "events (id "
+						  << LLSDXMLStreamer(mAcknowledge) << ")" << LL_ENDL;
 
-	// twiddling with making the messaging system gobble up event queue requests
+		// twiddling with making the messaging system gobble up event queue
+		// requests
 #if OGPXEVENTHACK
-		// OGPXEVENTHACK : An attempt at using the message_template.msg as a way to add HTTP messages that 
-		// are handled by the event queue (instead of coming across UDP, and being handled via UDP decoding).
-		// I found that I was able to do this in a limited way (have a message decoded into LLSD, 
-		// and a handler called for it) for inbound EQ messages. Unsure it gives us the level of control
-		// we need in OGPX to implement policy and trust between the viewer and other entities. The legacy
-		// model was "trust everything from the region", and it won't be that way in OGPX.
-		// Feels weird adding dead code to the patch, but I wanted a record of the experimentation
+		// OGPXEVENTHACK : An attempt at using the message_template.msg as a
+		// way to add HTTP messages that are handled by the event queue
+		// (instead of coming across UDP, and being handled via UDP decoding).
+		// I found that I was able to do this in a limited way (have a message
+		// decoded into LLSD, and a handler called for it) for inbound EQ
+		// messages. Unsure it gives us the level of control we need in OGPX to
+		// implement policy and trust between the viewer and other entities.
+		// The legacy model was "trust everything from the region", and it
+		// won't be that way in OGPX. Feels weird adding dead code to the
+		// patch, but I wanted a record of the experimentation.
 		// OGPX TODO: figure out proper building of services. 
 
 		// iterate over the requests sent by agent domain
 		LLSD::array_const_iterator i = events.beginArray();
 		LLSD::array_const_iterator end = events.endArray();
-		for	(; i !=	end; ++i)
+		for	( ; i !=	end; ++i)
 		{
 			if (i->has("message"))
 			{
@@ -494,7 +507,7 @@ namespace
 				const LLHTTPNode* handler =	messageRootNode().traverse(path, context);
 				if (!handler)
 				{
-					LL_WARNS("Messaging")	<< " no handler for "<< path << LL_ENDL;
+					llwarns	<< " no handler for "<< path << llendl;
 					return;
 				}
 
@@ -503,7 +516,10 @@ namespace
 				// We've found a handler for the request, call its post() and get its LLSD response
 				// so, changing from the post that was fussing with response pointer to simpler
 				result_for_agentd = handler->post(*i);
-				LL_DEBUGS("OGPX") << "after handling "<< ll_pretty_print_sd(*i) << " sending AD result: " << ll_pretty_print_sd(result_for_agentd) << LL_ENDL;
+				LL_DEBUGS("OGPX") << "after handling "<< ll_pretty_print_sd(*i)
+								  << " sending AD result: "
+								  << ll_pretty_print_sd(result_for_agentd)
+								  << LL_ENDL;
 			}
 		}
 		// OGPXEVENTHACK end
@@ -519,8 +535,9 @@ namespace
 }
 
 LLEventPoll::LLEventPoll(const std::string&	poll_url, const LLHost& sender)
-	: mImpl(LLEventPollResponder::start(poll_url, sender))
-	{ }
+:	mImpl(LLEventPollResponder::start(poll_url, sender))
+{
+}
 
 LLEventPoll::~LLEventPoll()
 {
@@ -534,10 +551,9 @@ LLEventPoll::~LLEventPoll()
 // for now we will revert to simpler code. This poll should remain active for the
 // life of the viewer session.
 LLAgentEventPoll::LLAgentEventPoll(const std::string&	pollURL)
-	: mImpl(LLAgentEventPollResponder::start(pollURL))
+:	mImpl(LLAgentEventPollResponder::start(pollURL))
 {
 }
-
 
 LLAgentEventPoll::~LLAgentEventPoll()
 {
