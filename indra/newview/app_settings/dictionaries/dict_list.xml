@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<llsd xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="llsd.xsd">
+  <array>
+    <map>
+      <key>name</key>
+      <string>de_de</string>
+      <key>language</key>
+      <string>Deutsch (Deutschland)</string>
+    </map>
+    <map>
+      <key>name</key>
+      <string>en_gb</string>
+      <key>language</key>
+      <string>English (United Kingdom)</string>
+    </map>
+    <map>
+      <key>name</key>
+      <string>en_us</string>
+      <key>language</key>
+      <string>English (United States)</string>
+    </map>
+    <map>
+      <key>name</key>
+      <string>es_es</string>
+      <key>language</key>
+      <string>Español (España)</string>
+    </map>
+    <map>
+      <key>name</key>
+      <string>fr_fr</string>
+      <key>language</key>
+      <string>Français (France)</string>
+    </map>
+    <map>
+      <key>name</key>
+      <string>it_it</string>
+      <key>language</key>
+      <string>Italiano (Italia)</string>
+    </map>
+    <map>
+      <key>name</key>
+      <string>pt_br</string>
+      <key>language</key>
+      <string>Português (Brasil)</string>
+    </map>
+  </array>
+</llsd>
