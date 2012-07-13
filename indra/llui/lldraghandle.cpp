@@ -52,8 +52,6 @@ const S32 BORDER_PAD = 1;
 const S32 LEFT_PAD = BORDER_PAD + TITLE_PAD + LEADING_PAD;
 const S32 RIGHT_PAD = BORDER_PAD + 32; // HACK: space for close btn and minimize btn
 
-S32 LLDragHandle::sSnapMargin = 5;
-
 LLDragHandle::LLDragHandle(const std::string& name,
 						   const LLRect& rect,
 						   const std::string& title)
@@ -62,13 +60,10 @@ LLDragHandle::LLDragHandle(const std::string& name,
 	mDragLastScreenY(0),
 	mLastMouseScreenX(0),
 	mLastMouseScreenY(0),
-	mDragHighlightColor(LLUI::sColorsGroup->getColor("DefaultHighlightLight")),
-	mDragShadowColor(LLUI::sColorsGroup->getColor("DefaultShadowDark")),
 	mTitleBox(NULL),
 	mMaxTitleWidth(0),
 	mForeground(TRUE)
 {
-	sSnapMargin = LLUI::sConfigGroup->getS32("SnapMargin");
 	setSaveToXML(false);
 }
 
@@ -115,13 +110,20 @@ void LLDragHandleTop::setTitle(const std::string& title)
 	std::string trimmed_title = title;
 	LLStringUtil::trim(trimmed_title);
 
-	const LLFontGL* font = LLResMgr::getInstance()->getRes(LLFONT_SANSSERIF);
-	LLTextBox* titlebox = new LLTextBox(std::string("Drag Handle Title"),
-										getRect(), trimmed_title, font);
-	titlebox->setFollows(FOLLOWS_TOP | FOLLOWS_LEFT | FOLLOWS_RIGHT);
-	titlebox->setFontStyle(LLFontGL::DROP_SHADOW_SOFT);
+	if (mTitleBox)
+	{
+		mTitleBox->setText(trimmed_title);
+	}
+	else
+	{
+		const LLFontGL* font = LLResMgr::getInstance()->getRes(LLFONT_SANSSERIF);
+		mTitleBox = new LLTextBox(std::string("Drag Handle Title"),
+								  getRect(), trimmed_title, font);
+		mTitleBox->setFollows(FOLLOWS_TOP | FOLLOWS_LEFT | FOLLOWS_RIGHT);
+		mTitleBox->setFontStyle(LLFontGL::DROP_SHADOW_SOFT);
+		addChild(mTitleBox);
+	}
 
-	setTitleBox(titlebox);
 	reshapeTitleBox();
 }
 
@@ -166,18 +168,19 @@ void LLDragHandleTop::draw()
 		for (S32 i = 0; i < 4; ++i)
 		{
 			gl_line_2d(left, line + 1, title_rect.mLeft - LEADING_PAD,
-					   line + 1, mDragHighlightColor);
+					   line + 1, LLUI::sDefaultHighlightLight);
 			if (show_right_side)
 			{
 				gl_line_2d(title_right, line + 1, right, line + 1,
-						   mDragHighlightColor);
+						   LLUI::sDefaultHighlightLight);
 			}
 
 			gl_line_2d(left, line, title_rect.mLeft - LEADING_PAD, line,
-					   mDragShadowColor);
+					   LLUI::sDefaultShadowDark);
 			if (show_right_side)
 			{
-				gl_line_2d(title_right, line, right, line, mDragShadowColor);
+				gl_line_2d(title_right, line, right, line,
+						   LLUI::sDefaultShadowDark);
 			}
 			line -= LINE_SPACING;
 		}
@@ -212,9 +215,10 @@ void LLDragHandleLeft::draw()
 		S32 line = left;
 		for (S32 i = 0; i < 4; ++i)
 		{
-			gl_line_2d(line, top, line, bottom, mDragHighlightColor);
+			gl_line_2d(line, top, line, bottom, LLUI::sDefaultHighlightLight);
 
-			gl_line_2d(line + 1, top, line + 1, bottom, mDragShadowColor);
+			gl_line_2d(line + 1, top, line + 1, bottom,
+					   LLUI::sDefaultShadowDark);
 
 			line += LINE_SPACING;
 		}
@@ -331,7 +335,7 @@ BOOL LLDragHandle::handleHover(S32 x, S32 y, MASK mask)
 
 		LLView* snap_view = getParent()->findSnapRect(new_rect, mouse_dir,
 													  SNAP_PARENT_AND_SIBLINGS,
-													  sSnapMargin);
+													  LLUI::sSnapMargin);
 
 		getParent()->snappedTo(snap_view);
 		delta_x = new_rect.mLeft - pre_snap_x;

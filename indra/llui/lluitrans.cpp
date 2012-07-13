@@ -81,6 +81,8 @@ bool LLUITrans::parseStrings(const std::string& xml_filename)
 std::string LLUITrans::getString(const std::string& xml_desc,
 								 const LLStringUtil::format_map_t& args)
 {
+	LL_DEBUGS("GetStringCalls") << "Requested Trans string: " << xml_desc
+								<< LL_ENDL;
 	template_map_t::iterator iter = sStringTemplates.find(xml_desc);
 
 	if (iter != sStringTemplates.end())

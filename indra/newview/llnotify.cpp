@@ -609,20 +609,16 @@ void LLNotifyBox::draw()
 
 void LLNotifyBox::drawBackground() const
 {
-	static LLCachedControl<LLColor4U> notify_caution_box_color(gColors,
-															   "NotifyCautionBoxColor");
-	static LLCachedControl<LLColor4U> notify_box_color(gColors,
-													   "NotifyBoxColor");
-	static LLCachedControl<LLColor4U> floater_focus_border_color(gColors,
-																 "FloaterFocusBorderColor");
-	static LLCachedControl<LLColor4U> color_drop_shadow(gColors,
-														"ColorDropShadow");
-
 	static const LLUIImagePtr rounded_square = LLUI::getUIImage("rounded_square.tga");
 	if (!rounded_square)
 	{
 		llerrs << "Missing UI image: rounded_square.tga" << llendl;
 	}
+
+	static LLCachedControl<LLColor4U> notify_caution_box_color(gColors,
+															   "NotifyCautionBoxColor");
+	static LLCachedControl<LLColor4U> notify_box_color(gColors,
+													   "NotifyBoxColor");
 
 	gGL.getTexUnit(0)->bind(rounded_square->getImage());
 
@@ -634,7 +630,7 @@ void LLNotifyBox::drawBackground() const
 	if (gFocusMgr.childHasKeyboardFocus(this))
 	{
 		const S32 focus_width = 2;
-		LLColor4 color = LLColor4(floater_focus_border_color);
+		LLColor4 color = LLUI::sFloaterFocusBorderColor;
 		gGL.color4fv(color.mV);
 		gl_segmented_rect_2d_tex(-focus_width,
 								 getRect().getHeight() + focus_width,
@@ -645,7 +641,7 @@ void LLNotifyBox::drawBackground() const
 								 16,
 								 mIsTip ? ROUNDED_RECT_TOP :
 										  ROUNDED_RECT_BOTTOM);
-		color = LLColor4(color_drop_shadow);
+		color = LLColor4(LLUI::sColorDropShadow);
 		gGL.color4fv(color.mV);
 		gl_segmented_rect_2d_tex(0,
 								 getRect().getHeight(),

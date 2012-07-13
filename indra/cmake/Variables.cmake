@@ -12,23 +12,18 @@
 # What to build:
 #
 #   VIEWER - viewer and other viewer-side components
-#   SERVER - simulator and other server-side bits
 
 
 # Relative and absolute paths to subtrees.
 
 set(LIBS_CLOSED_PREFIX)
 set(LIBS_OPEN_PREFIX)
-set(LIBS_SERVER_PREFIX)
 set(SCRIPTS_PREFIX ../scripts)
-set(SERVER_PREFIX)
 set(VIEWER_PREFIX)
 
 set(LIBS_CLOSED_DIR ${CMAKE_SOURCE_DIR}/${LIBS_CLOSED_PREFIX})
 set(LIBS_OPEN_DIR ${CMAKE_SOURCE_DIR}/${LIBS_OPEN_PREFIX})
-set(LIBS_SERVER_DIR ${CMAKE_SOURCE_DIR}/${LIBS_SERVER_PREFIX})
 set(SCRIPTS_DIR ${CMAKE_SOURCE_DIR}/${SCRIPTS_PREFIX})
-set(SERVER_DIR ${CMAKE_SOURCE_DIR}/${SERVER_PREFIX})
 set(VIEWER_DIR ${CMAKE_SOURCE_DIR}/${VIEWER_PREFIX})
 
 set(LIBS_PREBUILT_DIR ${CMAKE_SOURCE_DIR}/../libraries CACHE PATH
@@ -103,18 +98,5 @@ set(VIEWER_BRANDING_NAME "Cool VL Viewer")
 set(VIEWER_BRANDING_NAME_CAMELCASE "CoolVLViewer")
 
 set(STANDALONE OFF CACHE BOOL "Do not use Linden-supplied prebuilt libraries.")
-
-if (NOT STANDALONE AND EXISTS ${CMAKE_SOURCE_DIR}/llphysics)
-    set(SERVER ON CACHE BOOL "Build Second Life server software.")
-endif (NOT STANDALONE AND EXISTS ${CMAKE_SOURCE_DIR}/llphysics)
-
-if (LINUX AND SERVER AND VIEWER)
-  MESSAGE(FATAL_ERROR "
-The indra source does not currently support building SERVER and VIEWER at the same time.
-Please set one of these values to OFF in your CMake cache file.
-(either by running ccmake or by editing CMakeCache.txt by hand)
-For more information, please see JIRA DEV-14943 - Cmake Linux cannot build both VIEWER and SERVER in one build environment
-  ")
-endif (LINUX AND SERVER AND VIEWER)
 
 source_group("CMake Rules" FILES CMakeLists.txt)

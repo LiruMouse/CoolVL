@@ -64,9 +64,6 @@ LLSlider::LLSlider(const std::string& name,
 	mIncrement(increment),
 	mVolumeSlider(volume),
 	mMouseOffset(0),
-	mTrackColor(LLUI::sColorsGroup->getColor("SliderTrackColor")),
-	mThumbOutlineColor(LLUI::sColorsGroup->getColor("SliderThumbOutlineColor")),
-	mThumbCenterColor(LLUI::sColorsGroup->getColor("SliderThumbCenterColor")),
 	mMouseDownCallback(NULL),
 	mMouseUpCallback(NULL)
 {
@@ -258,8 +255,8 @@ void LLSlider::draw()
 	gGL.getTexUnit(0)->unbind(LLTexUnit::TT_TEXTURE);
 
 	F32 opacity = getEnabled() ? 1.f : 0.3f;
-	LLColor4 center_color = mThumbCenterColor % opacity;
-	LLColor4 track_color = mTrackColor % opacity;
+	LLColor4 center_color = LLUI::sSliderThumbCenterColor % opacity;
+	LLColor4 track_color = LLUI::sSliderTrackColor % opacity;
 
 	// Track
 	LLRect track_rect(mThumbImage->getWidth() / 2,
@@ -275,7 +272,7 @@ void LLSlider::draw()
 	if (hasMouseCapture())
 	{
 		// Show ghost where thumb was before dragging began.
-		mThumbImage->draw(mDragStartThumbRect, mThumbCenterColor % 0.3f);
+		mThumbImage->draw(mDragStartThumbRect, LLUI::sSliderThumbCenterColor % 0.3f);
 	}
 	if (hasFocus())
 	{
@@ -284,7 +281,7 @@ void LLSlider::draw()
 								gFocusMgr.getFocusFlashWidth());
 	}
 	// Fill in the thumb.
-	mThumbImage->draw(mThumbRect, hasMouseCapture() ? mThumbOutlineColor
+	mThumbImage->draw(mThumbRect, hasMouseCapture() ? LLUI::sSliderThumbOutlineColor
 													: center_color);
 
 	LLUICtrl::draw();

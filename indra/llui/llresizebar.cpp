@@ -55,7 +55,6 @@ LLResizeBar::LLResizeBar(const std::string& name,
 	mMaxSize(max_size),
 	mSide(side),
 	mSnappingEnabled(TRUE),
-	mSnapMargin(LLUI::sConfigGroup->getS32("SnapMargin")),
 	mAllowDoubleClickSnapping(TRUE),
 	mResizingView(resizing_view)
 {
@@ -195,7 +194,7 @@ BOOL LLResizeBar::handleHover(S32 x, S32 y, MASK mask)
 																mouse_dir,
 																SNAP_LEFT,
 																SNAP_PARENT_AND_SIBLINGS,
-																mSnapMargin);
+																LLUI::sSnapMargin);
 						break;
 
 					case TOP:
@@ -203,7 +202,7 @@ BOOL LLResizeBar::handleHover(S32 x, S32 y, MASK mask)
 																mouse_dir,
 																SNAP_TOP,
 																SNAP_PARENT_AND_SIBLINGS,
-																mSnapMargin);
+																LLUI::sSnapMargin);
 						break;
 
 					case RIGHT:
@@ -211,7 +210,7 @@ BOOL LLResizeBar::handleHover(S32 x, S32 y, MASK mask)
 																mouse_dir,
 																SNAP_RIGHT,
 																SNAP_PARENT_AND_SIBLINGS,
-																mSnapMargin);
+																LLUI::sSnapMargin);
 						break;
 
 					case BOTTOM:
@@ -219,7 +218,7 @@ BOOL LLResizeBar::handleHover(S32 x, S32 y, MASK mask)
 																mouse_dir,
 																SNAP_BOTTOM,
 																SNAP_PARENT_AND_SIBLINGS,
-																mSnapMargin);
+																LLUI::sSnapMargin);
 						break;
 				}
 			}

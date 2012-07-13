@@ -285,9 +285,6 @@ private:
 	std::string			mImageDisabledName;
 	std::string			mImageDisabledSelectedName;
 
-	LLColor4			mHighlightColor;
-	LLColor4			mUnselectedBgColor;
-	LLColor4			mSelectedBgColor;
 	LLColor4			mFlashBgColor;
 
 	LLColor4			mImageColor;
@@ -303,8 +300,6 @@ private:
 
 	BOOL				mFlashing;
 	LLFrameTimer		mFlashingTimer;
-	F32					mButtonFlashRate;
-	S32					mButtonFlashCount;
 
 	LLFontGL::HAlign	mHAlign;
 	S32					mLeftHPad;

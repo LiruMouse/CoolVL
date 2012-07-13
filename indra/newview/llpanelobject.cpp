@@ -1,11 +1,11 @@
-/** 
+/**
  * @file llpanelobject.cpp
  * @brief Object editing (position, scale, etc.) in the tools floater
  *
  * $LicenseInfo:firstyear=2001&license=viewergpl$
- * 
+ *
  * Copyright (c) 2001-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -32,10 +32,8 @@
 
 #include "llviewerprecompiledheaders.h"
 
-// file include
 #include "llpanelobject.h"
 
-// linden library includes
 #include "llbutton.h"
 #include "llcheckboxctrl.h"
 #include "llcombobox.h"
@@ -51,7 +49,6 @@
 #include "lluictrlfactory.h"
 #include "m3math.h"
 
-// project includes
 #include "llagent.h"
 #include "llcolorswatch.h"
 #include "lldrawpool.h"
@@ -77,10 +74,10 @@
 #include "pipeline.h"
 
 // Static variables for the object clipboard
-bool LLPanelObject::sSavedSizeValid		= false;
-bool LLPanelObject::sSavedPosValid		= false;
-bool LLPanelObject::sSavedRotValid		= false;
-bool LLPanelObject::sSavedShapeValid	= false;
+bool LLPanelObject::sSavedSizeValid = false;
+bool LLPanelObject::sSavedPosValid = false;
+bool LLPanelObject::sSavedRotValid = false;
+bool LLPanelObject::sSavedShapeValid = false;
 
 LLVector3 LLPanelObject::sSavedSize;
 LLVector3 LLPanelObject::sSavedPos;
@@ -111,200 +108,6 @@ enum {
 	MI_HOLE_COUNT
 };
 
-BOOL LLPanelObject::postBuild()
-{
-	setMouseOpaque(FALSE);
-
-	//--------------------------------------------------------
-	// Top
-	//--------------------------------------------------------
-
-	mButtonCopy = getChild<LLButton>("copy");
-	childSetAction("copy", onClickCopy, this);
-	mButtonPaste = getChild<LLButton>("paste");
-	childSetAction("paste", onClickPaste, this);
-
-	// Lock checkbox
-	mCheckLock = getChild<LLCheckBoxCtrl>("checkbox locked");
-	childSetCommitCallback("checkbox locked", onCommitLock, this);
-
-	// Physical checkbox
-	mCheckPhysics = getChild<LLCheckBoxCtrl>("Physical Checkbox Ctrl");
-	childSetCommitCallback("Physical Checkbox Ctrl", onCommitPhysics, this);
-
-	// Temporary checkbox
-	mCheckTemporary = getChild<LLCheckBoxCtrl>("Temporary Checkbox Ctrl");
-	childSetCommitCallback("Temporary Checkbox Ctrl", onCommitTemporary, this);
-
-	// Phantom checkbox
-	mCheckPhantom = getChild<LLCheckBoxCtrl>("Phantom Checkbox Ctrl");
-	childSetCommitCallback("Phantom Checkbox Ctrl", onCommitPhantom, this);
-
-	// Position
-	mLabelPosition = getChild<LLTextBox>("label position");
-	mCtrlPosX = getChild<LLSpinCtrl>("Pos X");
-	childSetCommitCallback("Pos X", onCommitPosition, this);
-	mCtrlPosY = getChild<LLSpinCtrl>("Pos Y");
-	childSetCommitCallback("Pos Y", onCommitPosition, this);
-	mCtrlPosZ = getChild<LLSpinCtrl>("Pos Z");
-	childSetCommitCallback("Pos Z", onCommitPosition, this);
-	mCheckCopyPos = getChild<LLCheckBoxCtrl>("paste_position");
-	childSetCommitCallback("paste_position", onCommitCopyPaste, this);
-
-	// Scale
-	mLabelSize = getChild<LLTextBox>("label size");
-	mCtrlScaleX = getChild<LLSpinCtrl>("Scale X");
-	childSetCommitCallback("Scale X", onCommitScale, this);
-	mCtrlScaleY = getChild<LLSpinCtrl>("Scale Y");
-	childSetCommitCallback("Scale Y", onCommitScale, this);
-	mCtrlScaleZ = getChild<LLSpinCtrl>("Scale Z");
-	childSetCommitCallback("Scale Z", onCommitScale, this);
-	mCheckCopySize = getChild<LLCheckBoxCtrl>("paste_size");
-	childSetCommitCallback("paste_size", onCommitCopyPaste, this);
-
-	// Rotation
-	mLabelRotation = getChild<LLTextBox>("label rotation");
-	mCtrlRotX = getChild<LLSpinCtrl>("Rot X");
-	childSetCommitCallback("Rot X", onCommitRotation, this);
-	mCtrlRotY = getChild<LLSpinCtrl>("Rot Y");
-	childSetCommitCallback("Rot Y", onCommitRotation, this);
-	mCtrlRotZ = getChild<LLSpinCtrl>("Rot Z");
-	childSetCommitCallback("Rot Z", onCommitRotation, this);
-	mCheckCopyRot = getChild<LLCheckBoxCtrl>("paste_rotation");
-	childSetCommitCallback("paste_rotation", onCommitCopyPaste, this);
-
-	//--------------------------------------------------------
-
-	mCheckCopyShape = getChild<LLCheckBoxCtrl>("paste_shape");
-	childSetCommitCallback("paste_shape", onCommitCopyPaste, this);
-
-	// Base Type
-	mLabelBaseType = getChild<LLTextBox>("label basetype");
-	mComboBaseType = getChild<LLComboBox>("comboBaseType");
-	childSetCommitCallback("comboBaseType", onCommitParametric, this);
-
-	// Cut
-	mLabelCut = getChild<LLTextBox>("text cut");
-	mSpinCutBegin = getChild<LLSpinCtrl>("cut begin");
-	childSetCommitCallback("cut begin", onCommitParametric, this);
-	mSpinCutBegin->setValidateBeforeCommit(precommitValidate);
-	mSpinCutEnd = getChild<LLSpinCtrl>("cut end");
-	childSetCommitCallback("cut end", onCommitParametric, this);
-	mSpinCutEnd->setValidateBeforeCommit(&precommitValidate);
-
-	// Hollow / Skew
-	mLabelHollow = getChild<LLTextBox>("text hollow");
-	mLabelSkew = getChild<LLTextBox>("text skew");
-	mSpinHollow = getChild<LLSpinCtrl>("Scale 1");
-	childSetCommitCallback("Scale 1", onCommitParametric, this);
-	mSpinHollow->setValidateBeforeCommit(&precommitValidate);
-	mSpinSkew = getChild<LLSpinCtrl>("Skew");
-	childSetCommitCallback("Skew", onCommitParametric, this);
-	mSpinSkew->setValidateBeforeCommit(&precommitValidate);
-	mLabelHoleType = getChild<LLTextBox>("Hollow Shape");
-
-	// Hole Type
-	mComboHoleType = getChild<LLComboBox>("hole");
-	childSetCommitCallback("hole", onCommitParametric, this);
-
-	// Twist
-	mLabelTwist = getChild<LLTextBox>("text twist");
-	mSpinTwistBegin = getChild<LLSpinCtrl>("Twist Begin");
-	childSetCommitCallback("Twist Begin", onCommitParametric, this);
-	mSpinTwistBegin->setValidateBeforeCommit(precommitValidate);
-	mSpinTwist = getChild<LLSpinCtrl>("Twist End");
-	childSetCommitCallback("Twist End", onCommitParametric, this);
-	mSpinTwist->setValidateBeforeCommit(&precommitValidate);
-
-	// Scale
-	mSpinScaleX = getChild<LLSpinCtrl>("Taper Scale X");
-	childSetCommitCallback("Taper Scale X", onCommitParametric, this);
-	mSpinScaleX->setValidateBeforeCommit(&precommitValidate);
-	mSpinScaleY = getChild<LLSpinCtrl>("Taper Scale Y");
-	childSetCommitCallback("Taper Scale Y", onCommitParametric, this);
-	mSpinScaleY->setValidateBeforeCommit(&precommitValidate);
-
-	// Shear
-	mLabelShear = getChild<LLTextBox>("text topshear");
-	mSpinShearX = getChild<LLSpinCtrl>("Shear X");
-	childSetCommitCallback("Shear X", onCommitParametric, this);
-	mSpinShearX->setValidateBeforeCommit(&precommitValidate);
-	mSpinShearY = getChild<LLSpinCtrl>("Shear Y");
-	childSetCommitCallback("Shear Y", onCommitParametric, this);
-	mSpinShearY->setValidateBeforeCommit(&precommitValidate);
-
-	// Path / Profile
-	mCtrlPathBegin = getChild<LLSpinCtrl>("Path Limit Begin");
-	childSetCommitCallback("Path Limit Begin", onCommitParametric, this);
-	mCtrlPathBegin->setValidateBeforeCommit(&precommitValidate);
-	mCtrlPathEnd = getChild<LLSpinCtrl>("Path Limit End");
-	childSetCommitCallback("Path Limit End", onCommitParametric, this);
-	mCtrlPathEnd->setValidateBeforeCommit(&precommitValidate);
-
-	// Taper
-	mLabelTaper = getChild<LLTextBox>("text taper2");
-	mSpinTaperX = getChild<LLSpinCtrl>("Taper X");
-	childSetCommitCallback("Taper X", onCommitParametric, this);
-	mSpinTaperX->setValidateBeforeCommit(precommitValidate);
-	mSpinTaperY = getChild<LLSpinCtrl>("Taper Y");
-	childSetCommitCallback("Taper Y", onCommitParametric, this);
-	mSpinTaperY->setValidateBeforeCommit(precommitValidate);
-
-	// Radius Offset / Revolutions
-	mLabelRadiusOffset = getChild<LLTextBox>("text radius delta");
-	mLabelRevolutions = getChild<LLTextBox>("text revolutions");
-	mSpinRadiusOffset = getChild<LLSpinCtrl>("Radius Offset");
-	childSetCommitCallback("Radius Offset", onCommitParametric, this);
-	mSpinRadiusOffset->setValidateBeforeCommit(&precommitValidate);
-	mSpinRevolutions = getChild<LLSpinCtrl>("Revolutions");
-	childSetCommitCallback("Revolutions", onCommitParametric, this);
-	mSpinRevolutions->setValidateBeforeCommit(&precommitValidate);
-
-	// Sculpt
-	mCtrlSculptTexture = getChild<LLTextureCtrl>("sculpt texture control");
-	if (mCtrlSculptTexture)
-	{
-		mCtrlSculptTexture->setDefaultImageAssetID(LLUUID(SCULPT_DEFAULT_TEXTURE));
-		mCtrlSculptTexture->setCommitCallback(LLPanelObject::onCommitSculpt);
-		mCtrlSculptTexture->setOnCancelCallback(LLPanelObject::onCancelSculpt);
-		mCtrlSculptTexture->setOnSelectCallback(LLPanelObject::onSelectSculpt);
-		mCtrlSculptTexture->setDropCallback(LLPanelObject::onDropSculpt);
-		mCtrlSculptTexture->setCallbackUserData(this);
-		// Don't allow (no copy) or (no transfer) textures to be selected during immediate mode
-		mCtrlSculptTexture->setImmediateFilterPermMask(PERM_COPY | PERM_TRANSFER);
-		// Allow any texture to be used during non-immediate mode.
-		mCtrlSculptTexture->setNonImmediateFilterPermMask(PERM_NONE);
-		LLAggregatePermissions texture_perms;
-		if (LLSelectMgr::getInstance()->selectGetAggregateTexturePermissions(texture_perms))
-		{
-			BOOL can_copy =
-				texture_perms.getValue(PERM_COPY) == LLAggregatePermissions::AP_EMPTY ||
-				texture_perms.getValue(PERM_COPY) == LLAggregatePermissions::AP_ALL;
-			BOOL can_transfer =
-				texture_perms.getValue(PERM_TRANSFER) == LLAggregatePermissions::AP_EMPTY ||
-				texture_perms.getValue(PERM_TRANSFER) == LLAggregatePermissions::AP_ALL;
-			mCtrlSculptTexture->setCanApplyImmediately(can_copy && can_transfer);
-		}
-		else
-		{
-			mCtrlSculptTexture->setCanApplyImmediately(FALSE);
-		}
-	}
-
-	mLabelSculptType = getChild<LLTextBox>("label sculpt type");
-	mCtrlSculptType = getChild<LLComboBox>("sculpt type control");
-	childSetCommitCallback("sculpt type control", onCommitSculptType, this);
-	mCtrlSculptMirror = getChild<LLCheckBoxCtrl>("sculpt mirror control");
-	childSetCommitCallback("sculpt mirror control", onCommitSculptType, this);
-	mCtrlSculptInvert = getChild<LLCheckBoxCtrl>("sculpt invert control");
-	childSetCommitCallback("sculpt invert control", onCommitSculptType, this);
-
-	// Start with everyone disabled
-	clearCtrls();
-
-	return TRUE;
-}
-
 LLPanelObject::LLPanelObject(const std::string& name)
 :	LLPanel(name),
 	mIsPhysical(FALSE),
@@ -317,9 +120,290 @@ LLPanelObject::LLPanelObject(const std::string& name)
 {
 }
 
+//virtual
 LLPanelObject::~LLPanelObject()
 {
 	// Children all cleaned up by default view destructor.
+}
+
+//virtual
+BOOL LLPanelObject::postBuild()
+{
+	setMouseOpaque(FALSE);
+
+	mLabelSelectSingle = getChild<LLTextBox>("select_single");
+	mLabelEditObject = getChild<LLTextBox>("edit_object");
+
+	mButtonCopy = getChild<LLButton>("copy");
+	mButtonCopy->setClickedCallback(onClickCopy, this);
+
+	mButtonPaste = getChild<LLButton>("paste");
+	mButtonPaste->setClickedCallback(onClickPaste, this);
+
+	// Lock checkbox
+	mCheckLock = getChild<LLCheckBoxCtrl>("checkbox locked");
+	mCheckLock->setCommitCallback(onCommitLock);
+	mCheckLock->setCallbackUserData(this);
+
+	// Physical checkbox
+	mCheckPhysics = getChild<LLCheckBoxCtrl>("Physical Checkbox Ctrl");
+	mCheckPhysics->setCommitCallback(onCommitPhysics);
+	mCheckPhysics->setCallbackUserData(this);
+
+	// Temporary checkbox
+	mCheckTemporary = getChild<LLCheckBoxCtrl>("Temporary Checkbox Ctrl");
+	mCheckTemporary->setCommitCallback(onCommitTemporary);
+	mCheckTemporary->setCallbackUserData(this);
+
+	// Phantom checkbox
+	mCheckPhantom = getChild<LLCheckBoxCtrl>("Phantom Checkbox Ctrl");
+	mCheckPhantom->setCommitCallback(onCommitPhantom);
+	mCheckPhantom->setCallbackUserData(this);
+
+	// Position
+
+	mLabelPosition = getChild<LLTextBox>("label position");
+
+	mCtrlPosX = getChild<LLSpinCtrl>("Pos X");
+	mCtrlPosX->setCommitCallback(onCommitPosition);
+	mCtrlPosX->setCallbackUserData(this);
+
+	mCtrlPosY = getChild<LLSpinCtrl>("Pos Y");
+	mCtrlPosY->setCommitCallback(onCommitPosition);
+	mCtrlPosY->setCallbackUserData(this);
+
+	mCtrlPosZ = getChild<LLSpinCtrl>("Pos Z");
+	mCtrlPosZ->setCommitCallback(onCommitPosition);
+	mCtrlPosZ->setCallbackUserData(this);
+
+	mCheckCopyPos = getChild<LLCheckBoxCtrl>("paste_position");
+	mCheckCopyPos->setCommitCallback(onCommitCopyPaste);
+	mCheckCopyPos->setCallbackUserData(this);
+
+	// Scale
+
+	mLabelSize = getChild<LLTextBox>("label size");
+
+	mCtrlScaleX = getChild<LLSpinCtrl>("Scale X");
+	mCtrlScaleX->setCommitCallback(onCommitScale);
+	mCtrlScaleX->setCallbackUserData(this);
+
+	mCtrlScaleY = getChild<LLSpinCtrl>("Scale Y");
+	mCtrlScaleY->setCommitCallback(onCommitScale);
+	mCtrlScaleY->setCallbackUserData(this);
+
+	mCtrlScaleZ = getChild<LLSpinCtrl>("Scale Z");
+	mCtrlScaleZ->setCommitCallback(onCommitScale);
+	mCtrlScaleZ->setCallbackUserData(this);
+
+	mCheckCopySize = getChild<LLCheckBoxCtrl>("paste_size");
+	mCheckCopySize->setCommitCallback(onCommitCopyPaste);
+	mCheckCopySize->setCallbackUserData(this);
+
+	// Rotation
+
+	mLabelRotation = getChild<LLTextBox>("label rotation");
+
+	mCtrlRotX = getChild<LLSpinCtrl>("Rot X");
+	mCtrlRotX->setCommitCallback(onCommitRotation);
+	mCtrlRotX->setCallbackUserData(this);
+
+	mCtrlRotY = getChild<LLSpinCtrl>("Rot Y");
+	mCtrlRotY->setCommitCallback(onCommitRotation);
+	mCtrlRotY->setCallbackUserData(this);
+
+	mCtrlRotZ = getChild<LLSpinCtrl>("Rot Z");
+	mCtrlRotZ->setCommitCallback(onCommitRotation);
+	mCtrlRotZ->setCallbackUserData(this);
+
+	mCheckCopyRot = getChild<LLCheckBoxCtrl>("paste_rotation");
+	mCheckCopyRot->setCommitCallback(onCommitCopyPaste);
+	mCheckCopyRot->setCallbackUserData(this);
+
+	//--------------------------------------------------------
+
+	mCheckCopyShape = getChild<LLCheckBoxCtrl>("paste_shape");
+	mCheckCopyShape->setCommitCallback(onCommitCopyPaste);
+	mCheckCopyShape->setCallbackUserData(this);
+
+	// Base Type
+
+	mLabelBaseType = getChild<LLTextBox>("label basetype");
+
+	mComboBaseType = getChild<LLComboBox>("comboBaseType");
+	mComboBaseType->setCommitCallback(onCommitParametric);
+	mComboBaseType->setCallbackUserData(this);
+
+	// Cut
+
+	mLabelCut = getChild<LLTextBox>("text cut");
+
+	mSpinCutBegin = getChild<LLSpinCtrl>("cut begin");
+	mSpinCutBegin->setCommitCallback(onCommitParametric);
+	mSpinCutBegin->setCallbackUserData(this);
+	mSpinCutBegin->setValidateBeforeCommit(precommitValidate);
+
+	mSpinCutEnd = getChild<LLSpinCtrl>("cut end");
+	mSpinCutEnd->setCommitCallback(onCommitParametric);
+	mSpinCutEnd->setCallbackUserData(this);
+	mSpinCutEnd->setValidateBeforeCommit(precommitValidate);
+
+	// Hollow / Skew
+
+	mLabelHollow = getChild<LLTextBox>("text hollow");
+	mLabelSkew = getChild<LLTextBox>("text skew");
+
+	mSpinHollow = getChild<LLSpinCtrl>("Scale 1");
+	mSpinHollow->setCommitCallback(onCommitParametric);
+	mSpinHollow->setCallbackUserData(this);
+
+	mSpinSkew = getChild<LLSpinCtrl>("Skew");
+	mSpinSkew->setCommitCallback(onCommitParametric);
+	mSpinSkew->setCallbackUserData(this);
+	mSpinSkew->setValidateBeforeCommit(precommitValidate);
+
+	mLabelHollowShape = getChild<LLTextBox>("Hollow Shape");
+
+	// Hole Type
+
+	mComboHoleType = getChild<LLComboBox>("hole");
+	mComboHoleType->setCommitCallback(onCommitParametric);
+	mComboHoleType->setCallbackUserData(this);
+
+	// Twist
+
+	mLabelTwist = getChild<LLTextBox>("text twist");
+
+	mSpinTwistBegin = getChild<LLSpinCtrl>("Twist Begin");
+	mSpinTwistBegin->setCommitCallback(onCommitParametric);
+	mSpinTwistBegin->setCallbackUserData(this);
+	mSpinTwistBegin->setValidateBeforeCommit(precommitValidate);
+
+	mSpinTwist = getChild<LLSpinCtrl>("Twist End");
+	mSpinTwist->setCommitCallback(onCommitParametric);
+	mSpinTwist->setCallbackUserData(this);
+	mSpinTwist->setValidateBeforeCommit(precommitValidate);
+
+	// Scale
+
+	mLabelScaleHole = getChild<LLTextBox>("scale_hole");
+	mLabelScaleTaper = getChild<LLTextBox>("scale_taper");
+
+	mSpinScaleX = getChild<LLSpinCtrl>("Taper Scale X");
+	mSpinScaleX->setCommitCallback(onCommitParametric);
+	mSpinScaleX->setCallbackUserData(this);
+	mSpinScaleX->setValidateBeforeCommit(precommitValidate);
+
+	mSpinScaleY = getChild<LLSpinCtrl>("Taper Scale Y");
+	mSpinScaleY->setCommitCallback(onCommitParametric);
+	mSpinScaleY->setCallbackUserData(this);
+	mSpinScaleY->setValidateBeforeCommit(precommitValidate);
+
+	// Shear
+
+	mLabelShear = getChild<LLTextBox>("text topshear");
+
+	mSpinShearX = getChild<LLSpinCtrl>("Shear X");
+	mSpinShearX->setCommitCallback(onCommitParametric);
+	mSpinShearX->setCallbackUserData(this);
+	mSpinShearX->setValidateBeforeCommit(precommitValidate);
+
+	mSpinShearY = getChild<LLSpinCtrl>("Shear Y");
+	mSpinShearY->setCommitCallback(onCommitParametric);
+	mSpinShearY->setCallbackUserData(this);
+	mSpinShearY->setValidateBeforeCommit(precommitValidate);
+
+	// Path / Profile
+
+	mLabelAdvancedCut = getChild<LLTextBox>("advanced_cut");
+	mLabelAdvancedDimple = getChild<LLTextBox>("advanced_dimple");
+	mLabelAdvancedSlice = getChild<LLTextBox>("advanced_slice");
+
+	mCtrlPathBegin = getChild<LLSpinCtrl>("Path Limit Begin");
+	mCtrlPathBegin->setCommitCallback(onCommitParametric);
+	mCtrlPathBegin->setCallbackUserData(this);
+	mCtrlPathBegin->setValidateBeforeCommit(precommitValidate);
+
+	mCtrlPathEnd = getChild<LLSpinCtrl>("Path Limit End");
+	mCtrlPathEnd->setCommitCallback(onCommitParametric);
+	mCtrlPathEnd->setCallbackUserData(this);
+	mCtrlPathEnd->setValidateBeforeCommit(precommitValidate);
+
+	// Taper
+
+	mLabelScaleTaper = getChild<LLTextBox>("text taper2");
+
+	mSpinTaperX = getChild<LLSpinCtrl>("Taper X");
+	mSpinTaperX->setCommitCallback(onCommitParametric);
+	mSpinTaperX->setCallbackUserData(this);
+	mSpinTaperX->setValidateBeforeCommit(precommitValidate);
+
+	mSpinTaperY = getChild<LLSpinCtrl>("Taper Y");
+	mSpinTaperY->setCommitCallback(onCommitParametric);
+	mSpinTaperY->setCallbackUserData(this);
+	mSpinTaperY->setValidateBeforeCommit(precommitValidate);
+
+	// Radius Offset / Revolutions
+
+	mLabelRadiusOffset = getChild<LLTextBox>("text radius delta");
+	mLabelRevolutions = getChild<LLTextBox>("text revolutions");
+
+	mSpinRadiusOffset = getChild<LLSpinCtrl>("Radius Offset");
+	mSpinRadiusOffset->setCommitCallback(onCommitParametric);
+	mSpinRadiusOffset->setCallbackUserData(this);
+	mSpinRadiusOffset->setValidateBeforeCommit(precommitValidate);
+
+	mSpinRevolutions = getChild<LLSpinCtrl>("Revolutions");
+	mSpinRevolutions->setCommitCallback(onCommitParametric);
+	mSpinRevolutions->setCallbackUserData(this);
+	mSpinRevolutions->setValidateBeforeCommit(precommitValidate);
+
+	// Sculpt
+
+	mCtrlSculptTexture = getChild<LLTextureCtrl>("sculpt texture control");
+	mCtrlSculptTexture->setDefaultImageAssetID(LLUUID(SCULPT_DEFAULT_TEXTURE));
+	mCtrlSculptTexture->setCommitCallback(LLPanelObject::onCommitSculpt);
+	mCtrlSculptTexture->setOnCancelCallback(LLPanelObject::onCancelSculpt);
+	mCtrlSculptTexture->setOnSelectCallback(LLPanelObject::onSelectSculpt);
+	mCtrlSculptTexture->setDropCallback(LLPanelObject::onDropSculpt);
+	mCtrlSculptTexture->setCallbackUserData(this);
+	// Don't allow (no copy) or (no transfer) textures to be selected during
+	// immediate mode
+	mCtrlSculptTexture->setImmediateFilterPermMask(PERM_COPY | PERM_TRANSFER);
+	// Allow any texture to be used during non-immediate mode.
+	mCtrlSculptTexture->setNonImmediateFilterPermMask(PERM_NONE);
+	LLAggregatePermissions texture_perms;
+	if (LLSelectMgr::getInstance()->selectGetAggregateTexturePermissions(texture_perms))
+	{
+		BOOL can_copy = texture_perms.getValue(PERM_COPY) == LLAggregatePermissions::AP_EMPTY ||
+						texture_perms.getValue(PERM_COPY) == LLAggregatePermissions::AP_ALL;
+		BOOL can_transfer = texture_perms.getValue(PERM_TRANSFER) == LLAggregatePermissions::AP_EMPTY ||
+							texture_perms.getValue(PERM_TRANSFER) == LLAggregatePermissions::AP_ALL;
+		mCtrlSculptTexture->setCanApplyImmediately(can_copy && can_transfer);
+	}
+	else
+	{
+		mCtrlSculptTexture->setCanApplyImmediately(FALSE);
+	}
+
+	mLabelSculptType = getChild<LLTextBox>("label sculpt type");
+
+	mCtrlSculptType = getChild<LLComboBox>("sculpt type control");
+	mCtrlSculptType->setCommitCallback(onCommitSculptType);
+	mCtrlSculptType->setCallbackUserData(this);
+
+	mCtrlSculptMirror = getChild<LLCheckBoxCtrl>("sculpt mirror control");
+	mCtrlSculptMirror->setCommitCallback(onCommitSculptType);
+	mCtrlSculptMirror->setCallbackUserData(this);
+
+	mCtrlSculptInvert = getChild<LLCheckBoxCtrl>("sculpt invert control");
+	mCtrlSculptInvert->setCommitCallback(onCommitSculptType);
+	mCtrlSculptInvert->setCallbackUserData(this);
+
+	// Start with everyone disabled
+	clearCtrls();
+
+	return TRUE;
 }
 
 void LLPanelObject::getState()
@@ -345,15 +429,15 @@ void LLPanelObject::getState()
 		}
 	}
 
-	LLVOVolume *volobjp = NULL;
-	if (objectp && (objectp->getPCode() == LL_PCODE_VOLUME))
+	LLVOVolume* volobjp = NULL;
+	if (objectp && objectp->getPCode() == LL_PCODE_VOLUME)
 	{
-		volobjp = (LLVOVolume *)objectp;
+		volobjp = (LLVOVolume*)objectp;
 	}
 
 	if (!objectp)
 	{
-		//forfeit focus
+		// forfeit focus
 		if (gFocusMgr.childHasKeyboardFocus(this))
 		{
 			gFocusMgr.setKeyboardFocus(NULL);
@@ -364,10 +448,16 @@ void LLPanelObject::getState()
 		return;
 	}
 
-	// can move or rotate only linked group with move permissions, or sub-object with move and modify perms
-	BOOL enable_move	= objectp->permMove() && !objectp->isAttachment() && (objectp->permModify() || !gSavedSettings.getBOOL("EditLinkedParts"));
-	BOOL enable_scale	= objectp->permMove() && objectp->permModify();
-	BOOL enable_rotate	= objectp->permMove() && ((objectp->permModify() && !objectp->isAttachment()) || !gSavedSettings.getBOOL("EditLinkedParts"));
+	static LLCachedControl<bool> edit_linked_parts(gSavedSettings,
+												   "EditLinkedParts");
+	// can move or rotate only linked group with move permissions, or
+	// sub-object with move and modify perms
+	BOOL enable_move = objectp->permMove() && !objectp->isAttachment() &&
+					   (objectp->permModify() || !edit_linked_parts);
+	BOOL enable_scale = objectp->permMove() && objectp->permModify();
+	BOOL enable_rotate = objectp->permMove() &&
+						 ((objectp->permModify() && !objectp->isAttachment()) ||
+						  !edit_linked_parts);
 
 	S32 selected_count = LLSelectMgr::getInstance()->getSelection()->getObjectCount();
 	BOOL single_volume = LLSelectMgr::getInstance()->selectionAllPCode(LL_PCODE_VOLUME)
@@ -437,11 +527,16 @@ void LLPanelObject::getState()
 	mCheckCopySize->setEnabled(enable_scale);
 
 	LLQuaternion object_rot = objectp->getRotationEdit();
-	object_rot.getEulerAngles(&(mCurEulerDegrees.mV[VX]), &(mCurEulerDegrees.mV[VY]), &(mCurEulerDegrees.mV[VZ]));
+	object_rot.getEulerAngles(&(mCurEulerDegrees.mV[VX]),
+							  &(mCurEulerDegrees.mV[VY]),
+							  &(mCurEulerDegrees.mV[VZ]));
 	mCurEulerDegrees *= RAD_TO_DEG;
-	mCurEulerDegrees.mV[VX] = fmod(llround(mCurEulerDegrees.mV[VX], OBJECT_ROTATION_PRECISION) + 360.f, 360.f);
-	mCurEulerDegrees.mV[VY] = fmod(llround(mCurEulerDegrees.mV[VY], OBJECT_ROTATION_PRECISION) + 360.f, 360.f);
-	mCurEulerDegrees.mV[VZ] = fmod(llround(mCurEulerDegrees.mV[VZ], OBJECT_ROTATION_PRECISION) + 360.f, 360.f);
+	mCurEulerDegrees.mV[VX] = fmod(llround(mCurEulerDegrees.mV[VX],
+								   OBJECT_ROTATION_PRECISION) + 360.f, 360.f);
+	mCurEulerDegrees.mV[VY] = fmod(llround(mCurEulerDegrees.mV[VY],
+								   OBJECT_ROTATION_PRECISION) + 360.f, 360.f);
+	mCurEulerDegrees.mV[VZ] = fmod(llround(mCurEulerDegrees.mV[VZ],
+								   OBJECT_ROTATION_PRECISION) + 360.f, 360.f);
 
 	if (enable_rotate)
 	{
@@ -467,35 +562,36 @@ void LLPanelObject::getState()
 	std::string owner_name;
 	owners_identical = LLSelectMgr::getInstance()->selectGetOwner(owner_id, owner_name);
 
-	// BUG? Check for all objects being editable?
+	// BUG ? Check for all objects being editable ?
 	S32 roots_selected = LLSelectMgr::getInstance()->getSelection()->getRootObjectCount();
 	BOOL editable = root_objectp->permModify();
 
 	// Select Single Message
-	childSetVisible("select_single", FALSE);
-	childSetVisible("edit_object", FALSE);
+	mLabelSelectSingle->setVisible(FALSE);
+	mLabelEditObject->setVisible(FALSE);
 	if (!editable || single_volume || selected_count <= 1)
 	{
-		childSetVisible("edit_object", TRUE);
-		childSetEnabled("edit_object", TRUE);
+		mLabelEditObject->setVisible(TRUE);
+		mLabelEditObject->setEnabled(TRUE);
 		mCheckCopyShape->setVisible(true);
 	}
 	else
 	{
-		childSetVisible("select_single", TRUE);
-		childSetEnabled("select_single", TRUE);
+		mLabelSelectSingle->setVisible(TRUE);
+		mLabelSelectSingle->setEnabled(TRUE);
 		mCheckCopyShape->setVisible(false);
 	}
 	// Lock checkbox - only modifiable if you own the object.
-	BOOL self_owned = (gAgent.getID() == owner_id);
+	BOOL self_owned = (gAgentID == owner_id);
 	mCheckLock->setEnabled(roots_selected > 0 && self_owned);
 
 	// More lock and debit checkbox - get the values
 	BOOL valid;
 	U32 owner_mask_on;
 	U32 owner_mask_off;
-	valid = LLSelectMgr::getInstance()->selectGetPerm(PERM_OWNER, &owner_mask_on, &owner_mask_off);
-
+	valid = LLSelectMgr::getInstance()->selectGetPerm(PERM_OWNER,
+													  &owner_mask_on,
+													  &owner_mask_off);
 	if (valid)
 	{
 		if (owner_mask_on & PERM_MOVE)
@@ -574,8 +670,8 @@ void LLPanelObject::getState()
 	}
 	else
 	{
-		// Only allowed to change these parameters for objects
-		// that you have permissions on AND are not attachments.
+		// Only allowed to change these parameters for objects that you have
+		// permissions on AND are not attachments.
 		enabled = root_objectp->permModify();
 
 		// Volume type
@@ -585,14 +681,15 @@ void LLPanelObject::getState()
 		U8 profile = profile_and_hole & LL_PCODE_PROFILE_MASK;
 		U8 hole = profile_and_hole & LL_PCODE_HOLE_MASK;
 
-		// Scale goes first so we can differentiate between a sphere and a torus,
-		// which have the same profile and path types.
+		// Scale goes first so we can differentiate between a sphere and a
+		// torus, which have the same profile and path types.
 
 		// Scale
 		scale_x = volume_params.getRatioX();
 		scale_y = volume_params.getRatioY();
 
-		BOOL linear_path = (path == LL_PCODE_PATH_LINE || path == LL_PCODE_PATH_FLEXIBLE);
+		BOOL linear_path = (path == LL_PCODE_PATH_LINE ||
+							path == LL_PCODE_PATH_FLEXIBLE);
 		if (linear_path && profile == LL_PCODE_PROFILE_CIRCLE)
 		{
 			selected_item = MI_CYLINDER;
@@ -617,34 +714,41 @@ void LLPanelObject::getState()
 		{
 			selected_item = MI_CYLINDER; // reasonable default
 		}
-		else if (path == LL_PCODE_PATH_CIRCLE && profile == LL_PCODE_PROFILE_CIRCLE && scale_y > 0.75f)
+		else if (path == LL_PCODE_PATH_CIRCLE &&
+				 profile == LL_PCODE_PROFILE_CIRCLE && scale_y > 0.75f)
 		{
 			selected_item = MI_SPHERE;
 		}
-		else if (path == LL_PCODE_PATH_CIRCLE && profile == LL_PCODE_PROFILE_CIRCLE && scale_y <= 0.75f)
+		else if (path == LL_PCODE_PATH_CIRCLE &&
+				 profile == LL_PCODE_PROFILE_CIRCLE && scale_y <= 0.75f)
 		{
 			selected_item = MI_TORUS;
 		}
-		else if (path == LL_PCODE_PATH_CIRCLE && profile == LL_PCODE_PROFILE_CIRCLE_HALF)
+		else if (path == LL_PCODE_PATH_CIRCLE &&
+				 profile == LL_PCODE_PROFILE_CIRCLE_HALF)
 		{
 			selected_item = MI_SPHERE;
 		}
-		else if (path == LL_PCODE_PATH_CIRCLE2 && profile == LL_PCODE_PROFILE_CIRCLE)
+		else if (path == LL_PCODE_PATH_CIRCLE2 &&
+				 profile == LL_PCODE_PROFILE_CIRCLE)
 		{
 			// Spirals aren't supported.  Make it into a sphere.  JC
 			selected_item = MI_SPHERE;
 		}
-		else if (path == LL_PCODE_PATH_CIRCLE && profile == LL_PCODE_PROFILE_EQUALTRI)
+		else if (path == LL_PCODE_PATH_CIRCLE &&
+				 profile == LL_PCODE_PROFILE_EQUALTRI)
 		{
 			selected_item = MI_RING;
 		}
-		else if (path == LL_PCODE_PATH_CIRCLE && profile == LL_PCODE_PROFILE_SQUARE && scale_y <= 0.75f)
+		else if (path == LL_PCODE_PATH_CIRCLE &&
+				 profile == LL_PCODE_PROFILE_SQUARE && scale_y <= 0.75f)
 		{
 			selected_item = MI_TUBE;
 		}
 		else
 		{
-			llinfos << "Unknown path " << (S32) path << " profile " << (S32) profile << " in getState" << llendl;
+			llinfos << "Unknown path " << (S32)path << " - profile "
+					<< (S32)profile << " in getState()" << llendl;
 			selected_item = MI_BOX;
 		}
 
@@ -663,7 +767,7 @@ void LLPanelObject::getState()
 
 		// Compute cut and advanced cut from S and T
 		F32 begin_t = volume_params.getBeginT();
-		F32 end_t	= volume_params.getEndT();
+		F32 end_t = volume_params.getEndT();
 
 		// Hollowness
 		F32 hollow = volume_params.getHollow();
@@ -700,7 +804,7 @@ void LLPanelObject::getState()
 		// Cut interpretation varies based on base object type
 		F32 cut_begin, cut_end, adv_cut_begin, adv_cut_end;
 
-		if (selected_item == MI_SPHERE || selected_item == MI_TORUS || 
+		if (selected_item == MI_SPHERE || selected_item == MI_TORUS ||
 			 selected_item == MI_TUBE   || selected_item == MI_RING)
 		{
 			cut_begin		= begin_t;
@@ -710,10 +814,10 @@ void LLPanelObject::getState()
 		}
 		else
 		{
-			cut_begin       = begin_s;
-			cut_end         = end_s;
+			cut_begin		= begin_s;
+			cut_end			= end_s;
 			adv_cut_begin   = begin_t;
-			adv_cut_end     = end_t;
+			adv_cut_end		= end_t;
 		}
 
 		mSpinCutBegin->set(cut_begin);
@@ -722,18 +826,18 @@ void LLPanelObject::getState()
 		mCtrlPathEnd->set(adv_cut_end);
 
 		// Twist
-		F32 twist		= volume_params.getTwist();
+		F32 twist = volume_params.getTwist();
 		F32 twist_begin = volume_params.getTwistBegin();
 		// Check the path type for conversion.
 		if (path == LL_PCODE_PATH_LINE || path == LL_PCODE_PATH_FLEXIBLE)
 		{
-			twist		*= OBJECT_TWIST_LINEAR_MAX;
-			twist_begin	*= OBJECT_TWIST_LINEAR_MAX;
+			twist *= OBJECT_TWIST_LINEAR_MAX;
+			twist_begin *= OBJECT_TWIST_LINEAR_MAX;
 		}
 		else
 		{
-			twist		*= OBJECT_TWIST_MAX;
-			twist_begin	*= OBJECT_TWIST_MAX;
+			twist *= OBJECT_TWIST_MAX;
+			twist_begin *= OBJECT_TWIST_MAX;
 		}
 
 		mSpinTwist->set(twist);
@@ -803,7 +907,7 @@ void LLPanelObject::getState()
 			{
 				skew = -min_skew_mag;
 			}
-			else 
+			else
 			{
 				skew = min_skew_mag;
 			}
@@ -813,8 +917,8 @@ void LLPanelObject::getState()
 
 	// Compute control visibility, label names, and twist range.
 	// Start with defaults.
-	BOOL cut_visible                = TRUE;
-	BOOL hollow_visible             = TRUE;
+	BOOL cut_visible				= TRUE;
+	BOOL hollow_visible				= TRUE;
 	BOOL top_size_x_visible			= TRUE;
 	BOOL top_size_y_visible			= TRUE;
 	BOOL top_shear_x_visible		= TRUE;
@@ -825,121 +929,119 @@ void LLPanelObject::getState()
 	BOOL skew_visible				= FALSE;
 	BOOL radius_offset_visible		= FALSE;
 	BOOL revolutions_visible		= FALSE;
-	BOOL sculpt_texture_visible     = FALSE;
+	BOOL sculpt_texture_visible		= FALSE;
 	F32	 twist_min					= OBJECT_TWIST_LINEAR_MIN;
 	F32	 twist_max					= OBJECT_TWIST_LINEAR_MAX;
 	F32	 twist_inc					= OBJECT_TWIST_LINEAR_INC;
-
-	BOOL advanced_is_dimple = FALSE;
-	BOOL advanced_is_slice = FALSE;
-	BOOL size_is_hole = FALSE;
+	BOOL advanced_is_dimple			= FALSE;
+	BOOL advanced_is_slice			= FALSE;
+	BOOL size_is_hole				= FALSE;
 
 	// Tune based on overall volume type
 	switch (selected_item)
 	{
-	case MI_SPHERE:
-		top_size_x_visible		= FALSE;
-		top_size_y_visible		= FALSE;
-		top_shear_x_visible		= FALSE;
-		top_shear_y_visible		= FALSE;
-		//twist_visible			= FALSE;
-		advanced_cut_visible	= TRUE;
-		advanced_is_dimple		= TRUE;
-		twist_min				= OBJECT_TWIST_MIN;
-		twist_max				= OBJECT_TWIST_MAX;
-		twist_inc				= OBJECT_TWIST_INC;
-		break;
+		case MI_SPHERE:
+			top_size_x_visible		= FALSE;
+			top_size_y_visible		= FALSE;
+			top_shear_x_visible		= FALSE;
+			top_shear_y_visible		= FALSE;
+			//twist_visible			= FALSE;
+			advanced_cut_visible	= TRUE;
+			advanced_is_dimple		= TRUE;
+			twist_min				= OBJECT_TWIST_MIN;
+			twist_max				= OBJECT_TWIST_MAX;
+			twist_inc				= OBJECT_TWIST_INC;
+			break;
 
-	case MI_TORUS:
-	case MI_TUBE:
-	case MI_RING:
-		//top_size_x_visible	= FALSE;
-		//top_size_y_visible	= FALSE;
-	  	size_is_hole 			= TRUE;
-		skew_visible			= TRUE;
-		advanced_cut_visible	= TRUE;
-		taper_visible			= TRUE;
-		radius_offset_visible	= TRUE;
-		revolutions_visible		= TRUE;
-		twist_min				= OBJECT_TWIST_MIN;
-		twist_max				= OBJECT_TWIST_MAX;
-		twist_inc				= OBJECT_TWIST_INC;
+		case MI_TORUS:
+		case MI_TUBE:
+		case MI_RING:
+			//top_size_x_visible	= FALSE;
+			//top_size_y_visible	= FALSE;
+		  	size_is_hole 			= TRUE;
+			skew_visible			= TRUE;
+			advanced_cut_visible	= TRUE;
+			taper_visible			= TRUE;
+			radius_offset_visible	= TRUE;
+			revolutions_visible		= TRUE;
+			twist_min				= OBJECT_TWIST_MIN;
+			twist_max				= OBJECT_TWIST_MAX;
+			twist_inc				= OBJECT_TWIST_INC;
+			break;
 
-		break;
+		case MI_SCULPT:
+			cut_visible				= FALSE;
+			hollow_visible			= FALSE;
+			twist_visible			= FALSE;
+			top_size_x_visible		= FALSE;
+			top_size_y_visible		= FALSE;
+			top_shear_x_visible		= FALSE;
+			top_shear_y_visible		= FALSE;
+			skew_visible			= FALSE;
+			advanced_cut_visible	= FALSE;
+			taper_visible			= FALSE;
+			radius_offset_visible	= FALSE;
+			revolutions_visible		= FALSE;
+			sculpt_texture_visible	= TRUE;
+			break;
 
-	case MI_SCULPT:
-		cut_visible             = FALSE;
-		hollow_visible          = FALSE;
-		twist_visible           = FALSE;
-		top_size_x_visible      = FALSE;
-		top_size_y_visible      = FALSE;
-		top_shear_x_visible     = FALSE;
-		top_shear_y_visible     = FALSE;
-		skew_visible            = FALSE;
-		advanced_cut_visible    = FALSE;
-		taper_visible           = FALSE;
-		radius_offset_visible   = FALSE;
-		revolutions_visible     = FALSE;
-		sculpt_texture_visible  = TRUE;
+		case MI_BOX:
+			advanced_cut_visible	= TRUE;
+			advanced_is_slice		= TRUE;
+			break;
 
-		break;
+		case MI_CYLINDER:
+			advanced_cut_visible	= TRUE;
+			advanced_is_slice		= TRUE;
+			break;
 
-	case MI_BOX:
-		advanced_cut_visible	= TRUE;
-		advanced_is_slice		= TRUE;
-		break;
+		case MI_PRISM:
+			advanced_cut_visible	= TRUE;
+			advanced_is_slice		= TRUE;
+			break;
 
-	case MI_CYLINDER:
-		advanced_cut_visible	= TRUE;
-		advanced_is_slice		= TRUE;
-		break;
-
-	case MI_PRISM:
-		advanced_cut_visible	= TRUE;
-		advanced_is_slice		= TRUE;
-		break;
-
-	default:
-		break;
+		default:
+			break;
 	}
 
 	// Check if we need to change top size/hole size params.
 	switch (selected_item)
 	{
-	case MI_SPHERE:
-	case MI_TORUS:
-	case MI_TUBE:
-	case MI_RING:
-		mSpinScaleX->set(scale_x);
-		mSpinScaleY->set(scale_y);
-		mSpinScaleX->setMinValue(OBJECT_MIN_HOLE_SIZE);
-		mSpinScaleX->setMaxValue(OBJECT_MAX_HOLE_SIZE_X);
-		mSpinScaleY->setMinValue(OBJECT_MIN_HOLE_SIZE);
-		mSpinScaleY->setMaxValue(OBJECT_MAX_HOLE_SIZE_Y);
-		break;
-	default:
-		if (editable)
-		{
-			mSpinScaleX->set(1.f - scale_x);
-			mSpinScaleY->set(1.f - scale_y);
-			mSpinScaleX->setMinValue(-1.f);
-			mSpinScaleX->setMaxValue(1.f);
-			mSpinScaleY->setMinValue(-1.f);
-			mSpinScaleY->setMaxValue(1.f);
-		}
-		break;
+		case MI_SPHERE:
+		case MI_TORUS:
+		case MI_TUBE:
+		case MI_RING:
+			mSpinScaleX->set(scale_x);
+			mSpinScaleY->set(scale_y);
+			mSpinScaleX->setMinValue(OBJECT_MIN_HOLE_SIZE);
+			mSpinScaleX->setMaxValue(OBJECT_MAX_HOLE_SIZE_X);
+			mSpinScaleY->setMinValue(OBJECT_MIN_HOLE_SIZE);
+			mSpinScaleY->setMaxValue(OBJECT_MAX_HOLE_SIZE_Y);
+			break;
+
+		default:
+			if (editable)
+			{
+				mSpinScaleX->set(1.f - scale_x);
+				mSpinScaleY->set(1.f - scale_y);
+				mSpinScaleX->setMinValue(-1.f);
+				mSpinScaleX->setMaxValue(1.f);
+				mSpinScaleY->setMinValue(-1.f);
+				mSpinScaleY->setMaxValue(1.f);
+			}
+			break;
 	}
 
 	// Check if we need to limit the hollow based on the hole type.
-	if (selected_hole == MI_HOLE_SQUARE && 
+	if (selected_hole == MI_HOLE_SQUARE &&
 		(selected_item == MI_CYLINDER || selected_item == MI_TORUS ||
-		 selected_item == MI_PRISM    || selected_item == MI_RING  ||
+		 selected_item == MI_PRISM	|| selected_item == MI_RING  ||
 		 selected_item == MI_SPHERE))
 	{
 		mSpinHollow->setMinValue(0.f);
 		mSpinHollow->setMaxValue(70.f);
 	}
-	else 
+	else
 	{
 		mSpinHollow->setMinValue(0.f);
 		mSpinHollow->setMaxValue(95.f);
@@ -955,7 +1057,7 @@ void LLPanelObject::getState()
 
 	mLabelHollow->setEnabled(enabled);
 	mSpinHollow->setEnabled(enabled);
-	mLabelHoleType->setEnabled(hole_enabled);
+	mLabelHollowShape->setEnabled(hole_enabled);
 	mComboHoleType->setEnabled(hole_enabled);
 
 	mLabelTwist->setEnabled(enabled);
@@ -965,19 +1067,19 @@ void LLPanelObject::getState()
 	mLabelSkew->setEnabled(enabled);
 	mSpinSkew->setEnabled(enabled);
 
-	childSetVisible("scale_hole", FALSE);
-	childSetVisible("scale_taper", FALSE);
+	mLabelScaleHole->setVisible(FALSE);
+	mLabelScaleTaper->setVisible(FALSE);
 	if (top_size_x_visible || top_size_y_visible)
 	{
 		if (size_is_hole)
 		{
-			childSetVisible("scale_hole", TRUE);
-			childSetEnabled("scale_hole", enabled);
+			mLabelScaleHole->setVisible(TRUE);
+			mLabelScaleHole->setEnabled(enabled);
 		}
 		else
 		{
-			childSetVisible("scale_taper", TRUE);
-			childSetEnabled("scale_taper", enabled);
+			mLabelScaleTaper->setVisible(TRUE);
+			mLabelScaleTaper->setEnabled(enabled);
 		}
 	}
 
@@ -988,34 +1090,34 @@ void LLPanelObject::getState()
 	mSpinShearX->setEnabled(enabled);
 	mSpinShearY->setEnabled(enabled);
 
-	childSetVisible("advanced_cut", FALSE);
-	childSetVisible("advanced_dimple", FALSE);
-	childSetVisible("advanced_slice", FALSE);
+	mLabelAdvancedCut->setVisible(FALSE);
+	mLabelAdvancedDimple->setVisible(FALSE);
+	mLabelAdvancedSlice->setVisible(FALSE);
 
 	if (advanced_cut_visible)
 	{
 		if (advanced_is_dimple)
 		{
-			childSetVisible("advanced_dimple", TRUE);
-			childSetEnabled("advanced_dimple", enabled);
+			mLabelAdvancedDimple->setVisible(TRUE);
+			mLabelAdvancedDimple->setEnabled(enabled);
 		}
 
 		else if (advanced_is_slice)
 		{
-			childSetVisible("advanced_slice", TRUE);
-			childSetEnabled("advanced_slice", enabled);
+			mLabelAdvancedSlice->setVisible(TRUE);
+			mLabelAdvancedSlice->setEnabled(enabled);
 		}
 		else
 		{
-			childSetVisible("advanced_cut", TRUE);
-			childSetEnabled("advanced_cut", enabled);
+			mLabelAdvancedCut->setVisible(TRUE);
+			mLabelAdvancedCut->setEnabled(enabled);
 		}
 	}
 
 	mCtrlPathBegin->setEnabled(enabled);
 	mCtrlPathEnd->setEnabled(enabled);
 
-	mLabelTaper->setEnabled(enabled);
+	mLabelScaleTaper->setEnabled(enabled);
 	mSpinTaperX->setEnabled(enabled);
 	mSpinTaperY->setEnabled(enabled);
 
@@ -1030,11 +1132,11 @@ void LLPanelObject::getState()
 	// Update field visibility
 	mLabelCut->setVisible(cut_visible);
 	mSpinCutBegin->setVisible(cut_visible);
-	mSpinCutEnd->setVisible(cut_visible); 
+	mSpinCutEnd->setVisible(cut_visible);
 
 	mLabelHollow->setVisible(hollow_visible);
 	mSpinHollow->setVisible(hollow_visible);
-	mLabelHoleType->setVisible(hollow_visible);
+	mLabelHollowShape->setVisible(hollow_visible);
 	mComboHoleType->setVisible(hollow_visible);
 
 	mLabelTwist->setVisible(twist_visible);
@@ -1060,7 +1162,7 @@ void LLPanelObject::getState()
 	mCtrlPathBegin->setVisible(advanced_cut_visible);
 	mCtrlPathEnd->setVisible(advanced_cut_visible);
 
-	mLabelTaper->setVisible(taper_visible);
+	mLabelScaleTaper->setVisible(taper_visible);
 	mSpinTaperX->setVisible(taper_visible);
 	mSpinTaperY->setVisible(taper_visible);
 
@@ -1074,15 +1176,16 @@ void LLPanelObject::getState()
 	BOOL is_mesh = FALSE;
 	if (selected_item == MI_SCULPT)
 	{
-        LLUUID id;
-		LLSculptParams *sculpt_params = (LLSculptParams *)objectp->getParameterEntry(LLNetworkData::PARAMS_SCULPT);
-
-		if (sculpt_params) // if we have a legal sculpt param block for this object:
+		LLUUID id;
+		LLSculptParams* sculpt_params;
+		sculpt_params = (LLSculptParams*)objectp->getParameterEntry(LLNetworkData::PARAMS_SCULPT);
+		if (sculpt_params)
 		{
+			// if we have a legal sculpt param block for this object:
 			if (mObject != objectp)  // we've just selected a new object, so save for undo
 			{
 				mSculptTextureRevert = sculpt_params->getSculptTexture();
-				mSculptTypeRevert    = sculpt_params->getSculptType();
+				mSculptTypeRevert	= sculpt_params->getSculptType();
 			}
 
 			U8 sculpt_type = sculpt_params->getSculptType();
@@ -1091,10 +1194,10 @@ void LLPanelObject::getState()
 			BOOL sculpt_mirror = sculpt_type & LL_SCULPT_FLAG_MIRROR;
 			is_mesh = (sculpt_stitching == LL_SCULPT_TYPE_MESH);
 
-			LLTextureCtrl*  mTextureCtrl = getChild<LLTextureCtrl>("sculpt texture control");
-			mTextureCtrl->setTentative(FALSE);
-			mTextureCtrl->setEnabled(editable && !is_mesh);
-			mTextureCtrl->setImageAssetID(editable ? sculpt_params->getSculptTexture() : LLUUID::null);
+			mCtrlSculptTexture->setTentative(FALSE);
+			mCtrlSculptTexture->setEnabled(editable && !is_mesh);
+			mCtrlSculptTexture->setImageAssetID(editable ? sculpt_params->getSculptTexture()
+														 : LLUUID::null);
 
 			mComboBaseType->setEnabled(!is_mesh);
 
@@ -1167,8 +1270,9 @@ void LLPanelObject::setCopyPasteState()
 // static
 BOOL LLPanelObject::precommitValidate(LLUICtrl* ctrl, void* userdata)
 {
-	// TODO: Richard will fill this in later.  
-	return TRUE; // FALSE means that validation failed and new value should not be commited.
+	// TODO: Richard will fill this in later.
+	// FALSE means that validation failed and new value should not be commited.
+	return TRUE;
 }
 
 void LLPanelObject::sendIsPhysical()
@@ -1238,7 +1342,8 @@ void LLPanelObject::sendCastShadows()
 // static
 void LLPanelObject::onCommitParametric(LLUICtrl* ctrl, void* userdata)
 {
-	LLPanelObject* self = (LLPanelObject*) userdata;
+	LLPanelObject* self = (LLPanelObject*)userdata;
+	if (!self) return;
 
 	if (self->mObject.isNull())
 	{
@@ -1263,10 +1368,11 @@ void LLPanelObject::onCommitParametric(LLUICtrl* ctrl, void* userdata)
 	// set sculpting
 	S32 selected_type = self->mComboBaseType->getCurrentIndex();
 
+	LLSculptParams* sculpt_params;
 	if (selected_type == MI_SCULPT)
 	{
 		self->mObject->setParameterEntryInUse(LLNetworkData::PARAMS_SCULPT, TRUE, TRUE);
-		LLSculptParams *sculpt_params = (LLSculptParams *)self->mObject->getParameterEntry(LLNetworkData::PARAMS_SCULPT);
+		sculpt_params = (LLSculptParams*)self->mObject->getParameterEntry(LLNetworkData::PARAMS_SCULPT);
 		if (sculpt_params)
 		{
 			volume_params.setSculptID(sculpt_params->getSculptTexture(),
@@ -1275,7 +1381,7 @@ void LLPanelObject::onCommitParametric(LLUICtrl* ctrl, void* userdata)
 	}
 	else
 	{
-		LLSculptParams *sculpt_params = (LLSculptParams *)self->mObject->getParameterEntry(LLNetworkData::PARAMS_SCULPT);
+		sculpt_params = (LLSculptParams*)self->mObject->getParameterEntry(LLNetworkData::PARAMS_SCULPT);
 		if (sculpt_params)
 		{
 			self->mObject->setParameterEntryInUse(LLNetworkData::PARAMS_SCULPT,
@@ -1286,10 +1392,9 @@ void LLPanelObject::onCommitParametric(LLUICtrl* ctrl, void* userdata)
 	// Update the volume, if necessary.
 	self->mObject->updateVolume(volume_params);
 
-	// This was added to make sure thate when changes are made, the UI
-	// adjusts to present valid options.
-	// *FIX: only some changes, ie, hollow or primitive type changes,
-	// require a refresh.
+	// This was added to make sure thate when changes are made, the UI adjusts
+	// to present valid options. *FIX: only some changes, ie, hollow or
+	// primitive type changes, require a refresh.
 	self->refresh();
 }
 
@@ -1302,60 +1407,60 @@ void LLPanelObject::getVolumeParams(LLVolumeParams& volume_params)
 	U8 path;
 	switch (selected_type)
 	{
-	case MI_CYLINDER:
-		profile = LL_PCODE_PROFILE_CIRCLE;
-		path = LL_PCODE_PATH_LINE;
-		break;
+		case MI_CYLINDER:
+			profile = LL_PCODE_PROFILE_CIRCLE;
+			path = LL_PCODE_PATH_LINE;
+			break;
 
-	case MI_BOX:
-		profile = LL_PCODE_PROFILE_SQUARE;
-		path = LL_PCODE_PATH_LINE;
-		break;
+		case MI_BOX:
+			profile = LL_PCODE_PROFILE_SQUARE;
+			path = LL_PCODE_PATH_LINE;
+			break;
 
-	case MI_PRISM:
-		profile = LL_PCODE_PROFILE_EQUALTRI;
-		path = LL_PCODE_PATH_LINE;
-		break;
+		case MI_PRISM:
+			profile = LL_PCODE_PROFILE_EQUALTRI;
+			path = LL_PCODE_PATH_LINE;
+			break;
 
-	case MI_SPHERE:
-		profile = LL_PCODE_PROFILE_CIRCLE_HALF;
-		path = LL_PCODE_PATH_CIRCLE;
-		break;
+		case MI_SPHERE:
+			profile = LL_PCODE_PROFILE_CIRCLE_HALF;
+			path = LL_PCODE_PATH_CIRCLE;
+			break;
 
-	case MI_TORUS:
-		profile = LL_PCODE_PROFILE_CIRCLE;
-		path = LL_PCODE_PATH_CIRCLE;
-		break;
+		case MI_TORUS:
+			profile = LL_PCODE_PROFILE_CIRCLE;
+			path = LL_PCODE_PATH_CIRCLE;
+			break;
 
-	case MI_TUBE:
-		profile = LL_PCODE_PROFILE_SQUARE;
-		path = LL_PCODE_PATH_CIRCLE;
-		break;
+		case MI_TUBE:
+			profile = LL_PCODE_PROFILE_SQUARE;
+			path = LL_PCODE_PATH_CIRCLE;
+			break;
 
-	case MI_RING:
-		profile = LL_PCODE_PROFILE_EQUALTRI;
-		path = LL_PCODE_PATH_CIRCLE;
-		break;
+		case MI_RING:
+			profile = LL_PCODE_PROFILE_EQUALTRI;
+			path = LL_PCODE_PATH_CIRCLE;
+			break;
 
-	case MI_SCULPT:
-		profile = LL_PCODE_PROFILE_CIRCLE;
-		path = LL_PCODE_PATH_CIRCLE;
-		break;
+		case MI_SCULPT:
+			profile = LL_PCODE_PROFILE_CIRCLE;
+			path = LL_PCODE_PATH_CIRCLE;
+			break;
 
-	default:
-		llwarns << "Unknown base type " << selected_type 
-			<< " in getVolumeParams()" << llendl;
-		// assume a box
-		selected_type = MI_BOX;
-		profile = LL_PCODE_PROFILE_SQUARE;
-		path = LL_PCODE_PATH_LINE;
-		break;
+		default:
+			llwarns << "Unknown base type " << selected_type
+					<< " in getVolumeParams()" << llendl;
+			// assume a box
+			selected_type = MI_BOX;
+			profile = LL_PCODE_PROFILE_SQUARE;
+			path = LL_PCODE_PATH_LINE;
+			break;
 	}
 
 	if (path == LL_PCODE_PATH_LINE)
 	{
-		LLVOVolume *volobjp = (LLVOVolume *)(LLViewerObject*)(mObject);
-		if (volobjp->isFlexible())
+		LLVOVolume* volobjp = (LLVOVolume*)((LLViewerObject*)mObject);
+		if (volobjp && volobjp->isFlexible())
 		{
 			path = LL_PCODE_PATH_FLEXIBLE;
 		}
@@ -1365,19 +1470,19 @@ void LLPanelObject::getVolumeParams(LLVolumeParams& volume_params)
 	U8 hole;
 	switch (selected_hole)
 	{
-	case MI_HOLE_CIRCLE: 
-		hole = LL_PCODE_HOLE_CIRCLE;
-		break;
-	case MI_HOLE_SQUARE:
-		hole = LL_PCODE_HOLE_SQUARE;
-		break;
-	case MI_HOLE_TRIANGLE:
-		hole = LL_PCODE_HOLE_TRIANGLE;
-		break;
-	case MI_HOLE_SAME:
-	default:
-		hole = LL_PCODE_HOLE_SAME;
-		break;
+		case MI_HOLE_CIRCLE:
+			hole = LL_PCODE_HOLE_CIRCLE;
+			break;
+		case MI_HOLE_SQUARE:
+			hole = LL_PCODE_HOLE_SQUARE;
+			break;
+		case MI_HOLE_TRIANGLE:
+			hole = LL_PCODE_HOLE_TRIANGLE;
+			break;
+		case MI_HOLE_SAME:
+		default:
+			hole = LL_PCODE_HOLE_SAME;
+			break;
 	}
 
 	volume_params.setType(profile | hole, path);
@@ -1407,7 +1512,7 @@ void LLPanelObject::getVolumeParams(LLVolumeParams& volume_params)
 	F32 begin_s, end_s;
 	F32 begin_t, end_t;
 
-	if (selected_type == MI_SPHERE || selected_type == MI_TORUS || 
+	if (selected_type == MI_SPHERE || selected_type == MI_TORUS ||
 		selected_type == MI_TUBE   || selected_type == MI_RING)
 	{
 		begin_s = adv_cut_begin;
@@ -1431,9 +1536,9 @@ void LLPanelObject::getVolumeParams(LLVolumeParams& volume_params)
 	// Hollowness
 	F32 hollow = mSpinHollow->get() / 100.f;
 
-	if (selected_hole == MI_HOLE_SQUARE && 
+	if (selected_hole == MI_HOLE_SQUARE &&
 		(selected_type == MI_CYLINDER || selected_type == MI_TORUS ||
-		 selected_type == MI_PRISM    || selected_type == MI_RING  ||
+		 selected_type == MI_PRISM	|| selected_type == MI_RING  ||
 		 selected_type == MI_SPHERE))
 	{
 		if (hollow > 0.7f) hollow = 0.7f;
@@ -1542,7 +1647,7 @@ void LLPanelObject::getVolumeParams(LLVolumeParams& volume_params)
 			{
 				skew = -min_skew_mag;
 			}
-			else 
+			else
 			{
 				skew = min_skew_mag;
 			}
@@ -1657,10 +1762,12 @@ void LLPanelObject::sendScale(BOOL btn_down)
 		LLSelectMgr::getInstance()->adjustTexturesByScale(TRUE, !dont_stretch_textures);
 //		llinfos << "scale sent" << llendl;
 	}
+#if 0
 	else
 	{
-//		llinfos << "scale not changed" << llendl;
+		llinfos << "scale not changed" << llendl;
 	}
+#endif
 }
 
 void LLPanelObject::sendPosition(BOOL btn_down)
@@ -1688,15 +1795,16 @@ void LLPanelObject::sendPosition(BOOL btn_down)
 			mCtrlPosZ->set(max_height);
 		}
 
-		// Grass is always drawn on the ground, so clamp its position to the ground
+		// Grass is always drawn on the ground, so clamp its position to the
+		// ground
 		if (mObject->getPCode() == LL_PCODE_LEGACY_GRASS)
 		{
 			mCtrlPosZ->set(LLWorld::getInstance()->resolveLandHeightAgent(newpos) + 1.f);
 		}
 	}
 
-	// Make sure new position is in a valid region, so the object
-	// won't get dumped by the simulator.
+	// Make sure new position is in a valid region, so the object won't get
+	// dumped by the simulator.
 	LLVector3d new_pos_global = regionp->getPosGlobalFromRegion(newpos);
 
 	if (LLWorld::getInstance()->positionRegionValidGlobal(new_pos_global))
@@ -1748,39 +1856,30 @@ void LLPanelObject::sendPosition(BOOL btn_down)
 void LLPanelObject::sendSculpt()
 {
 	if (mObject.isNull())
+	{
 		return;
+	}
 
 	LLSculptParams sculpt_params;
-
-	if (mCtrlSculptTexture)
-		sculpt_params.setSculptTexture(mCtrlSculptTexture->getImageAssetID());
+	sculpt_params.setSculptTexture(mCtrlSculptTexture->getImageAssetID());
 
 	U8 sculpt_type = 0;
 
-	if (mCtrlSculptType)
-	{
-		sculpt_type |= mCtrlSculptType->getCurrentIndex();
-	}
+	sculpt_type |= mCtrlSculptType->getCurrentIndex();
 
 	bool enabled = (sculpt_type != LL_SCULPT_TYPE_MESH);
 
-	if (mCtrlSculptMirror)
+	mCtrlSculptMirror->setEnabled(enabled ? TRUE : FALSE);
+	if (mCtrlSculptMirror->get())
 	{
-		mCtrlSculptMirror->setEnabled(enabled ? TRUE : FALSE);
-		if (mCtrlSculptMirror->get())
-		{
-			sculpt_type |= LL_SCULPT_FLAG_MIRROR;
-		}
+		sculpt_type |= LL_SCULPT_FLAG_MIRROR;
 	}
-	if (mCtrlSculptInvert)
+	mCtrlSculptInvert->setEnabled(enabled ? TRUE : FALSE);
+	if (mCtrlSculptInvert->get())
 	{
-		mCtrlSculptInvert->setEnabled(enabled ? TRUE : FALSE);
-		if (mCtrlSculptInvert->get())
-		{
-			sculpt_type |= LL_SCULPT_FLAG_INVERT;
-		}
+		sculpt_type |= LL_SCULPT_FLAG_INVERT;
 	}
-	
+
 	sculpt_params.setSculptType(sculpt_type);
 	mObject->setParameterEntry(LLNetworkData::PARAMS_SCULPT, sculpt_params, TRUE);
 }
@@ -1799,10 +1898,9 @@ void LLPanelObject::refresh()
 	}
 
 	F32 max_scale = get_default_max_prim_scale(LLPickInfo::isFlora(mObject));
-
-	getChild<LLSpinCtrl>("Scale X")->setMaxValue(max_scale);
-	getChild<LLSpinCtrl>("Scale Y")->setMaxValue(max_scale);
-	getChild<LLSpinCtrl>("Scale Z")->setMaxValue(max_scale);
+	mCtrlScaleX->setMaxValue(max_scale);
+	mCtrlScaleY->setMaxValue(max_scale);
+	mCtrlScaleZ->setMaxValue(max_scale);
 }
 
 void LLPanelObject::draw()
@@ -1899,23 +1997,23 @@ void LLPanelObject::clearCtrls()
 	mLabelBaseType->setEnabled(FALSE);
 	mLabelCut->setEnabled(FALSE);
 	mLabelHollow->setEnabled(FALSE);
-	mLabelHoleType->setEnabled(FALSE);
+	mLabelHollowShape->setEnabled(FALSE);
 	mLabelTwist->setEnabled(FALSE);
 	mLabelSkew->setEnabled(FALSE);
 	mLabelShear->setEnabled(FALSE);
-	mLabelTaper->setEnabled(FALSE);
+	mLabelScaleTaper->setEnabled(FALSE);
 	mLabelRadiusOffset->setEnabled(FALSE);
 	mLabelRevolutions->setEnabled(FALSE);
 
-	childSetVisible("select_single", FALSE);
-	childSetVisible("edit_object", TRUE);
-	childSetEnabled("edit_object", FALSE);
+	mLabelSelectSingle->setVisible(FALSE);
+	mLabelEditObject->setVisible(TRUE);
+	mLabelEditObject->setEnabled(FALSE);
 
-	childSetEnabled("scale_hole", FALSE);
-	childSetEnabled("scale_taper", FALSE);
-	childSetEnabled("advanced_cut", FALSE);
-	childSetEnabled("advanced_dimple", FALSE);
-	childSetVisible("advanced_slice", FALSE);
+	mLabelScaleHole->setEnabled(FALSE);
+	mLabelScaleTaper->setEnabled(FALSE);
+	mLabelAdvancedCut->setEnabled(FALSE);
+	mLabelAdvancedDimple->setEnabled(FALSE);
+	mLabelAdvancedSlice->setVisible(FALSE);
 }
 
 //
@@ -1926,12 +2024,13 @@ void LLPanelObject::clearCtrls()
 void LLPanelObject::onCommitLock(LLUICtrl *ctrl, void *data)
 {
 	// Checkbox will have toggled itself
-	LLPanelObject *self = (LLPanelObject *)data;
-
-	if (self->mRootObject.isNull()) return;
+	LLPanelObject* self = (LLPanelObject*)data;
+	if (!self || self->mRootObject.isNull())
+	{
+		return;
+	}
 
 	BOOL new_state = self->mCheckLock->get();
-
 	LLSelectMgr::getInstance()->selectionSetObjectPermissions(PERM_OWNER,
 															  !new_state,
 															  PERM_MOVE | PERM_MODIFY);
@@ -1940,82 +2039,105 @@ void LLPanelObject::onCommitLock(LLUICtrl *ctrl, void *data)
 // static
 void LLPanelObject::onCommitPosition(LLUICtrl* ctrl, void* userdata)
 {
-	LLPanelObject* self = (LLPanelObject*) userdata;
-	BOOL btn_down = ((LLSpinCtrl*)ctrl)->isMouseHeldDown();
-	self->sendPosition(btn_down);
+	LLPanelObject* self = (LLPanelObject*)userdata;
+	if (self && ctrl)
+	{
+		BOOL btn_down = ((LLSpinCtrl*)ctrl)->isMouseHeldDown();
+		self->sendPosition(btn_down);
+	}
 }
 
 // static
 void LLPanelObject::onCommitScale(LLUICtrl* ctrl, void* userdata)
 {
-	LLPanelObject* self = (LLPanelObject*) userdata;
-	BOOL btn_down = ((LLSpinCtrl*)ctrl)->isMouseHeldDown();
-	self->sendScale(btn_down);
+	LLPanelObject* self = (LLPanelObject*)userdata;
+	if (self && ctrl)
+	{
+		BOOL btn_down = ((LLSpinCtrl*)ctrl)->isMouseHeldDown();
+		self->sendScale(btn_down);
+	}
 }
 
 // static
 void LLPanelObject::onCommitRotation(LLUICtrl* ctrl, void* userdata)
 {
-	LLPanelObject* self = (LLPanelObject*) userdata;
-	BOOL btn_down = ((LLSpinCtrl*)ctrl)->isMouseHeldDown();
-	self->sendRotation(btn_down);
+	LLPanelObject* self = (LLPanelObject*)userdata;
+	if (self && ctrl)
+	{
+		BOOL btn_down = ((LLSpinCtrl*)ctrl)->isMouseHeldDown();
+		self->sendRotation(btn_down);
+	}
 }
 
 // static
 void LLPanelObject::onCommitPhysics(LLUICtrl* ctrl, void* userdata)
 {
-	LLPanelObject* self = (LLPanelObject*) userdata;
-	self->sendIsPhysical();
+	LLPanelObject* self = (LLPanelObject*)userdata;
+	if (self)
+	{
+		self->sendIsPhysical();
+	}
 }
 
 // static
 void LLPanelObject::onCommitTemporary(LLUICtrl* ctrl, void* userdata)
 {
-	LLPanelObject* self = (LLPanelObject*) userdata;
-	self->sendIsTemporary();
+	LLPanelObject* self = (LLPanelObject*)userdata;
+	if (self)
+	{
+		self->sendIsTemporary();
+	}
 }
 
 // static
 void LLPanelObject::onCommitPhantom(LLUICtrl* ctrl, void* userdata)
 {
-	LLPanelObject* self = (LLPanelObject*) userdata;
-	self->sendIsPhantom();
+	LLPanelObject* self = (LLPanelObject*)userdata;
+	if (self)
+	{
+		self->sendIsPhantom();
+	}
 }
 
 // static
 void LLPanelObject::onCommitCastShadows(LLUICtrl* ctrl, void* userdata)
 {
-	LLPanelObject* self = (LLPanelObject*) userdata;
-	self->sendCastShadows();
+	LLPanelObject* self = (LLPanelObject*)userdata;
+	if (self)
+	{
+		self->sendCastShadows();
+	}
 }
 
 // static
 void LLPanelObject::onSelectSculpt(LLUICtrl* ctrl, void* userdata)
 {
-	LLPanelObject* self = (LLPanelObject*) userdata;
-    LLTextureCtrl* mTextureCtrl = self->getChild<LLTextureCtrl>("sculpt texture control");
-	if (mTextureCtrl)
+	LLPanelObject* self = (LLPanelObject*)userdata;
+	if (self)
 	{
-		self->mSculptTextureRevert = mTextureCtrl->getImageAssetID();
+		self->mSculptTextureRevert = self->mCtrlSculptTexture->getImageAssetID();
+		self->sendSculpt();
 	}
-	self->sendSculpt();
 }
 
 void LLPanelObject::onCommitSculpt(LLUICtrl* ctrl, void* userdata)
 {
-	LLPanelObject* self = (LLPanelObject*) userdata;
-	self->sendSculpt();
+	LLPanelObject* self = (LLPanelObject*)userdata;
+	if (self)
+	{
+		self->sendSculpt();
+	}
 }
 
 // static
-BOOL LLPanelObject::onDropSculpt(LLUICtrl*, LLInventoryItem* item, void* userdata)
+BOOL LLPanelObject::onDropSculpt(LLUICtrl*, LLInventoryItem* item,
+								 void* userdata)
 {
-	LLPanelObject* self = (LLPanelObject*) userdata;
-    LLTextureCtrl* mTextureCtrl = self->getChild<LLTextureCtrl>("sculpt texture control");
-	if (mTextureCtrl)
+	LLPanelObject* self = (LLPanelObject*)userdata;
+	if (self)
 	{
 		LLUUID asset = item->getAssetUUID();
-		mTextureCtrl->setImageAssetID(asset);
+		self->mCtrlSculptTexture->setImageAssetID(asset);
 		self->mSculptTextureRevert = asset;
 	}
 	return TRUE;
@@ -2024,35 +2146,42 @@ BOOL LLPanelObject::onDropSculpt(LLUICtrl*, LLInventoryItem* item, void* userdat
 // static
 void LLPanelObject::onCancelSculpt(LLUICtrl* ctrl, void* userdata)
 {
-	LLPanelObject* self = (LLPanelObject*) userdata;
-	LLTextureCtrl* mTextureCtrl = self->getChild<LLTextureCtrl>("sculpt texture control");
-	if (mTextureCtrl)
+	LLPanelObject* self = (LLPanelObject*)userdata;
+	if (self)
 	{
-		mTextureCtrl->setImageAssetID(self->mSculptTextureRevert);
+		self->mCtrlSculptTexture->setImageAssetID(self->mSculptTextureRevert);
+		self->sendSculpt();
 	}
-	self->sendSculpt();
 }
 
 // static
 void LLPanelObject::onCommitSculptType(LLUICtrl *ctrl, void* userdata)
 {
-	LLPanelObject* self = (LLPanelObject*) userdata;
-	self->sendSculpt();
+	LLPanelObject* self = (LLPanelObject*)userdata;
+	if (self)
+	{
+		self->sendSculpt();
+	}
 }
 
 // static
 void LLPanelObject::onCommitCopyPaste(LLUICtrl *ctrl, void* userdata)
 {
 	LLPanelObject* self = (LLPanelObject*)userdata;
-	self->setCopyPasteState();
+	if (self)
+	{
+		self->setCopyPasteState();
+	}
 }
 
 // static
-void LLPanelObject::onClickCopy(void* user_data)
+void LLPanelObject::onClickCopy(void* userdata)
 {
-	LLPanelObject* self = (LLPanelObject*)user_data;
+	LLPanelObject* self = (LLPanelObject*)userdata;
+	if (!self) return;
 
-	if (self->mCheckCopySize->getVisible() && self->mCheckCopySize->getEnabled())
+	if (self->mCheckCopySize->getVisible() &&
+		self->mCheckCopySize->getEnabled())
 	{
 		self->sSavedSize = LLVector3(self->mCtrlScaleX->get(),
 									 self->mCtrlScaleY->get(),
@@ -2088,7 +2217,8 @@ void LLPanelObject::onClickCopy(void* user_data)
 		sSavedRotValid = false;
 	}
 
-	if (self->mCheckCopyShape->getVisible() && self->mCheckCopyShape->getEnabled())
+	if (self->mCheckCopyShape->getVisible() &&
+		self->mCheckCopyShape->getEnabled())
 	{
 		self->getVolumeParams(sSavedShape);
 		sSavedShapeValid = true;
@@ -2102,9 +2232,10 @@ void LLPanelObject::onClickCopy(void* user_data)
 }
 
 // static
-void LLPanelObject::onClickPaste(void* user_data)
+void LLPanelObject::onClickPaste(void* userdata)
 {
-	LLPanelObject* self = (LLPanelObject*)user_data;
+	LLPanelObject* self = (LLPanelObject*)userdata;
+	if (!self) return;
 
 	if (sSavedSizeValid && self->mCheckCopySize->getVisible() &&
 		self->mCheckCopySize->getEnabled() && self->mCheckCopySize->get())

@@ -539,8 +539,6 @@ private:
 	static BOOL		sKeyboardMode;
 
 	LLColor4		mBackgroundColor;
-	LLColor4		mColorDropShadow;
-	S32				mDropShadowFloater;
 
 	BOOL			mBgVisible;
 	LLMenuItemGL*	mParentMenuItem;
@@ -676,11 +674,6 @@ private:
 	F32				mOuterRingAlpha; // for rendering pie menus as both bounded and unbounded
 	F32				mCurRadius;
 	BOOL			mRightMouseDown;
-
-	F32				mPieMenuLineWidth;
-	LLColor4		mPieMenuLineColor;
-	LLColor4		mPieMenuBgColor;
-	LLColor4		mPieMenuSelectedColor;
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

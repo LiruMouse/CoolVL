@@ -32,82 +32,89 @@
 
 #include "llviewerprecompiledheaders.h"
 
-// File include
 #include "llcolorswatch.h"
 
-// Linden library includes
+#include "llbutton.h"
+#include "llfocusmgr.h"
+#include "llrender.h"
+#include "lltextbox.h"
+#include "llui.h"
+#include "llviewborder.h"
 #include "v4color.h"
 
-// Project includes
-#include "llui.h"
-#include "llrender.h"
-#include "lluiconstants.h"
-#include "llviewerwindow.h"
-#include "llviewercontrol.h"
-#include "llbutton.h"
-#include "lltextbox.h"
 #include "llfloatercolorpicker.h"
-#include "llviewborder.h"
+#include "lluiconstants.h"
 #include "llviewertexturelist.h"
-#include "llfocusmgr.h"
+#include "llviewerwindow.h"
 
 static LLRegisterWidget<LLColorSwatchCtrl> r("color_swatch");
 
-LLColorSwatchCtrl::LLColorSwatchCtrl(const std::string& name, const LLRect& rect, const LLColor4& color,
-		void (*commit_callback)(LLUICtrl* ctrl, void* userdata),
-		void* userdata )
-:	LLUICtrl(name, rect, TRUE, commit_callback, userdata, FOLLOWS_LEFT | FOLLOWS_TOP),
-	mValid( TRUE ),
-	mColor( color ),
-	mBorderColor( gColors.getColor("DefaultHighlightLight") ),
+LLColorSwatchCtrl::LLColorSwatchCtrl(const std::string& name,
+									 const LLRect& rect,
+									 const LLColor4& color,
+									 void (*commit_callback)(LLUICtrl* ctrl,
+															 void* userdata),
+									 void* userdata)
+:	LLUICtrl(name, rect, TRUE, commit_callback, userdata,
+			 FOLLOWS_LEFT | FOLLOWS_TOP),
+	mValid(TRUE),
+	mColor(color),
+	mBorderColor(LLUI::sDefaultHighlightLight),
 	mCanApplyImmediately(FALSE),
 	mOnCancelCallback(NULL),
 	mOnSelectCallback(NULL)
 {
-	mCaption = new LLTextBox( name,
-		LLRect( 0, BTN_HEIGHT_SMALL, getRect().getWidth(), 0 ),
-		name,
-		LLFontGL::getFontSansSerifSmall() );
-	mCaption->setFollows( FOLLOWS_LEFT | FOLLOWS_RIGHT | FOLLOWS_BOTTOM );
-	addChild( mCaption );
+	mCaption = new LLTextBox(name,LLRect(0, BTN_HEIGHT_SMALL,
+										 getRect().getWidth(), 0),
+							 name, LLFontGL::getFontSansSerifSmall());
+	mCaption->setFollows(FOLLOWS_LEFT | FOLLOWS_RIGHT | FOLLOWS_BOTTOM);
+	addChild(mCaption);
 
 	// Scalable UI made this off-by-one, I don't know why. JC
-	LLRect border_rect(0, getRect().getHeight()-1, getRect().getWidth()-1, 0);
+	LLRect border_rect(0, getRect().getHeight() - 1,
+					   getRect().getWidth() - 1, 0);
 	border_rect.mBottom += BTN_HEIGHT_SMALL;
-	mBorder = new LLViewBorder(std::string("border"), border_rect, LLViewBorder::BEVEL_IN);
+	mBorder = new LLViewBorder(std::string("border"), border_rect,
+							   LLViewBorder::BEVEL_IN);
 	addChild(mBorder);
 
 	mAlphaGradientImage = LLUI::getUIImage("color_swatch_alpha.tga");
 }
 
-LLColorSwatchCtrl::LLColorSwatchCtrl(const std::string& name, const LLRect& rect, const std::string& label, const LLColor4& color,
-		void (*commit_callback)(LLUICtrl* ctrl, void* userdata),
-		void* userdata )
-:	LLUICtrl(name, rect, TRUE, commit_callback, userdata, FOLLOWS_LEFT | FOLLOWS_TOP),
-	mValid( TRUE ),
-	mColor( color ),
-	mBorderColor( gColors.getColor("DefaultHighlightLight") ),
+LLColorSwatchCtrl::LLColorSwatchCtrl(const std::string& name,
+									 const LLRect& rect,
+									 const std::string& label,
+									 const LLColor4& color,
+									 void (*commit_callback)(LLUICtrl* ctrl,
+															 void* userdata),
+									 void* userdata)
+:	LLUICtrl(name, rect, TRUE, commit_callback, userdata,
+			 FOLLOWS_LEFT | FOLLOWS_TOP),
+	mValid(TRUE),
+	mColor(color),
+	mBorderColor(LLUI::sDefaultHighlightLight),
 	mCanApplyImmediately(FALSE),
 	mOnCancelCallback(NULL),
 	mOnSelectCallback(NULL)
 {
-	mCaption = new LLTextBox( label,
-		LLRect( 0, BTN_HEIGHT_SMALL, getRect().getWidth(), 0 ),
-		label,
-		LLFontGL::getFontSansSerifSmall() );
-	mCaption->setFollows( FOLLOWS_LEFT | FOLLOWS_RIGHT | FOLLOWS_BOTTOM );
-	addChild( mCaption );
+	mCaption = new LLTextBox(label, LLRect(0, BTN_HEIGHT_SMALL,
+										   getRect().getWidth(), 0),
+							 label, LLFontGL::getFontSansSerifSmall());
+	mCaption->setFollows(FOLLOWS_LEFT | FOLLOWS_RIGHT | FOLLOWS_BOTTOM);
+	addChild(mCaption);
 
 	// Scalable UI made this off-by-one, I don't know why. JC
-	LLRect border_rect(0, getRect().getHeight()-1, getRect().getWidth()-1, 0);
+	LLRect border_rect(0, getRect().getHeight() - 1,
+					   getRect().getWidth() - 1, 0);
 	border_rect.mBottom += BTN_HEIGHT_SMALL;
-	mBorder = new LLViewBorder(std::string("border"), border_rect, LLViewBorder::BEVEL_IN);
+	mBorder = new LLViewBorder(std::string("border"), border_rect,
+							   LLViewBorder::BEVEL_IN);
 	addChild(mBorder);
 
 	mAlphaGradientImage = LLUI::getUIImage("color_swatch_alpha.tga");
 }
 
-LLColorSwatchCtrl::~LLColorSwatchCtrl ()
+LLColorSwatchCtrl::~LLColorSwatchCtrl()
 {
 	// parent dialog is destroyed so we are too and we need to cancel selection
 	LLFloaterColorPicker* pickerp = (LLFloaterColorPicker*)mPickerHandle.get();
@@ -132,31 +139,35 @@ BOOL LLColorSwatchCtrl::handleHover(S32 x, S32 y, MASK mask)
 
 BOOL LLColorSwatchCtrl::handleUnicodeCharHere(llwchar uni_char)
 {
-	if( ' ' == uni_char )
+	if (' ' == uni_char)
 	{
 		showPicker(TRUE);
 	}
 	return LLUICtrl::handleUnicodeCharHere(uni_char);
 }
 
-// forces color of this swatch and any associated floater to the input value, if currently invalid
+// forces color of this swatch and any associated floater to the input value,
+// if currently invalid
 void LLColorSwatchCtrl::setOriginal(const LLColor4& color)
 {
 	mColor = color;
 	LLFloaterColorPicker* pickerp = (LLFloaterColorPicker*)mPickerHandle.get();
 	if (pickerp)
 	{
-		pickerp->setOrigRgb(mColor.mV[VRED], mColor.mV[VGREEN], mColor.mV[VBLUE]);
+		pickerp->setOrigRgb(mColor.mV[VRED], mColor.mV[VGREEN],
+							mColor.mV[VBLUE]);
 	}
 }
 
-void LLColorSwatchCtrl::set(const LLColor4& color, BOOL update_picker, BOOL from_event)
+void LLColorSwatchCtrl::set(const LLColor4& color, BOOL update_picker,
+							BOOL from_event)
 {
 	mColor = color; 
 	LLFloaterColorPicker* pickerp = (LLFloaterColorPicker*)mPickerHandle.get();
 	if (pickerp && update_picker)
 	{
-		pickerp->setCurRgb(mColor.mV[VRED], mColor.mV[VGREEN], mColor.mV[VBLUE]);
+		pickerp->setCurRgb(mColor.mV[VRED], mColor.mV[VGREEN],
+						   mColor.mV[VBLUE]);
 	}
 	if (!from_event)
 	{
@@ -171,24 +182,24 @@ void LLColorSwatchCtrl::setLabel(const std::string& label)
 
 BOOL LLColorSwatchCtrl::handleMouseDown(S32 x, S32 y, MASK mask)
 {
-	// Route future Mouse messages here preemptively.  (Release on mouse up.)
-	// No handler is needed for capture lost since this object has no state that depends on it.
-	gFocusMgr.setMouseCapture( this );
+	// Route future Mouse messages here preemptively (release on mouse up).
+	// No handler is needed for capture lost since this object has no state
+	// that depends on it.
+	gFocusMgr.setMouseCapture(this);
 
 	return TRUE;
 }
 
-
 BOOL LLColorSwatchCtrl::handleMouseUp(S32 x, S32 y, MASK mask)
 {
 	// We only handle the click if the click both started and ended within us
-	if( hasMouseCapture() )
+	if (hasMouseCapture())
 	{
 		// Release the mouse
-		gFocusMgr.setMouseCapture( NULL );
+		gFocusMgr.setMouseCapture(NULL);
 
 		// If mouseup in the widget, it's been clicked
-		if ( pointInView(x, y) )
+		if (pointInView(x, y))
 		{
 			llassert(getEnabled());
 			llassert(getVisible());
@@ -205,17 +216,18 @@ void LLColorSwatchCtrl::draw()
 {
 	mBorder->setKeyboardFocusHighlight(hasFocus());
 	// Draw border
-	LLRect border( 0, getRect().getHeight(), getRect().getWidth(), BTN_HEIGHT_SMALL );
-	gl_rect_2d( border, mBorderColor, FALSE );
+	LLRect border(0, getRect().getHeight(), getRect().getWidth(),
+				  BTN_HEIGHT_SMALL);
+	gl_rect_2d(border, mBorderColor, FALSE);
 
 	LLRect interior = border;
-	interior.stretch( -1 );
+	interior.stretch(-1);
 
 	// Check state
-	if ( mValid )
+	if (mValid)
 	{
 		// Draw the color swatch
-		gl_rect_2d_checkerboard( interior );
+		gl_rect_2d_checkerboard(interior);
 		gl_rect_2d(interior, mColor, TRUE);
 		LLColor4 opaque_color = mColor;
 		opaque_color.mV[VALPHA] = 1.f;
@@ -233,19 +245,22 @@ void LLColorSwatchCtrl::draw()
 	{
 		if (!mFallbackImageName.empty())
 		{
-			LLPointer<LLViewerFetchedTexture> fallback_image = LLViewerTextureManager::getFetchedTextureFromFile(mFallbackImageName);
-			if( fallback_image->getComponents() == 4 )
-			{	
-				gl_rect_2d_checkerboard( interior );
-			}	
-			gl_draw_scaled_image( interior.mLeft, interior.mBottom, interior.getWidth(), interior.getHeight(), fallback_image);
-			fallback_image->addTextureStats( (F32)(interior.getWidth() * interior.getHeight()) );
+			LLPointer<LLViewerFetchedTexture> fallback_image;
+			fallback_image = LLViewerTextureManager::getFetchedTextureFromFile(mFallbackImageName);
+			if (fallback_image->getComponents() == 4)
+			{
+				gl_rect_2d_checkerboard(interior);
+			}
+			gl_draw_scaled_image(interior.mLeft, interior.mBottom,
+								 interior.getWidth(), interior.getHeight(),
+								 fallback_image);
+			fallback_image->addTextureStats((F32)(interior.getWidth() * interior.getHeight()));
 		}
 		else
 		{
 			// Draw grey and an X
 			gl_rect_2d(interior, LLColor4::grey, TRUE);
-			
+
 			gl_draw_x(interior, LLColor4::black);
 		}
 	}
@@ -253,10 +268,10 @@ void LLColorSwatchCtrl::draw()
 	LLUICtrl::draw();
 }
 
-void LLColorSwatchCtrl::setEnabled( BOOL enabled )
+void LLColorSwatchCtrl::setEnabled(BOOL enabled)
 {
-	mCaption->setEnabled( enabled );
-	LLView::setEnabled( enabled );
+	mCaption->setEnabled(enabled);
+	LLView::setEnabled(enabled);
 
 	if (!enabled)
 	{
@@ -269,27 +284,27 @@ void LLColorSwatchCtrl::setEnabled( BOOL enabled )
 	}
 }
 
-
 void LLColorSwatchCtrl::setValue(const LLSD& value)
 {
 	set(LLColor4(value), TRUE, TRUE);
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// called (infrequently) when the color changes so the subject of the swatch can be updated.
-void LLColorSwatchCtrl::onColorChanged ( void* data, EColorPickOp pick_op )
+// called (infrequently) when the color changes so the subject of the swatch
+// can be updated.
+void LLColorSwatchCtrl::onColorChanged(void* data, EColorPickOp pick_op)
 {
-	LLColorSwatchCtrl* subject = ( LLColorSwatchCtrl* )data;
-	if ( subject )
+	LLColorSwatchCtrl* subject = (LLColorSwatchCtrl*)data;
+	if (subject)
 	{
 		LLFloaterColorPicker* pickerp = (LLFloaterColorPicker*)subject->mPickerHandle.get();
 		if (pickerp)
 		{
 			// move color across from selector to internal widget storage
-			LLColor4 updatedColor ( pickerp->getCurR (), 
-									pickerp->getCurG (), 
-									pickerp->getCurB (), 
-									subject->mColor.mV[VALPHA] ); // keep current alpha
+			LLColor4 updatedColor(pickerp->getCurR(), 
+								  pickerp->getCurG(), 
+								  pickerp->getCurB(), 
+								  subject->mColor.mV[VALPHA]); // keep current alpha
 			subject->mColor = updatedColor;
 			subject->setControlValue(updatedColor.getValue());
 
@@ -304,13 +319,13 @@ void LLColorSwatchCtrl::onColorChanged ( void* data, EColorPickOp pick_op )
 			else
 			{
 				// just commit change
-				subject->onCommit ();
+				subject->onCommit();
 			}
 		}
 	}
 }
 
-void LLColorSwatchCtrl::setValid(BOOL valid )
+void LLColorSwatchCtrl::setValid(BOOL valid)
 {
 	mValid = valid;
 
@@ -335,10 +350,10 @@ void LLColorSwatchCtrl::showPicker(BOOL take_focus)
 	}
 
 	// initialize picker with current color
-	pickerp->initUI ( mColor.mV [ VRED ], mColor.mV [ VGREEN ], mColor.mV [ VBLUE ] );
+	pickerp->initUI(mColor.mV[VRED], mColor.mV[VGREEN], mColor.mV[VBLUE]);
 
 	// display it
-	pickerp->showUI ();
+	pickerp->showUI();
 
 	if (take_focus)
 	{
@@ -367,7 +382,8 @@ LLXMLNodePtr LLColorSwatchCtrl::getXML(bool save_children) const
 	return node;
 }
 
-LLView* LLColorSwatchCtrl::fromXML(LLXMLNodePtr node, LLView *parent, LLUICtrlFactory *factory)
+LLView* LLColorSwatchCtrl::fromXML(LLXMLNodePtr node, LLView* parent,
+								   LLUICtrlFactory* factory)
 {
 	std::string name("colorswatch");
 	node->getAttributeString("name", name);
@@ -391,13 +407,9 @@ LLView* LLColorSwatchCtrl::fromXML(LLXMLNodePtr node, LLView *parent, LLUICtrlFa
 		label.assign(node->getValue());
 	}
 
-	LLColorSwatchCtrl* color_swatch = new LLColorSwatchCtrl(
-		name, 
-		rect,
-		label,
-		color,
-		callback,
-		NULL );
+	LLColorSwatchCtrl* color_swatch = new LLColorSwatchCtrl(name, rect, label,
+															color, callback,
+															NULL);
 
 	color_swatch->setCanApplyImmediately(can_apply_immediately);
 	color_swatch->initFromXML(node, parent);

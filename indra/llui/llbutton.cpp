@@ -99,8 +99,8 @@ LLButton::LLButton(const std::string& name,
 	setImageDisabled(std::string("button_disabled_32x128.tga"));
 	setImageDisabledSelected(std::string("button_disabled_32x128.tga"));
 
-	mImageColor = LLUI::sColorsGroup->getColor("ButtonImageColor");
-	mDisabledImageColor = LLUI::sColorsGroup->getColor("ButtonImageColor");
+	mImageColor = LLUI::sButtonImageColor;
+	mDisabledImageColor = LLUI::sButtonImageColor;
 
 	init(click_callback, callback_data, NULL, control_name);
 }
@@ -148,8 +148,8 @@ LLButton::LLButton(const std::string& name, const LLRect& rect,
 	mSelectedLabel = selected_label;
 
 	// by default, disabled color is same as enabled
-	mImageColor = LLUI::sColorsGroup->getColor("ButtonImageColor");
-	mDisabledImageColor = LLUI::sColorsGroup->getColor("ButtonImageColor");
+	mImageColor = LLUI::sButtonImageColor;
+	mDisabledImageColor = LLUI::sButtonImageColor;
 
 	if (unselected_image_name != "")
 	{
@@ -202,16 +202,11 @@ void LLButton::init(void (*click_callback)(void*), void *callback_data,
 
 	setControlName(control_name, NULL);
 
-	mUnselectedLabelColor = LLUI::sColorsGroup->getColor("ButtonLabelColor");
-	mSelectedLabelColor = LLUI::sColorsGroup->getColor("ButtonLabelSelectedColor");
-	mDisabledLabelColor = LLUI::sColorsGroup->getColor("ButtonLabelDisabledColor");
-	mDisabledSelectedLabelColor = LLUI::sColorsGroup->getColor("ButtonLabelSelectedDisabledColor");
-	mHighlightColor = LLUI::sColorsGroup->getColor("ButtonUnselectedFgColor");
-	mUnselectedBgColor = LLUI::sColorsGroup->getColor("ButtonUnselectedBgColor");
-	mSelectedBgColor = LLUI::sColorsGroup->getColor("ButtonSelectedBgColor");
-	mFlashBgColor = LLUI::sColorsGroup->getColor("ButtonFlashBgColor");
-	mButtonFlashRate = LLUI::sConfigGroup->getF32("ButtonFlashRate");
-	mButtonFlashCount = LLUI::sConfigGroup->getS32("ButtonFlashCount");
+	mUnselectedLabelColor = LLUI::sButtonLabelColor;
+	mSelectedLabelColor = LLUI::sButtonLabelSelectedColor;
+	mDisabledLabelColor = LLUI::sButtonLabelDisabledColor;
+	mDisabledSelectedLabelColor = LLUI::sButtonLabelSelectedDisabledColor;
+	mFlashBgColor = LLUI::sButtonFlashBgColor;
 
 	mImageOverlayAlignment = LLFontGL::HCENTER;
 	mImageOverlayColor = LLColor4::white;
@@ -405,9 +400,9 @@ void LLButton::draw()
 	if (mFlashing)
 	{
 		F32 elapsed = mFlashingTimer.getElapsedTimeF32();
-		S32 flash_count = S32(elapsed * mButtonFlashRate * 2.f);
+		S32 flash_count = S32(elapsed * LLUI::sButtonFlashRate * 2.f);
 		// flash on or off ?
-		flash = flash_count % 2 == 0 || flash_count > 2 * mButtonFlashCount;
+		flash = flash_count % 2 == 0 || flash_count > 2 * LLUI::sButtonFlashCount;
 	}
 
 	BOOL pressed_by_keyboard = FALSE;

@@ -68,7 +68,6 @@ private:
 	S32				mMaxSize;
 	const Side		mSide;
 	BOOL			mSnappingEnabled;
-	S32				mSnapMargin;
 	BOOL			mAllowDoubleClickSnapping;
 	LLView*			mResizingView;
 };

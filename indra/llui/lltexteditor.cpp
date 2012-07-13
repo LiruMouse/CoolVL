@@ -293,15 +293,13 @@ LLTextEditor::LLTextEditor(const std::string& name,
 	mKeystrokeData(NULL),
 	mOnHandleKeyCallback(NULL),
 	mOnHandleKeyData(NULL),
-	mCursorColor(LLUI::sColorsGroup->getColor("TextCursorColor")),
-	mFgColor(LLUI::sColorsGroup->getColor("TextFgColor")),
-	mDefaultColor(LLUI::sColorsGroup->getColor("TextDefaultColor")),
-	mReadOnlyFgColor(LLUI::sColorsGroup->getColor("TextFgReadOnlyColor")),
-	mWriteableBgColor(LLUI::sColorsGroup->getColor("TextBgWriteableColor")),
-	mReadOnlyBgColor(LLUI::sColorsGroup->getColor("TextBgReadOnlyColor")),
-	mFocusBgColor(LLUI::sColorsGroup->getColor("TextBgFocusColor")),
-	mTextEmbeddedItemColor(LLUI::sColorsGroup->getColor("TextEmbeddedItemColor")),
-	mTextEmbeddedItemReadOnlyColor(LLUI::sColorsGroup->getColor("TextEmbeddedItemReadOnlyColor")),
+	mCursorColor(LLUI::sTextCursorColor),
+	mFgColor(LLUI::sTextFgColor),
+	mDefaultColor(LLUI::sTextDefaultColor),
+	mReadOnlyFgColor(LLUI::sTextFgReadOnlyColor),
+	mWriteableBgColor(LLUI::sTextBgWriteableColor),
+	mReadOnlyBgColor(LLUI::sTextBgReadOnlyColor),
+	mFocusBgColor(LLUI::sTextBgFocusColor),
 	mReadOnly(FALSE),
 	mWordWrap(FALSE),
 	mShowLineNumbers (FALSE),
@@ -3869,8 +3867,8 @@ void LLTextEditor::drawClippedSegment(const LLWString &text, S32 seg_start,
 
 	if (style->getIsEmbeddedItem())
 	{
-		color = mReadOnly ? mTextEmbeddedItemReadOnlyColor
-						  : mTextEmbeddedItemColor;
+		color = mReadOnly ? LLUI::sTextEmbeddedItemReadOnlyColor
+						  : LLUI::sTextEmbeddedItemColor;
 	}
 
 	F32 y_top = y + (F32)llround(font->getLineHeight());

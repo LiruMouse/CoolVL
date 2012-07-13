@@ -2321,9 +2321,9 @@ void LLViewerWindow::draw()
 		S16 sub_region = LLViewerCamera::getInstance()->getZoomSubRegion();
 		if (zoom_factor > 1.f)
 		{
-			//decompose subregion number to x and y values
-			int pos_y = sub_region / llceil(zoom_factor);
-			int pos_x = sub_region - (pos_y*llceil(zoom_factor));
+			// decompose subregion number to x and y values
+			S32 pos_y = sub_region / llceil(zoom_factor);
+			S32 pos_x = sub_region - (pos_y*llceil(zoom_factor));
 			// offset for this tile
 			glTranslatef((F32)getWindowWidth() * -(F32)pos_x, 
 						(F32)getWindowHeight() * -(F32)pos_y, 
@@ -2724,8 +2724,7 @@ BOOL LLViewerWindow::handlePerFrameHover()
 	//RN: fix for asynchronous notification of mouse leaving window not working
 	LLCoordWindow mouse_pos;
 	mWindow->getCursorPosition(&mouse_pos);
-	if (mouse_pos.mX < 0 || 
-		mouse_pos.mY < 0 ||
+	if (mouse_pos.mX < 0 || mouse_pos.mY < 0 ||
 		mouse_pos.mX > mWindowRect.getWidth() ||
 		mouse_pos.mY > mWindowRect.getHeight())
 	{
@@ -2736,8 +2735,8 @@ BOOL LLViewerWindow::handlePerFrameHover()
 		mMouseInWindow = TRUE;
 	}
 
-	S32 dx = lltrunc((F32) (mCurrentMousePoint.mX - mLastMousePoint.mX) * LLUI::sGLScaleFactor.mV[VX]);
-	S32 dy = lltrunc((F32) (mCurrentMousePoint.mY - mLastMousePoint.mY) * LLUI::sGLScaleFactor.mV[VY]);
+	S32 dx = lltrunc((F32)(mCurrentMousePoint.mX - mLastMousePoint.mX) * LLUI::sGLScaleFactor.mV[VX]);
+	S32 dy = lltrunc((F32)(mCurrentMousePoint.mY - mLastMousePoint.mY) * LLUI::sGLScaleFactor.mV[VY]);
 
 	LLVector2 mouse_vel; 
 
@@ -2864,12 +2863,13 @@ BOOL LLViewerWindow::handlePerFrameHover()
 		}
 	}
 
-	// *NOTE: sometimes tools handle the mouse as a captor, so this
-	// logic is a little confusing
-	LLTool *tool = NULL;
+	// *NOTE: sometimes tools handle the mouse as a captor, so this logic is a
+	// little confusing
+	LLToolMgr* toolmgr = LLToolMgr::getInstance();
+	LLTool* tool = NULL;
 	if (gHoverView)
 	{
-		tool = LLToolMgr::getInstance()->getCurrentTool();
+		tool = toolmgr->getCurrentTool();
 
 		if (!handled && tool)
 		{
@@ -2888,9 +2888,8 @@ BOOL LLViewerWindow::handlePerFrameHover()
 
 		// Suppress the toolbox view if our source tool was the pie tool,
 		// and we've overridden to something else.
-		mSuppressToolbox = 
-			(LLToolMgr::getInstance()->getBaseTool() == LLToolPie::getInstance()) &&
-			(LLToolMgr::getInstance()->getCurrentTool() != LLToolPie::getInstance());
+		mSuppressToolbox = toolmgr->getBaseTool() == LLToolPie::getInstance() &&
+						   toolmgr->getCurrentTool() != LLToolPie::getInstance();
 
 	}
 
@@ -2955,17 +2954,16 @@ BOOL LLViewerWindow::handlePerFrameHover()
 		tool != LLToolDragAndDrop::getInstance() && !LLPipeline::sFreezeTime)
 	{ 
 		LLMouseHandler *captor = gFocusMgr.getMouseCapture();
-		// With the null, inspect, or drag and drop tool, don't muck
-		// with visibility.
+		// With the null, inspect, or drag and drop tool, don't muck with
+		// visibility.
 
 		if (gFloaterTools->isMinimized() ||
-			(tool != LLToolPie::getInstance()						// not default tool
-			&& tool != LLToolCompGun::getInstance()					// not coming out of mouselook
-			&& !mSuppressToolbox									// not override in third person
-			&& LLToolMgr::getInstance()->getCurrentToolset() != gFaceEditToolset	// not special mode
-			&& LLToolMgr::getInstance()->getCurrentToolset() != gMouselookToolset
-			&& (!captor || captor->isView()))						// not dragging
-			)
+			(tool != LLToolPie::getInstance() &&					// not default tool
+			 tool != LLToolCompGun::getInstance() &&				// not coming out of mouselook
+			 !mSuppressToolbox &&									// not override in third person
+			 toolmgr->getCurrentToolset() != gFaceEditToolset	&&	// not special mode
+			 toolmgr->getCurrentToolset() != gMouselookToolset &&
+			 (!captor || captor->isView())))						// not dragging
 		{
 			// Force floater tools to be visible (unless minimized)
 			if (!gFloaterTools->getVisible())

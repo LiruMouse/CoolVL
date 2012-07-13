@@ -47,8 +47,7 @@
 
 static void print_cil_box(LLFILE* fp, LSCRIPTType type)
 {
-	
-switch(type)
+	switch(type)
 	{
 	case LST_INTEGER:
 		fprintf(fp, "box [mscorlib]System.Int32\n");
@@ -158,8 +157,6 @@ S32 LLScriptConstant::getSize()
 	printf("Script Constant Base class -- should never get here!\n");
 	return 0;
 }
-
-
 
 void LLScriptConstantInteger::recurse(LLFILE *fp, S32 tabs, S32 tabsize, LSCRIPTCompilePass pass, LSCRIPTPruneType ptype, BOOL &prunearg, LLScriptScope *scope, LSCRIPTType &type, LSCRIPTType basetype, U64 &count, LLScriptByteCodeChunk *chunk, LLScriptByteCodeChunk *heap, S32 stacksize, LLScriptScopeEntry *entry, S32 entrycount, LLScriptLibData **ldata)
 {
@@ -434,8 +431,6 @@ S32 LLScriptIdentifier::getSize()
 	return 0;
 }
 
-
-
 void LLScriptSimpleAssignable::addAssignable(LLScriptSimpleAssignable *assign)
 {
 	if (mNextp)
@@ -604,7 +599,6 @@ S32 LLScriptSAConstant::getSize()
 {
 	return mConstant->getSize();
 }
-
 
 static void print_cil_cast(LLFILE* fp, LSCRIPTType srcType, LSCRIPTType targetType)
 {

@@ -140,17 +140,17 @@ void LLAgentAccess::setTeen(bool teen)
 }
 
 //static 
-int LLAgentAccess::convertTextToMaturity(char text)
+U8 LLAgentAccess::convertTextToMaturity(char text)
 {
 	if ('A' == text)
 	{
 		return SIM_ACCESS_ADULT;
 	}
-	else if ('M'== text)
+	else if ('M' == text)
 	{
 		return SIM_ACCESS_MATURE;
 	}
-	else if ('P'== text)
+	else if ('P' == text)
 	{
 		return SIM_ACCESS_PG;
 	}
@@ -160,4 +160,36 @@ int LLAgentAccess::convertTextToMaturity(char text)
 void LLAgentAccess::setMaturity(char text)
 {
 	mAccess = LLAgentAccess::convertTextToMaturity(text);
+	U8 preferred_access = (U8)gSavedSettings.getU32("PreferredMaturity");
+	while (!canSetMaturity(preferred_access))
+	{
+		if (preferred_access == SIM_ACCESS_ADULT)
+		{
+			preferred_access = SIM_ACCESS_MATURE;
+		}
+		else
+		{
+			// Mature or invalid access gets set to PG
+			preferred_access = SIM_ACCESS_PG;
+		}
+	}
+	gSavedSettings.setU32("PreferredMaturity", preferred_access);
+}
+
+bool LLAgentAccess::canSetMaturity(U8 maturity)
+{
+	if (isAdult() || isGodlike())
+	{
+		// Adults and "gods" can always set their Maturity level
+		return true;
+	}
+	if (maturity == SIM_ACCESS_PG ||
+		(maturity == SIM_ACCESS_MATURE && isMature()))
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }

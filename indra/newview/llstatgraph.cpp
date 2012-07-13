@@ -37,7 +37,7 @@
 #include "llgl.h"
 #include "llmath.h"
 #include "llrender.h"
-#include "llui.h"
+//#include "llui.h"
 
 #include "llstat.h"
 #include "llviewercontrol.h"
@@ -110,8 +110,7 @@ void LLStatGraph::draw()
 	}
 
 	//gl_drop_shadow(0,  getRect().getHeight(), getRect().getWidth(), 0,
-	//				gColors.getColor("ColorDropShadow"),
-	//				(S32)gSavedSettings.getF32("DropShadowFloater"));
+	//				LLUI::sColorDropShadow, LLUI::sDropShadowFloater);
 
 	static LLCachedControl<LLColor4U> menu_default_bg_color(gColors,
 															"MenuDefaultBgColor");

@@ -113,18 +113,14 @@ static const S32 BTN_HPAD = 8;
 static const LLFONT_ID FONT_NAME = LLFONT_SANSSERIF;
 
 LLAlertDialog::LLAlertDialog(LLNotificationPtr notification, bool modal)
-:	LLModalDialog(notification->getLabel(), 100, 100, modal),  // dummy size. Will reshape below.
+:	LLModalDialog(notification->getLabel(), 100, 100, modal),  // dummy size, will reshape below.
 	LLInstanceTracker<LLAlertDialog, LLUUID>(notification->getID()),
 	mDefaultOption(0),
 	mCheck(NULL),
 	mCaution(notification->getPriority() >= NOTIFICATION_PRIORITY_HIGH),
 	mLabel(notification->getName()),
 	mLineEditor(NULL),
-	mNote(notification),
-	mDropShadowFloater(LLUI::sConfigGroup->getS32("DropShadowFloater")),
-	mColorDropShadow(LLUI::sColorsGroup->getColor("ColorDropShadow")),
-	mAlertBoxColor(LLUI::sColorsGroup->getColor("AlertBoxColor")),
-	mAlertCautionBoxColor(LLUI::sColorsGroup->getColor("AlertCautionBoxColor"))
+	mNote(notification)
 {
 	const LLFontGL* font = LLResMgr::getInstance()->getRes(FONT_NAME);
 	const S32 LINE_HEIGHT = llfloor(font->getLineHeight() + 0.99f);
@@ -312,7 +308,8 @@ LLAlertDialog::LLAlertDialog(LLNotificationPtr notification, bool modal)
 	{
 		S32 y = VPAD + BTN_HEIGHT + VPAD/2;
 		mLineEditor = new LLLineEditor(edit_text_name,
-									   LLRect(HPAD, y + EDITOR_HEIGHT, dialog_width - HPAD, y),
+									   LLRect(HPAD, y + EDITOR_HEIGHT,
+											  dialog_width - HPAD, y),
 									   edit_text_contents,
 									   LLFontGL::getFontSansSerif(),
 									   STD_STRING_STR_LEN);
@@ -349,7 +346,7 @@ LLAlertDialog::LLAlertDialog(LLNotificationPtr notification, bool modal)
 bool LLAlertDialog::show()
 {
 	// If this is a caution message, change the color and add an icon.
-	setBackgroundColor(mCaution ? mAlertCautionBoxColor : mAlertBoxColor);
+	setBackgroundColor(mCaution ? LLUI::sAlertCautionBoxColor : LLUI::sAlertBoxColor);
 
 	startModal();
 	gFloaterView->adjustToFitScreen(this, FALSE);
@@ -369,8 +366,8 @@ bool LLAlertDialog::show()
 
 	// attach to floater if necessary
 	LLUUID context_key = mNote->getPayload()["context"].asUUID();
-	LLFloaterNotificationContext* contextp =
-		dynamic_cast<LLFloaterNotificationContext*>(LLNotificationContext::getInstance(context_key));
+	LLFloaterNotificationContext* contextp;
+	contextp = dynamic_cast<LLFloaterNotificationContext*>(LLNotificationContext::getInstance(context_key));
 	if (contextp && contextp->getFloater())
 	{
 		contextp->getFloater()->addDependentFloater(this, FALSE);
@@ -481,7 +478,7 @@ void LLAlertDialog::draw()
 	}
 
 	gl_drop_shadow(0, getRect().getHeight(), getRect().getWidth(), 0,
-				   mColorDropShadow, mDropShadowFloater);
+				   LLUI::sColorDropShadow, LLUI::sDropShadowFloater);
 
 	LLModalDialog::draw();
 }
@@ -505,6 +502,7 @@ void LLAlertDialog::onButtonPressed(void* userdata)
 {
 	ButtonData* button_data = (ButtonData*)userdata;
 	LLAlertDialog* self = button_data->mSelf;
+	if (!self || !button_data) return;
 
 	LLSD response = self->mNote->getResponseTemplate();
 	if (self->mLineEditor)
@@ -527,6 +525,7 @@ void LLAlertDialog::onButtonPressed(void* userdata)
 void LLAlertDialog::onClickIgnore(LLUICtrl* ctrl, void* user_data)
 {
 	LLAlertDialog* self = (LLAlertDialog*)user_data;
+	if (!self) return;
 
 	// checkbox sometimes means "hide and do the default" and other times means
 	// "warn me again". Yuck. JC

@@ -43,18 +43,15 @@ public:
 	LLPanelDirLand(const std::string& name, LLFloaterDirectory* floater);
 	/*virtual*/ ~LLPanelDirLand();
 
+	/*virtual*/ BOOL postBuild();
 	/*virtual*/ void draw();
 
-	virtual BOOL postBuild();
-
-	void performQuery();
+	/*virtual*/ void performQuery();
 
 protected:
 	static void onClickSort(void* data);
 	static void onCommitPrice(LLUICtrl* ctrl, void* data);
 	static void onCommitArea(LLUICtrl* ctrl, void* data);
-
 };
-
 
 #endif

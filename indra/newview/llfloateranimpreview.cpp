@@ -34,7 +34,6 @@
 
 #include "llfloateranimpreview.h"
 
-#include "llapr.h"
 #include "llbbox.h"
 #include "llbutton.h"
 #include "llbvhloader.h"
@@ -44,7 +43,6 @@
 #include "llkeyframemotion.h"
 #include "llrender.h"
 #include "llstring.h"
-#include "llui.h"
 #include "lluictrlfactory.h"
 #include "llvfile.h"
 
@@ -77,13 +75,50 @@ const F32 MAX_CAMERA_ZOOM = 10.f;
 
 const F32 BASE_ANIM_TIME_OFFSET = 5.f;
 
+std::string STATUS[] =
+{
+	"E_ST_OK",
+	"E_ST_EOF",
+	"E_ST_NO_CONSTRAINT",
+	"E_ST_NO_FILE",
+	"E_ST_NO_HIER",
+	"E_ST_NO_JOINT",
+	"E_ST_NO_NAME",
+	"E_ST_NO_OFFSET",
+	"E_ST_NO_CHANNELS",
+	"E_ST_NO_ROTATION",
+	"E_ST_NO_AXIS",
+	"E_ST_NO_MOTION",
+	"E_ST_NO_FRAMES",
+	"E_ST_NO_FRAME_TIME",
+	"E_ST_NO_POS",
+	"E_ST_NO_ROT",
+	"E_ST_NO_XLT_FILE",
+	"E_ST_NO_XLT_HEADER",
+	"E_ST_NO_XLT_NAME",
+	"E_ST_NO_XLT_IGNORE",
+	"E_ST_NO_XLT_RELATIVE",
+	"E_ST_NO_XLT_OUTNAME",
+	"E_ST_NO_XLT_MATRIX",
+	"E_ST_NO_XLT_MERGECHILD",
+	"E_ST_NO_XLT_MERGEPARENT",
+	"E_ST_NO_XLT_PRIORITY",
+	"E_ST_NO_XLT_LOOP",
+	"E_ST_NO_XLT_EASEIN",
+	"E_ST_NO_XLT_EASEOUT",
+	"E_ST_NO_XLT_HAND",
+	"E_ST_NO_XLT_EMOTE",
+	"E_ST_BAD_ROOT"
+};
+
 //-----------------------------------------------------------------------------
 // LLFloaterAnimPreview()
 //-----------------------------------------------------------------------------
 LLFloaterAnimPreview::LLFloaterAnimPreview(const std::string& filename)
 :	LLFloaterNameDesc(filename),
 	mAnimPreview(NULL),
-	mInWorld(FALSE)
+	mInWorld(false),
+	mBadAnimation(false)
 {
 	mLastMouseX = 0;
 	mLastMouseY = 0;
@@ -113,6 +148,11 @@ LLFloaterAnimPreview::LLFloaterAnimPreview(const std::string& filename)
 	mIDList["Surprise"] = ANIM_AGENT_EXPRESS_SURPRISE;
 	mIDList["Wink"] = ANIM_AGENT_EXPRESS_WINK;
 	mIDList["Worry"] = ANIM_AGENT_EXPRESS_WORRY;
+
+	mPlayImage = LLUI::getUIImage("button_anim_play.tga");
+	mPlaySelectedImage = LLUI::getUIImage("button_anim_play_selected.tga");
+	mPauseImage = LLUI::getUIImage("button_anim_pause.tga");
+	mPauseSelectedImage = LLUI::getUIImage("button_anim_pause_selected.tga");
 }
 
 //-----------------------------------------------------------------------------
@@ -161,8 +201,10 @@ BOOL LLFloaterAnimPreview::postBuild()
 
 	childSetCommitCallback("name_form", onCommitName, this);
 
-	childSetLabelArg("ok_btn", "[AMOUNT]", llformat("%d", sUploadAmount));
-	childSetAction("ok_btn", onBtnOK, this);
+	mUploadButton = getChild<LLButton>("ok_btn");
+	mUploadButton->setLabelArg("[AMOUNT]", llformat("%d", sUploadAmount));
+	mUploadButton->setClickedCallback(onBtnOK, this);
+
 	setDefaultBtn();
 
 	if (mInWorld)
@@ -190,21 +232,17 @@ BOOL LLFloaterAnimPreview::postBuild()
 	mPlayButton = getChild<LLButton>("play_btn");
 	mPlayButton->setClickedCallback(onBtnPlay);
 	mPlayButton->setCallbackUserData(this);
-
-	mPlayButton->setImages("button_anim_play.tga",
-						   "button_anim_play_selected.tga");
+	mPlayButton->setImageUnselected(mPlayImage);
+	mPlayButton->setImageSelected(mPlaySelectedImage);
 	mPlayButton->setDisabledImages(LLStringUtil::null, LLStringUtil::null);
-
 	mPlayButton->setScaleImage(TRUE);
 
 	mStopButton = getChild<LLButton>("stop_btn");
 	mStopButton->setClickedCallback(onBtnStop);
 	mStopButton->setCallbackUserData(this);
-
 	mStopButton->setImages("button_anim_stop.tga",
 						   "button_anim_stop_selected.tga");
 	mStopButton->setDisabledImages(LLStringUtil::null, LLStringUtil::null);
-
 	mStopButton->setScaleImage(TRUE);
 
 	r.set(r.mRight + PREVIEW_HPAD, y, getRect().getWidth() - PREVIEW_HPAD,
@@ -234,8 +272,19 @@ BOOL LLFloaterAnimPreview::postBuild()
 			if (file_size == infile.read(file_buffer, file_size))
 			{
 				file_buffer[file_size] = '\0';
+				ELoadStatus load_status = E_ST_OK;
+				S32 line_number = 0; 
 				llinfos << "Loading BVH file " << mFilename << llendl;
-				loaderp = new LLBVHLoader(file_buffer);
+				loaderp = new LLBVHLoader(file_buffer, load_status, line_number);
+				if (load_status == E_ST_NO_XLT_FILE)
+				{
+					llwarns << "NOTE: No translation table found." << llendl;
+				}
+				else if (load_status != E_ST_OK)
+				{
+					llwarns << "ERROR: [line: " << line_number << "] "
+							<< getString(STATUS[load_status]) << llendl;
+				}
 			}
 
 			infile.close();
@@ -348,8 +397,11 @@ BOOL LLFloaterAnimPreview::postBuild()
 			{
 				LLUIString out_str = getString("failed_file_read");
 				// *TODO:Translate
-				out_str.setArg("[STATUS]", loaderp->getStatus());
+				out_str.setArg("[STATUS]",
+							   getString(STATUS[loaderp->getStatus()]));
 				childSetValue("bad_animation_text", out_str.getString());
+				mBadAnimation = true;
+				mUploadButton->setEnabled(FALSE);
 			}
 		}
 
@@ -1191,12 +1243,13 @@ BOOL LLFloaterAnimPreview::validateLoopOut(LLUICtrl* spin, void* data)
 //-----------------------------------------------------------------------------
 void LLFloaterAnimPreview::refresh()
 {
-	if (!mAnimPreview && !(mInWorld && isAgentAvatarValid()))
+	if (mBadAnimation ||
+		(!mAnimPreview && !(mInWorld && isAgentAvatarValid())))
 	{
 		childShow("bad_animation_text");
 		mPlayButton->setEnabled(FALSE);
 		mStopButton->setEnabled(FALSE);
-		childDisable("ok_btn");
+		mUploadButton->setEnabled(FALSE);
 	}
 	else
 	{
@@ -1221,10 +1274,8 @@ void LLFloaterAnimPreview::refresh()
 			LLKeyframeMotion* motionp = (LLKeyframeMotion*)avatarp->findMotion(mMotionID);
 			if (avatarp->areAnimationsPaused())
 			{
-
-				mPlayButton->setImages("button_anim_play.tga",
-									   "button_anim_play_selected.tga");
-
+				mPlayButton->setImageUnselected(mPlayImage);
+				mPlayButton->setImageSelected(mPlaySelectedImage);
 			}
 			else
 			{
@@ -1233,20 +1284,20 @@ void LLFloaterAnimPreview::refresh()
 					F32 fraction_complete = motionp->getLastUpdateTime() / motionp->getDuration();
 					childSetValue("playback_slider", fraction_complete);
 				}
-				mPlayButton->setImages("button_anim_pause.tga",
-									   "button_anim_pause_selected.tga");
-
+				mPlayButton->setImageUnselected(mPauseImage);
+				mPlayButton->setImageSelected(mPauseSelectedImage);
 			}
 		}
 		else
 		{
 			mPauseRequest = avatarp->requestPause();
-			mPlayButton->setImages("button_anim_play.tga",
-								   "button_anim_play_selected.tga");
+			mPlayButton->setImageUnselected(mPlayImage);
+			mPlayButton->setImageSelected(mPlaySelectedImage);
 
 			mStopButton->setEnabled(TRUE); // stop also resets, leave enabled.
 		}
-		childEnable("ok_btn");
+		mUploadButton->setEnabled(TRUE);
+
 		if (!mInWorld)
 		{
 			mAnimPreview->requestUpdate();

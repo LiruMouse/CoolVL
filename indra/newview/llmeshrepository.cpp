@@ -660,7 +660,7 @@ void LLMeshRepoThread::loadMeshLOD(const LLVolumeParams& mesh_params, S32 lod)
 		if (pending != mPendingLOD.end())
 		{	// append this lod request to existing header request
 			pending->second.push_back(lod);
-			llassert(pending->second.size() <= LLModel::NUM_LODS)
+			llassert(pending->second.size() <= LLModel::NUM_LODS);
 		}
 		else
 		{	// if no header request is pending, fetch header
@@ -3663,7 +3663,7 @@ void LLMeshRepository::buildPhysicsMesh(LLModel::Decomposition& decomp)
 
 bool LLMeshRepository::meshUploadEnabled()
 {
-	LLViewerRegion *region = gAgent.getRegion();
+	LLViewerRegion* region = gAgent.getRegion();
 	if (region)
 	{
 		return region->meshUploadEnabled();
@@ -3673,7 +3673,7 @@ bool LLMeshRepository::meshUploadEnabled()
 
 bool LLMeshRepository::meshRezEnabled()
 {
-	LLViewerRegion *region = gAgent.getRegion();
+	LLViewerRegion* region = gAgent.getRegion();
 	if (region)
 	{
 		return region->meshRezEnabled();

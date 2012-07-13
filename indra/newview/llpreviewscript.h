@@ -34,6 +34,7 @@
 #define LL_LLPREVIEWSCRIPT_H
 
 #include "lldarray.h"
+#include "llcheckboxctrl.h"
 #include "lleventtimer.h"
 #include "llframetimer.h"
 #include "lliconctrl.h"
@@ -45,11 +46,11 @@
 
 class LLButton;
 class LLComboBox;
-class LLCheckBoxCtrl;
 class LLKeywordToken;
 class LLMenuBarGL;
 class LLMessageSystem;
 class LLScrollListCtrl;
+class LLTextBox;
 class LLTextEditor;
 class LLViewerObject;
 
@@ -63,17 +64,14 @@ class LLScriptEdCore : public LLPanel, public LLEventTimer
 	friend class LLLiveLSLEditor;
 
 public:
-	LLScriptEdCore(
-		const std::string& name,
-		const LLRect& rect,
-		const std::string& sample,
-		const std::string& help_url,
-		const LLHandle<LLFloater>& floater_handle,
-		void (*load_callback)(void* userdata),
-		void (*save_callback)(void* userdata, BOOL close_after_save),
-		void (*search_replace_callback)(void* userdata),
-		void* userdata,
-		S32 bottom_pad = 0);	// pad below bottom row of buttons
+	LLScriptEdCore(const std::string& name, const LLRect& rect,
+				   const std::string& sample, const std::string& help_url,
+				   const LLHandle<LLFloater>& floater_handle,
+				   void (*load_callback)(void* data),
+				   void (*save_callback)(void* data, BOOL close_after_save),
+				   void (*search_replace_callback)(void* data),
+				   void* userdata,
+				   S32 bottom_pad = 0);	// pad below bottom row of buttons
 	~LLScriptEdCore();
 
 	void			initMenu();
@@ -84,44 +82,10 @@ public:
 
 	void            setScriptText(const std::string& text, BOOL is_valid);
 
-	bool			handleSaveChangesDialog(const LLSD& notification, const LLSD& response);
-	bool			handleReloadFromServerDialog(const LLSD& notification, const LLSD& response);
-
-	static bool		onHelpWebDialog(const LLSD& notification, const LLSD& response);
-	static void		onBtnHelp(void* userdata);
-	static void		onBtnDynamicHelp(void* userdata);
-	static void		onCheckLock(LLUICtrl*, void*);
-	static void		onHelpComboCommit(LLUICtrl* ctrl, void* userdata);
-	static void		onClickBack(void* userdata);
-	static void		onClickForward(void* userdata);
-	static void		onBtnInsertSample(void*);
-	static void		onBtnInsertFunction(LLUICtrl*, void*);
-	static void		doSave(void* userdata, BOOL close_after_save);
-	static void		onMonoCheckboxClicked(LLUICtrl*, void* userdata);
-	static void		onBtnLoadFromFile(void* userdata);
-	static void		onBtnSaveToFile(void* userdata);
-	static void		onBtnSave(void* userdata);
-	static void		onBtnUndoChanges(void* userdata);
-	static void		onSearchMenu(void* userdata);
-
-	static void		onUndoMenu(void* userdata);
-	static void		onRedoMenu(void* userdata);
-	static void		onCutMenu(void* userdata);
-	static void		onCopyMenu(void* userdata);
-	static void		onPasteMenu(void* userdata);
-	static void		onSelectAllMenu(void* userdata);
-	static void		onDeselectMenu(void* userdata);
-
-	static BOOL		enableUndoMenu(void* userdata);
-	static BOOL		enableRedoMenu(void* userdata);
-	static BOOL		enableCutMenu(void* userdata);
-	static BOOL		enableCopyMenu(void* userdata);
-	static BOOL		enablePasteMenu(void* userdata);
-	static BOOL		enableSelectAllMenu(void* userdata);
-	static BOOL		enableDeselectMenu(void* userdata);
-
-	static BOOL		enableSaveLoadFile(void* userdata);
-	static BOOL		hasChanged(void* userdata);
+	bool			handleSaveChangesDialog(const LLSD& notification,
+											const LLSD& response);
+	bool			handleReloadFromServerDialog(const LLSD& notification,
+												 const LLSD& response);
 
 	LLCheckBoxCtrl*	getMonoCheckBox()			{ return mMonoCheckbox; }
 	BOOL			monoChecked() const;
@@ -157,32 +121,75 @@ protected:
 								   void* userdata);
 
 private:
-	std::string		mScriptName;
-	std::string		mSampleText;
-	std::string		mAutosaveFilename;
-	std::string		mHelpURL;
-	LLTextEditor*	mEditor;
-	LLCheckBoxCtrl*	mMonoCheckbox;
-	void			(*mLoadCallback)(void* userdata);
-	void			(*mSaveCallback)(void* userdata, BOOL close_after_save);
-	void			(*mSearchReplaceCallback) (void* userdata);
-	void*			mUserdata;
-	LLComboBox		*mFunctions;
-	BOOL			mForceClose;
-	//LLPanel*		mGuiPanel;
-	LLPanel*		mCodePanel;
-	LLScrollListCtrl* mErrorList;
-	LLDynamicArray<LLEntryAndEdCore*> mBridges;
-	LLHandle<LLFloater>	mLiveHelpHandle;
-	LLKeywordToken* mLastHelpToken;
-	LLFrameTimer	mLiveHelpTimer;
-	S32				mLiveHelpHistorySize;
-	BOOL			mEnableSave;
-	BOOL			mHasScriptData;
+	static bool		onHelpWebDialog(const LLSD& notification,
+									const LLSD& response);
+	static void		onBtnHelp(void* userdata);
+	static void		onBtnDynamicHelp(void* userdata);
+	static void		onCheckLock(LLUICtrl*, void*);
+	static void		onHelpComboCommit(LLUICtrl* ctrl, void* userdata);
+	static void		onClickBack(void* userdata);
+	static void		onClickForward(void* userdata);
+	static void		onBtnInsertSample(void*);
+	static void		onBtnInsertFunction(LLUICtrl*, void*);
+	static void		doSave(void* userdata, BOOL close_after_save);
+	static void		onMonoCheckboxClicked(LLUICtrl*, void* userdata);
+	static void		onBtnLoadFromFile(void* userdata);
+	static void		onBtnSaveToFile(void* userdata);
+	static void		onBtnSave(void* userdata);
+	static void		onBtnUndoChanges(void* userdata);
+	static void		onSearchMenu(void* userdata);
 
-	static std::set<LLScriptEdCore*> sList;
+	static void		onUndoMenu(void* userdata);
+	static void		onRedoMenu(void* userdata);
+	static void		onCutMenu(void* userdata);
+	static void		onCopyMenu(void* userdata);
+	static void		onPasteMenu(void* userdata);
+	static void		onSelectAllMenu(void* userdata);
+	static void		onDeselectMenu(void* userdata);
+
+	static BOOL		enableUndoMenu(void* userdata);
+	static BOOL		enableRedoMenu(void* userdata);
+	static BOOL		enableCutMenu(void* userdata);
+	static BOOL		enableCopyMenu(void* userdata);
+	static BOOL		enablePasteMenu(void* userdata);
+	static BOOL		enableSelectAllMenu(void* userdata);
+	static BOOL		enableDeselectMenu(void* userdata);
+
+	static BOOL		enableSaveLoadFile(void* userdata);
+	static BOOL		hasChanged(void* userdata);
+
+private:
+	std::string			mScriptName;
+	std::string			mSampleText;
+	std::string			mAutosaveFilename;
+	std::string			mHelpURL;
+
+	void				(*mLoadCallback)(void* userdata);
+	void				(*mSaveCallback)(void* userdata, BOOL close_after_save);
+	void				(*mSearchReplaceCallback) (void* userdata);
+	void*				mUserdata;
+
+	BOOL				mForceClose;
+	BOOL				mEnableSave;
+	BOOL				mHasScriptData;
+
+	LLPanel*			mCodePanel;
+	LLButton*			mSaveButton;
+	LLTextBox*			mLineColText;
+	LLComboBox*			mFunctions;
+	LLTextEditor*		mEditor;
+	LLCheckBoxCtrl*		mMonoCheckbox;
+	LLScrollListCtrl*	mErrorList;
+
+	LLKeywordToken* 	mLastHelpToken;
+	LLFrameTimer		mLiveHelpTimer;
+	S32					mLiveHelpHistorySize;
+	LLHandle<LLFloater>					mLiveHelpHandle;
+
+	LLDynamicArray<LLEntryAndEdCore*>	mBridges;
+
+	static std::set<LLScriptEdCore*>	sList;
 };
-
 
 // Used to view and edit a LSL from your inventory.
 class LLPreviewLSL : public LLPreview
@@ -234,7 +241,6 @@ protected:
 	S32 mPendingUploads;
 
 };
-
 
 // Used to view and edit an LSL that is attached to an object.
 class LLLiveLSLEditor : public LLPreview
@@ -299,19 +305,24 @@ protected:
 	static void* createScriptEdPanel(void* userdata);
 
 protected:
-	LLUUID mObjectID;
-	LLUUID mItemID; // The inventory item this script is associated with
-	BOOL mIsNew;
-	LLScriptEdCore* mScriptEd;
-	//LLUUID mTransmitID;
-	LLCheckBoxCtrl	*mRunningCheckbox;
-	BOOL mAskedForRunningInfo;
-	BOOL mHaveRunningInfo;
-	LLButton		*mResetButton;
+	LLUUID				mObjectID;
+	LLUUID				mItemID; // The inventory item this script is associated with
+	BOOL				mIsNew;
+	LLScriptEdCore*		mScriptEd;
+
+	LLButton*			mResetButton;
+	LLCheckBoxCtrl*		mRunningCheckbox;
+
+	std::string			mScriptRunningText;
+	std::string			mCannotRunText;
+	std::string			mOutOfRange;
+
+	BOOL				mAskedForRunningInfo;
+	BOOL				mHaveRunningInfo;
 	LLPointer<LLViewerInventoryItem> mItem;
-	BOOL mCloseAfterSave;
+	BOOL				mCloseAfterSave;
 	// need to save both text and script, so need to decide when done
-	S32 mPendingUploads;
+	S32					mPendingUploads;
 
 	static LLMap<LLUUID, LLLiveLSLEditor*> sInstances;
 	BOOL getIsModifiable() const { return mIsModifiable; } // Evaluated on load assert

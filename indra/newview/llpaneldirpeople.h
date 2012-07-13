@@ -35,17 +35,17 @@
 
 #include "llpaneldirbrowser.h"
 
-
 class LLPanelDirPeople : public LLPanelDirBrowser
 {
 public:
 	LLPanelDirPeople(const std::string& name, LLFloaterDirectory* floater);
-	virtual ~LLPanelDirPeople();
+	/*virtual*/ ~LLPanelDirPeople();
 
 	/*virtual*/ BOOL postBuild();
 
 	/*virtual*/ void performQuery();
 
+protected:
 	static void onClickSearch(void *userdata);
 	static void onKeystrokeName(LLLineEditor* line, void* data);
 };

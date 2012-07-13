@@ -385,6 +385,8 @@ BOOL LLPanelLandGeneral::postBuild()
 	mBtnStartAuction = getChild<LLButton>("Linden Sale...");
 	mBtnStartAuction->setClickedCallback(onClickStartAuction, NULL);
 
+	mAnyoneText = getString("anyone");
+
 	return TRUE;
 }
 
@@ -401,7 +403,7 @@ void LLPanelLandGeneral::refresh()
 	LLParcel* parcel = mParcel->getParcel();
 	bool region_owner = false;
 	LLViewerRegion* regionp = LLViewerParcelMgr::getInstance()->getSelectionRegion();
-	if (regionp && (regionp->getOwner() == gAgentID))
+	if (regionp && regionp->getOwner() == gAgentID)
 	{
 		region_owner = true;
 		mBtnReleaseLand->setVisible(FALSE);
@@ -681,7 +683,8 @@ void LLPanelLandGeneral::refresh()
 			mBtnReleaseLand->setEnabled(can_release);
 		}
 
-		BOOL use_pass = parcel->getParcelFlag(PF_USE_PASS_LIST) && !LLViewerParcelMgr::getInstance()->isCollisionBanned();;
+		BOOL use_pass = parcel->getParcelFlag(PF_USE_PASS_LIST) &&
+						!LLViewerParcelMgr::getInstance()->isCollisionBanned();;
 		mBtnBuyPass->setEnabled(use_pass);
 	}
 }
@@ -729,7 +732,7 @@ void LLPanelLandGeneral::refreshNames()
 	}
 	else
 	{
-		mSaleInfoForSale2->setTextArg("[BUYER]", getString("anyone"));
+		mSaleInfoForSale2->setTextArg("[BUYER]", mAnyoneText);
 	}
 }
 
@@ -852,15 +855,19 @@ void LLPanelLandGeneral::onClickReclaim(void*)
 BOOL LLPanelLandGeneral::enableBuyPass(void* data)
 {
 	LLPanelLandGeneral* panelp = (LLPanelLandGeneral*)data;
-	LLParcel* parcel = panelp != NULL ? panelp->mParcel->getParcel() : LLViewerParcelMgr::getInstance()->getParcelSelection()->getParcel();
-	return (parcel != NULL) && (parcel->getParcelFlag(PF_USE_PASS_LIST) && !LLViewerParcelMgr::getInstance()->isCollisionBanned());
+	LLParcel* parcel = panelp != NULL ? panelp->mParcel->getParcel()
+									  : LLViewerParcelMgr::getInstance()->getParcelSelection()->getParcel();
+	return parcel != NULL &&
+		   parcel->getParcelFlag(PF_USE_PASS_LIST) &&
+		   !LLViewerParcelMgr::getInstance()->isCollisionBanned();
 }
 
 // static
 void LLPanelLandGeneral::onClickBuyPass(void* data)
 {
 	LLPanelLandGeneral* panelp = (LLPanelLandGeneral*)data;
-	LLParcel* parcel = panelp != NULL ? panelp->mParcel->getParcel() : LLViewerParcelMgr::getInstance()->getParcelSelection()->getParcel();
+	LLParcel* parcel = panelp != NULL ? panelp->mParcel->getParcel()
+									  : LLViewerParcelMgr::getInstance()->getParcelSelection()->getParcel();
 
 	if (!parcel) return;
 

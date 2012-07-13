@@ -35,18 +35,17 @@
 
 #include "llpaneldirbrowser.h"
 
+class LLButton;
 class LLUICtrl;
 
 class LLPanelDirEvents : public LLPanelDirBrowser
 {
 public:
 	LLPanelDirEvents(const std::string& name, LLFloaterDirectory* floater);
-	virtual ~LLPanelDirEvents();
+	/*virtual*/ ~LLPanelDirEvents();
 
+	/*virtual*/ BOOL postBuild();
 	/*virtual*/ void draw();
-
-	virtual BOOL postBuild();
-
 	/*virtual*/ void performQuery();
 
 	void performQueryOrDelete(U32 event_id);
@@ -67,7 +66,8 @@ protected:
 protected:
 	BOOL		mDoneQuery;
 	S32			mDay;	// 0 = today, 1 = tomorrow
-};
 
+	LLButton* 	mDeleteButton;
+};
 
 #endif

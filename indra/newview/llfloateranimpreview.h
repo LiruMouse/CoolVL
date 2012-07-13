@@ -33,12 +33,15 @@
 #ifndef LL_LLFLOATERANIMPREVIEW_H
 #define LL_LLFLOATERANIMPREVIEW_H
 
-#include "llfloaternamedesc.h"
-#include "lldynamictexture.h"
 #include "llcharacter.h"
 #include "llquaternion.h"
+#include "llui.h"
+
+#include "lldynamictexture.h"
+#include "llfloaternamedesc.h"
 
 class LLVOAvatar;
+class LLButton;
 class LLViewerJointMesh;
 
 class LLPreviewAnimation : public LLViewerDynamicTexture
@@ -57,40 +60,46 @@ public:
 	void	zoom(F32 zoom_delta);
 	void	setZoom(F32 zoom_amt);
 	void	pan(F32 right, F32 up);
-	virtual BOOL needsUpdate() { return mNeedsUpdate; }
+	virtual BOOL needsUpdate()					{ return mNeedsUpdate; }
 
-	LLVOAvatar* getDummyAvatar() { return mDummyAvatar; }
+	LLVOAvatar* getDummyAvatar()				{ return mDummyAvatar; }
 
 protected:
-	BOOL				mNeedsUpdate;
-	F32					mCameraDistance;
-	F32					mCameraYaw;
-	F32					mCameraPitch;
-	F32					mCameraZoom;
-	LLVector3			mCameraOffset;
-	LLVector3			mCameraRelPos;
-	LLPointer<LLVOAvatar>			mDummyAvatar;
+	BOOL					mNeedsUpdate;
+	F32						mCameraDistance;
+	F32						mCameraYaw;
+	F32						mCameraPitch;
+	F32						mCameraZoom;
+	LLVector3				mCameraOffset;
+	LLVector3				mCameraRelPos;
+	LLPointer<LLVOAvatar>	mDummyAvatar;
 };
 
 class LLFloaterAnimPreview : public LLFloaterNameDesc
 {
 public:
 	LLFloaterAnimPreview(const std::string& filename);
-	virtual ~LLFloaterAnimPreview();
+	/*virtual*/ ~LLFloaterAnimPreview();
 	
-	BOOL postBuild();
+	/*virtual*/ BOOL postBuild();
+	/*virtual*/ void draw();
+	/*virtual*/ void refresh();
 
-	BOOL handleMouseDown(S32 x, S32 y, MASK mask);
-	BOOL handleMouseUp(S32 x, S32 y, MASK mask);
-	BOOL handleHover(S32 x, S32 y, MASK mask);
-	BOOL handleScrollWheel(S32 x, S32 y, S32 clicks); 
-	void onMouseCaptureLost();
+	static void setUploadAmount(S32 amount)		{ sUploadAmount = amount; }
 
-	void refresh();
+private:
+	/*virtual*/ BOOL handleMouseDown(S32 x, S32 y, MASK mask);
+	/*virtual*/ BOOL handleMouseUp(S32 x, S32 y, MASK mask);
+	/*virtual*/ BOOL handleHover(S32 x, S32 y, MASK mask);
+	/*virtual*/ BOOL handleScrollWheel(S32 x, S32 y, S32 clicks); 
+	/*virtual*/ void onMouseCaptureLost();
 
+	void setAnimCallbacks();
+	void resetMotion();
+
+	static void	onBtnOK(void*);
 	static void	onBtnPlay(void*);
 	static void	onBtnStop(void*);
-	static void setUploadAmount(S32 amount) { sUploadAmount = amount; }
 	static void onSliderMove(LLUICtrl*, void*);
 	static void onCommitBaseAnim(LLUICtrl*, void*);
 	static void onCommitLoop(LLUICtrl*, void*);
@@ -106,34 +115,34 @@ public:
 	static void onCommitEaseOut(LLUICtrl*, void*);
 	static BOOL validateEaseIn(LLUICtrl*, void*);
 	static BOOL validateEaseOut(LLUICtrl*, void*);
-	static void	onBtnOK(void*);
 	static void onSaveComplete(const LLUUID& asset_uuid,
-									   LLAssetType::EType type,
-									   void* user_data,
-									   S32 status, LLExtStat ext_status);
-private:
-	void setAnimCallbacks();
-	
-protected:
-	void			draw();
-	void			resetMotion();
+							   LLAssetType::EType type,
+							   void* user_data,
+							   S32 status,
+							   LLExtStat ext_status);
 
+private:
 	LLPointer< LLPreviewAnimation > mAnimPreview;
-	S32					mLastMouseX;
-	S32					mLastMouseY;
-	LLButton*			mPlayButton;
-	LLButton*			mStopButton;
-	LLRect				mPreviewRect;
-	LLRectf				mPreviewImageRect;
-	LLAssetID			mMotionID;
-	LLTransactionID		mTransactionID;
-	BOOL				mEnabled;
-	BOOL				mInWorld;
-	LLAnimPauseRequest	mPauseRequest;
+	S32								mLastMouseX;
+	S32								mLastMouseY;
+	LLButton*						mPlayButton;
+	LLButton*						mStopButton;
+	LLButton*						mUploadButton;
+	LLUIImagePtr					mPlayImage;
+	LLUIImagePtr					mPlaySelectedImage;
+	LLUIImagePtr					mPauseImage;
+	LLUIImagePtr					mPauseSelectedImage;
+	LLRect							mPreviewRect;
+	LLRectf							mPreviewImageRect;
+	LLAssetID						mMotionID;
+	LLTransactionID					mTransactionID;
+	bool							mInWorld;
+	bool							mBadAnimation;
+	LLAnimPauseRequest				mPauseRequest;
 
 	std::map<std::string, LLUUID>	mIDList;
 
-	static S32 sUploadAmount;
+	static S32						sUploadAmount;
 };
 
 #endif  // LL_LLFLOATERANIMPREVIEW_H

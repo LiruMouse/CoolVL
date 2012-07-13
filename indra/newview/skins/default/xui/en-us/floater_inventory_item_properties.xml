@@ -84,30 +84,35 @@
 	     mouse_opaque="true" name="CheckOwnerTransfer" radio_style="false"
 	     width="106" />
 	<text bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
+	 tool_tip="These are the base permissions; the object can never be more permissive than this. V = Velocity (allow anyone to move), M = Modify, C = Copy, T = Transfer."
 	     bottom="-165" drop_shadow_visible="true" follows="left|top"
 	     font="SansSerifSmall" h_pad="0" halign="left" height="10" left="10"
 	     mouse_opaque="true" name="BaseMaskDebug" v_pad="0" width="330">
 		B:
 	</text>
 	<text bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
+	 tool_tip="These are the owner permissions. V = Velocity (allow anyone to move), M = Modify, C = Copy, T = Transfer."
 	     bottom="-165" drop_shadow_visible="true" follows="left|top"
 	     font="SansSerifSmall" h_pad="0" halign="left" height="10" left_delta="60"
 	     mouse_opaque="true" name="OwnerMaskDebug" v_pad="0" width="270">
 		O:
 	</text>
 	<text bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
+	 tool_tip="These are the group permissions (the group the object is set or deeded to is shown next to 'Group:' above). V = Velocity (allow anyone to move), M = Modify, C = Copy, T = Transfer."
 	     bottom="-165" drop_shadow_visible="true" follows="left|top"
 	     font="SansSerifSmall" h_pad="0" halign="left" height="10" left_delta="60"
 	     mouse_opaque="true" name="GroupMaskDebug" v_pad="0" width="210">
 		G:
 	</text>
 	<text bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
+	 tool_tip="These are the permissions everyone else has on the object. V = Velocity (allow anyone to move), M = Modify, C = Copy, T = Transfer."
 	     bottom="-165" drop_shadow_visible="true" follows="left|top"
 	     font="SansSerifSmall" h_pad="0" halign="left" height="10" left_delta="60"
 	     mouse_opaque="true" name="EveryoneMaskDebug" v_pad="0" width="150">
 		E:
 	</text>
 	<text bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
+	 tool_tip="These are the permissions the next person to own the object will have. If the 'N' is followed with an asterix ('*'), then it means that the slam bit is set and that the object will get its permissions updated when rezzed in-world (i.e. on the ground, not as an attachment). V = Velocity (allow anyone to move), M = Modify, C = Copy, T = Transfer."
 	     bottom="-165" drop_shadow_visible="true" follows="left|top"
 	     font="SansSerifSmall" h_pad="0" halign="left" height="10" left_delta="60"
 	     mouse_opaque="true" name="NextMaskDebug" v_pad="0" width="90">

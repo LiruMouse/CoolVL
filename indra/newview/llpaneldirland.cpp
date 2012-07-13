@@ -34,7 +34,6 @@
 
 #include "llpaneldirland.h"
 
-// linden library includes
 #include "llcheckboxctrl.h"
 #include "lllineeditor.h"
 #include "llparcel.h"
@@ -42,7 +41,6 @@
 #include "llscrolllistctrl.h"
 #include "message.h"
 
-// viewer project includes
 #include "llagent.h"
 #include "llstatusbar.h"
 #include "lluiconstants.h"
@@ -58,8 +56,9 @@ static const char FIND_AUCTION[] = "Auction";
 static const char FIND_MAINLANDSALES[] = "Mainland Sales";
 static const char FIND_ESTATESALES[] = "Estate Sales";
 
-LLPanelDirLand::LLPanelDirLand(const std::string& name, LLFloaterDirectory* floater)
-	:	LLPanelDirBrowser(name, floater)
+LLPanelDirLand::LLPanelDirLand(const std::string& name,
+							   LLFloaterDirectory* floater)
+:	LLPanelDirBrowser(name, floater)
 {
 }
 
@@ -69,27 +68,13 @@ BOOL LLPanelDirLand::postBuild()
 
 	childSetValue("type", gSavedSettings.getString("FindLandType"));
 
-	bool adult_enabled = gAgent.canAccessAdult();
-	bool mature_enabled = gAgent.canAccessMature();
-	childSetVisible("incpg", true);
-	if (!mature_enabled)
-	{
-		childSetValue("incmature", FALSE);
-		childDisable("incmature");
-	}
-	if (!adult_enabled)
-	{
-		childSetValue("incadult", FALSE);
-		childDisable("incadult");
-	}
-
 	childSetCommitCallback("pricecheck", onCommitPrice, this);
 	childSetCommitCallback("areacheck", onCommitArea, this);
 
 	childSetValue("priceedit", gStatusBar->getBalance());
 	childSetEnabled("priceedit", gSavedSettings.getBOOL("FindLandPrice"));
 	childSetPrevalidate("priceedit", LLLineEditor::prevalidateNonNegativeS32);
-	
+
 	childSetEnabled("areaedit", gSavedSettings.getBOOL("FindLandArea"));
 	childSetPrevalidate("areaedit", LLLineEditor::prevalidateNonNegativeS32);
 
@@ -117,7 +102,6 @@ LLPanelDirLand::~LLPanelDirLand()
 void LLPanelDirLand::draw()
 {
 	updateMaturityCheckbox();
-
 	LLPanelDirBrowser::draw();
 }
 
@@ -150,9 +134,9 @@ void LLPanelDirLand::onCommitArea(LLUICtrl* ctrl, void* data)
 
 void LLPanelDirLand::performQuery()
 {
-	BOOL inc_pg = childGetValue("incpg").asBoolean();
-	BOOL inc_mature = childGetValue("incmature").asBoolean();
-	BOOL inc_adult = childGetValue("incadult").asBoolean();
+	BOOL inc_pg		= !mIncPGCheck || mIncPGCheck->getValue().asBoolean();
+	BOOL inc_mature	= mIncMatureCheck && mIncMatureCheck->getValue().asBoolean();
+	BOOL inc_adult	= mIncAdultCheck && mIncAdultCheck->getValue().asBoolean();
 	if (!(inc_pg || inc_mature || inc_adult))
 	{
 		LLNotifications::instance().add("NoContentToSearch");
@@ -193,7 +177,7 @@ void LLPanelDirLand::performQuery()
 	{
 		query_flags |= DFQ_INC_ADULT;
 	}
-	
+
 	// Add old flags in case we are talking to an old dataserver
 	if (inc_pg && !inc_mature)
 	{
@@ -254,6 +238,6 @@ void LLPanelDirLand::performQuery()
 	msg->addU32("SearchType", search_type);
 	msg->addS32("Price", childGetValue("priceedit").asInteger());
 	msg->addS32("Area", childGetValue("areaedit").asInteger());
-	msg->addS32Fast(_PREHASH_QueryStart,mSearchStart);
+	msg->addS32Fast(_PREHASH_QueryStart, mSearchStart);
 	gAgent.sendReliableMessage();
 }

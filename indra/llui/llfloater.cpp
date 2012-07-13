@@ -137,13 +137,7 @@ LLFloater::LLFloater()
 	mResizable(FALSE),
 	mDragOnLeft(FALSE),
 	mMinWidth(0),
-	mMinHeight(0),
-	mDropShadowFloater(LLUI::sConfigGroup->getS32("DropShadowFloater")),
-	mColorDropShadow(LLUI::sColorsGroup->getColor("ColorDropShadow")),
-	mTitleBarFocusColor(LLUI::sColorsGroup->getColor("TitleBarFocusColor")),
-	mFloaterFocusBorderColor(LLUI::sColorsGroup->getColor("FloaterFocusBorderColor")),
-	mFloaterUnfocusBorderColor(LLUI::sColorsGroup->getColor("FloaterUnfocusBorderColor")),
-	mFloaterButtonImageColor(LLUI::sColorsGroup->getColor("FloaterButtonImageColor"))
+	mMinHeight(0)
 {
 	// automatically take focus when opened
 	mAutoFocus = TRUE;
@@ -259,13 +253,6 @@ void LLFloater::initFloater(const std::string& title,
 		}
 	}
 	mButtonScale = 1.f;
-
-	mDropShadowFloater			= LLUI::sConfigGroup->getS32("DropShadowFloater");
-	mColorDropShadow			= LLUI::sColorsGroup->getColor("ColorDropShadow");
-	mTitleBarFocusColor			= LLUI::sColorsGroup->getColor("TitleBarFocusColor");
-	mFloaterFocusBorderColor	= LLUI::sColorsGroup->getColor("FloaterFocusBorderColor");
-	mFloaterUnfocusBorderColor	= LLUI::sColorsGroup->getColor("FloaterUnfocusBorderColor");
-	mFloaterButtonImageColor	= LLUI::sColorsGroup->getColor("FloaterButtonImageColor");
 
 	//sjb: This is a bit of a hack:
 	BOOL need_border = hasBorder();
@@ -1437,8 +1424,8 @@ void LLFloater::draw()
 		S32 right = getRect().getWidth() - LLPANEL_BORDER_WIDTH;
 		S32 bottom = LLPANEL_BORDER_WIDTH;
 
-		LLColor4 shadow_color = mColorDropShadow;
-		F32 shadow_offset = (F32)mDropShadowFloater;
+		LLColor4 shadow_color = LLUI::sColorDropShadow;
+		F32 shadow_offset = (F32)LLUI::sDropShadowFloater;
 		if (!isBackgroundOpaque())
 		{
 			shadow_offset *= 0.2f;
@@ -1465,7 +1452,7 @@ void LLFloater::draw()
 			LLRect r = getRect();
 			gl_rect_2d_offset_local(0, r.getHeight(), r.getWidth(),
 									r.getHeight() - (S32)font->getLineHeight() - 1,
-									mTitleBarFocusColor, 0, TRUE);
+									LLUI::sTitleBarFocusColor, 0, TRUE);
 		}
 	}
 
@@ -1522,8 +1509,8 @@ void LLFloater::draw()
 		// use lines instead of gl_rect_2d so we can round the edges as per
 		// james' recommendation
 		LLUI::setLineWidth(1.5f);
-		LLColor4 outlineColor = gFocusMgr.childHasKeyboardFocus(this) ? mFloaterFocusBorderColor
-																	  : mFloaterUnfocusBorderColor;
+		LLColor4 outlineColor = gFocusMgr.childHasKeyboardFocus(this) ? LLUI::sFloaterFocusBorderColor
+																	  : LLUI::sFloaterUnfocusBorderColor;
 		gl_rect_2d_offset_local(0, getRect().getHeight() + 1,
 								getRect().getWidth() + 1, 0, outlineColor,
 								-LLPANEL_BORDER_WIDTH, FALSE);
@@ -1747,7 +1734,7 @@ void LLFloater::buildButtons()
 		buttonp->setFollowsTop();
 		buttonp->setFollowsRight();
 		buttonp->setToolTip(sButtonToolTips[i]);
-		buttonp->setImageColor(mFloaterButtonImageColor);
+		buttonp->setImageColor(LLUI::sFloaterButtonImageColor);
 		buttonp->setHoverImages(sButtonPressedImageNames[i],
 								sButtonPressedImageNames[i]);
 		buttonp->setScaleImage(TRUE);

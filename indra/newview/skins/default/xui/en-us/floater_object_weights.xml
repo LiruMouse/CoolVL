@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater name="object weights floater" title="Object Weights" mouse_opaque="true"
+ can_resize="false" can_drag_on_left="false" can_minimize="true" can_close="true"
+ rect_control="FloaterObjectWeightsRect"
+ width="200" min_width="200" height="200" min_height="151" follows="top|left">
+	<text name="selected_objects_label" font="SansSerifSmall" mouse_opaque="true"
+	 left="10" bottom_delta="-40" width="110" height="16" follows="top|left">
+		Selected objects:
+	</text>
+	<text name="selected_objects_count" font="SansSerifSmall" mouse_opaque="true"
+	 left_delta="120" bottom_delta="0" width="60" height="16" follows="top|left">
+		[COUNT]
+	</text>
+	<text name="objects_impact_label" font="SansSerifSmall" mouse_opaque="true"
+	 left="10" bottom_delta="-20" width="110" height="16" follows="top|left">
+		Land impact:
+	</text>
+	<text name="objects_impact" font="SansSerifSmall" mouse_opaque="true"
+	 left_delta="120" bottom_delta="0" width="60" height="16" follows="top|left">
+		[COUNT]
+	</text>
+	<text name="objects_physics_label" font="SansSerifSmall" mouse_opaque="true"
+	 left="10" bottom_delta="-20" width="110" height="16" follows="top|left">
+		Physics cost:
+	</text>
+	<text name="objects_physics_cost" font="SansSerifSmall" mouse_opaque="true"
+	 left_delta="120" bottom_delta="0" width="60" height="16" follows="top|left">
+		[COUNT]
+	</text>
+	<text name="selected_prims_label" font="SansSerifSmall" mouse_opaque="true"
+	 left="10" bottom_delta="-32" width="110" height="16" follows="top|left">
+		Selected primitives:
+	</text>
+	<text name="selected_prims_count" font="SansSerifSmall" mouse_opaque="true"
+	 left_delta="120" bottom_delta="0" width="60" height="16" follows="top|left">
+		[COUNT]
+	</text>
+	<text name="prims_impact_label" font="SansSerifSmall" mouse_opaque="true"
+	 left="10" bottom_delta="-20" width="110" height="16" follows="top|left">
+		Land impact:
+	</text>
+	<text name="prims_impact" font="SansSerifSmall" mouse_opaque="true"
+	 left_delta="120" bottom_delta="0" width="60" height="16" follows="top|left">
+		[COUNT]
+	</text>
+	<text name="prims_physics_label" font="SansSerifSmall" mouse_opaque="true"
+	 left="10" bottom_delta="-20" width="110" height="16" follows="top|left">
+		Physics cost:
+	</text>
+	<text name="prims_physics_cost" font="SansSerifSmall" mouse_opaque="true"
+	 left_delta="120" bottom_delta="0" width="60" height="16" follows="top|left">
+		[COUNT]
+	</text>
+	<text name="streaming_cost_label" font="SansSerifSmall" mouse_opaque="true"
+	 left="10" bottom_delta="-20" width="110" height="16" follows="top|left">
+		Streaming cost:
+	</text>
+	<text name="streaming_cost" font="SansSerifSmall" mouse_opaque="true"
+	 left_delta="120" bottom_delta="0" width="60" height="16" follows="top|left">
+		[COUNT]
+	</text>
+	<text name="triangle_count_label" font="SansSerifSmall" mouse_opaque="true"
+	 left="10" bottom_delta="-20" width="110" height="16" follows="top|left">
+		Triangle count:
+	</text>
+	<text name="triangle_count" font="SansSerifSmall" mouse_opaque="true"
+	 left_delta="120" bottom_delta="0" width="60" height="16" follows="top|left">
+		[COUNT]
+	</text>
+</floater>

@@ -128,9 +128,6 @@ private:
 	LLColor4			mBackgroundColor;
 	LLColor4			mBorderColor;
 	LLColor4			mHoverColor;
-	LLColor4			mColorDropShadow;
-
-	S32					mDropShadowTooltip;
 
 	BOOL				mHoverActive;
 	BOOL				mHasHover;

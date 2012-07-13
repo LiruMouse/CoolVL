@@ -33,15 +33,14 @@
 #include "llviewerprecompiledheaders.h"
 
 #include "llpaneldirpeople.h"
-#include "llviewerwindow.h"
 
-// linden library includes
+#include "llqueryflags.h"
 #include "message.h"
 
-// viewer project includes
-#include "llqueryflags.h"
+#include "llviewerwindow.h"
 
-LLPanelDirPeople::LLPanelDirPeople(const std::string& name, LLFloaterDirectory* floater)
+LLPanelDirPeople::LLPanelDirPeople(const std::string& name,
+								   LLFloaterDirectory* floater)
 :	LLPanelDirBrowser(name, floater)
 {
 	mMinSearchChars = 3;
@@ -55,7 +54,7 @@ BOOL LLPanelDirPeople::postBuild()
 
 	childSetAction("Search", &LLPanelDirBrowser::onClickSearchCore, this);
 	childDisable("Search");
-	setDefaultBtn( "Search" );
+	setDefaultBtn("Search");
 
 	return TRUE;
 }
@@ -65,49 +64,43 @@ LLPanelDirPeople::~LLPanelDirPeople()
 	// Children all cleaned up by default view destructor.
 }
 
-
 // virtual
 void LLPanelDirPeople::performQuery()
 {
-	if (childGetValue("name").asString().length() < mMinSearchChars)
+	std::string name = childGetValue("name").asString();
+	if (name.length() < mMinSearchChars)
 	{
 		return;
 	}
 
-	// filter short words out of the query string
-	// and indidate if we did have to filter it
-	// The shortest username is 2 characters long.
+	// filter short words out of the query string and indidate if we did have
+	// to filter it. The shortest username is 2 characters long.
 	const S32 SHORTEST_WORD_LEN = 2;
 	bool query_was_filtered = false;
-	std::string query_string = LLPanelDirBrowser::filterShortWords( 
-			childGetValue("name").asString(), 
-				SHORTEST_WORD_LEN, 
-					query_was_filtered );
+	std::string query_string = LLPanelDirBrowser::filterShortWords(name, 
+																   SHORTEST_WORD_LEN, 
+																   query_was_filtered);
 
 	// possible we threw away all the short words in the query so check length
-	if ( query_string.length() < mMinSearchChars )
+	if (query_string.length() < mMinSearchChars)
 	{
 		LLNotifications::instance().add("SeachFilteredOnShortWordsEmpty");
 		return;
-	};
+	}
 
 	// if we filtered something out, display a popup
-	if ( query_was_filtered )
+	if (query_was_filtered)
 	{
 		LLSD args;
 		args["FINALQUERY"] = query_string;
 		LLNotifications::instance().add("SeachFilteredOnShortWords", args);
-	};
+	}
 
 	setupNewSearch();
 
 	U32 scope = DFQ_PEOPLE;
 
 	// send the message
-	sendDirFindQuery(
-		gMessageSystem,
-		mSearchID,
-		query_string,
-		scope,
-		mSearchStart);
+	sendDirFindQuery(gMessageSystem, mSearchID, query_string, scope,
+					 mSearchStart);
 }

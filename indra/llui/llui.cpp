@@ -75,6 +75,75 @@ LLHtmlHelp*		LLUI::sHtmlHelp = NULL;
 BOOL            LLUI::sShowXUINames = FALSE;
 std::stack<LLRect> LLScreenClipRect::sClipRectStack;
 
+S32 LLUI::sButtonFlashCount = 10;
+F32 LLUI::sButtonFlashRate = 2.0f;
+F32 LLUI::sColumnHeaderDropDownDelay = 0.3f;
+S32 LLUI::sDropShadowButton = 2;
+S32 LLUI::sDropShadowFloater = 5;
+S32 LLUI::sDropShadowTooltip = 4;
+F32 LLUI::sMenuAccessKeyTime = 0.25f;
+F32 LLUI::sPieMenuLineWidth = 2.5f;
+S32 LLUI::sSnapMargin = 10;
+BOOL LLUI::sTabToTextFieldsOnly = FALSE;
+F32 LLUI::sTypeAheadTimeout = 1.5f;
+BOOL LLUI::sUseAltKeyForMenus = FALSE;
+
+LLColor4 LLUI::sAlertBoxColor = LLColor4();
+LLColor4 LLUI::sAlertCautionBoxColor = LLColor4();
+LLColor4 LLUI::sAlertCautionTextColor = LLColor4();
+LLColor4 LLUI::sAlertTextColor = LLColor4();
+LLColor4 LLUI::sButtonFlashBgColor = LLColor4();
+LLColor4 LLUI::sButtonImageColor = LLColor4();
+LLColor4 LLUI::sButtonLabelColor = LLColor4();
+LLColor4 LLUI::sButtonLabelDisabledColor = LLColor4();
+LLColor4 LLUI::sButtonLabelSelectedColor = LLColor4();
+LLColor4 LLUI::sButtonLabelSelectedDisabledColor = LLColor4();
+LLColor4 LLUI::sColorDropShadow = LLColor4();
+LLColor4 LLUI::sDefaultBackgroundColor = LLColor4();
+LLColor4 LLUI::sDefaultHighlightDark = LLColor4();
+LLColor4 LLUI::sDefaultHighlightLight = LLColor4();
+LLColor4 LLUI::sDefaultShadowDark = LLColor4();
+LLColor4 LLUI::sDefaultShadowLight = LLColor4();
+LLColor4 LLUI::sFloaterButtonImageColor = LLColor4();
+LLColor4 LLUI::sFloaterFocusBorderColor = LLColor4();
+LLColor4 LLUI::sFloaterUnfocusBorderColor = LLColor4();
+LLColor4 LLUI::sFocusBackgroundColor = LLColor4();
+LLColor4 LLUI::sLabelDisabledColor = LLColor4();
+LLColor4 LLUI::sLabelSelectedColor = LLColor4();
+LLColor4 LLUI::sLabelTextColor = LLColor4();
+LLColor4 LLUI::sLoginProgressBarBgColor = LLColor4();
+LLColor4 LLUI::sMultiSliderThumbCenterColor = LLColor4();
+LLColor4 LLUI::sMultiSliderThumbCenterSelectedColor = LLColor4();
+LLColor4 LLUI::sMultiSliderTrackColor = LLColor4();
+LLColor4 LLUI::sMultiSliderTriangleColor = LLColor4();
+LLColor4 LLUI::sPieMenuBgColor = LLColor4();
+LLColor4 LLUI::sPieMenuLineColor = LLColor4();
+LLColor4 LLUI::sPieMenuSelectedColor = LLColor4();
+LLColor4 LLUI::sScrollbarThumbColor = LLColor4();
+LLColor4 LLUI::sScrollbarTrackColor = LLColor4();
+LLColor4 LLUI::sScrollBgReadOnlyColor = LLColor4();
+LLColor4 LLUI::sScrollBGStripeColor = LLColor4();
+LLColor4 LLUI::sScrollBgWriteableColor = LLColor4();
+LLColor4 LLUI::sScrollDisabledColor = LLColor4();
+LLColor4 LLUI::sScrollHighlightedColor = LLColor4();
+LLColor4 LLUI::sScrollSelectedBGColor = LLColor4();
+LLColor4 LLUI::sScrollSelectedFGColor = LLColor4();
+LLColor4 LLUI::sScrollUnselectedColor = LLColor4();
+LLColor4 LLUI::sSliderThumbCenterColor = LLColor4();
+LLColor4 LLUI::sSliderThumbOutlineColor = LLColor4();
+LLColor4 LLUI::sSliderTrackColor = LLColor4();
+LLColor4 LLUI::sTextBgFocusColor = LLColor4();
+LLColor4 LLUI::sTextBgReadOnlyColor = LLColor4();
+LLColor4 LLUI::sTextBgWriteableColor = LLColor4();
+LLColor4 LLUI::sTextCursorColor = LLColor4();
+LLColor4 LLUI::sTextDefaultColor = LLColor4();
+LLColor4 LLUI::sTextEmbeddedItemColor = LLColor4();
+LLColor4 LLUI::sTextEmbeddedItemReadOnlyColor = LLColor4();
+LLColor4 LLUI::sTextFgColor = LLColor4();
+LLColor4 LLUI::sTextFgReadOnlyColor = LLColor4();
+LLColor4 LLUI::sTextFgTentativeColor = LLColor4();
+LLColor4 LLUI::sTitleBarFocusColor = LLColor4();
+
 //
 // Functions
 //
@@ -1606,8 +1675,82 @@ void LLUI::initClass(LLControlGroup* config,
 	sWindow = NULL; // set later in startup
 	LLFontGL::sShadowColor = colors->getColor("ColorDropShadow");
 
-	LLUI::sShowXUINames = LLUI::sConfigGroup->getBOOL("ShowXUINames");
-	LLUI::sConfigGroup->getControl("ShowXUINames")->getSignal()->connect(boost::bind(&handleShowXUINamesChanged, _2));
+	sShowXUINames = sConfigGroup->getBOOL("ShowXUINames");
+	sConfigGroup->getControl("ShowXUINames")->getSignal()->connect(boost::bind(&handleShowXUINamesChanged, _2));
+
+	LLUI::refreshSettings();
+}
+
+void LLUI::refreshSettings()
+{
+	sButtonFlashCount = sConfigGroup->getS32("ButtonFlashCount");
+	sButtonFlashRate = sConfigGroup->getF32("ButtonFlashRate");
+	sColumnHeaderDropDownDelay = sConfigGroup->getF32("ColumnHeaderDropDownDelay");
+	sDropShadowButton = sConfigGroup->getS32("DropShadowButton");
+	sDropShadowFloater = sConfigGroup->getS32("DropShadowFloater");
+	sDropShadowTooltip = sConfigGroup->getS32("DropShadowTooltip");
+	sMenuAccessKeyTime = sConfigGroup->getF32("MenuAccessKeyTime");
+	sPieMenuLineWidth = sConfigGroup->getF32("PieMenuLineWidth");
+	sSnapMargin = sConfigGroup->getS32("SnapMargin");
+	sTabToTextFieldsOnly = sConfigGroup->getBOOL("TabToTextFieldsOnly");
+	sTypeAheadTimeout = sConfigGroup->getF32("TypeAheadTimeout");
+	sUseAltKeyForMenus = sConfigGroup->getBOOL("UseAltKeyForMenus");
+
+	sAlertBoxColor = sColorsGroup->getColor("AlertBoxColor");
+	sAlertCautionBoxColor = sColorsGroup->getColor("AlertCautionBoxColor");
+	sAlertCautionTextColor = sColorsGroup->getColor("AlertCautionTextColor");
+	sAlertTextColor = sColorsGroup->getColor("AlertTextColor");
+	sButtonFlashBgColor = sColorsGroup->getColor("ButtonFlashBgColor");
+	sButtonImageColor = sColorsGroup->getColor("ButtonImageColor");
+	sButtonLabelColor = sColorsGroup->getColor("ButtonLabelColor");
+	sButtonLabelDisabledColor = sColorsGroup->getColor("ButtonLabelDisabledColor");
+	sButtonLabelSelectedColor = sColorsGroup->getColor("ButtonLabelSelectedColor");
+	sButtonLabelSelectedDisabledColor = sColorsGroup->getColor("ButtonLabelSelectedDisabledColor");
+	sColorDropShadow = sColorsGroup->getColor("ColorDropShadow");
+	sDefaultBackgroundColor = sColorsGroup->getColor("DefaultBackgroundColor");
+	sDefaultHighlightDark = sColorsGroup->getColor("DefaultHighlightDark");
+	sDefaultHighlightLight = sColorsGroup->getColor("DefaultHighlightLight");
+	sDefaultShadowDark = sColorsGroup->getColor("DefaultShadowDark");
+	sDefaultShadowLight = sColorsGroup->getColor("DefaultShadowLight");
+	sFloaterButtonImageColor = sColorsGroup->getColor("FloaterButtonImageColor");
+	sFloaterFocusBorderColor = sColorsGroup->getColor("FloaterFocusBorderColor");
+	sFloaterUnfocusBorderColor = sColorsGroup->getColor("FloaterUnfocusBorderColor");
+	sFocusBackgroundColor = sColorsGroup->getColor("FocusBackgroundColor");
+	sLabelDisabledColor = sColorsGroup->getColor("LabelDisabledColor");
+	sLabelSelectedColor = sColorsGroup->getColor("LabelSelectedColor");
+	sLabelTextColor = sColorsGroup->getColor("LabelTextColor");
+	sLoginProgressBarBgColor = sColorsGroup->getColor("LoginProgressBarBgColor");
+	sMultiSliderThumbCenterColor = sColorsGroup->getColor("MultiSliderThumbCenterColor");
+	sMultiSliderThumbCenterSelectedColor = sColorsGroup->getColor("MultiSliderThumbCenterSelectedColor");
+	sMultiSliderTrackColor = sColorsGroup->getColor("MultiSliderTrackColor");
+	sMultiSliderTriangleColor = sColorsGroup->getColor("MultiSliderTriangleColor");
+	sPieMenuBgColor = sColorsGroup->getColor("PieMenuBgColor");
+	sPieMenuLineColor = sColorsGroup->getColor("PieMenuLineColor");
+	sPieMenuSelectedColor = sColorsGroup->getColor("PieMenuSelectedColor");
+	sScrollbarThumbColor = sColorsGroup->getColor("ScrollbarThumbColor");
+	sScrollbarTrackColor = sColorsGroup->getColor("ScrollbarTrackColor");
+	sScrollBgReadOnlyColor = sColorsGroup->getColor("ScrollBgReadOnlyColor");
+	sScrollBGStripeColor = sColorsGroup->getColor("ScrollBGStripeColor");
+	sScrollBgWriteableColor = sColorsGroup->getColor("ScrollBgWriteableColor");
+	sScrollDisabledColor = sColorsGroup->getColor("ScrollDisabledColor");
+	sScrollHighlightedColor = sColorsGroup->getColor("ScrollHighlightedColor");
+	sScrollSelectedBGColor = sColorsGroup->getColor("ScrollSelectedBGColor");
+	sScrollSelectedFGColor = sColorsGroup->getColor("ScrollSelectedFGColor");
+	sScrollUnselectedColor = sColorsGroup->getColor("ScrollUnselectedColor");
+	sSliderThumbCenterColor = sColorsGroup->getColor("SliderThumbCenterColor");
+	sSliderThumbOutlineColor = sColorsGroup->getColor("SliderThumbOutlineColor");
+	sSliderTrackColor = sColorsGroup->getColor("SliderTrackColor");
+	sTextBgFocusColor = sColorsGroup->getColor("TextBgFocusColor");
+	sTextBgReadOnlyColor = sColorsGroup->getColor("TextBgReadOnlyColor");
+	sTextBgWriteableColor = sColorsGroup->getColor("TextBgWriteableColor");
+	sTextCursorColor = sColorsGroup->getColor("TextCursorColor");
+	sTextDefaultColor = sColorsGroup->getColor("TextDefaultColor");
+	sTextEmbeddedItemColor = sColorsGroup->getColor("TextEmbeddedItemColor");
+	sTextEmbeddedItemReadOnlyColor = sColorsGroup->getColor("TextEmbeddedItemReadOnlyColor");
+	sTextFgColor = sColorsGroup->getColor("TextFgColor");
+	sTextFgReadOnlyColor = sColorsGroup->getColor("TextFgReadOnlyColor");
+	sTextFgTentativeColor = sColorsGroup->getColor("TextFgTentativeColor");
+	sTitleBarFocusColor = sColorsGroup->getColor("TitleBarFocusColor");
 }
 
 void LLUI::cleanupClass()

@@ -37,16 +37,16 @@
 #ifdef GROUP_VOTING
 
 #include "llbutton.h"
+#include "llfocusmgr.h"
 #include "llnotifications.h"
 #include "llradiogroup.h"
 #include "llscrolllistctrl.h"
 #include "llspinctrl.h"
 #include "lltextbox.h"
 #include "lltexteditor.h"
+#include "llui.h"
 
 #include "llagent.h"
-#include "llfocusmgr.h"
-#include "llviewercontrol.h"
 #include "llviewerregion.h"
 #include "llviewerwindow.h"
 
@@ -98,53 +98,53 @@ public:
 												 void** data);
 
 public:
-	LLUUID mGroupID;
-	LLUUID mProposalID;
+	LLUUID				mGroupID;
+	LLUUID				mProposalID;
 
-	LLPanelGroupVoting& mPanel;
+	LLPanelGroupVoting&	mPanel;
 	
-	LLSpinCtrl		*mQuorum;
-	LLTextBox		*mQuorumLbl;
-	LLSpinCtrl		*mDuration;
-	LLTextBox		*mDurationLbl;
-	LLTextBox       *mDurationText;
-	LLRadioGroup	*mMajority;
-	LLTextBox		*mMajorityLbl;
-	LLTextBox		*mStartLbl;
-	LLTextBox	    *mEndLbl;
-	LLTextBox	    *mStartDate;
-	LLTextBox	    *mEndDate;
+	LLSpinCtrl*			mQuorum;
+	LLTextBox*			mQuorumLbl;
+	LLSpinCtrl*			mDuration;
+	LLTextBox*			mDurationLbl;
+	LLTextBox*			mDurationText;
+	LLRadioGroup*		mMajority;
+	LLTextBox*			mMajorityLbl;
+	LLTextBox*			mStartLbl;
+	LLTextBox*			mEndLbl;
+	LLTextBox*			mStartDate;
+	LLTextBox*			mEndDate;
 
-	LLButton *mBtnYes;
-	LLButton *mBtnNo;
-	LLButton *mBtnAbstain;
+	LLButton*			mBtnYes;
+	LLButton*			mBtnNo;
+	LLButton*			mBtnAbstain;
 
-	LLScrollListCtrl *mProposals;
-	LLTextEditor     *mProposalText;
-	LLButton	     *mBtnCreateProposal;
-	LLButton	     *mBtnSubmitProposal;
-	LLButton         *mBtnCancelProposal;
-	LLButton	     *mBtnViewProposalList;
-	LLButton	     *mBtnViewProposalItem;
+	LLScrollListCtrl*	mProposals;
+	LLTextEditor*		mProposalText;
+	LLButton*			mBtnCreateProposal;
+	LLButton*			mBtnSubmitProposal;
+	LLButton*			mBtnCancelProposal;
+	LLButton*			mBtnViewProposalList;
+	LLButton*			mBtnViewProposalItem;
 
-	LLScrollListCtrl *mVotesHistory;
-	LLTextBox	     *mVotesHistoryLbl;
-	LLTextEditor	 *mVoteHistoryText;
-	LLTextBox        *mVoteHistoryTextLbl;
-	LLButton		 *mBtnViewHistoryList;
-	LLButton		 *mBtnViewHistoryItem;
+	LLScrollListCtrl*	mVotesHistory;
+	LLTextBox*			mVotesHistoryLbl;
+	LLTextEditor*		mVoteHistoryText;
+	LLTextBox *			mVoteHistoryTextLbl;
+	LLButton*			mBtnViewHistoryList;
+	LLButton*			mBtnViewHistoryItem;
 
-	int	mNumGroupMembers;
+	int					mNumGroupMembers;
 
-	std::vector<LLSD> mActiveReceived;
-	std::vector<LLSD> mHistoryReceived;
-	U32 mOtherGroupHistoryItems;
+	std::vector<LLSD>	mActiveReceived;
+	std::vector<LLSD>	mHistoryReceived;
+	U32					mOtherGroupHistoryItems;
 
-	int mProposalColumnWidths[10];
-	int mHistoryColumnWidths[10];
+	int					mProposalColumnWidths[10];
+	int					mHistoryColumnWidths[10];
 
-	LLUUID mProposalTransID;
-	LLUUID mHistoryTransID;
+	LLUUID				mProposalTransID;
+	LLUUID				mHistoryTransID;
 
 	static std::map<LLUUID, LLPanelGroupVoting::impl*> sGroupIDs;
 };
@@ -243,7 +243,7 @@ void LLPanelGroupVoting::impl::setEnableListProposals()
 	mPanel.childSetVisible("proposal_lbl", FALSE);
 	mPanel.childSetVisible("proposal_voting_lbl", TRUE);
 	mProposals->setVisible(TRUE);
-	mProposals->setBgSelectedColor(gColors.getColor("ScrollSelectedBGColor"));
+	mProposals->setBgSelectedColor(LLUI::sScrollSelectedBGColor);
 	mProposalText->setVisible(FALSE);
 	mBtnYes->setEnabled(FALSE);
 	mBtnYes->setVisible(FALSE);

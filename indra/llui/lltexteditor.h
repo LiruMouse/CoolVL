@@ -650,15 +650,12 @@ private:
 	LLFrameTimer	mKeystrokeTimer;
 
 	LLColor4		mCursorColor;
-
 	LLColor4		mFgColor;
 	LLColor4		mDefaultColor;
 	LLColor4		mReadOnlyFgColor;
 	LLColor4		mWriteableBgColor;
 	LLColor4		mReadOnlyBgColor;
 	LLColor4		mFocusBgColor;
-	LLColor4		mTextEmbeddedItemColor;
-	LLColor4		mTextEmbeddedItemReadOnlyColor;
 	
 	BOOL			mReadOnly;
 	BOOL			mWordWrap;

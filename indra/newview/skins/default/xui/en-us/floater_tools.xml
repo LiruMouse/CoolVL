@@ -119,7 +119,7 @@
 	     name="checkbox limit drag distance" width="134" />
 	<button bottom_delta="-17" follows="left|top" font="SansSerifSmall"
        halign="center" valign="center"
-	   height="16" label="Grid Options" label_selected="Grid Options" left_delta="0"
+	   height="18" label="Grid Options" label_selected="Grid Options" left_delta="0"
 	   mouse_opaque="true" name="Grid Options" width="120" />
 	<button bottom_delta="-18" follows="left|top" font="SansSerifSmall"
        halign="center" valign="center"
@@ -129,6 +129,20 @@
        halign="center" valign="center"
 	   height="18" label="Unlink" label_selected="Unlink" left_delta="65"
 	   mouse_opaque="true" name="Unlink" width="55" />
+	<text name="obj_count" font="SansSerifSmall" mouse_opaque="true"
+	 bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
+	 drop_shadow_visible="true" halign="right" h_pad="0" v_pad="0"
+	 tool_tip="This is the total number of selected objects. Click for detailed statistics."
+	 left="118" bottom_delta="-14" width="143" height="14" follows="left|top">
+		Selected objects: [COUNT]
+	</text>
+	<text name="prim_count" font="SansSerifSmall" mouse_opaque="true"
+	 bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
+	 drop_shadow_visible="true" halign="right" h_pad="0" v_pad="0"
+	 tool_tip="This is the total number of selected primitives. When the land impact is different than the number of primitives, it is presented between parenthesis after the latter. Click for detailed statistics."
+	 left="118" bottom_delta="-14" width="143" height="14" follows="left|top">
+		primitives: [COUNT]
+	</text>
 
 <!-- Help text -->
 
@@ -314,18 +328,6 @@
 	<volume_slider bottom_delta="-4" follows="left|top" height="16" hidden="false"
 	     increment="0.1" initial_val="0.00" left="178" max_val="2.0" min_val="-1.0"
 	     mouse_opaque="true" name="slider force" width="80" />
-  <text bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
-         bottom="-151" left="118" drop_shadow_visible="true" follows="left|top"
-         font="SansSerifSmall" h_pad="0" halign="right" height="16"
-         mouse_opaque="true" name="obj_count" v_pad="0" width="143">
-    Selected objects: [COUNT]
-  </text>
-  <text bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
-       bottom="-163" left="118" drop_shadow_visible="true" follows="left|top"
-       font="SansSerifSmall" h_pad="0" halign="right" height="16"
-       mouse_opaque="true" name="prim_count" v_pad="0" width="143">
-    primitives: [COUNT]
-  </text>
 
 <!-- Sub-tabs -->
 
@@ -367,7 +369,7 @@
 				Thrax Linden
 			</text>
 			<button bottom="-66" follows="top|right" font="SansSerifSmall" halign="center"
-			     height="20" label="Profile..." label_selected="Profile..." left_delta="94"
+			     height="18" label="Profile..." label_selected="Profile..." left_delta="94"
 			     mouse_opaque="true" name="button creator profile" scale_image="TRUE"
 			     width="78" />
 			<text bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
@@ -383,7 +385,7 @@
 				Thrax Linden
 			</text>
 			<button bottom="-86" follows="top|right" font="SansSerifSmall" halign="center"
-			     height="20" label="Profile..." label_selected="Profile..." left_delta="94"
+			     height="18" label="Profile..." label_selected="Profile..." left_delta="94"
 			     mouse_opaque="true" name="button owner profile" scale_image="TRUE"
 			     width="78" />
 			<text bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
@@ -400,7 +402,7 @@
 				The Lindens
 			</text>
 			<button bottom="-106" follows="top|right" font="SansSerifSmall" halign="center"
-			     height="20" label="Set..." label_selected="Set..." left_delta="94"
+			     height="18" label="Set..." label_selected="Set..." left_delta="94"
 			     mouse_opaque="true" name="button set group" scale_image="TRUE" width="78" />
 			<text bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
 			     bottom_delta="-20" drop_shadow_visible="true" follows="left|top"
@@ -513,40 +515,34 @@
 					Open parcel media
 				</combo_item>
 			</combo_box>
-			<text bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
-			     bottom="-115" drop_shadow_visible="true" follows="left|top"
-			     font="SansSerifSmall" h_pad="0" halign="left" height="10" left="88"
-			     mouse_opaque="true" name="B:" v_pad="0" width="174">
+			<text name="B:" font="SansSerifSmall" halign="left" h_pad="0" v_pad="0" mouse_opaque="true"
+			 tool_tip="These are the base permissions; the object can never be more permissive than this. V = Velocity (allow anyone to move), M = Modify, C = Copy, T = Transfer."
+			 left="88" bottom="-115" width="50" height="10" follows="left|top" >
 				B:
 			</text>
-			<text bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
-			     bottom="-115" drop_shadow_visible="true" follows="left|top"
-			     font="SansSerifSmall" h_pad="0" halign="left" height="10" left_delta="50"
-			     mouse_opaque="true" name="O:" v_pad="0" width="124">
-				O;
+			<text name="O:" font="SansSerifSmall" halign="left" h_pad="0" v_pad="0" mouse_opaque="true"
+			 tool_tip="These are the owner permissions. V = Velocity (allow anyone to move), M = Modify, C = Copy, T = Transfer."
+			 left_delta="55" bottom_delta="0" width="50" height="10" follows="left|top" >
+				O:
 			</text>
-			<text bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
-			     bottom="-115" drop_shadow_visible="true" follows="left|top"
-			     font="SansSerifSmall" h_pad="0" halign="left" height="10" left_delta="50"
-			     mouse_opaque="true" name="G:" v_pad="0" width="74">
+			<text name="G:" font="SansSerifSmall" halign="left" h_pad="0" v_pad="0" mouse_opaque="true"
+			 tool_tip="These are the group permissions (the group the object is set or deeded to is shown next to 'Group:' above). V = Velocity (allow anyone to move), M = Modify, C = Copy, T = Transfer."
+			 left_delta="55" bottom_delta="0" width="50" height="10" follows="left|top" >
 				G:
 			</text>
-			<text bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
-			     bottom="-127" drop_shadow_visible="true" follows="left|top"
-			     font="SansSerifSmall" h_pad="0" halign="left" height="10" left="88"
-			     mouse_opaque="true" name="E:" v_pad="0" width="174">
+			<text name="E:" font="SansSerifSmall" halign="left" h_pad="0" v_pad="0" mouse_opaque="true"
+			 tool_tip="These are the permissions everyone else has on the object. V = Velocity (allow anyone to move), M = Modify, C = Copy, T = Transfer."
+			 left="88" bottom="-127" width="50" height="10" follows="left|top" >
 				E:
 			</text>
-			<text bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
-			     bottom="-127" drop_shadow_visible="true" follows="left|top"
-			     font="SansSerifSmall" h_pad="0" halign="left" height="10" left_delta="50"
-			     mouse_opaque="true" name="N:" v_pad="0" width="124">
+			<text name="N:" font="SansSerifSmall" halign="left" h_pad="0" v_pad="0" mouse_opaque="true"
+			 tool_tip="These are the permissions the next person to own the object will have. V = Velocity (allow anyone to move), M = Modify, C = Copy, T = Transfer."
+			 left_delta="55" bottom_delta="0" width="50" height="10" follows="left|top" >
 				N:
 			</text>
-			<text bg_visible="false" border_drop_shadow_visible="false" border_visible="false"
-			     bottom="-127" drop_shadow_visible="true" follows="left|top"
-			     font="SansSerifSmall" h_pad="0" halign="left" height="10" left_delta="50"
-			     mouse_opaque="true" name="F:" v_pad="0" width="74">
+			<text name="F:" font="SansSerifSmall" halign="left" h_pad="0" v_pad="0" mouse_opaque="true"
+			 tool_tip="These are the permissions of the object as a whole (F = full), including all permissions of the object's contents. For example, a copyable object which has a no-copy item added to its contents becomes non-copyable as a whole because it's restricted by the no-copy content item. V = Velocity (allow anyone to move), M = Modify, C = Copy, T = Transfer."
+			 left_delta="55" bottom_delta="0" width="50" height="10" follows="left|top" >
 				F:
 			</text>
 			<string name="text modify info 1">

@@ -19,6 +19,11 @@ set(CMAKE_CXX_FLAGS_RELWITHDEBINFO
 set(CMAKE_CONFIGURATION_TYPES "RelWithDebInfo;Release;Debug" CACHE STRING
     "Supported build types." FORCE)
 
+# If you want to enable or disable TCMALLOC in viewer builds, this is the place.
+# set ON or OFF as desired.
+set(USE_TCMALLOC ON)
+
+
 # Platform-specific compilation flags.
 
 if (WINDOWS)
@@ -38,6 +43,12 @@ if (WINDOWS)
 
   set(CMAKE_CXX_STANDARD_LIBRARIES "")
   set(CMAKE_C_STANDARD_LIBRARIES "")
+
+  if (USE_TCMALLOC)
+    add_definitions(/DLL_USE_TCMALLOC=1)
+  else (USE_TCMALLOC)
+    add_definitions(/DLL_USE_TCMALLOC=0)
+  endif (USE_TCMALLOC)
 
   add_definitions(
       /DLL_WINDOWS=1
@@ -140,6 +151,12 @@ if (LINUX)
 
   # End of hacks.
 
+  if (USE_TCMALLOC)
+    add_definitions(-DLL_USE_TCMALLOC=1)
+  else (USE_TCMALLOC)
+    add_definitions(-DLL_USE_TCMALLOC=0)
+  endif (USE_TCMALLOC)
+
   add_definitions(
       -DLL_LINUX=1
       -D_REENTRANT
@@ -153,39 +170,15 @@ if (LINUX)
       -pthread
       )
 
-  if (SERVER)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ftemplate-depth-60")
-    if (EXISTS /etc/debian_version)
-      FILE(READ /etc/debian_version DEBIAN_VERSION)
-    else (EXISTS /etc/debian_version)
-      set(DEBIAN_VERSION "")
-    endif (EXISTS /etc/debian_version)
-
-    if (NOT DEBIAN_VERSION STREQUAL "3.1")
-      add_definitions(-DCTYPE_WORKAROUND)
-    endif (NOT DEBIAN_VERSION STREQUAL "3.1")
-
-    if (EXISTS /usr/lib/mysql4/mysql)
-      link_directories(/usr/lib/mysql4/mysql)
-    endif (EXISTS /usr/lib/mysql4/mysql)
-
-    add_definitions(
-        -msse2
-        -mfpmath=sse
-        )
-  endif (SERVER)
-
-  if (VIEWER)
-    add_definitions(-DAPPID=secondlife)
-    add_definitions(-fvisibility=hidden)
-    # don't catch SIGCHLD in our base application class for the viewer - some of our 3rd party libs may need their *own* SIGCHLD handler to work.  Sigh!  The viewer doesn't need to catch SIGCHLD anyway.
-    add_definitions(-DLL_IGNORE_SIGCHLD)
-    add_definitions(-march=pentium4 -mfpmath=sse)
-    if (NOT STANDALONE)
-      # this stops us requiring a really recent glibc at runtime
-      add_definitions(-fno-stack-protector)
-    endif (NOT STANDALONE)
-  endif (VIEWER)
+  add_definitions(-DAPPID=secondlife)
+  add_definitions(-fvisibility=hidden)
+  # don't catch SIGCHLD in our base application class for the viewer - some of our 3rd party libs may need their *own* SIGCHLD handler to work.  Sigh!  The viewer doesn't need to catch SIGCHLD anyway.
+  add_definitions(-DLL_IGNORE_SIGCHLD)
+  add_definitions(-march=pentium4 -mfpmath=sse)
+  if (NOT STANDALONE)
+    # this stops us requiring a really recent glibc at runtime
+    add_definitions(-fno-stack-protector)
+  endif (NOT STANDALONE)
 
   set(CMAKE_CXX_FLAGS_DEBUG "-fno-inline ${CMAKE_CXX_FLAGS_DEBUG}")
   set(CMAKE_CXX_FLAGS_RELEASE "-O2 ${CMAKE_CXX_FLAGS_RELEASE}")
@@ -245,7 +238,3 @@ else (STANDALONE)
       pango-1.0
       )
 endif (STANDALONE)
-
-if(SERVER)
-  include_directories(${LIBS_PREBUILT_DIR}/include/havok)
-endif(SERVER)

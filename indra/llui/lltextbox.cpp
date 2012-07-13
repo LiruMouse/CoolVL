@@ -40,42 +40,52 @@
 
 static LLRegisterWidget<LLTextBox> r("text");
 
-LLTextBox::LLTextBox(const std::string& name, const LLRect& rect, const std::string& text,
-					 const LLFontGL* font, BOOL mouse_opaque)
+LLTextBox::LLTextBox(const std::string& name,
+					 const LLRect& rect,
+					 const std::string& text,
+					 const LLFontGL* font,
+					 BOOL mouse_opaque)
 :	LLUICtrl(name, rect, mouse_opaque, NULL, NULL, FOLLOWS_LEFT | FOLLOWS_TOP),
 	mFontGL(font ? font : LLFontGL::getFontSansSerifSmall())
 {
+	LL_DEBUGS("UITextBox") << "Creating TextBox: " << name << LL_ENDL;
 	initDefaults();
 	setText(text);
 }
 
-LLTextBox::LLTextBox(const std::string& name, const std::string& text, F32 max_width,
-					 const LLFontGL* font, BOOL mouse_opaque) :
-	LLUICtrl(name, LLRect(0, 0, 1, 1), mouse_opaque, NULL, NULL, FOLLOWS_LEFT | FOLLOWS_TOP),
+LLTextBox::LLTextBox(const std::string& name,
+					 const std::string& text,
+					 F32 max_width,
+					 const LLFontGL* font,
+					 BOOL mouse_opaque) :
+	LLUICtrl(name, LLRect(0, 0, 1, 1), mouse_opaque, NULL, NULL,
+			 FOLLOWS_LEFT | FOLLOWS_TOP),
 	mFontGL(font ? font : LLFontGL::getFontSansSerifSmall())
 {
+	LL_DEBUGS("UITextBox") << "Creating TextBox: " << name << LL_ENDL;
 	initDefaults();
 	setWrappedText(text, max_width);
 	reshapeToFitText();
 }
 
 LLTextBox::LLTextBox(const std::string& name_and_label, const LLRect& rect) :
-	LLUICtrl(name_and_label, rect, TRUE, NULL, NULL, FOLLOWS_LEFT | FOLLOWS_TOP),
+	LLUICtrl(name_and_label, rect, TRUE, NULL, NULL,
+			 FOLLOWS_LEFT | FOLLOWS_TOP),
 	mFontGL(LLFontGL::getFontSansSerifSmall())
 {
+	LL_DEBUGS("UITextBox") << "Creating TextBox: " << name_and_label
+						   << LL_ENDL;
 	initDefaults();
 	setText(name_and_label);
 }
 
 void LLTextBox::initDefaults()
 {
-	mTextColor = LLUI::sColorsGroup->getColor("LabelTextColor");
-	mDisabledColor = LLUI::sColorsGroup->getColor("LabelDisabledColor");
-	mBackgroundColor = LLUI::sColorsGroup->getColor("DefaultBackgroundColor");
-	mBorderColor = LLUI::sColorsGroup->getColor("DefaultHighlightLight");
-	mHoverColor = LLUI::sColorsGroup->getColor("LabelSelectedColor");
-	mColorDropShadow = LLUI::sColorsGroup->getColor("ColorDropShadow");
-	mDropShadowTooltip = LLUI::sConfigGroup->getS32("DropShadowTooltip");
+	mTextColor = LLUI::sLabelTextColor;
+	mDisabledColor = LLUI::sLabelDisabledColor;
+	mBackgroundColor = LLUI::sDefaultBackgroundColor;
+	mBorderColor = LLUI::sDefaultHighlightLight;
+	mHoverColor = LLUI::sLabelSelectedColor;
 	mHoverActive = FALSE;
 	mHasHover = FALSE;
 	mBackgroundVisible = FALSE;
@@ -276,7 +286,8 @@ S32 LLTextBox::getTextPixelHeight()
 	return (S32)(num_lines * mFontGL->getLineHeight());
 }
 
-BOOL LLTextBox::setTextArg(const std::string& key, const LLStringExplicit& text)
+BOOL LLTextBox::setTextArg(const std::string& key,
+						   const LLStringExplicit& text)
 {
 	mText.setArg(key, text);
 	setLineLengths();
@@ -293,7 +304,7 @@ void LLTextBox::draw()
 	if (mBorderDropShadowVisible)
 	{
 		gl_drop_shadow(0, getRect().getHeight(), getRect().getWidth(), 0,
-					   mColorDropShadow, mDropShadowTooltip);
+					   LLUI::sColorDropShadow, LLUI::sDropShadowTooltip);
 	}
 
 	if (mBackgroundVisible)

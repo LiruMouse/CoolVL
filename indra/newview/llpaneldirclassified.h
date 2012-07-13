@@ -35,12 +35,8 @@
 
 #include "llpaneldirbrowser.h"
 
-// UI class forward declarations
 class LLButton;
-class LLCheckBoxCtrl;
-class LLComboBox;
 class LLLineEditor;
-class LLScrollListCtrl;
 
 class LLPanelDirClassified : public LLPanelDirBrowser
 {
@@ -48,29 +44,21 @@ public:
 	LLPanelDirClassified(const std::string& name, LLFloaterDirectory* floater);
 	/*virtual*/ ~LLPanelDirClassified();
 
+	/*virtual*/ BOOL postBuild();
 	/*virtual*/ void draw();
+	/*virtual*/ void refresh();
 
-	virtual BOOL postBuild();
-
-	void refresh();
-
-	// Request the classifieds from the database
-	void performQuery();
+	// Requests the classifieds from the database
+	/*virtual*/ void performQuery();
 
 protected:
-	//static void onClickNewClassified(void* data);
 	static void onClickDelete(void* data);
-
-	// onClickNext and onClickPrev are special case searches
 	static void onClickSearch(void *userdata);
-
 	static void onKeystrokeNameClassified(LLLineEditor* line, void* data);
-	
-	// 
 	static void onClickCreateNewClassified(void* data);
 
 protected:
+	LLButton* 	mDeleteButton;
 };
-
 
 #endif

@@ -140,7 +140,6 @@ private:
 	static U32			sCount;
 };
 
-
 class LLScrollListDate : public LLScrollListText
 {
 public:
@@ -723,8 +722,6 @@ private:
 	LLColor4		mHighlightedColor;
 
 	S32				mBorderThickness;
-
-	F32				mTypeAheadTimeout;
 
 	void			(*mOnDoubleClickCallback)(void* userdata);
 	void			(*mOnMaximumSelectCallback)(void* userdata);

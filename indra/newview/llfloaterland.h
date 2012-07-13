@@ -234,6 +234,8 @@ private:
 	LLButton*		mBtnBuyPass;
 	LLButton*		mBtnStartAuction;
 
+	std::string		mAnyoneText;
+
 	LLSafeHandle<LLParcelSelection>&	mParcel;
 
 	static LLHandle<LLFloater> sBuyPassDialogHandle;

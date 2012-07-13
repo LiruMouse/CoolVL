@@ -46,6 +46,7 @@
 #include "llresmgr.h"
 #include "llsys.h"
 #include "lltextbox.h"
+#include "llui.h"
 #include "lluictrlfactory.h"
 #include "message.h"
 
@@ -262,11 +263,8 @@ void LLStatusBar::draw()
 
 	if (isBackgroundVisible())
 	{
-		static LLCachedControl<S32> drop_shadow_floater(gSavedSettings, "DropShadowFloater");
-		static LLCachedControl<LLColor4U> color_drop_shadow(gColors, "ColorDropShadow");
-		LLColor4 shadow_color = LLColor4(color_drop_shadow);
 		gl_drop_shadow(0, getRect().getHeight(), getRect().getWidth(), 0,
-					   shadow_color, drop_shadow_floater);
+					   LLUI::sColorDropShadow, LLUI::sDropShadowFloater);
 	}
 	LLPanel::draw();
 }

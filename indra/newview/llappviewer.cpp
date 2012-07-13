@@ -497,6 +497,7 @@ static void settings_to_globals()
 	gShowObjectUpdates = gSavedSettings.getBOOL("ShowObjectUpdates");
 	LLWorldMapView::sMapScale = gSavedSettings.getF32("MapScale");
 	LLHoverView::sShowHoverTips = gSavedSettings.getBOOL("ShowHoverTips");
+	LLAvatarName::sLegacyNamesForFriends = (bool)gSavedSettings.getBOOL("LegacyNamesForFriends");
 
 	// Setup the spell checker
 	LLSpellCheck::instance().setSpellCheck(gSavedSettings.getBOOL("SpellCheck"));
@@ -2587,12 +2588,9 @@ void LLAppViewer::writeDebugInfo()
 void LLAppViewer::cleanupSavedSettings()
 {
 	gSavedSettings.setBOOL("FlyBtnState", FALSE);
-
-	gSavedSettings.setBOOL("FirstPersonBtnState", FALSE);
-	gSavedSettings.setBOOL("ThirdPersonBtnState", TRUE);
 	gSavedSettings.setBOOL("BuildBtnState", FALSE);
 
-	gSavedSettings.setBOOL("UseEnergy", TRUE);				// force toggle to turn off, since sends message to simulator
+	gSavedSettings.setBOOL("UseEnergy", TRUE);	// force toggle to turn off, since sends message to simulator
 
 	gSavedSettings.setBOOL("DebugWindowProc", gDebugWindowProc);
 

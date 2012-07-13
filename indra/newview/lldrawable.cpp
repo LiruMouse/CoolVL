@@ -442,11 +442,11 @@ void LLDrawable::makeStatic(BOOL warning_enabled)
 {
 	if (isState(ACTIVE))
 	{
-		clearState(ACTIVE);
+		clearState(ACTIVE | ANIMATED_CHILD);
 
 		if (mParent.notNull() && mParent->isActive() && warning_enabled)
 		{
-			llwarns << "Drawable becomes static with active parent." << llendl;
+			LL_WARNS_ONCE("Drawable") << "Drawable becomes static with active parent." << LL_ENDL;
 		}
 
 		LLViewerObject::const_child_list_t& child_list = mVObjp->getChildren();
@@ -509,7 +509,7 @@ F32 LLDrawable::updateXform(BOOL undamped)
 
 	// Damping
 	F32 dist_squared = 0.f;
-	F32 camdist2 = (mDistanceWRTCamera * mDistanceWRTCamera);
+	F32 camdist2 = mDistanceWRTCamera * mDistanceWRTCamera;
 
 	if (damped && isVisible())
 	{
@@ -532,9 +532,9 @@ F32 LLDrawable::updateXform(BOOL undamped)
 			target_rot = new_rot;
 			target_scale = new_scale;
 		}
-		else
+		else if (mVObjp->getAngularVelocity().isExactlyZero())
 		{
-			// snap to final position
+			// snap to final position (only if no target omega is applied)
 			dist_squared = 0.0f;
 			if (getVOVolume() && !isRoot())
 			{	// child prim snapping to some position, needs a rebuild
@@ -543,14 +543,24 @@ F32 LLDrawable::updateXform(BOOL undamped)
 		}
 	}
 
-	if ((mCurrentScale != target_scale) ||
-		(!isRoot() &&
-		 (dist_squared >= MIN_INTERPOLATE_DISTANCE_SQUARED ||
-		  !mVObjp->getAngularVelocity().isExactlyZero() ||
-		  target_pos != mXform.getPosition() ||
-		  target_rot != mXform.getRotation())))
-	{	// child prim moving or scale change requires immediate rebuild
+	LLVector3 vec = mCurrentScale - target_scale;
+	
+	if (vec * vec > MIN_INTERPOLATE_DISTANCE_SQUARED)
+	{	// scale change requires immediate rebuild
+		mCurrentScale = target_scale;
 		gPipeline.markRebuild(this, LLDrawable::REBUILD_POSITION, TRUE);
+	}
+	else if (!isRoot() &&
+			 (!mVObjp->getAngularVelocity().isExactlyZero() ||
+			  dist_squared > 0.f))
+	{	// child prim moving relative to parent, tag as needing to be rendered
+		// atomically and rebuild
+		if (!isState(LLDrawable::ANIMATED_CHILD))
+		{			
+			setState(LLDrawable::ANIMATED_CHILD);
+			gPipeline.markRebuild(this, LLDrawable::REBUILD_ALL, TRUE);
+			mVObjp->dirtySpatialGroup();
+		}
 	}
 	else if (!getVOVolume() && !isAvatar())
 	{

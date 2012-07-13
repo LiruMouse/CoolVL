@@ -36,7 +36,6 @@
 
 #include "llassetstorage.h"
 #include "llbutton.h"
-#include "llcheckboxctrl.h"
 #include "llcombobox.h"
 #include "lllineeditor.h"
 #include "llmenugl.h"
@@ -44,6 +43,7 @@
 #include "llresmgr.h"
 #include "llscrolllistctrl.h"
 #include "llsecondlifeurls.h"
+#include "lltextbox.h"
 #include "lluictrlfactory.h"
 #include "llvfile.h"
 #include "lscript_rt_interface.h"
@@ -168,7 +168,8 @@ LLScriptEdCore::LLScriptEdCore(const std::string& name,
 	setFollowsAll();
 	setBorderVisible(FALSE);
 
-	LLUICtrlFactory::getInstance()->buildPanel(this, "floater_script_ed_panel.xml");
+	LLUICtrlFactory::getInstance()->buildPanel(this,
+											   "floater_script_ed_panel.xml");
 
 	mErrorList = getChild<LLScrollListCtrl>("lsl errors");
 
@@ -256,7 +257,11 @@ LLScriptEdCore::LLScriptEdCore(const std::string& name,
 	}
  
 	childSetCommitCallback("lsl errors", &LLScriptEdCore::onErrorList, this);
-	childSetAction("Save_btn", onBtnSave, this);
+
+	mSaveButton = getChild<LLButton>("Save_btn");
+	mSaveButton->setClickedCallback(onBtnSave, this);
+
+	mLineColText = getChild<LLTextBox>("line_col");
 
 	initMenu();
 
@@ -370,10 +375,12 @@ BOOL LLScriptEdCore::hasChanged(void* userdata)
 	return ((!self->mEditor->isPristine() || self->mEnableSave) && self->mHasScriptData);
 }
 
+static const F32 UPDATE_FREQUENCY = 0.5f;
+
 void LLScriptEdCore::draw()
 {
 	BOOL script_changed	= hasChanged(this);
-	childSetEnabled("Save_btn",	script_changed);
+	mSaveButton->setEnabled(script_changed);
 
 	if (mEditor->hasFocus())
 	{
@@ -382,14 +389,20 @@ void LLScriptEdCore::draw()
 		mEditor->getCurrentLineAndColumn(&line, &column, FALSE);  // don't include wordwrap
 		std::string cursor_pos;
 		cursor_pos = llformat("Line %d, Column %d", line, column);
-		childSetText("line_col", cursor_pos);
+		mLineColText->setText(cursor_pos);
 	}
 	else
 	{
-		childSetText("line_col", LLStringUtil::null);
+		mLineColText->setText(LLStringUtil::null);
 	}
 
-	updateDynamicHelp();
+	static LLTimer update_timer;
+	if (update_timer.hasExpired())
+	{
+		// Don't do this every frame !
+		updateDynamicHelp();
+		update_timer.setTimerExpirySec(UPDATE_FREQUENCY);
+	}
 
 	LLPanel::draw();
 }
@@ -397,7 +410,7 @@ void LLScriptEdCore::draw()
 void LLScriptEdCore::updateDynamicHelp(BOOL immediate)
 {
 	LLFloater* help_floater = mLiveHelpHandle.get();
-	if (!help_floater) return;
+	if (!help_floater || ! help_floater->getVisible()) return;
 
 	// update back and forward buttons
 	LLButton* fwd_button = help_floater->getChild<LLButton>("fwd_btn");
@@ -406,7 +419,9 @@ void LLScriptEdCore::updateDynamicHelp(BOOL immediate)
 	back_button->setEnabled(browser->canNavigateBack());
 	fwd_button->setEnabled(browser->canNavigateForward());
 
-	if (!immediate && !gSavedSettings.getBOOL("ScriptHelpFollowsCursor"))
+	static LLCachedControl<bool> help_follow_cursor(gSavedSettings,
+													"ScriptHelpFollowsCursor");
+	if (!immediate && !help_follow_cursor)
 	{
 		return;
 	}
@@ -416,9 +431,10 @@ void LLScriptEdCore::updateDynamicHelp(BOOL immediate)
 	mEditor->getSelectedSegments(selected_segments);
 
 	// try segments in selection range first
-	std::vector<const LLTextSegment*>::iterator segment_iter;
-	for (segment_iter = selected_segments.begin();
-		 segment_iter != selected_segments.end(); ++segment_iter)
+	for (std::vector<const LLTextSegment*>::iterator
+			segment_iter = selected_segments.begin(),
+			end = selected_segments.end();
+		 segment_iter != end; ++segment_iter)
 	{
 		if ((*segment_iter)->getToken() &&
 			(*segment_iter)->getToken()->getType() == LLKeywordToken::WORD)
@@ -630,7 +646,8 @@ void LLScriptEdCore::onBtnHelp(void* userdata)
 	LLScriptEdCore* corep = (LLScriptEdCore*)userdata;
 	LLSD payload;
 	payload["help_url"] = corep->mHelpURL;
-	LLNotifications::instance().add("WebLaunchLSLGuide", LLSD(), payload, onHelpWebDialog);
+	LLNotifications::instance().add("WebLaunchLSLGuide", LLSD(), payload,
+									onHelpWebDialog);
 }
 
 // static 
@@ -643,7 +660,6 @@ void LLScriptEdCore::onBtnDynamicHelp(void* userdata)
 	{
 		live_help_floater->setFocus(TRUE);
 		corep->updateDynamicHelp(TRUE);
-
 		return;
 	}
 
@@ -712,7 +728,8 @@ void LLScriptEdCore::onCheckLock(LLUICtrl* ctrl, void* userdata)
 {
 	LLScriptEdCore* corep = (LLScriptEdCore*)userdata;
 
-	// clear out token any time we lock the frame, so we will refresh web page immediately when unlocked
+	// clear out token any time we lock the frame, so we will refresh web page
+	// immediately when unlocked
 	gSavedSettings.setBOOL("ScriptHelpFollowsCursor", ctrl->getValue().asBoolean());
 
 	corep->mLastHelpToken = NULL;
@@ -1071,7 +1088,7 @@ void LLScriptEdCore::deleteBridges()
 {
 	S32 count = mBridges.count();
 	LLEntryAndEdCore* eandc;
-	for(S32 i = 0; i < count; i++)
+	for (S32 i = 0; i < count; i++)
 	{
 		eandc = mBridges.get(i);
 		delete eandc;
@@ -1191,9 +1208,8 @@ LLPreviewLSL::LLPreviewLSL(const std::string& name, const LLRect& rect,
 void LLPreviewLSL::callbackLSLCompileSucceeded()
 {
 	llinfos << "LSL Bytecode saved" << llendl;
-	// *TODO: Translate
-	mScriptEd->mErrorList->addCommentText(std::string("Compile successful!"));
-	mScriptEd->mErrorList->addCommentText(std::string("Save complete."));
+	mScriptEd->mErrorList->addCommentText(getString("compile_success"));
+	mScriptEd->mErrorList->addCommentText(getString("save_complete"));
 	closeIfNeeded();
 }
 
@@ -1202,7 +1218,7 @@ void LLPreviewLSL::callbackLSLCompileFailed(const LLSD& compile_errors)
 {
 	llinfos << "Compile failed!" << llendl;
 
-	for(LLSD::array_const_iterator line = compile_errors.beginArray();
+	for (LLSD::array_const_iterator line = compile_errors.beginArray();
 		line < compile_errors.endArray();
 		line++)
 	{
@@ -1243,7 +1259,7 @@ void LLPreviewLSL::loadAsset()
 		{
 			LLUUID* new_uuid = new LLUUID(mItemUUID);
 			gAssetStorage->getInvItemAsset(LLHost::invalid,
-										   gAgent.getID(),
+										   gAgentID,
 										   gAgent.getSessionID(),
 										   item->getPermissions().getOwner(),
 										   LLUUID::null,
@@ -1436,7 +1452,7 @@ void LLPreviewLSL::uploadAssetLegacy(const std::string& filename,
 		{
 			char buffer[MAX_STRING];		/*Flawfinder: ignore*/
 			std::string line;
-			while(!feof(fp)) 
+			while (!feof(fp)) 
 			{
 				if (fgets(buffer, MAX_STRING, fp) == NULL)
 				{
@@ -1701,12 +1717,17 @@ LLLiveLSLEditor::LLLiveLSLEditor(const std::string& name,
 	LLLiveLSLEditor::sInstances.addData(mItemID ^ mObjectID, this);
 
 	LLCallbackMap::map_t factory_map;
-	factory_map["script ed panel"] = LLCallbackMap(LLLiveLSLEditor::createScriptEdPanel, this);
+	factory_map["script ed panel"] = LLCallbackMap(LLLiveLSLEditor::createScriptEdPanel,
+												   this);
 
-	LLUICtrlFactory::getInstance()->buildFloater(this, "floater_live_lsleditor.xml", &factory_map);
+	LLUICtrlFactory::getInstance()->buildFloater(this,
+												 "floater_live_lsleditor.xml",
+												 &factory_map);
 
-	childSetCommitCallback("running", LLLiveLSLEditor::onRunningCheckboxClicked, this);
-	childSetEnabled("running", false);
+	mRunningCheckbox = getChild<LLCheckBoxCtrl>("running");
+	mRunningCheckbox->setCommitCallback(onRunningCheckboxClicked);
+	mRunningCheckbox->setCallbackUserData(this);
+	mRunningCheckbox->setEnabled(FALSE);
 
 	childSetAction("Reset", &LLLiveLSLEditor::onReset, this);
 	childSetEnabled("Reset", true);
@@ -1723,6 +1744,10 @@ LLLiveLSLEditor::LLLiveLSLEditor(const std::string& name,
 
 	setTitle(title);
 	mScriptEd->setScriptName(title);
+
+	mScriptRunningText = getString("script_running");
+	mCannotRunText = getString("public_objects_can_not_run");
+	mOutOfRange = getString("out_of_range");
 }
 
 LLLiveLSLEditor::~LLLiveLSLEditor()
@@ -1742,19 +1767,17 @@ void LLLiveLSLEditor::callbackLSLCompileSucceeded(const LLUUID& task_id,
 												  bool is_script_running)
 {
 	LL_DEBUGS("ScriptEditor") << "LSL Bytecode saved" << LL_ENDL;
-	// *TODO: Translate
-	mScriptEd->mErrorList->addCommentText(std::string("Compile successful!"));
-	mScriptEd->mErrorList->addCommentText(std::string("Save complete."));
+	mScriptEd->mErrorList->addCommentText(getString("compile_success"));
+	mScriptEd->mErrorList->addCommentText(getString("save_complete"));
 	closeIfNeeded();
 }
 
 // virtual
 void LLLiveLSLEditor::callbackLSLCompileFailed(const LLSD& compile_errors)
 {
-	LL_DEBUGS("ScriptEditor") << "Compile failed!" << LL_ENDL;
-	for(LLSD::array_const_iterator line = compile_errors.beginArray();
-		line < compile_errors.endArray();
-		line++)
+	LL_DEBUGS("ScriptEditor") << "Compile failed !" << LL_ENDL;
+	for (LLSD::array_const_iterator line = compile_errors.beginArray();
+		 line < compile_errors.endArray(); ++line)
 	{
 		LLSD row;
 		std::string error_message = line->asString();
@@ -1775,20 +1798,24 @@ void LLLiveLSLEditor::loadAsset(BOOL is_new)
 		LLViewerObject* object = gObjectList.findObject(mObjectID);
 		if (object)
 		{
-			// HACK! we "know" that mItemID refers to a LLViewerInventoryItem...
-			LLViewerInventoryItem* item = (LLViewerInventoryItem*)object->getInventoryObject(mItemID);
-			if (item 
-				&& (gAgent.allowOperation(PERM_COPY, item->getPermissions(), GP_OBJECT_MANIPULATE)
-				   || gAgent.isGodlike()))
+			// HACK !  We "know" that mItemID refers to a LLViewerInventoryItem
+			LLViewerInventoryItem* item;
+			item = (LLViewerInventoryItem*)object->getInventoryObject(mItemID);
+			if (item &&
+				(gAgent.allowOperation(PERM_COPY, item->getPermissions(),
+									   GP_OBJECT_MANIPULATE) ||
+				 gAgent.isGodlike()))
 			{
 				mItem = new LLViewerInventoryItem(item);
 				//llinfos << "asset id " << mItem->getAssetUUID() << llendl;
 			}
 
-			if (!gAgent.isGodlike()
-			   && (item
-				   && (!gAgent.allowOperation(PERM_COPY, item->getPermissions(), GP_OBJECT_MANIPULATE)
-					   || !gAgent.allowOperation(PERM_MODIFY, item->getPermissions(), GP_OBJECT_MANIPULATE))))
+			if (!gAgent.isGodlike() &&
+				(item &&
+				 (!gAgent.allowOperation(PERM_COPY, item->getPermissions(),
+										 GP_OBJECT_MANIPULATE) ||
+				  !gAgent.allowOperation(PERM_MODIFY, item->getPermissions(),
+										 GP_OBJECT_MANIPULATE))))
 			{
 				mItem = new LLViewerInventoryItem(item);
 				mScriptEd->setScriptText(getString("not_allowed"), FALSE);
@@ -1802,16 +1829,14 @@ void LLLiveLSLEditor::loadAsset(BOOL is_new)
 				// request the text from the object
 				LLUUID* user_data = new LLUUID(mItemID ^ mObjectID);
 				gAssetStorage->getInvItemAsset(object->getRegion()->getHost(),
-											gAgent.getID(),
-											gAgent.getSessionID(),
-											item->getPermissions().getOwner(),
-											object->getID(),
-											item->getUUID(),
-											item->getAssetUUID(),
-											item->getType(),
-											&LLLiveLSLEditor::onLoadComplete,
-											(void*)user_data,
-											TRUE);
+											   gAgentID, gAgent.getSessionID(),
+											   item->getPermissions().getOwner(),
+											   object->getID(),
+											   item->getUUID(),
+											   item->getAssetUUID(),
+											   item->getType(),
+											   &LLLiveLSLEditor::onLoadComplete,
+											   (void*)user_data, TRUE);
 				LLMessageSystem* msg = gMessageSystem;
 				msg->newMessageFast(_PREHASH_GetScriptRunning);
 				msg->nextBlockFast(_PREHASH_Script);
@@ -1842,7 +1867,7 @@ void LLLiveLSLEditor::loadAsset(BOOL is_new)
 			// request the exports from the object
 			gMessageSystem->newMessage("GetScriptExports");
 			gMessageSystem->nextBlock("ScriptBlock");
-			gMessageSystem->addUUID("AgentID", gAgent.getID());
+			gMessageSystem->addUUID("AgentID", gAgentID);
 			U32 local_id = object->getLocalID();
 			gMessageSystem->addData("LocalID", &local_id);
 			gMessageSystem->addUUID("ItemID", mItemID);
@@ -1871,7 +1896,7 @@ void LLLiveLSLEditor::loadAsset(BOOL is_new)
 		mScriptEd->setScriptText(std::string(HELLO_LSL), TRUE);
 		mScriptEd->enableSave(FALSE);
 		LLPermissions perm;
-		perm.init(gAgent.getID(), gAgent.getID(), LLUUID::null, gAgent.getGroupID());
+		perm.init(gAgentID, gAgentID, LLUUID::null, gAgent.getGroupID());
 		perm.initMasks(PERM_ALL, PERM_ALL, PERM_NONE, PERM_NONE, PERM_MOVE | PERM_TRANSFER);
 		mItem = new LLViewerInventoryItem(mItemID,
 									mObjectID,
@@ -1930,40 +1955,8 @@ void LLLiveLSLEditor::onLoadComplete(LLVFS *vfs, const LLUUID& asset_id,
 	delete xored_id;
 }
 
-// unused
-// void LLLiveLSLEditor::loadScriptText(const std::string& filename)
-// {
-// 	if (!filename)
-// 	{
-// 		llerrs << "Filename is Empty!" << llendl;
-// 		return;
-// 	}
-// 	LLFILE* file = LLFile::fopen(filename, "rb");		/*Flawfinder: ignore*/
-// 	if (file)
-// 	{
-// 		// read in the whole file
-// 		fseek(file, 0L, SEEK_END);
-// 		long file_length = ftell(file);
-// 		fseek(file, 0L, SEEK_SET);
-// 		char* buffer = new char[file_length+1];
-// 		size_t nread = fread(buffer, 1, file_length, file);
-// 		if (nread < (size_t) file_length)
-// 		{
-// 			llwarns << "Short read" << llendl;
-// 		}
-// 		buffer[nread] = '\0';
-// 		fclose(file);
-// 		mScriptEd->mEditor->setText(LLStringExplicit(buffer));
-// 		mScriptEd->mEditor->makePristine();
-// 		delete[] buffer;
-// 	}
-// 	else
-// 	{
-// 		llwarns << "Error opening " << filename << llendl;
-// 	}
-// }
-
-void LLLiveLSLEditor::loadScriptText(LLVFS *vfs, const LLUUID &uuid, LLAssetType::EType type)
+void LLLiveLSLEditor::loadScriptText(LLVFS *vfs, const LLUUID &uuid,
+									 LLAssetType::EType type)
 {
 	LLVFile file(vfs, uuid, type);
 	S32 file_length = file.getSize();
@@ -1981,20 +1974,19 @@ void LLLiveLSLEditor::loadScriptText(LLVFS *vfs, const LLUUID &uuid, LLAssetType
 	mScriptEd->setScriptText(LLStringExplicit(&buffer[0]), TRUE);
 	mScriptEd->mEditor->makePristine();
 	delete[] buffer;
-
 }
 
 void LLLiveLSLEditor::onRunningCheckboxClicked(LLUICtrl*, void* userdata)
 {
-	LLLiveLSLEditor* self = (LLLiveLSLEditor*) userdata;
+	LLLiveLSLEditor* self = (LLLiveLSLEditor*)userdata;
+	if (!self) return;
+
 	LLViewerObject* object = gObjectList.findObject(self->mObjectID);
-	LLCheckBoxCtrl* runningCheckbox = self->getChild<LLCheckBoxCtrl>("running");
-	BOOL running =  runningCheckbox->get();
-	//self->mRunningCheckbox->get();
+	BOOL running = self->mRunningCheckbox->get();
 //MK
 	if (gRRenabled && !gAgent.mRRInterface.canDetach(object))
 	{
-		runningCheckbox->set(!running);
+		self->mRunningCheckbox->set(!running);
 		return;
 	}
 //mk
@@ -2003,7 +1995,7 @@ void LLLiveLSLEditor::onRunningCheckboxClicked(LLUICtrl*, void* userdata)
 		LLMessageSystem* msg = gMessageSystem;
 		msg->newMessageFast(_PREHASH_SetScriptRunning);
 		msg->nextBlockFast(_PREHASH_AgentData);
-		msg->addUUIDFast(_PREHASH_AgentID, gAgent.getID());
+		msg->addUUIDFast(_PREHASH_AgentID, gAgentID);
 		msg->addUUIDFast(_PREHASH_SessionID, gAgent.getSessionID());
 		msg->nextBlockFast(_PREHASH_Script);
 		msg->addUUIDFast(_PREHASH_ObjectID, self->mObjectID);
@@ -2013,7 +2005,7 @@ void LLLiveLSLEditor::onRunningCheckboxClicked(LLUICtrl*, void* userdata)
 	}
 	else
 	{
-		runningCheckbox->set(!running);
+		self->mRunningCheckbox->set(!running);
 		LLNotifications::instance().add("CouldNotStartStopScript");
 	}
 }
@@ -2034,7 +2026,7 @@ void LLLiveLSLEditor::onReset(void *userdata)
 		LLMessageSystem* msg = gMessageSystem;
 		msg->newMessageFast(_PREHASH_ScriptReset);
 		msg->nextBlockFast(_PREHASH_AgentData);
-		msg->addUUIDFast(_PREHASH_AgentID, gAgent.getID());
+		msg->addUUIDFast(_PREHASH_AgentID, gAgentID);
 		msg->addUUIDFast(_PREHASH_SessionID, gAgent.getSessionID());
 		msg->nextBlockFast(_PREHASH_Script);
 		msg->addUUIDFast(_PREHASH_ObjectID, self->mObjectID);
@@ -2050,53 +2042,54 @@ void LLLiveLSLEditor::onReset(void *userdata)
 void LLLiveLSLEditor::draw()
 {
 	LLViewerObject* object = gObjectList.findObject(mObjectID);
-	LLCheckBoxCtrl* runningCheckbox = getChild<LLCheckBoxCtrl>("running");
 	if (object && mAskedForRunningInfo && mHaveRunningInfo)
 	{
 		if (object->permAnyOwner())
 		{
-			runningCheckbox->setLabel(getString("script_running"));
-			runningCheckbox->setEnabled(TRUE);
+			mRunningCheckbox->setLabel(mScriptRunningText);
+			mRunningCheckbox->setEnabled(TRUE);
 
 			if (object->permAnyOwner())
 			{
-				runningCheckbox->setLabel(getString("script_running"));
-				runningCheckbox->setEnabled(TRUE);
+				mRunningCheckbox->setLabel(mScriptRunningText);
+				mRunningCheckbox->setEnabled(TRUE);
 			}
 			else
 			{
-				runningCheckbox->setLabel(getString("public_objects_can_not_run"));
-				runningCheckbox->setEnabled(FALSE);
+				mRunningCheckbox->setLabel(mCannotRunText);
+				mRunningCheckbox->setEnabled(FALSE);
 				// *FIX: Set it to false so that the ui is correct for
 				// a box that is released to public. It could be
 				// incorrect after a release/claim cycle, but will be
 				// correct after clicking on it.
-				runningCheckbox->set(FALSE);
-				if (mScriptEd) mScriptEd->getMonoCheckBox()->set(FALSE);
+				mRunningCheckbox->set(FALSE);
+				if (mScriptEd)
+				{
+					mScriptEd->getMonoCheckBox()->set(FALSE);
+				}
 			}
 		}
 		else
 		{
-			runningCheckbox->setLabel(getString("public_objects_can_not_run"));
-			runningCheckbox->setEnabled(FALSE);
+			mRunningCheckbox->setLabel(mCannotRunText);
+			mRunningCheckbox->setEnabled(FALSE);
 
-			// *FIX: Set it to false so that the ui is correct for
-			// a box that is released to public. It could be
-			// incorrect after a release/claim cycle, but will be
-			// correct after clicking on it.
-			runningCheckbox->set(FALSE);
-			if (mScriptEd) mScriptEd->getMonoCheckBox()->setEnabled(FALSE);
+			// *FIX: Set it to false so that the ui is correct for a box that
+			// is released to public. It could be incorrect after a release/
+			// claim cycle, but will be correct after clicking on it.
+			mRunningCheckbox->set(FALSE);
+			if (mScriptEd)
+			{
+				mScriptEd->getMonoCheckBox()->setEnabled(FALSE);
+			}
 			// object may have fallen out of range.
 			mHaveRunningInfo = FALSE;
 		}
 	}
 	else if (!object)
 	{
-		// HACK: Display this information in the title bar.
-		// Really ought to put in main window.
-		// *TODO: Translate
-		setTitle(std::string("Script (object out of range)"));
-		runningCheckbox->setEnabled(FALSE);
+		setTitle(mOutOfRange);
+		mRunningCheckbox->setEnabled(FALSE);
 		// object may have fallen out of range.
 		mHaveRunningInfo = FALSE;
 	}
@@ -2117,21 +2110,20 @@ void LLLiveLSLEditor::onSearchReplace(void* userdata)
 
 struct LLLiveLSLSaveData
 {
-	LLLiveLSLSaveData(const LLUUID& id, const LLViewerInventoryItem* item, BOOL active);
-	LLUUID mObjectID;
-	LLPointer<LLViewerInventoryItem> mItem;
-	BOOL mActive;
-};
+	LLLiveLSLSaveData(const LLUUID& id, const LLViewerInventoryItem* item,
+					  BOOL active)
+	:	mObjectID(id),
+		mActive(active)
 
-LLLiveLSLSaveData::LLLiveLSLSaveData(const LLUUID& id,
-									 const LLViewerInventoryItem* item,
-									 BOOL active) :
-	mObjectID(id),
-	mActive(active)
-{
-	llassert(item);
-	mItem = new LLViewerInventoryItem(item);
-}
+	{
+		llassert(item);
+		mItem = new LLViewerInventoryItem(item);
+	}
+
+	LLUUID								mObjectID;
+	BOOL								mActive;
+	LLPointer<LLViewerInventoryItem>	mItem;
+};
 
 void LLLiveLSLEditor::saveIfNeeded()
 {
@@ -2248,28 +2240,22 @@ void LLLiveLSLEditor::uploadAssetLegacy(const std::string& filename,
 										const LLTransactionID& tid,
 										BOOL is_running)
 {
-	LLLiveLSLSaveData* data = new LLLiveLSLSaveData(mObjectID,
-													mItem,
+	LLLiveLSLSaveData* data = new LLLiveLSLSaveData(mObjectID, mItem,
 													is_running);
-	gAssetStorage->storeAssetData(filename, tid,
-								  LLAssetType::AT_LSL_TEXT,
-								  &onSaveTextComplete,
-								  (void*)data,
-								  FALSE);
+	gAssetStorage->storeAssetData(filename, tid, LLAssetType::AT_LSL_TEXT,
+								  &onSaveTextComplete, (void*)data, FALSE);
 
 	LLAssetID asset_id = tid.makeAssetID(gAgent.getSecureSessionID());
-	std::string filepath = gDirUtilp->getExpandedFilename(LL_PATH_CACHE,asset_id.asString());
+	std::string filepath = gDirUtilp->getExpandedFilename(LL_PATH_CACHE,
+														  asset_id.asString());
 	std::string dst_filename = llformat("%s.lso", filepath.c_str());
 	std::string err_filename = llformat("%s.out", filepath.c_str());
 
 	LLFILE *fp;
 	const BOOL compile_to_mono = FALSE;
-	if (!lscript_compile(filename.c_str(),
-						dst_filename.c_str(),
-						err_filename.c_str(),
-						compile_to_mono,
-						asset_id.asString().c_str(),
-						gAgent.isGodlike()))
+	if (!lscript_compile(filename.c_str(), dst_filename.c_str(),
+						 err_filename.c_str(), compile_to_mono,
+						 asset_id.asString().c_str(), gAgent.isGodlike()))
 	{
 		// load the error file into the error scrolllist
 		llinfos << "Compile failed!" << llendl;
@@ -2277,7 +2263,7 @@ void LLLiveLSLEditor::uploadAssetLegacy(const std::string& filename,
 		{
 			char buffer[MAX_STRING];		/*Flawfinder: ignore*/
 			std::string line;
-			while(!feof(fp)) 
+			while (!feof(fp)) 
 			{
 
 				if (fgets(buffer, MAX_STRING, fp) == NULL)
@@ -2310,9 +2296,8 @@ void LLLiveLSLEditor::uploadAssetLegacy(const std::string& filename,
 	}
 	else
 	{
-		llinfos << "Compile worked!" << llendl;
-		// *TODO: Translate
-		mScriptEd->mErrorList->addCommentText(std::string("Compile successful, saving..."));
+		llinfos << "Compile successful !" << llendl;
+		mScriptEd->mErrorList->addCommentText(getString("success_saving"));
 		if (gAssetStorage)
 		{
 			llinfos << "LLLiveLSLEditor::saveAsset "
@@ -2337,13 +2322,16 @@ void LLLiveLSLEditor::uploadAssetLegacy(const std::string& filename,
 	LLFile::remove(err_filename);
 	LLFile::remove(dst_filename);
 
-	// If we successfully saved it, then we should be able to check/uncheck the running box!
-	LLCheckBoxCtrl* runningCheckbox = getChild<LLCheckBoxCtrl>("running");
-	runningCheckbox->setLabel(getString("script_running"));
-	runningCheckbox->setEnabled(TRUE);
+	// If we successfully saved it, then we should be able to check/uncheck
+	// the running box!
+	mRunningCheckbox->setLabel(mScriptRunningText);
+	mRunningCheckbox->setEnabled(TRUE);
 }
 
-void LLLiveLSLEditor::onSaveTextComplete(const LLUUID& asset_uuid, void* user_data, S32 status, LLExtStat ext_status) // StoreAssetData callback (fixed)
+// StoreAssetData callback (fixed)
+void LLLiveLSLEditor::onSaveTextComplete(const LLUUID& asset_uuid,
+										 void* user_data, S32 status,
+										 LLExtStat ext_status)
 {
 	LLLiveLSLSaveData* data = (LLLiveLSLSaveData*)user_data;
 
@@ -2356,13 +2344,12 @@ void LLLiveLSLEditor::onSaveTextComplete(const LLUUID& asset_uuid, void* user_da
 	}
 	else
 	{
-		LLLiveLSLEditor* self = sInstances.getIfThere(data->mItem->getUUID() ^ data->mObjectID);
+		LLLiveLSLEditor* self;
+		self = sInstances.getIfThere(data->mItem->getUUID() ^ data->mObjectID);
 		if (self)
 		{
 			self->getWindow()->decBusyCount();
-			self->mPendingUploads--;
-			if (self->mPendingUploads <= 0
-				&& self->mCloseAfterSave)
+			if (--self->mPendingUploads <= 0 && self->mCloseAfterSave)
 			{
 				self->close();
 			}
@@ -2379,7 +2366,7 @@ void LLLiveLSLEditor::onSaveBytecodeComplete(const LLUUID& asset_uuid,
 {
 	LLLiveLSLSaveData* data = (LLLiveLSLSaveData*)user_data;
 	if (!data) return;
-	if (0 ==status)
+	if (status == 0)
 	{
 		llinfos << "LSL Bytecode saved" << llendl;
 		LLUUID xor_id = data->mItem->getUUID() ^ data->mObjectID;
@@ -2387,8 +2374,7 @@ void LLLiveLSLEditor::onSaveBytecodeComplete(const LLUUID& asset_uuid,
 		if (self)
 		{
 			// Tell the user that the compile worked.
-			// *TODO: Translate
-			self->mScriptEd->mErrorList->addCommentText(std::string("Save complete."));
+			self->mScriptEd->mErrorList->addCommentText(self->getString("save_complete"));
 			// close the window if this completes both uploads
 			self->getWindow()->decBusyCount();
 			self->mPendingUploads--;
@@ -2436,10 +2422,10 @@ BOOL LLLiveLSLEditor::canClose()
 void LLLiveLSLEditor::closeIfNeeded()
 {
 	getWindow()->decBusyCount();
-	mPendingUploads--;
-	if (mPendingUploads <= 0 && mCloseAfterSave)
+	if (--mPendingUploads <= 0 && mCloseAfterSave)
 	{
-		if (!mScriptEd->mAutosaveFilename.empty()) {
+		if (!mScriptEd->mAutosaveFilename.empty())
+		{
 			llinfos << "remove autosave: " << mScriptEd->mAutosaveFilename << llendl;
 			LLFile::remove(mScriptEd->mAutosaveFilename.c_str());
 		}
@@ -2521,8 +2507,7 @@ void LLLiveLSLEditor::processScriptRunningReply(LLMessageSystem* msg, void**)
 		instance->mHaveRunningInfo = TRUE;
 		BOOL running;
 		msg->getBOOLFast(_PREHASH_Script, _PREHASH_Running, running);
-		LLCheckBoxCtrl* runningCheckbox = instance->getChild<LLCheckBoxCtrl>("running");
-		runningCheckbox->set(running);
+		instance->mRunningCheckbox->set(running);
 		BOOL mono;
 		msg->getBOOLFast(_PREHASH_Script, "Mono", mono);
 		LLCheckBoxCtrl* monoCheckbox = instance->mScriptEd->getMonoCheckBox();

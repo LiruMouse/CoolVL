@@ -1,11 +1,11 @@
-/** 
+/**
  * @file llfloaterdirectory.cpp
  * @brief The "Find" floater.  Should be llfloaterfind.
  *
  * $LicenseInfo:firstyear=2002&license=viewergpl$
- * 
+ *
  * Copyright (c) 2002-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -56,7 +56,6 @@
 #include "llpaneldirland.h"
 #include "llpaneldirpeople.h"
 #include "llpaneldirplaces.h"
-#include "llpaneldirpopular.h"
 #include "llpanelgroup.h"
 #include "llpanelpick.h"
 #include "llpanelplace.h"
@@ -149,7 +148,7 @@ LLFloaterDirectory::~LLFloaterDirectory()
 	sInstance = NULL;
 
 	//Note: this function is defined in the class LLFloater.
-	//however, it causes crash if this line is postponed to ~LLFloater(). 
+	//however, it causes crash if this line is postponed to ~LLFloater().
 	//because it uses some pointers deleted below. That is, those pointers are used again after deleting.
 	setMinimized(FALSE);
 
@@ -164,7 +163,7 @@ LLFloaterDirectory::~LLFloaterDirectory()
 }
 
 // static
-void *LLFloaterDirectory::createFindAll(void* userdata)
+void* LLFloaterDirectory::createFindAll(void* userdata)
 {
 	LLFloaterDirectory *self = (LLFloaterDirectory*)userdata;
 	self->mFindAllPanel = LLPanelDirFindAllInterface::create(self);
@@ -224,7 +223,7 @@ void* LLFloaterDirectory::createGroups(void* userdata)
 }
 
 // static
-void *LLFloaterDirectory::createFindAllOld(void* userdata)
+void* LLFloaterDirectory::createFindAllOld(void* userdata)
 {
 	LLFloaterDirectory *self = (LLFloaterDirectory*)userdata;
 	return new LLPanelDirFindAllOld("find_all_old_panel", self);
@@ -244,7 +243,7 @@ void* LLFloaterDirectory::createClassifiedDetail(void* userdata)
 void*	LLFloaterDirectory::createPanelAvatar(void*	data)
 {
 	LLFloaterDirectory* self = (LLFloaterDirectory*)data;
-	self->mPanelAvatarp = new LLPanelAvatar("Avatar", LLRect(), 
+	self->mPanelAvatarp = new LLPanelAvatar("Avatar", LLRect(),
 		FALSE); // disallow editing in search context (SL-48632)
 	self->mPanelAvatarp->setVisible(FALSE);
 	return self->mPanelAvatarp;
@@ -332,7 +331,7 @@ void LLFloaterDirectory::showClassified(const LLUUID& classified_id)
 // static
 void LLFloaterDirectory::showEvents(S32 event_id)
 {
-	showPanel("events_panel"); 
+	showPanel("events_panel");
 
 	if (sInstance->mEventsPanel)
 	{
@@ -341,7 +340,7 @@ void LLFloaterDirectory::showEvents(S32 event_id)
 		sInstance->mEventsPanel->performQuery();
 		if (event_id != 0)
 		{
-			sInstance->mEventsPanel->selectEventByID(event_id);	
+			sInstance->mEventsPanel->selectEventByID(event_id);
 		}
 	}
 }
@@ -388,7 +387,7 @@ void LLFloaterDirectory::focusCurrentPanel()
 void LLFloaterDirectory::showPanel(const std::string& tabname)
 {
 	// This function gets called when web browser clicks are processed,
-	// so we don't delete the existing panel, which would delete the 
+	// so we don't delete the existing panel, which would delete the
 	// web browser instance currently handling the click. JC
 	if (!sInstance)
 	{

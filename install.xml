@@ -1154,35 +1154,6 @@ anguage Infrstructure (CLI) international standard</string>
           </map>
         </map>
       </map>
-      <key>mysql</key>
-      <map>
-        <key>license</key>
-        <string>gpl</string>
-        <key>packages</key>
-        <map>
-          <key>darwin</key>
-          <map>
-            <key>md5sum</key>
-            <string>df27f2db244ea2762759a06cd75ada4e</string>
-            <key>url</key>
-            <uri>scp:install-packages.lindenlab.com:/local/www/install-packages/doc/mysql-darwin-20080812.tar.bz2</uri>
-          </map>
-          <key>linux</key>
-          <map>
-            <key>md5sum</key>
-            <string>cc86b4cc858655e23704d1168325d7b9</string>
-            <key>url</key>
-            <uri>scp:install-packages.lindenlab.com:/local/www/install-packages/doc/mysqlclient-linux-20090320.tar.bz2</uri>
-          </map>
-          <key>windows</key>
-          <map>
-            <key>md5sum</key>
-            <string>98bac06680dca907e783d8dd4aa9edde</string>
-            <key>url</key>
-            <uri>scp:install-packages.lindenlab.com:/local/www/install-packages/doc/mysql-windows-20080804.tar.bz2</uri>
-          </map>
-        </map>
-      </map>
       <key>ndofdev</key>
       <map>
         <key>copyright</key>

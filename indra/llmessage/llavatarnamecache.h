@@ -43,7 +43,6 @@ class LLUUID;
 
 namespace LLAvatarNameCache
 {
-		
 	typedef boost::signals2::signal<void (void)> use_display_name_signal_t;
 
 	// Until the cache is set running, immediate lookups will fail and

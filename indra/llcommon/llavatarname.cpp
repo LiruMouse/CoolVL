@@ -60,7 +60,8 @@ LLAvatarName::LLAvatarName()
 	mIsTemporaryName(false),
 	mExpires(F64_MAX),
 	mNextUpdate(0.0)
-{ }
+{
+}
 
 bool LLAvatarName::operator<(const LLAvatarName& rhs) const
 {

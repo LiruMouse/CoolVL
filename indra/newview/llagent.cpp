@@ -435,6 +435,15 @@ void LLAgent::init()
 
 	mEffectColor = gSavedSettings.getColor4("EffectColor");
 
+	LLControlVariable* maturity = gSavedSettings.getControl("PreferredMaturity");
+	if (maturity)
+	{
+		maturity->getValidateSignal()->connect(boost::bind(&LLAgent::validateMaturity,
+														   this, _2));
+		maturity->getSignal()->connect(boost::bind(&LLAgent::handleMaturity,
+												   this, _2));
+	}
+
 	mInitialized = TRUE;
 }
 
@@ -4092,10 +4101,7 @@ void LLAgent::changeCameraToMouselook(BOOL animate)
 
 	LLToolMgr::getInstance()->setCurrentToolset(gMouselookToolset);
 
-	gSavedSettings.setBOOL("FirstPersonBtnState",	FALSE);
-	gSavedSettings.setBOOL("MouselookBtnState",		TRUE);
-	gSavedSettings.setBOOL("ThirdPersonBtnState",	FALSE);
-	gSavedSettings.setBOOL("BuildBtnState",			FALSE);
+	gSavedSettings.setBOOL("BuildBtnState", FALSE);
 
 	setupCameraView(true);	// Reset the view to rear view.
 
@@ -4193,10 +4199,7 @@ void LLAgent::changeCameraToFollow(BOOL animate)
 			gAgentAvatarp->startMotion(ANIM_AGENT_BREATHE_ROT);
 		}
 
-		gSavedSettings.setBOOL("FirstPersonBtnState",	FALSE);
-		gSavedSettings.setBOOL("MouselookBtnState",		FALSE);
-		gSavedSettings.setBOOL("ThirdPersonBtnState",	TRUE);
-		gSavedSettings.setBOOL("BuildBtnState",			FALSE);
+		gSavedSettings.setBOOL("BuildBtnState", FALSE);
 
 		// unpause avatar animation
 		mPauseRequest = NULL;
@@ -4245,10 +4248,7 @@ void LLAgent::changeCameraToThirdPerson(BOOL animate)
 		gAgentAvatarp->startMotion(ANIM_AGENT_BREATHE_ROT);
 	}
 
-	gSavedSettings.setBOOL("FirstPersonBtnState",	FALSE);
-	gSavedSettings.setBOOL("MouselookBtnState",		FALSE);
-	gSavedSettings.setBOOL("ThirdPersonBtnState",	TRUE);
-	gSavedSettings.setBOOL("BuildBtnState",			FALSE);
+	gSavedSettings.setBOOL("BuildBtnState", FALSE);
 
 	LLVector3 at_axis;
 
@@ -4314,17 +4314,18 @@ void LLAgent::changeCameraToThirdPerson(BOOL animate)
 void LLAgent::changeCameraToCustomizeAvatar(BOOL avatar_animate, BOOL camera_animate)
 {
 	if (!gViewerWindow) return;
+
+	if (LLViewerJoystick::getInstance()->getOverrideCamera())
+	{
+		return;
+	}
+
 //MK
 	if (gRRenabled && gAgent.mRRInterface.mContainsUnsit)
 	{
 		return;
 	}
 //mk
-	if (LLViewerJoystick::getInstance()->getOverrideCamera())
-	{
-		return;
-	}
-
 	setControlFlags(AGENT_CONTROL_STAND_UP); // force stand up
 //MK
 	if (gRRenabled && gAgent.mRRInterface.contains("standtp"))
@@ -4334,6 +4335,7 @@ void LLAgent::changeCameraToCustomizeAvatar(BOOL avatar_animate, BOOL camera_ani
 		gAgent.mRRInterface.mSnappingBackToLastStandingLocation = false;
 	}
 //mk
+
 	gViewerWindow->getWindow()->resetBusyCount();
 
 	if (gFaceEditToolset)
@@ -4341,9 +4343,6 @@ void LLAgent::changeCameraToCustomizeAvatar(BOOL avatar_animate, BOOL camera_ani
 		LLToolMgr::getInstance()->setCurrentToolset(gFaceEditToolset);
 	}
 
-	gSavedSettings.setBOOL("FirstPersonBtnState", FALSE);
-	gSavedSettings.setBOOL("MouselookBtnState", FALSE);
-	gSavedSettings.setBOOL("ThirdPersonBtnState", FALSE);
 	gSavedSettings.setBOOL("BuildBtnState", FALSE);
 
 	if (camera_animate)
@@ -4377,7 +4376,8 @@ void LLAgent::changeCameraToCustomizeAvatar(BOOL avatar_animate, BOOL camera_ani
 
 	if (isAgentAvatarValid())
 	{
-		if (avatar_animate)
+		if (avatar_animate && gSavedSettings.getBOOL("AppearanceAnimation")
+			/*&& gSavedSettings.getBOOL("AppearanceForceStand")*/)
 		{
 				// Remove any pitch from the avatar
 			LLVector3 at = mFrameAgent.getAtAxis();
@@ -5125,12 +5125,12 @@ void LLAgent::setTeen(bool teen)
 }
 
 //static
-int LLAgent::convertTextToMaturity(char text)
+U8 LLAgent::convertTextToMaturity(char text)
 {
 	return LLAgentAccess::convertTextToMaturity(text);
 }
 
-bool LLAgent::sendMaturityPreferenceToServer(int preferredMaturity)
+bool LLAgent::sendMaturityPreferenceToServer(U8 preferredMaturity)
 {
 	// Update agent access preference on the server
 	std::string url = getRegion()->getCapability("UpdateAgentInformation");
@@ -5184,6 +5184,16 @@ void LLAgent::setGodLevel(U8 god_level)
 const LLAgentAccess& LLAgent::getAgentAccess()
 {
 	return *mAgentAccess;
+}
+
+bool LLAgent::validateMaturity(const LLSD& newvalue)
+{
+	return mAgentAccess->canSetMaturity(newvalue.asInteger());
+}
+
+void LLAgent::handleMaturity(const LLSD& newvalue)
+{
+	sendMaturityPreferenceToServer(newvalue.asInteger());
 }
 
 void LLAgent::buildFullname(std::string& name) const

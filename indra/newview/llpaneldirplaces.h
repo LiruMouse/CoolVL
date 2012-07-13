@@ -35,29 +35,27 @@
 
 #include "llpaneldirbrowser.h"
 
-// UI class forward declarations
 class LLLineEditor;
 
 class LLPanelDirPlaces : public LLPanelDirBrowser
 {
 public:
 	LLPanelDirPlaces(const std::string& name, LLFloaterDirectory* floater);
-	virtual ~LLPanelDirPlaces();
+	/*virtual*/ ~LLPanelDirPlaces();
 
+	/*virtual*/ BOOL postBuild();
 	/*virtual*/ void draw();
 
-	virtual BOOL postBuild();
-
-	static void onClickSearch(void *userdata);
-	static void onKeystrokeName(LLLineEditor* line, void* data);
-
-	void performQuery();
+	/*virtual*/ void performQuery();
 
 	// Initially fill in some data for the panel.
 	void initialQuery();
 
-private:
+protected:
 	void queryCore(const std::string& name, S32 category, U32 flags);
+
+	static void onClickSearch(void *userdata);
+	static void onKeystrokeName(LLLineEditor* line, void* data);
 };
 
 #endif

@@ -34,30 +34,31 @@
 
 #include "llpaneldirgroups.h"
 
-// linden library includes
-#include "llagent.h"
-//#include "llfontgl.h"
-#include "message.h"
+#include "llcheckboxctrl.h"
 #include "llqueryflags.h"
+#include "message.h"
+
+#include "llagent.h"
 #include "llviewercontrol.h"
 #include "llviewerwindow.h"
 
-LLPanelDirGroups::LLPanelDirGroups(const std::string& name, LLFloaterDirectory* floater)
-	:	LLPanelDirBrowser(name, floater)
+LLPanelDirGroups::LLPanelDirGroups(const std::string& name,
+								   LLFloaterDirectory* floater)
+:	LLPanelDirBrowser(name, floater)
 {
 	mMinSearchChars = 3;
 }
-
 
 BOOL LLPanelDirGroups::postBuild()
 {
 	LLPanelDirBrowser::postBuild();
 
-	childSetKeystrokeCallback("name", &LLPanelDirBrowser::onKeystrokeName, this);
+	childSetKeystrokeCallback("name", &LLPanelDirBrowser::onKeystrokeName,
+							  this);
 
 	childSetAction("Search", &LLPanelDirBrowser::onClickSearchCore, this);
 	childDisable("Search");
-	setDefaultBtn( "Search" );
+	setDefaultBtn("Search");
 
 	return TRUE;
 }
@@ -74,7 +75,6 @@ void LLPanelDirGroups::draw()
 	LLPanelDirBrowser::draw();
 }
 
-
 // virtual
 void LLPanelDirGroups::performQuery()
 {
@@ -86,19 +86,19 @@ void LLPanelDirGroups::performQuery()
 
     // "hi " is three chars but not a long-enough search
 	std::string query_string = group_name;
-	LLStringUtil::trim( query_string );
+	LLStringUtil::trim(query_string);
 	bool query_was_filtered = (query_string != group_name);
 
 	// possible we threw away all the short words in the query so check length
-	if ( query_string.length() < mMinSearchChars )
+	if (query_string.length() < mMinSearchChars)
 	{
 		LLNotifications::instance().add("SeachFilteredOnShortWordsEmpty");
 		return;
-	};
+	}
 
-	BOOL inc_pg = childGetValue("incpg").asBoolean();
-	BOOL inc_mature = childGetValue("incmature").asBoolean();
-	BOOL inc_adult = childGetValue("incadult").asBoolean();
+	BOOL inc_pg		= !mIncPGCheck || mIncPGCheck->getValue().asBoolean();
+	BOOL inc_mature	= mIncMatureCheck && mIncMatureCheck->getValue().asBoolean();
+	BOOL inc_adult	= mIncAdultCheck && mIncAdultCheck->getValue().asBoolean();
 	if (!(inc_pg || inc_mature || inc_adult))
 	{
 		LLNotifications::instance().add("NoContentToSearch");
@@ -106,12 +106,12 @@ void LLPanelDirGroups::performQuery()
 	}
 
 	// if we filtered something out, display a popup
-	if ( query_was_filtered )
+	if (query_was_filtered)
 	{
 		LLSD args;
 		args["[FINALQUERY]"] = query_string;
 		LLNotifications::instance().add("SeachFilteredOnShortWords", args);
-	};
+	}
 
 	setupNewSearch();
 
@@ -134,10 +134,6 @@ void LLPanelDirGroups::performQuery()
 	mCurrentSortAscending = FALSE;
 
 	// send the message
-	sendDirFindQuery(
-		gMessageSystem,
-		mSearchID,
-		query_string,
-		scope,
-		mSearchStart);
+	sendDirFindQuery(gMessageSystem, mSearchID, query_string, scope,
+					 mSearchStart);
 }

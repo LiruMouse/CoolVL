@@ -34,14 +34,13 @@
 
 #include "llpaneldirclassified.h"
 
-// linden library includes
+#include "llcheckboxctrl.h"
 #include "llclassifiedflags.h"
 #include "lllineeditor.h"
 #include "llqueryflags.h"
 #include "lluictrlfactory.h"
 #include "message.h"
 
-// viewer project includes
 #include "llagent.h"
 #include "llclassifiedinfo.h"
 #include "llfloateravatarinfo.h"
@@ -66,31 +65,6 @@ BOOL LLPanelDirClassified::postBuild()
 {
 	LLPanelDirBrowser::postBuild();
 
-	// Teens don't get mature checkbox
-	if (gAgent.wantsPGOnly())
-	{
-		childSetValue("incmature", FALSE);
-		childSetValue("incadult", FALSE);
-		childHide("incmature");
-		childHide("incadult");
-		childSetValue("incpg", TRUE);
-		childDisable("incpg");
-	}
-
-	bool mature_enabled = gAgent.canAccessMature();
-	if (!mature_enabled)
-	{
-		childSetValue("incmature", FALSE);
-		childDisable("incmature");
-	}
-
-	bool adult_enabled = gAgent.canAccessAdult();
-	if (!adult_enabled)
-	{
-		childSetValue("incadult", FALSE);
-		childDisable("incadult");
-	}
-
 	// 0 or 3+ character searches allowed, exciting
 	childSetKeystrokeCallback("name", onKeystrokeNameClassified, this);
 
@@ -100,9 +74,10 @@ BOOL LLPanelDirClassified::postBuild()
 
 	childSetAction("Place an Ad...", onClickCreateNewClassified, this);
 
-	childSetAction("Delete", onClickDelete, this);
-	childDisable("Delete");
-	childHide("Delete");
+	mDeleteButton = getChild<LLButton>("Delete");
+	mDeleteButton->setClickedCallback(onClickDelete, this);
+	mDeleteButton->setEnabled(FALSE);
+	mDeleteButton->setVisible(FALSE);
 
 	// Don't do this every time we open find, it's expensive; require clicking
 	// 'search'
@@ -124,19 +99,19 @@ void LLPanelDirClassified::draw()
 
 void LLPanelDirClassified::refresh()
 {
-	BOOL godlike = gAgent.isGodlike();
-	childSetVisible("Delete", godlike);
-	childSetEnabled("Delete", godlike);
+	bool godlike = gAgent.isGodlike();
+	mDeleteButton->setEnabled(godlike);
+	mDeleteButton->setVisible(godlike);
 	updateMaturityCheckbox();
 }
 
-//Open Profile to Classifieds tab
+// Open Profile to Classifieds tab
 void LLPanelDirClassified::onClickCreateNewClassified(void *userdata)
 {
 	LLFloaterAvatarInfo::showFromObject(gAgent.getID(), "Classified");
 }
 
-// static
+//static
 void LLPanelDirClassified::onClickDelete(void *userdata)
 {
 	LLPanelDirClassified *self = (LLPanelDirClassified *)userdata;
@@ -164,11 +139,9 @@ void LLPanelDirClassified::onClickDelete(void *userdata)
 
 void LLPanelDirClassified::performQuery()
 {
-	//lldebugs << "LLPanelDirClassified::performQuery()" << llendl;
-
-	BOOL inc_pg = childGetValue("incpg").asBoolean();
-	BOOL inc_mature = childGetValue("incmature").asBoolean();
-	BOOL inc_adult = childGetValue("incadult").asBoolean();
+	BOOL inc_pg = !mIncPGCheck || mIncPGCheck->getValue().asBoolean();
+	BOOL inc_mature = mIncMatureCheck && mIncMatureCheck->getValue().asBoolean();
+	BOOL inc_adult = mIncAdultCheck && mIncAdultCheck->getValue().asBoolean();
 	if (!(inc_pg || inc_mature || inc_adult))
 	{
 		LLNotifications::instance().add("NoContentToSearch");
@@ -198,7 +171,7 @@ void LLPanelDirClassified::performQuery()
 	msg->addStringFast(_PREHASH_QueryText, childGetValue("name").asString());
 	msg->addU32Fast(_PREHASH_QueryFlags, query_flags);
 	msg->addU32Fast(_PREHASH_Category, category);
-	msg->addS32Fast(_PREHASH_QueryStart,mSearchStart);
+	msg->addS32Fast(_PREHASH_QueryStart, mSearchStart);
 
 	gAgent.sendReliableMessage();
 }

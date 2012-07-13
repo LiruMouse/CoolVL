@@ -593,15 +593,14 @@ LLScrollListCtrl::LLScrollListCtrl(const std::string& name,
 	mMaxContentWidth(0),
 	mBackgroundVisible(TRUE),
 	mDrawStripes(TRUE),
-	mBgWriteableColor(LLUI::sColorsGroup->getColor("ScrollBgWriteableColor")),
-	mBgReadOnlyColor(LLUI::sColorsGroup->getColor("ScrollBgReadOnlyColor")),
-	mBgSelectedColor(LLUI::sColorsGroup->getColor("ScrollSelectedBGColor")),
-	mBgStripeColor(LLUI::sColorsGroup->getColor("ScrollBGStripeColor")),
-	mFgSelectedColor(LLUI::sColorsGroup->getColor("ScrollSelectedFGColor")),
-	mFgUnselectedColor(LLUI::sColorsGroup->getColor("ScrollUnselectedColor")),
-	mFgDisabledColor(LLUI::sColorsGroup->getColor("ScrollDisabledColor")),
-	mHighlightedColor(LLUI::sColorsGroup->getColor("ScrollHighlightedColor")),
-	mTypeAheadTimeout(LLUI::sConfigGroup->getF32("TypeAheadTimeout")),
+	mBgWriteableColor(LLUI::sScrollBgWriteableColor),
+	mBgReadOnlyColor(LLUI::sScrollBgReadOnlyColor),
+	mBgSelectedColor(LLUI::sScrollSelectedBGColor),
+	mBgStripeColor(LLUI::sScrollBGStripeColor),
+	mFgSelectedColor(LLUI::sScrollSelectedFGColor),
+	mFgUnselectedColor(LLUI::sScrollUnselectedColor),
+	mFgDisabledColor(LLUI::sScrollDisabledColor),
+	mHighlightedColor(LLUI::sScrollHighlightedColor),
 	mBorderThickness(2),
 	mOnDoubleClickCallback(NULL),
 	mOnMaximumSelectCallback(NULL),
@@ -1793,8 +1792,8 @@ void LLScrollListCtrl::drawItems()
 
 		LLColor4 highlight_color = LLColor4::white;
 		highlight_color.mV[VALPHA] = clamp_rescale(mSearchTimer.getElapsedTimeF32(),
-												   mTypeAheadTimeout * 0.7f,
-												   mTypeAheadTimeout, 0.4f,
+												   LLUI::sTypeAheadTimeout * 0.7f,
+												   LLUI::sTypeAheadTimeout, 0.4f,
 												   0.f);
 
 		for (item_list::iterator iter = mItemList.begin(),
@@ -2467,7 +2466,7 @@ BOOL LLScrollListCtrl::handleUnicodeCharHere(llwchar uni_char)
 	}
 
 	// perform incremental search based on keyboard input
-	if (mSearchTimer.getElapsedTimeF32() > mTypeAheadTimeout)
+	if (mSearchTimer.getElapsedTimeF32() > LLUI::sTypeAheadTimeout)
 	{
 		mSearchString.clear();
 	}
@@ -3657,7 +3656,7 @@ LLColumnHeader::LLColumnHeader(const std::string& label,
 	mButton->setTabStop(FALSE);
 	// require at least two frames between mouse down and mouse up event to
 	// capture intentional "hold" not just bad framerate
-	mButton->setHeldDownDelay(LLUI::sConfigGroup->getF32("ColumnHeaderDropDownDelay"), 2);
+	mButton->setHeldDownDelay(LLUI::sColumnHeaderDropDownDelay, 2);
 	mButton->setHeldDownCallback(onHeldDown);
 	mButton->setClickedCallback(onClick);
 	mButton->setMouseDownCallback(onMouseDown);

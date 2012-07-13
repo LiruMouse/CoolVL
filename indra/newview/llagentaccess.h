@@ -67,7 +67,9 @@ public:
 	void setTeen(bool teen);
 	void setMaturity(char text);
 
-	static int convertTextToMaturity(char text);
+	static U8 convertTextToMaturity(char text);
+
+	bool canSetMaturity(U8 maturity);
 
 private:
 	U8						mAccess;	// SIM_ACCESS_MATURE etc

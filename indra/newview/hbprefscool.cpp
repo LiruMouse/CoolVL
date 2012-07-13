@@ -142,11 +142,12 @@ private:
 	BOOL mAllowMultipleViewers;
 	BOOL mFetchInventoryOnLogin;
 	BOOL mSpeedRez;
+	BOOL mTeleportHistoryDeparture;
 	BOOL mPreviewAnimInWorld;
+	BOOL mAppearanceAnimation;
 	BOOL mPrivateLookAt;
 	BOOL mPrivatePointAt;
 	BOOL mRevokePermsOnStandUp;
-	BOOL mTeleportHistoryDeparture;
 	BOOL mRezWithLandGroup;
 	BOOL mNoMultipleShoes;
 	BOOL mNoMultipleSkirts;
@@ -495,6 +496,7 @@ void HBPrefsCoolImpl::refreshValues()
 	mSpeedRez							= gSavedSettings.getBOOL("SpeedRez");
 	mSpeedRezInterval					= gSavedSettings.getU32("SpeedRezInterval");
 	mPreviewAnimInWorld					= gSavedSettings.getBOOL("PreviewAnimInWorld");
+	mAppearanceAnimation				= gSavedSettings.getBOOL("AppearanceAnimation");
 	mPrivateLookAt						= gSavedSettings.getBOOL("PrivateLookAt");
 	mPrivatePointAt						= gSavedSettings.getBOOL("PrivatePointAt");
 	mPrivateLookAtLimit					= gSavedSettings.getU32("PrivateLookAtLimit");
@@ -686,6 +688,7 @@ void HBPrefsCoolImpl::cancel()
 	gSavedSettings.setBOOL("SpeedRez",							mSpeedRez);
 	gSavedSettings.setU32("SpeedRezInterval",					mSpeedRezInterval);
 	gSavedSettings.setBOOL("PreviewAnimInWorld",				mPreviewAnimInWorld);
+	gSavedSettings.setBOOL("AppearanceAnimation",				mAppearanceAnimation);
 	gSavedSettings.setBOOL("PrivateLookAt",						mPrivateLookAt);
 	gSavedSettings.setBOOL("PrivatePointAt",					mPrivatePointAt);
 	gSavedSettings.setU32("PrivateLookAtLimit",					mPrivateLookAtLimit);

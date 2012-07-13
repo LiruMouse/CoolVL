@@ -77,8 +77,8 @@ LLSliderCtrl::LLSliderCtrl(const std::string& name,
 	mValue(initial_value),
 	mEditor(NULL),
 	mTextBox(NULL),
-	mTextEnabledColor(LLUI::sColorsGroup->getColor("LabelTextColor")),
-	mTextDisabledColor(LLUI::sColorsGroup->getColor("LabelDisabledColor")),
+	mTextEnabledColor(LLUI::sLabelTextColor),
+	mTextDisabledColor(LLUI::sLabelDisabledColor),
 	mSliderMouseUpCallback(NULL),
 	mSliderMouseDownCallback(NULL)
 {

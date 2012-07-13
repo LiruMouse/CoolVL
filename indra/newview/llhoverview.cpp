@@ -728,13 +728,8 @@ void LLHoverView::draw()
 	static LLCachedControl<LLColor4U> tool_tip_bg_color(gColors,
 														"ToolTipBgColor");
 	LLColor4 bg_color = LLColor4(tool_tip_bg_color);
-	static LLCachedControl<LLColor4U> color_drop_shadow(gColors,
-														"ColorDropShadow");
-	LLColor4 shadow_color = LLColor4(color_drop_shadow);
+	LLColor4 shadow_color = LLUI::sColorDropShadow;
 	//LLColor4 border_color = gColors.getColor("ToolTipBorderColor");
-
-	static LLCachedControl<S32> shadow_offset(gSavedSettings,
-											  "DropShadowTooltip");
 
 	// Could decrease the alpha here. JC
 	//text_color.mV[VALPHA] = alpha;
@@ -775,6 +770,7 @@ void LLHoverView::draw()
 
 	LLGLSUIDefault gls_ui;
 
+	S32 shadow_offset = LLUI::sDropShadowTooltip;
 	shadow_color.mV[VALPHA] = 0.7f * alpha;
 	shadow_image->draw(LLRect(left + shadow_offset, top - shadow_offset,
 							  right + shadow_offset, bottom - shadow_offset),

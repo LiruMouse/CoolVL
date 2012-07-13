@@ -73,8 +73,8 @@ LLSpinCtrl::LLSpinCtrl(const std::string& name,
 	mIncrement(increment),
 	mPrecision(3),
 	mLabelBox(NULL),
-	mTextEnabledColor(LLUI::sColorsGroup->getColor("LabelTextColor")),
-	mTextDisabledColor(LLUI::sColorsGroup->getColor("LabelDisabledColor")),
+	mTextEnabledColor(LLUI::sLabelTextColor),
+	mTextDisabledColor(LLUI::sLabelDisabledColor),
 	mbHasBeenSet(FALSE)
 {
 	S32 top = getRect().getHeight();

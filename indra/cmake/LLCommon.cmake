@@ -22,6 +22,4 @@ else (LINUX)
     set(LLCOMMON_LIBRARIES llcommon)
 endif (LINUX)
 
-add_definitions(${TCMALLOC_FLAG})
-
 set(LLCOMMON_LIBRARIES llcommon)

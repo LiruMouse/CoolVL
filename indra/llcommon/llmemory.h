@@ -39,15 +39,7 @@
 
 #include "llmemtype.h"
 
-///////////////////////////////////////////////////////////////////////////////
-// FIXME: LL_USE_TCMALLOC should be positionned by cmake but it currently fails
-#ifdef LL_USE_TCMALLOC
-#undef LL_USE_TCMALLOC
-#endif
-// Hard-code this for now...
-#define LL_USE_TCMALLOC 1
-///////////////////////////////////////////////////////////////////////////////
-
+// Note: LL_USE_TCMALLOC is set in ../indra/cmake/00-Common.cmake
 #if LL_USE_TCMALLOC
 
 // ll_aligned_foo_16 are not needed with tcmalloc
@@ -85,7 +77,7 @@ inline void* ll_aligned_realloc_16(void* ptr, size_t size)
 #elif defined(LL_DARWIN)
 	return realloc(ptr, size); // default osx malloc is 16 byte aligned.
 #else
-	return realloc(ptr, size); // FIXME not guaranteed to be aligned.
+	return realloc(ptr, size); // Not guaranteed to be aligned (but seems to actually be !).
 #endif
 }
 

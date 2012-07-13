@@ -33,23 +33,27 @@
 
 #include "llviewerprecompiledheaders.h"
 
-//file include
 #include "llprefsgeneral.h"
 
-// project includes
-#include "llcolorswatch.h"
+#include "llavatarnamecache.h"
+#include "llcheckboxctrl.h"
 #include "llcombobox.h"
+#include "llradiogroup.h"
+#include "lltextbox.h"
 #include "lluictrlfactory.h"
+
+#include "llagent.h"
+#include "llcolorswatch.h"
+#include "llstartup.h"
 #include "llurlsimstring.h"
 #include "llviewercontrol.h"
-#include "llagent.h"
 #include "llviewerregion.h"
 
 class LLPrefsGeneralImpl : public LLPanel
 {
 public:
 	LLPrefsGeneralImpl();
-	/*virtual*/ ~LLPrefsGeneralImpl() { };
+	/*virtual*/ ~LLPrefsGeneralImpl() {};
 
 	/*virtual*/ void refresh();
 
@@ -59,31 +63,77 @@ public:
 private:
 	void refreshValues();
 
-	BOOL mForceShowGrid;
-	BOOL mLoginLastLocation;
-	BOOL mShowStartLocation;
-	BOOL mRenderHideGroupTitleAll;
-	BOOL mRenderHideGroupTitle;
-	BOOL mLanguageIsPublic;
-	BOOL mRenderNameHideSelf;
-	BOOL mSmallAvatarNames;
-	BOOL mUIAutoScale;
-	BOOL mLegacyNamesForFriends;
-	BOOL mOmitResidentAsLastName;
-	F32 mChatBubbleOpacity;
-	F32 mUIScaleFactor;
-	S32 mRenderName;
-	S32 mAFKTimeout;
-	U32 mPreferredMaturity;
-	U32 mDisplayNamesUsage;
-	LLColor4 mEffectColor;
-	std::string mLanguage;
+private:
+	LLComboBox*		mFadeOutNamesCombo;
+	LLComboBox*		mMaturityCombo;
+	LLComboBox*		mLanguageCombo;
+	LLTextBox*		mMaturityText;
+	LLTextBox*		mDisplayNameText1;
+	LLTextBox*		mDisplayNameText2;
+	LLTextBox*		mNoDisplayNameText;
+	LLRadioGroup*	mDisplayNameRadio;
+	LLCheckBoxCtrl*	mLegacyNamesCheck;
+	LLCheckBoxCtrl*	mOmitResidentCheck;
+	bool			mHasDisplayNames;
+	bool			mCanChooseMaturity;
+
+	BOOL			mForceShowGrid;
+	BOOL			mLoginLastLocation;
+	BOOL			mShowStartLocation;
+	BOOL			mRenderHideGroupTitleAll;
+	BOOL			mRenderHideGroupTitle;
+	BOOL			mLanguageIsPublic;
+	BOOL			mRenderNameHideSelf;
+	BOOL			mSmallAvatarNames;
+	BOOL			mUIAutoScale;
+	BOOL			mLegacyNamesForFriends;
+	BOOL			mOmitResidentAsLastName;
+	F32				mChatBubbleOpacity;
+	F32				mUIScaleFactor;
+	S32				mRenderName;
+	S32				mAFKTimeout;
+	U32				mPreferredMaturity;
+	U32				mDisplayNamesUsage;
+	LLColor4		mEffectColor;
+	std::string		mLanguage;
 };
 
 LLPrefsGeneralImpl::LLPrefsGeneralImpl()
- : LLPanel(std::string("General Preferences"))
+:	LLPanel(std::string("General Preferences"))
 {
-	LLUICtrlFactory::getInstance()->buildPanel(this, "panel_preferences_general.xml");
+	LLUICtrlFactory::getInstance()->buildPanel(this,
+											   "panel_preferences_general.xml");
+
+	mDisplayNameText1 = getChild<LLTextBox>("display_names_text_box1");
+	mDisplayNameText2 = getChild<LLTextBox>("display_names_text_box2");
+	mNoDisplayNameText = getChild<LLTextBox>("no_display_names_text_box");
+	mDisplayNameRadio = getChild<LLRadioGroup>("display_names_usage");
+	mLegacyNamesCheck = getChild<LLCheckBoxCtrl>("legacy_names_for_friends_check");
+	mOmitResidentCheck = getChild<LLCheckBoxCtrl>("omit_resident_last_name_check");
+
+	mFadeOutNamesCombo = getChild<LLComboBox>("fade_out_combobox");
+	mMaturityCombo = getChild<LLComboBox>("maturity_desired_combobox");
+	mMaturityText = getChild<LLTextBox>("maturity_desired_textbox");
+	mLanguageCombo = getChild<LLComboBox>("language_combobox");
+
+	mHasDisplayNames = LLStartUp::getStartupState() < STATE_STARTED ||
+					   LLAvatarNameCache::hasNameLookupURL();
+
+	if (LLStartUp::getStartupState() < STATE_STARTED)
+	{
+		mCanChooseMaturity = true;
+	}
+	else
+	{
+		mCanChooseMaturity = gAgent.isMature() || gAgent.isGodlike();
+		if (mCanChooseMaturity && !gAgent.isAdult() && !gAgent.isGodlike())
+		{
+			// If they're not adult or a god, they shouldn't see the adult
+			// selection, so delete it
+			mMaturityCombo->remove(0);
+		}
+	}
+
 	refresh();
 }
 
@@ -114,55 +164,40 @@ void LLPrefsGeneralImpl::refresh()
 {
 	refreshValues();
 
-	LLComboBox* combo = getChild<LLComboBox>("fade_out_combobox");
-	if (combo)
-	{
-		combo->setCurrentByIndex(mRenderName);
-	}
-	childSetValue("language_combobox", mLanguage);
+	mFadeOutNamesCombo->setCurrentByIndex(mRenderName);
 
-	// if we have no agent, we can't let them choose anything
-	// if we have an agent, then we only let them choose if they have a choice
-	bool can_choose = gAgent.getID().notNull() && (gAgent.isMature() || gAgent.isGodlike());
-	if (can_choose)
-	{
-		// if they're not adult or a god, they shouldn't see the adult selection, so delete it
-		if (!gAgent.isAdult() && !gAgent.isGodlike())
-		{
-			LLComboBox* maturity_combo = getChild<LLComboBox>("maturity_desired_combobox");
-			// we're going to remove the adult entry from the combo. This obviously depends
-			// on the order of items in the XML file, but there doesn't seem to be a reasonable
-			// way to depend on the field in XML called 'name'.
-			maturity_combo->remove(0);
-		}
-	}
-	childSetValue("maturity_desired_combobox", (S32)gSavedSettings.getU32("PreferredMaturity"));
-	std::string selected_item_label = getChild<LLComboBox>("maturity_desired_combobox")->getSelectedItemLabel();
-	childSetValue("maturity_desired_textbox", selected_item_label);
-	childSetVisible("maturity_desired_combobox", can_choose);
-	childSetVisible("maturity_desired_textbox",	!can_choose);
+	mMaturityCombo->setValue((S32)gSavedSettings.getU32("PreferredMaturity"));
+	mMaturityCombo->setVisible(mCanChooseMaturity);
+	mMaturityText->setVisible(!mCanChooseMaturity);
+	std::string selected_item_label = mMaturityCombo->getSelectedItemLabel();
+	mMaturityText->setValue(selected_item_label);
+
+	mDisplayNameText1->setVisible(mHasDisplayNames);
+	mDisplayNameText2->setVisible(mHasDisplayNames);
+	mNoDisplayNameText->setVisible(!mHasDisplayNames);
+	mDisplayNameRadio->setEnabled(mHasDisplayNames);
+	mLegacyNamesCheck->setEnabled(mHasDisplayNames);
+	mOmitResidentCheck->setEnabled(mHasDisplayNames);
+
+	mLanguageCombo->setValue(mLanguage);
 }
 
 void LLPrefsGeneralImpl::apply()
 {
-	LLComboBox* combo = getChild<LLComboBox>("fade_out_combobox");
-	if (combo)
-	{
-		gSavedSettings.setS32("RenderName", combo->getCurrentIndex());
-	}
-	std::string language = childGetValue("language_combobox");
+	gSavedSettings.setS32("RenderName", mFadeOutNamesCombo->getCurrentIndex());
+
+	std::string language = mLanguageCombo->getValue();
 	if (language != mLanguage)
 	{
 		gSavedSettings.setString("Language", language);
 		LLNotifications::instance().add("InEffectAfterRestart");
 	}
-	if (gAgent.getID().notNull() && (gAgent.isMature() || gAgent.isGodlike()))
+	if (mCanChooseMaturity)
 	{
-		S32 preferred_maturity = childGetValue("maturity_desired_combobox").asInteger();
+		S32 preferred_maturity = mMaturityCombo->getValue().asInteger();
 		if (preferred_maturity != gSavedSettings.getU32("PreferredMaturity"))
 		{
 			gSavedSettings.setU32("PreferredMaturity", preferred_maturity);
-			gAgent.sendMaturityPreferenceToServer(preferred_maturity);
 		}
 	}
 	refreshValues();
@@ -185,7 +220,10 @@ void LLPrefsGeneralImpl::cancel()
 	gSavedSettings.setS32("RenderName",					mRenderName);
 	gSavedSettings.setS32("AFKTimeout",					mAFKTimeout);
 	gSavedSettings.setF32("UIScaleFactor",				mUIScaleFactor);
-	gSavedSettings.setU32("PreferredMaturity",			mPreferredMaturity);
+	if (mPreferredMaturity != gSavedSettings.getU32("PreferredMaturity"))
+	{
+		gSavedSettings.setU32("PreferredMaturity",		mPreferredMaturity);
+	}
 	gSavedSettings.setU32("DisplayNamesUsage",			mDisplayNamesUsage);
 	gSavedSettings.setColor4("EffectColor",				mEffectColor);
 	gSavedSettings.setString("Language",				mLanguage);

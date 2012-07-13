@@ -268,9 +268,7 @@ void LLOverlayBar::draw()
 		// draw rounded rect tabs behind all children
 		LLRect r;
 		// focus highlights
-		static LLCachedControl<LLColor4U> floater_focus_border_color(gColors,
-																	 "FloaterFocusBorderColor");
-		LLColor4 color = LLColor4(floater_focus_border_color);
+		LLColor4 color = LLUI::sFloaterFocusBorderColor;
 		gGL.color4fv(color.mV);
 		if (gFocusMgr.childHasKeyboardFocus(gBottomPanel))
 		{
@@ -304,9 +302,7 @@ void LLOverlayBar::draw()
 			{
 				r = view->getRect();
 				// draw a nice little pseudo-3D outline
-				static LLCachedControl<LLColor4U> default_shadow_dark(gColors,
-																	  "DefaultShadowDark");
-				color = LLColor4(default_shadow_dark);
+				color = LLUI::sDefaultShadowDark;
 				gGL.color4fv(color.mV);
 				gl_segmented_rect_2d_tex(r.mLeft - mStatusBarPad / 3 + 1,
 										 r.mTop + 2, r.mRight + mStatusBarPad / 3,
@@ -314,9 +310,8 @@ void LLOverlayBar::draw()
 										 rounded_square->getTextureWidth(),
 										 rounded_square->getTextureHeight(),
 										 16, ROUNDED_RECT_TOP);
-				static LLCachedControl<LLColor4U> default_highlight_light(gColors,
-																		  "DefaultHighlightLight");
-				color = LLColor4(default_highlight_light);
+
+				color = LLUI::sDefaultHighlightLight;
 				gGL.color4fv(color.mV);
 				gl_segmented_rect_2d_tex(r.mLeft - mStatusBarPad / 3,
 										 r.mTop + 2,
@@ -325,13 +320,12 @@ void LLOverlayBar::draw()
 										 rounded_square->getTextureWidth(),
 										 rounded_square->getTextureHeight(),
 										 16, ROUNDED_RECT_TOP);
+
 				// here's the main background.  Note that it overhangs on the
 				// bottom so as to hide the focus highlight on the bottom
 				// panel, thus producing the illusion that the focus highlight
 				// continues around the tabs
-				static LLCachedControl<LLColor4U> focus_background_color(gColors,
-																		 "FocusBackgroundColor");
-				color = LLColor4(focus_background_color);
+				color = LLUI::sFocusBackgroundColor;
 				gGL.color4fv(color.mV);
 				gl_segmented_rect_2d_tex(r.mLeft - mStatusBarPad / 3 + 1,
 										 r.mTop + 1,

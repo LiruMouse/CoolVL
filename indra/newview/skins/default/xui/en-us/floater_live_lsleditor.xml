@@ -17,4 +17,16 @@
 	<string name="script_running">
 		Running
 	</string>
+	<string name="out_of_range">
+		Script (object out of range)
+	</string>
+	<string name="compile_success">
+		Compile successful !
+	</string>
+	<string name="save_complete">
+		Save complete.
+	</string>
+	<string name="success_saving">
+		Compile successful, saving...
+	</string>
 </floater>

@@ -258,8 +258,7 @@ protected:
 
 	void			destroy() { die(); } // Don't call this directly.  You probably want to call close(). JC
 
-private:
-	
+private:	
 	void			setForeground(BOOL b);	// called only by floaterview
 	void			cleanupHandles(); // remove handles to dead floaters
 	void			createMinimizeButton();
@@ -267,71 +266,67 @@ private:
 	void			buildButtons();
 	BOOL			offerClickToButton(S32 x, S32 y, MASK mask, EFloaterButtons index);
 
-	LLRect			mExpandedRect;
-	LLDragHandle*	mDragHandle;
-	LLResizeBar*	mResizeBar[4];
-	LLResizeHandle*	mResizeHandle[4];
-	LLButton		*mMinimizeButton;
-	BOOL			mCanTearOff;
-	BOOL			mMinimized;
-	BOOL			mForeground;
-	LLHandle<LLFloater>	mDependeeHandle;
-	std::string		mTitle;
-	std::string		mShortTitle;
+private:	
+	LLRect							mExpandedRect;
+	LLDragHandle*					mDragHandle;
+	LLResizeBar*					mResizeBar[4];
+	LLResizeHandle*					mResizeHandle[4];
+	LLButton*						mMinimizeButton;
+	BOOL							mCanTearOff;
+	BOOL							mMinimized;
+	BOOL							mForeground;
+	LLHandle<LLFloater>				mDependeeHandle;
+	std::string						mTitle;
+	std::string						mShortTitle;
 
-	BOOL			mFirstLook;			// TRUE if the _next_ time this floater is visible will be the first time in the session that it is visible.
+	// TRUE if the _next_ time this floater is visible will be the first time
+	// in the session that it is visible:
+	BOOL							mFirstLook;
 
-	BOOL			mResizable;
-	S32				mMinWidth;
-	S32				mMinHeight;
+	BOOL							mResizable;
+	S32								mMinWidth;
+	S32								mMinHeight;
 
-	BOOL			mEditing;
+	BOOL							mEditing;
 	
 	typedef std::set<LLHandle<LLFloater> > handle_set_t;
 	typedef std::set<LLHandle<LLFloater> >::iterator handle_set_iter_t;
-	handle_set_t	mDependents;
-	bool			mDragOnLeft;
+	handle_set_t					mDependents;
+	bool							mDragOnLeft;
 
-	BOOL			mButtonsEnabled[BUTTON_COUNT];
+	BOOL							mButtonsEnabled[BUTTON_COUNT];
 protected:
-	LLButton*		mButtons[BUTTON_COUNT];
+	LLButton*						mButtons[BUTTON_COUNT];
 private:
-	F32				mButtonScale;
-	BOOL			mAutoFocus;
-	LLHandle<LLFloater> mSnappedTo;
+	F32								mButtonScale;
+	BOOL							mAutoFocus;
+	LLHandle<LLFloater>				mSnappedTo;
 	
-	LLHandle<LLFloater> mHostHandle;
-	LLHandle<LLFloater> mLastHostHandle;
+	LLHandle<LLFloater>				mHostHandle;
+	LLHandle<LLFloater>				mLastHostHandle;
 
-	static LLMultiFloater* sHostp;
-	static BOOL		sEditModeEnabled;
-	static std::string	sButtonActiveImageNames[BUTTON_COUNT];
-	static std::string	sButtonInactiveImageNames[BUTTON_COUNT];
-	static std::string	sButtonPressedImageNames[BUTTON_COUNT];
-	static std::string	sButtonNames[BUTTON_COUNT];
-	static std::string	sButtonToolTips[BUTTON_COUNT];
+	static LLMultiFloater*			sHostp;
+	static BOOL						sEditModeEnabled;
+	static std::string				sButtonActiveImageNames[BUTTON_COUNT];
+	static std::string				sButtonInactiveImageNames[BUTTON_COUNT];
+	static std::string				sButtonPressedImageNames[BUTTON_COUNT];
+	static std::string				sButtonNames[BUTTON_COUNT];
+	static std::string				sButtonToolTips[BUTTON_COUNT];
 	typedef void (*click_callback)(void *);
 	static click_callback sButtonCallbacks[BUTTON_COUNT];
 
 	typedef std::map<LLHandle<LLFloater>, LLFloater*> handle_map_t;
 	typedef std::map<LLHandle<LLFloater>, LLFloater*>::iterator handle_map_iter_t;
-	static handle_map_t	sFloaterMap;
+	static handle_map_t				sFloaterMap;
 
-	std::vector<LLHandle<LLView> > mMinimizedHiddenChildren;
+	std::vector<LLHandle<LLView> >	mMinimizedHiddenChildren;
 
-	BOOL			mHasBeenDraggedWhileMinimized;
-	S32				mPreviousMinimizedBottom;
-	S32				mPreviousMinimizedLeft;
+	BOOL							mHasBeenDraggedWhileMinimized;
+	S32								mPreviousMinimizedBottom;
+	S32								mPreviousMinimizedLeft;
 	
-	LLFloaterNotificationContext* mNotificationContext;
-	LLRootHandle<LLFloater>		mHandle;	
-
-	S32				mDropShadowFloater;
-	LLColor4		mColorDropShadow;
-	LLColor4		mTitleBarFocusColor;
-	LLColor4		mFloaterFocusBorderColor;
-	LLColor4		mFloaterUnfocusBorderColor;
-	LLColor4		mFloaterButtonImageColor;
+	LLFloaterNotificationContext*	mNotificationContext;
+	LLRootHandle<LLFloater>			mHandle;	
 };
 
 /////////////////////////////////////////////////////////////

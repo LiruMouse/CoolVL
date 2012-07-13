@@ -34,13 +34,14 @@
 #define LL_LLFLOATERTOOLS_H
 
 #include "llfloater.h"
+#include "llcheckboxctrl.h"
+#include "llcombobox.h"
 #include "llcoord.h"
 #include "llparcelselection.h"
 
 class LLButton;
 class LLTextBox;
 class LLTool;
-class LLCheckBoxCtrl;
 class LLTabContainer;
 class LLPanelPermissions;
 class LLPanelObject;
@@ -58,21 +59,21 @@ typedef LLSafeHandle<LLObjectSelection> LLObjectSelectionHandle;
 class LLFloaterTools : public LLFloater
 {
 public:
-	virtual	BOOL	postBuild();
-	static	void*	createPanelPermissions(void*	vdata);
-	static	void*	createPanelObject(void*	vdata);
-	static	void*	createPanelVolume(void*	vdata);
-	static	void*	createPanelFace(void*	vdata);
-	static	void*	createPanelContents(void*	vdata);
-	static	void*	createPanelContentsInventory(void*	vdata);
-	static	void*	createPanelLandInfo(void*	vdata);
+	/*virtual*/	BOOL postBuild();
+	static void* createPanelPermissions(void*    vdata);
+	static void* createPanelObject(void* vdata);
+	static void* createPanelVolume(void* vdata);
+	static void* createPanelFace(void*   vdata);
+	static void* createPanelContents(void*   vdata);
+	static void* createPanelContentsInventory(void*  vdata);
+	static void* createPanelLandInfo(void*   vdata);
 
 	LLFloaterTools();
-	virtual ~LLFloaterTools();
+	/*virtual*/ ~LLFloaterTools();
 
-	virtual void onOpen();
-	virtual void onClose(bool app_quitting);
-	virtual BOOL canClose();
+	/*virtual*/ void onOpen();
+	/*virtual*/ void onClose(bool app_quitting);
+	/*virtual*/ BOOL canClose();
 
 	// call this once per frame to handle visibility, rect location,
 	// button highlights, etc.
@@ -94,7 +95,7 @@ public:
 		PANEL_COUNT
 	};
 
-	/*virtual*/  void draw();
+	/*virtual*/ void draw();
 
 	void dirty();
 	void showPanel(EInfoPanel panel);
@@ -103,103 +104,123 @@ public:
 	virtual void onFocusReceived();
 	static void setEditTool(void* data);
 	void saveLastTool();
-private:
-	static void setObjectType( void* data );
 
-	void refresh();
+	BOOL getSelectIndividuals()		{ return mCheckSelectIndividual->get(); }
+	void setGridMode(S32 mode)		{ mComboGridMode->setCurrentByIndex(mode); }
+
+private:
+	static void setObjectType(void* data);
+
+	/*virtual*/ void refresh();
 
 	static void onClickGridOptions(void* data);
 	static void onClickLink(void* data);
 	static void onClickUnlink(void* data);
 
-public:
+private:
+	LLButton*				mBtnFocus;
+	LLButton*				mBtnMove;
+	LLButton*				mBtnEdit;
+	LLButton*				mBtnCreate;
+	LLButton*				mBtnLand;
 
-	LLButton		*mBtnFocus;
-	LLButton		*mBtnMove;
-	LLButton		*mBtnEdit;
-	LLButton		*mBtnCreate;
-	LLButton		*mBtnLand;
-
-	LLTextBox		*mTextStatus;
+	LLTextBox*				mTextStatus;
 
 	// Focus buttons
-	LLCheckBoxCtrl	*mRadioOrbit;
-	LLCheckBoxCtrl	*mRadioZoom;
-	LLCheckBoxCtrl	*mRadioPan;
+	LLCheckBoxCtrl*			mRadioOrbit;
+	LLCheckBoxCtrl*			mRadioZoom;
+	LLCheckBoxCtrl*			mRadioPan;
+	LLSlider*				mSliderZoom;
 
 	// Move buttons
-	LLCheckBoxCtrl	*mRadioMove;
-	LLCheckBoxCtrl	*mRadioLift;
-	LLCheckBoxCtrl	*mRadioSpin;
+	LLCheckBoxCtrl*			mRadioMove;
+	LLCheckBoxCtrl*			mRadioLift;
+	LLCheckBoxCtrl*			mRadioSpin;
 
 	// Edit buttons
-	LLCheckBoxCtrl	*mRadioPosition;
-	LLCheckBoxCtrl	*mRadioAlign;
-	LLCheckBoxCtrl	*mRadioRotate;
-	LLCheckBoxCtrl	*mRadioStretch;
-	LLCheckBoxCtrl	*mRadioSelectFace;
+	LLCheckBoxCtrl*			mRadioPosition;
+	LLCheckBoxCtrl*			mRadioAlign;
+	LLCheckBoxCtrl*			mRadioRotate;
+	LLCheckBoxCtrl*			mRadioStretch;
+	LLCheckBoxCtrl*			mRadioSelectFace;
 
-	LLCheckBoxCtrl	*mCheckSelectIndividual;
-	LLButton*		mBtnLink;
-	LLButton*		mBtnUnlink;
+	LLCheckBoxCtrl*			mCheckSelectIndividual;
+	LLButton*				mBtnLink;
+	LLButton*				mBtnUnlink;
 
-	LLButton*		mBtnGridOptions;
-	LLTextBox*		mTextGridMode;
-	LLComboBox*		mComboGridMode;
-	LLCheckBoxCtrl*	mCheckStretchUniform;
-	LLCheckBoxCtrl*	mCheckStretchTexture;
-	LLCheckBoxCtrl*	mCheckLimitDrag;
+	LLTextBox*				mTextObjectCount;
+	LLTextBox*				mTextPrimCount;
 
-	LLButton		*mBtnRotateLeft;
-	LLButton		*mBtnRotateReset;
-	LLButton		*mBtnRotateRight;
+	LLButton*				mBtnGridOptions;
+	LLTextBox*				mTextGridMode;
+	LLComboBox*				mComboGridMode;
+	LLCheckBoxCtrl*			mCheckStretchUniform;
+	LLCheckBoxCtrl*			mCheckStretchTexture;
+	LLCheckBoxCtrl*			mCheckLimitDrag;
 
-	LLButton		*mBtnDelete;
-	LLButton		*mBtnDuplicate;
-	LLButton		*mBtnDuplicateInPlace;
+	LLButton*				mBtnRotateLeft;
+	LLButton*				mBtnRotateReset;
+	LLButton*				mBtnRotateRight;
+
+	LLButton*				mBtnDelete;
+	LLButton*				mBtnDuplicate;
+	LLButton*				mBtnDuplicateInPlace;
 
 	// Create buttons
-	LLCheckBoxCtrl	*mCheckSticky;
-	LLCheckBoxCtrl	*mCheckCopySelection;
-	LLCheckBoxCtrl	*mCheckCopyCenters;
-	LLCheckBoxCtrl	*mCheckCopyRotates;
+	LLCheckBoxCtrl*			mCheckSticky;
+	LLCheckBoxCtrl*			mCheckCopySelection;
+	LLCheckBoxCtrl*			mCheckCopyCenters;
+	LLCheckBoxCtrl*			mCheckCopyRotates;
 
 	// Land buttons
-//	LLCheckBoxCtrl	*mRadioEditLand;
-	LLCheckBoxCtrl	*mRadioSelectLand;
+//	LLCheckBoxCtrl*			mRadioEditLand;
+	LLCheckBoxCtrl*			mRadioSelectLand;
 
-	LLCheckBoxCtrl	*mRadioDozerFlatten;
-	LLCheckBoxCtrl	*mRadioDozerRaise;
-	LLCheckBoxCtrl	*mRadioDozerLower;
-	LLCheckBoxCtrl	*mRadioDozerSmooth;
-	LLCheckBoxCtrl	*mRadioDozerNoise;
-	LLCheckBoxCtrl	*mRadioDozerRevert;
-	LLSlider		*mSliderDozerSize;
-	LLSlider		*mSliderDozerForce;
+	LLCheckBoxCtrl*			mRadioDozerFlatten;
+	LLCheckBoxCtrl*			mRadioDozerRaise;
+	LLCheckBoxCtrl*			mRadioDozerLower;
+	LLCheckBoxCtrl*			mRadioDozerSmooth;
+	LLCheckBoxCtrl*			mRadioDozerNoise;
+	LLCheckBoxCtrl*			mRadioDozerRevert;
+	LLSlider*				mSliderDozerSize;
+	LLSlider*				mSliderDozerForce;
+	LLButton*				mBtnApplyToSelection;
+	LLTextBox*				mTextBulldozer;
+	LLTextBox*				mTextDozerSize;
+	LLTextBox*				mTextStrength;
 
-	LLComboBox		*mComboTreesGrass;
+	LLComboBox*				mComboTreesGrass;
+	LLTextBox*				mTextTreeGrass;
+	LLButton*				mBtnToolTree;
+	LLButton*				mBtnToolGrass;
 
+	std::vector<LLButton*>	mButtons;	//[15];
 
-	LLButton		*mBtnApplyToSelection;
-
-	std::vector<LLButton*>	mButtons;//[ 15 ];
-
-	LLTabContainer	*mTab;
-	LLPanelPermissions		*mPanelPermissions;
-	LLPanelObject			*mPanelObject;
-	LLPanelVolume			*mPanelVolume;
-	LLPanelContents			*mPanelContents;
-	LLPanelFace				*mPanelFace;
-	LLPanelLandInfo			*mPanelLandInfo;
+	LLTabContainer*			mTab;
+	LLPanelPermissions*		mPanelPermissions;
+	LLPanelObject*			mPanelObject;
+	LLPanelVolume*			mPanelVolume;
+	LLPanelContents*		mPanelContents;
+	LLPanelFace*			mPanelFace;
+	LLPanelLandInfo*		mPanelLandInfo;
 
 	LLTabContainer*			mTabLand;
+
+	std::string				mGridScreenText;
+	std::string				mGridLocalText;
+	std::string				mGridWorldText;
+	std::string				mGridReferenceText;
+	std::string				mGridAttachmentText;
 
 	LLParcelSelectionHandle	mParcelSelection;
 	LLObjectSelectionHandle	mObjectSelection;
 
-private:
-	BOOL					mDirty;
+	bool					mDirty;
 	U32						mPrecision;
+
+	S32						mLastObjectCount;
+	S32						mLastPrimCount;
+	S32						mLastLandImpact;
 
 	std::map<std::string, std::string> mStatusText;
 
@@ -207,6 +228,6 @@ private:
 	static void onSelectTreesGrass(LLUICtrl*, void*);
 };
 
-extern LLFloaterTools *gFloaterTools;
+extern LLFloaterTools* gFloaterTools;
 
 #endif

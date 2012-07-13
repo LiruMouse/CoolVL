@@ -375,6 +375,17 @@
       <key>Value</key>
       <integer>1</integer>
     </map>
+    <key>AppearanceAnimation</key>
+    <map>
+      <key>Comment</key>
+      <string>When entering appearance editing mode, play the appearance editing animation</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>1</integer>
+    </map>
     <key>ApplyColorImmediately</key>
     <map>
       <key>Comment</key>
@@ -880,17 +891,6 @@
       <string>F32</string>
       <key>Value</key>
       <integer>1.0</integer>
-    </map>
-    <key>AvatarPickerSortOrder</key>
-    <map>
-      <key>Comment</key>
-      <string>Specifies sort key for textures in avatar picker (+0 = name, +1 = date, +2 = folders always by name, +4 = system folders to top)</string>
-      <key>Persist</key>
-      <integer>1</integer>
-      <key>Type</key>
-      <string>U32</string>
-      <key>Value</key>
-      <integer>2</integer>
     </map>
     <key>AvatarSex</key>
     <map>
@@ -2704,7 +2704,7 @@
       <key>Type</key>
       <string>F32</string>
       <key>Value</key>
-      <real>0.300000011921</real>
+      <real>0.3</real>
     </map>
     <key>CompileOutputRect</key>
     <map>
@@ -3833,17 +3833,6 @@
       <key>Value</key>
       <integer>5</integer>
     </map>
-    <key>DropShadowSlider</key>
-    <map>
-      <key>Comment</key>
-      <string>Drop shadow width for sliders (pixels)</string>
-      <key>Persist</key>
-      <integer>1</integer>
-      <key>Type</key>
-      <string>S32</string>
-      <key>Value</key>
-      <integer>3</integer>
-    </map>
     <key>DropShadowTooltip</key>
     <map>
       <key>Comment</key>
@@ -4179,17 +4168,6 @@
       <key>Value</key>
       <integer>20</integer>
     </map>
-    <key>FirstPersonBtnState</key>
-    <map>
-      <key>Comment</key>
-      <string />
-      <key>Persist</key>
-      <integer>0</integer>
-      <key>Type</key>
-      <string>Boolean</string>
-      <key>Value</key>
-      <integer>0</integer>
-    </map>
     <key>FirstRunThisInstall</key>
     <map>
       <key>Comment</key>
@@ -4412,22 +4390,38 @@
         <integer>0</integer>
       </array>
     </map>
+    <key>AvatarPickerRect</key>
+    <map>
+      <key>Comment</key>
+      <string>Rectangle for the Avatar Picker window</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Rect</string>
+      <key>Value</key>
+      <array>
+        <integer>0</integer>
+        <integer>380</integer>
+        <integer>300</integer>
+        <integer>0</integer>
+      </array>
+    </map>
     <key>FloaterBeaconsRect</key>
     <map>
-        <key>Comment</key>
-        <string>Rectangle for beacon and highlight controls</string>
-        <key>Persist</key>
-        <integer>1</integer>
-        <key>Type</key>
-        <string>Rect</string>
-        <key>Value</key>
-        <array>
-            <integer>200</integer>
-            <integer>250</integer>
-            <integer>250</integer>
-            <integer>200</integer>
-    </array>
-  </map>
+      <key>Comment</key>
+      <string>Rectangle for beacon and highlight controls</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Rect</string>
+      <key>Value</key>
+      <array>
+        <integer>200</integer>
+        <integer>250</integer>
+        <integer>250</integer>
+        <integer>200</integer>
+      </array>
+    </map>
     <key>FloaterBuildOptionsRect</key>
     <map>
       <key>Comment</key>
@@ -4879,16 +4873,21 @@
         <integer>0</integer>
       </array>
     </map>
-    <key>ShowRadar</key>
+    <key>FloaterObjectWeightsRect</key>
     <map>
       <key>Comment</key>
-      <string>Show the radar floater</string>
+      <string>Rectangle for build options window.</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
-      <string>Boolean</string>
+      <string>Rect</string>
       <key>Value</key>
-      <integer>0</integer>
+      <array>
+        <integer>0</integer>
+        <integer>0</integer>
+        <integer>0</integer>
+        <integer>0</integer>
+      </array>
     </map>
     <key>FloaterRadarRect</key>
     <map>
@@ -4905,6 +4904,17 @@
         <integer>200</integer>
         <integer>0</integer>
       </array>
+    </map>
+    <key>ShowRadar</key>
+    <map>
+      <key>Comment</key>
+      <string>Show the radar floater</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>0</integer>
     </map>
     <key>RadarKeepOpen</key>
     <map>
@@ -7501,17 +7511,6 @@
       <string>Smooths out motion of mouse when in mouselook mode.</string>
       <key>Persist</key>
       <integer>1</integer>
-      <key>Type</key>
-      <string>Boolean</string>
-      <key>Value</key>
-      <integer>0</integer>
-    </map>
-    <key>MouselookBtnState</key>
-    <map>
-      <key>Comment</key>
-      <string />
-      <key>Persist</key>
-      <integer>0</integer>
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
@@ -12443,18 +12442,7 @@
       <key>Value</key>
       <integer>2</integer>
     </map>
-    <key>ThirdPersonBtnState</key>
-    <map>
-      <key>Comment</key>
-      <string />
-      <key>Persist</key>
-      <integer>0</integer>
-      <key>Type</key>
-      <string>Boolean</string>
-      <key>Value</key>
-      <integer>1</integer>
-    </map>
-    <key>ThrottleBandwidthKBPS</key>
+   <key>ThrottleBandwidthKBPS</key>
     <map>
       <key>Comment</key>
       <string>Maximum allowable downstream bandwidth (kilo bits per second)</string>

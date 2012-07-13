@@ -199,10 +199,105 @@ Maximum animation length is [MAX_LENGTH] seconds.
 	</string>
 	<string name="failed_file_read">
 		Unable to read animation file.
-
 [STATUS]
 	</string>
 	<string name="in_world">
 		The animation preview is played on your avatar.
+	</string>
+	<string name="E_ST_OK">
+		Ok
+	</string>
+	<string name="E_ST_EOF">
+		Premature end of file.
+	</string>
+	<string name="E_ST_NO_CONSTRAINT">
+		Cannot read constraint definition.
+	</string>
+	<string name="E_ST_NO_FILE">
+		Cannot open BVH file.
+	</string>
+	<string name="E_ST_NO_HIER">
+		Invalid HIERARCHY header.
+	</string>
+	<string name="E_ST_NO_JOINT">
+		Cannot find ROOT or JOINT.
+	</string>
+	<string name="E_ST_NO_NAME">
+		Cannot get JOINT name.
+	</string>
+	<string name="E_ST_NO_OFFSET">
+		Cannot find OFFSET.
+	</string>
+	<string name="E_ST_NO_CHANNELS">
+		Cannot find CHANNELS.
+	</string>
+	<string name="E_ST_NO_ROTATION">
+		Cannot get rotation order.
+	</string>
+	<string name="E_ST_NO_AXIS">
+		Cannot get rotation axis.
+	</string>
+	<string name="E_ST_NO_MOTION">
+		Cannot find MOTION.
+	</string>
+	<string name="E_ST_NO_FRAMES">
+		Cannot get number of frames.
+	</string>
+	<string name="E_ST_NO_FRAME_TIME">
+		Cannot get frame time.
+	</string>
+	<string name="E_ST_NO_POS">
+		Cannot get position values.
+	</string>
+	<string name="E_ST_NO_ROT">
+		Cannot get rotation values.
+	</string>
+	<string name="E_ST_NO_XLT_FILE">
+		Cannot open translation file.
+	</string>
+	<string name="E_ST_NO_XLT_HEADER">
+		Cannot read translation header.
+	</string>
+	<string name="E_ST_NO_XLT_NAME">
+		Cannot read translation names.
+	</string>
+	<string name="E_ST_NO_XLT_IGNORE">
+		Cannot read translation ignore value.
+	</string>
+	<string name="E_ST_NO_XLT_RELATIVE">
+		Cannot read translation relative value.
+	</string>
+	<string name="E_ST_NO_XLT_OUTNAME">
+		Cannot read translation outname value.
+	</string>
+	<string name="E_ST_NO_XLT_MATRIX">
+		Cannot read translation matrix.
+	</string>
+	<string name="E_ST_NO_XLT_MERGECHILD">
+		Cannot get mergechild name.
+	</string>
+	<string name="E_ST_NO_XLT_MERGEPARENT">
+		Cannot get mergeparent name.
+	</string>
+	<string name="E_ST_NO_XLT_PRIORITY">
+		Cannot get priority value.
+	</string>
+	<string name="E_ST_NO_XLT_LOOP">
+		Cannot get loop value.
+	</string>
+	<string name="E_ST_NO_XLT_EASEIN">
+		Cannot get easeIn values.
+	</string>
+	<string name="E_ST_NO_XLT_EASEOUT">
+		Cannot get easeOut values.
+	</string>
+	<string name="E_ST_NO_XLT_HAND">
+		Cannot get hand morph value.
+	</string>
+	<string name="E_ST_NO_XLT_EMOTE">
+		Cannot read emote name.
+	</string>
+	<string name="E_ST_BAD_ROOT">
+		Incorrect root joint name, use "hip".
 	</string>
 </floater>

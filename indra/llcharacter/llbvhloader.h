@@ -1,11 +1,11 @@
-/** 
+/**
  * @file llbvhloader.h
  * @brief Translates a BVH files to LindenLabAnimation format.
  *
  * $LicenseInfo:firstyear=2004&license=viewergpl$
- * 
+ *
  * Copyright (c) 2004-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -33,11 +33,11 @@
 #ifndef LL_LLBVHLOADER_H
 #define LL_LLBVHLOADER_H
 
-#include "v3math.h"
-#include "m3math.h"
-#include "llmath.h"
 #include "llapr.h"
 #include "llbvhconsts.h"
+#include "llmath.h"
+#include "m3math.h"
+#include "v3math.h"
 
 const S32 BVH_PARSER_LINE_SIZE = 2048;
 class LLDataPacker;
@@ -48,7 +48,7 @@ class LLDataPacker;
 class FileCloser
 {
 public:
-	FileCloser( apr_file_t *file )
+	FileCloser(apr_file_t *file)
 	{
 		mFile = file;
 	}
@@ -57,10 +57,10 @@ public:
 	{
 		apr_file_close(mFile);
 	}
+
 protected:
 	apr_file_t* mFile;
 };
-
 
 //------------------------------------------------------------------------
 // Key
@@ -75,12 +75,11 @@ struct Key
 		mIgnoreRot = false;
 	}
 
-	F32	mPos[3];
-	F32	mRot[3];
+	F32		mPos[3];
+	F32		mRot[3];
 	BOOL	mIgnorePos;
 	BOOL	mIgnoreRot;
 };
-
 
 //------------------------------------------------------------------------
 // KeyVector
@@ -92,7 +91,7 @@ typedef  std::vector<Key> KeyVector;
 //------------------------------------------------------------------------
 struct Joint
 {
-	Joint(const char *name)
+	Joint(const char* name)
 	{
 		mName = name;
 		mIgnore = FALSE;
@@ -130,7 +129,6 @@ struct Joint
 	S32				mChildTreeMaxDepth;
 	S32				mPriority;
 };
-
 
 struct Constraint
 {
@@ -185,6 +183,42 @@ public:
 	S32			mPriorityModifier;
 };
 
+typedef enum e_load_status
+{
+	E_ST_OK,
+	E_ST_EOF,
+	E_ST_NO_CONSTRAINT,
+	E_ST_NO_FILE,
+	E_ST_NO_HIER,
+	E_ST_NO_JOINT,
+	E_ST_NO_NAME,
+	E_ST_NO_OFFSET,
+	E_ST_NO_CHANNELS,
+	E_ST_NO_ROTATION,
+	E_ST_NO_AXIS,
+	E_ST_NO_MOTION,
+	E_ST_NO_FRAMES,
+	E_ST_NO_FRAME_TIME,
+	E_ST_NO_POS,
+	E_ST_NO_ROT,
+	E_ST_NO_XLT_FILE,
+	E_ST_NO_XLT_HEADER,
+	E_ST_NO_XLT_NAME,
+	E_ST_NO_XLT_IGNORE,
+	E_ST_NO_XLT_RELATIVE,
+	E_ST_NO_XLT_OUTNAME,
+	E_ST_NO_XLT_MATRIX,
+	E_ST_NO_XLT_MERGECHILD,
+	E_ST_NO_XLT_MERGEPARENT,
+	E_ST_NO_XLT_PRIORITY,
+	E_ST_NO_XLT_LOOP,
+	E_ST_NO_XLT_EASEIN,
+	E_ST_NO_XLT_EASEOUT,
+	E_ST_NO_XLT_HAND,
+	E_ST_NO_XLT_EMOTE,
+	E_ST_BAD_ROOT
+} ELoadStatus;
+
 //------------------------------------------------------------------------
 // TranslationMap
 //------------------------------------------------------------------------
@@ -195,57 +229,22 @@ class LLBVHLoader
 	friend class LLKeyframeMotion;
 public:
 	// Constructor
-	LLBVHLoader(const char* buffer);
+	LLBVHLoader(const char* buffer, ELoadStatus& loadStatus, S32& errorLine);
 	~LLBVHLoader();
-	
-	// Status Codes
-	typedef const char *status_t;
-	static const char *ST_OK;
-	static const char *ST_EOF;
-	static const char *ST_NO_CONSTRAINT;
-	static const char *ST_NO_FILE;
-	static const char *ST_NO_HIER;
-	static const char *ST_NO_JOINT;
-	static const char *ST_NO_NAME;
-	static const char *ST_NO_OFFSET;
-	static const char *ST_NO_CHANNELS;
-	static const char *ST_NO_ROTATION;
-	static const char *ST_NO_AXIS;
-	static const char *ST_NO_MOTION;
-	static const char *ST_NO_FRAMES;
-	static const char *ST_NO_FRAME_TIME;
-	static const char *ST_NO_POS;
-	static const char *ST_NO_ROT;
-	static const char *ST_NO_XLT_FILE;
-	static const char *ST_NO_XLT_HEADER;
-	static const char *ST_NO_XLT_NAME;
-	static const char *ST_NO_XLT_IGNORE;
-	static const char *ST_NO_XLT_RELATIVE;
-	static const char *ST_NO_XLT_OUTNAME;
-	static const char *ST_NO_XLT_MATRIX;
-	static const char *ST_NO_XLT_MERGECHILD;
-	static const char *ST_NO_XLT_MERGEPARENT;
-	static const char *ST_NO_XLT_PRIORITY;
-	static const char *ST_NO_XLT_LOOP;
-	static const char *ST_NO_XLT_EASEIN;
-	static const char *ST_NO_XLT_EASEOUT;
-	static const char *ST_NO_XLT_HAND;
-	static const char *ST_NO_XLT_EMOTE;
-	static const char *ST_BAD_ROOT;
 
 	// Loads the specified translation table.
-	status_t loadTranslationTable(const char *fileName);
+	ELoadStatus loadTranslationTable(const char* fileName);
 
 	// Load the specified BVH file.
 	// Returns status code.
-	status_t loadBVHFile(const char *buffer, char *error_text, S32 &error_line);
+	ELoadStatus loadBVHFile(const char *buffer, char *error_text, S32 &error_line);
 
 	// Applies translations to BVH data loaded.
 	void applyTranslations();
 
 	// Returns the number of lines scanned.
 	// Useful for error reporting.
-	S32 getLineNumber() { return mLineNumber; }
+	S32 getLineNumber()		{ return mLineNumber; }
 
 	// returns required size of output buffer
 	U32 getOutputSize();
@@ -258,11 +257,11 @@ public:
 
 	void reset();
 
-	F32 getDuration() { return mDuration; }
+	F32 getDuration()		{ return mDuration; }
 
-	BOOL isInitialized() { return mInitialized; }
+	BOOL isInitialized()	{ return mInitialized; }
 
-	status_t getStatus() { return mStatus; }
+	ELoadStatus getStatus()	{ return mStatus; }
 
 protected:
 	// Consumes one line of input from file.
@@ -289,7 +288,7 @@ protected:
 	std::string			mEmoteName;
 
 	BOOL				mInitialized;
-	status_t			mStatus;
+	ELoadStatus			mStatus;
 	// computed values
 	F32	mDuration;
 };

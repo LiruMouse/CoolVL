@@ -37,14 +37,16 @@
 #ifndef LL_LLPANELDIRBROWSER_H
 #define LL_LLPANELDIRBROWSER_H
 
-#include "llpanel.h"
-
-#include "lluuid.h"
 #include "llframetimer.h"
 #include "llmap.h"
+#include "llpanel.h"
+#include "lluuid.h"
 
-class LLMessageSystem;
+class LLButton;
+class LLCheckBoxCtrl;
 class LLFloaterDirectory;
+class LLMessageSystem;
+class LLScrollListCtrl;
 
 class LLPanelDirBrowser: public LLPanel
 {
@@ -89,15 +91,11 @@ public:
 	// Expects a pointer to an LLPanelDirBrowser object.
 	static void onClickSearchCore(void* userdata);
 
-	// query_start indicates the first result row to
-	// return, usually 0 or 100 or 200 because the searches
-	// return a max of 100 rows
-	static void sendDirFindQuery(
-		LLMessageSystem* msg,
-		const LLUUID& query_id,
-		const std::string& text,
-		U32 flags,
-		S32 query_start);
+	// query_start indicates the first result row to return, usually 0 or 100
+	// or 200 because the searches return a max of 100 rows
+	static void sendDirFindQuery(LLMessageSystem* msg, const LLUUID& query_id,
+								 const std::string& text, U32 flags,
+								 S32 query_start);
 
 	void newClassified();
 
@@ -116,10 +114,12 @@ public:
 	static void processDirClassifiedReply(LLMessageSystem* msg, void**);
 	static void processDirLandReply(LLMessageSystem *msg, void**);
 
-	std::string filterShortWords( const std::string source_string, int shortest_word_length, bool& was_filtered );
+	std::string filterShortWords(const std::string source_string,
+								 int shortest_word_length, bool& was_filtered);
 	
-	// Logic to control maturity checkboxes in Classified/Events/Places/'Land for Sale' tabs.
-	void updateMaturityCheckbox();
+	// Logic to control maturity checkboxes in Classified/Events/Places/
+	// "Land for Sale" tabs.
+	void updateMaturityCheckbox(bool force = false);
 
 protected:
 	void updateResultCount();
@@ -135,26 +135,43 @@ protected:
 	S32 showNextButton(S32 rows);
 
 protected:
-	LLUUID			mSearchID;		// Unique ID for a pending search
-	LLUUID			mWantSelectID;	// scroll item to select on arrival
-	std::string     mCurrentSortColumn;
-	BOOL            mCurrentSortAscending;
-	// Some searches return a max of 100 items per page, so we can
-	// start the search from the 100th item rather than the 0th, etc.
-	S32				mSearchStart;
+	LLUUID				mSearchID;		// Unique ID for a pending search
+	LLUUID				mWantSelectID;	// scroll item to select on arrival
+	std::string     	mCurrentSortColumn;
+	BOOL            	mCurrentSortAscending;
+	// Some searches return a max of 100 items per page, so we can start the
+	// search from the 100th item rather than the 0th, etc.
+	S32					mSearchStart;
 	// Places is 100 per page, events is 200 per page
-	S32				mResultsPerPage;
-	S32				mResultsReceived;
+	S32					mResultsPerPage;
+	S32					mResultsReceived;
 
-	U32				mMinSearchChars;
+	U32					mMinSearchChars;
 
-	LLSD			mResultsContents;
+	LLSD				mResultsContents;
 
-	BOOL			mHaveSearchResults;
-	BOOL			mDidAutoSelect;
-	LLFrameTimer	mLastResultTimer;
+	bool				mHaveSearchResults;
+	bool				mDidAutoSelect;
+	LLFrameTimer		mLastResultTimer;
 
-	LLFloaterDirectory* mFloaterDirectory;
+	bool				mLastWantPGOnly;
+	bool				mLastCanAccessMature;
+	bool				mLastCanAccessAdult;
+
+	std::string			mControlNameAdult;
+	std::string			mControlNameMature;
+	std::string			mControlNamePG;
+
+	LLCheckBoxCtrl*		mIncAdultCheck;
+	LLCheckBoxCtrl*		mIncMatureCheck;
+	LLCheckBoxCtrl*		mIncPGCheck;
+
+	LLButton*			mPrevButton;
+	LLButton*			mNextButton;
+
+	LLScrollListCtrl* 	mResultsList;
+
+	LLFloaterDirectory*	mFloaterDirectory;
 };
 
 // Codes used for sorting by type.

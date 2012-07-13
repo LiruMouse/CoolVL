@@ -60,8 +60,8 @@ LLCheckBoxCtrl::LLCheckBoxCtrl(const std::string& name,
 							   BOOL use_radio_style,
 							   const std::string& control_which)
 :	LLUICtrl(name, rect, TRUE, commit_callback, callback_user_data, FOLLOWS_LEFT | FOLLOWS_TOP),
-	mTextEnabledColor(LLUI::sColorsGroup->getColor("LabelTextColor")),
-	mTextDisabledColor(LLUI::sColorsGroup->getColor("LabelDisabledColor")),
+	mTextEnabledColor(LLUI::sLabelTextColor),
+	mTextDisabledColor(LLUI::sLabelDisabledColor),
 	mRadioStyle(use_radio_style),
 	mInitialValue(initial_value),
 	mSetValue(initial_value)

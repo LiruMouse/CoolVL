@@ -1724,8 +1724,6 @@ LLMenuGL::LLMenuGL(const std::string& name, const std::string& label,
 				   LLHandle<LLFloater> parent_floater_handle)
 :	LLUICtrl(name, LLRect(), FALSE, NULL, NULL),
 	mBackgroundColor(sDefaultBackgroundColor),
-	mColorDropShadow(LLUI::sColorsGroup->getColor("ColorDropShadow")),
-	mDropShadowFloater(LLUI::sConfigGroup->getS32("DropShadowFloater")),
 	mBgVisible(TRUE),
 	mParentMenuItem(NULL),
 	mLabel(label),
@@ -1752,8 +1750,6 @@ LLMenuGL::LLMenuGL(const std::string& label,
 				   LLHandle<LLFloater> parent_floater_handle)
 :	LLUICtrl(label, LLRect(), FALSE, NULL, NULL),
 	mBackgroundColor(sDefaultBackgroundColor),
-	mColorDropShadow(LLUI::sColorsGroup->getColor("ColorDropShadow")),
-	mDropShadowFloater(LLUI::sConfigGroup->getS32("DropShadowFloater")),
 	mBgVisible(TRUE),
 	mParentMenuItem(NULL),
 	mLabel(label),
@@ -3087,7 +3083,7 @@ void LLMenuGL::draw(void)
 	if (mDropShadowed && !mTornOff)
 	{
 		gl_drop_shadow(0, getRect().getHeight(), getRect().getWidth(), 0,
-					   mColorDropShadow, mDropShadowFloater);
+					   LLUI::sColorDropShadow, LLUI::sDropShadowFloater);
 	}
 
 	if (mBgVisible)
@@ -3318,10 +3314,6 @@ LLPieMenu::LLPieMenu(const std::string& name, const std::string& label)
 	mHoveredAnyItem(FALSE),
 	mOuterRingAlpha(1.f),
 	mCurRadius(0.f),
-	mPieMenuLineWidth(LLUI::sConfigGroup->getF32("PieMenuLineWidth")),
-	mPieMenuLineColor(LLUI::sColorsGroup->getColor("PieMenuLineColor")),
-	mPieMenuBgColor(LLUI::sColorsGroup->getColor("PieMenuBgColor")),
-	mPieMenuSelectedColor(LLUI::sColorsGroup->getColor("PieMenuSelectedColor")),
 	mRightMouseDown(FALSE)
 {
 	LLMenuGL::setVisible(FALSE);
@@ -3337,10 +3329,6 @@ LLPieMenu::LLPieMenu(const std::string& name)
 	mHoveredAnyItem(FALSE),
 	mOuterRingAlpha(1.f),
 	mCurRadius(0.f),
-	mPieMenuLineWidth(LLUI::sConfigGroup->getF32("PieMenuLineWidth")),
-	mPieMenuLineColor(LLUI::sColorsGroup->getColor("PieMenuLineColor")),
-	mPieMenuBgColor(LLUI::sColorsGroup->getColor("PieMenuBgColor")),
-	mPieMenuSelectedColor(LLUI::sColorsGroup->getColor("PieMenuSelectedColor")),
 	mRightMouseDown(FALSE)
 {
 	LLMenuGL::setVisible(FALSE);
@@ -3657,10 +3645,10 @@ void LLPieMenu::draw()
 		gGL.translatef(center_x, center_y, 0.f);
 
 		// main body
-		LLColor4 outer_color = mPieMenuBgColor;
+		LLColor4 outer_color = LLUI::sPieMenuBgColor;
 		outer_color.mV[VALPHA] *= mOuterRingAlpha;
-		gl_washer_2d(mCurRadius, (F32)PIE_CENTER_SIZE, steps, mPieMenuBgColor,
-					 outer_color);
+		gl_washer_2d(mCurRadius, (F32)PIE_CENTER_SIZE, steps,
+					 LLUI::sPieMenuBgColor, outer_color);
 
 		// selected wedge
 		S32 i = 0;
@@ -3675,25 +3663,25 @@ void LLPieMenu::draw()
 				F32 start_radians = ((F32)i - 0.5f) * arc_size;
 				F32 end_radians = start_radians + arc_size;
 
-				LLColor4 outer_color = mPieMenuSelectedColor;
+				LLColor4 outer_color = LLUI::sPieMenuSelectedColor;
 				outer_color.mV[VALPHA] *= mOuterRingAlpha;
 				gl_washer_segment_2d(mCurRadius, (F32)PIE_CENTER_SIZE,
 									 start_radians, end_radians, steps / 8,
-									 mPieMenuSelectedColor, outer_color);
+									 LLUI::sPieMenuSelectedColor, outer_color);
 			}
 			++i;
 		}
 
-		LLUI::setLineWidth(mPieMenuLineWidth);
+		LLUI::setLineWidth(LLUI::sPieMenuLineWidth);
 
 		// inner lines
-		outer_color = mPieMenuLineColor;
+		outer_color = LLUI::sPieMenuLineColor;
 		outer_color.mV[VALPHA] *= mOuterRingAlpha;
 		gl_washer_spokes_2d(mCurRadius, (F32)PIE_CENTER_SIZE, 8,
-							mPieMenuLineColor, outer_color);
+							LLUI::sPieMenuLineColor, outer_color);
 
 		// inner circle
-		gGL.color4fv(mPieMenuLineColor.mV);
+		gGL.color4fv(LLUI::sPieMenuLineColor.mV);
 		gl_circle_2d(0, 0, (F32)PIE_CENTER_SIZE, steps, FALSE);
 
 		// outer circle
@@ -4201,7 +4189,7 @@ BOOL LLMenuBarGL::handleAcceleratorKey(KEY key, MASK mask)
 BOOL LLMenuBarGL::handleKeyHere(KEY key, MASK mask)
 {
 	if (key == KEY_ALT && !gKeyboard->getKeyRepeated(key) &&
-		LLUI::sConfigGroup->getBOOL("UseAltKeyForMenus"))
+		LLUI::sUseAltKeyForMenus)
 	{
 		mAltKeyTrigger = TRUE;
 	}
@@ -4291,7 +4279,7 @@ void LLMenuBarGL::checkMenuTrigger()
 		// if alt key was released quickly, treat it as a menu access key
 		// otherwise it was probably an Alt-zoom or similar action
 		if (gKeyboard->getKeyElapsedFrameCount(KEY_ALT) < 2 ||
-			gKeyboard->getKeyElapsedTime(KEY_ALT) <= LLUI::sConfigGroup->getF32("MenuAccessKeyTime"))
+			gKeyboard->getKeyElapsedTime(KEY_ALT) <= LLUI::sMenuAccessKeyTime)
 		{
 			if (getHighlightedItem())
 			{

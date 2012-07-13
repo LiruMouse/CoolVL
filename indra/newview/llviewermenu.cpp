@@ -608,14 +608,12 @@ void init_menus()
 	///
 	/// set up the colors
 	///
-	LLColor4 color;
-
-	LLColor4 pie_color = gColors.getColor("PieMenuBgColor");
-	gPieSelf->setBackgroundColor(pie_color);
-	gPieAvatar->setBackgroundColor(pie_color);
-	gPieObject->setBackgroundColor(pie_color);
-	gPieAttachment->setBackgroundColor(pie_color);
-	gPieLand->setBackgroundColor(pie_color);
+	LLColor4 color = LLUI::sPieMenuBgColor;
+	gPieSelf->setBackgroundColor(color);
+	gPieAvatar->setBackgroundColor(color);
+	gPieObject->setBackgroundColor(color);
+	gPieAttachment->setBackgroundColor(color);
+	gPieLand->setBackgroundColor(color);
 
 	color = gColors.getColor("MenuPopupBgColor");
 	gPopupMenuView->setBackgroundColor(color);
@@ -7951,7 +7949,7 @@ class LLToolsUseSelectionForGrid : public view_listener_t
 		LLSelectMgr::getInstance()->setGridMode(GRID_MODE_REF_OBJECT);
 		if (gFloaterTools)
 		{
-			gFloaterTools->mComboGridMode->setCurrentByIndex((S32)GRID_MODE_REF_OBJECT);
+			gFloaterTools->setGridMode((S32)GRID_MODE_REF_OBJECT);
 		}
 		return true;
 	}

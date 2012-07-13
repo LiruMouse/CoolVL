@@ -224,7 +224,6 @@ protected:
 
 private:
 	S32						mButtonPadding;
-	S32						mDropShadowButton;
 	LLLineEditor*			mTextEntry;
 	BOOL					mAllowTextEntry;
 	S32						mMaxChars;

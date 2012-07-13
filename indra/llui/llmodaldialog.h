@@ -83,9 +83,6 @@ protected:
 	void			centerOnScreen();
 
 private:
-	S32				mDropShadowFloater;
-	LLColor4		mColorDropShadow;
-
 	LLFrameTimer 	mVisibleTime;
 	const BOOL		mModal;
 

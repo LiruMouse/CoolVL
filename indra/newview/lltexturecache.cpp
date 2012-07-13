@@ -289,12 +289,13 @@ bool LLTextureCacheLocalFileWorker::doWrite()
 class LLTextureCacheRemoteWorker : public LLTextureCacheWorker
 {
 public:
-	LLTextureCacheRemoteWorker(LLTextureCache* cache, U32 priority, const LLUUID& id,
-						 U8* data, S32 datasize, S32 offset,
-						 S32 imagesize, // for writes
-						 LLTextureCache::Responder* responder)
-			: LLTextureCacheWorker(cache, priority, id, data, datasize, offset, imagesize, responder),
-			mState(INIT)
+	LLTextureCacheRemoteWorker(LLTextureCache* cache, U32 priority,
+							   const LLUUID& id, U8* data, S32 datasize,
+							   S32 offset, S32 imagesize, // for writes
+							   LLTextureCache::Responder* responder)
+	:	LLTextureCacheWorker(cache, priority, id, data, datasize, offset,
+							 imagesize, responder),
+		mState(INIT)
 	{
 	}
 
@@ -322,8 +323,10 @@ void LLTextureCacheWorker::startWork(S32 param)
 // This is where a texture is read from the cache system (header and body)
 // Current assumption are:
 // - the whole data are in a raw form, will be stored at mReadData
-// - the size of this raw data is mDataSize and can be smaller than TEXTURE_CACHE_ENTRY_SIZE (the size of a record in the header cache)
-// - the code supports offset reading but this is actually never exercised in the viewer
+// - the size of this raw data is mDataSize and can be smaller than
+//   TEXTURE_CACHE_ENTRY_SIZE (the size of a record in the header cache)
+// - the code supports offset reading but this is actually never exercised in
+//   the viewer
 bool LLTextureCacheRemoteWorker::doRead()
 {
 	bool done = false;
@@ -419,8 +422,10 @@ bool LLTextureCacheRemoteWorker::doRead()
 		else
 		{
 			mImageSize = entry.mImageSize;
-			// If the read offset is bigger than the header cache, we read directly from the body
-			// Note that currently, we *never* read with offset from the cache, so the result is *always* HEADER
+			// If the read offset is bigger than the header cache, we read
+			// directly from the body.
+			// Note that currently, we *never* read with offset from the cache,
+			// so the result is *always* HEADER
 			mState = mOffset < TEXTURE_CACHE_ENTRY_SIZE ? HEADER : BODY;
 		}
 	}

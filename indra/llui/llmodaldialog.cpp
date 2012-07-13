@@ -53,9 +53,7 @@ LLModalDialog::LLModalDialog(const std::string& title, S32 width, S32 height,
 			 modal ? FALSE : TRUE, // minimizable ?
 			 modal ? FALSE : TRUE, // close button ?
 			 TRUE), // bordered
-	mModal(modal),
-	mDropShadowFloater(LLUI::sConfigGroup->getS32("DropShadowFloater")),
-	mColorDropShadow(LLUI::sColorsGroup->getColor("ColorDropShadow"))
+	mModal(modal)
 {
 	setVisible(FALSE);
 	setBackgroundVisible(TRUE);
@@ -251,7 +249,7 @@ void LLModalDialog::onClose(bool app_quitting)
 void LLModalDialog::draw()
 {
 	gl_drop_shadow(0, getRect().getHeight(), getRect().getWidth(), 0,
-				   mColorDropShadow, mDropShadowFloater);
+				   LLUI::sColorDropShadow, LLUI::sDropShadowFloater);
 
 	LLFloater::draw();
 

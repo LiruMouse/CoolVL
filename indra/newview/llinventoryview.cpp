@@ -1,11 +1,11 @@
-/** 
+/**
  * @file llinventoryview.cpp
  * @brief Implementation of the inventory view and associated stuff.
  *
  * $LicenseInfo:firstyear=2001&license=viewergpl$
- * 
+ *
  * Copyright (c) 2001-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -134,19 +134,19 @@ void LLInventoryViewFinder::onCheckSinceLogoff(LLUICtrl *ctrl, void *user_data)
 	if (!self) return;
 
 	bool since_logoff= self->childGetValue("check_since_logoff");
-	
+
 	if (!since_logoff &&
 	    !(self->mSpinSinceDays->get() || self->mSpinSinceHours->get()))
 	{
 		self->mSpinSinceHours->set(1.0f);
-	}	
+	}
 }
 
 void LLInventoryViewFinder::onTimeAgo(LLUICtrl *ctrl, void *user_data)
 {
 	LLInventoryViewFinder *self = (LLInventoryViewFinder *)user_data;
 	if (!self) return;
-	
+
 	bool since_logoff=true;
 	if ( self->mSpinSinceDays->get() ||  self->mSpinSinceHours->get() )
 	{
@@ -406,11 +406,11 @@ void LLInventoryViewFinder::selectNoTypes(void* user_data)
 ///----------------------------------------------------------------------------
 void LLSaveFolderState::setApply(BOOL apply)
 {
-	mApply = apply; 
+	mApply = apply;
 	// before generating new list of open folders, clear the old one
-	if(!apply) 
+	if(!apply)
 	{
-		clearOpenFolders(); 
+		clearOpenFolders();
 	}
 }
 
@@ -466,13 +466,13 @@ LLInventoryView::LLInventoryView(const std::string& name,
 	LLFloater(name, rect, std::string("Inventory"), RESIZE_YES,
 			  INV_MIN_WIDTH, INV_MIN_HEIGHT, DRAG_ON_TOP,
 			  MINIMIZE_NO, CLOSE_YES),
-	mActivePanel(NULL)
+	mActivePanel(NULL),
+	mLastCount(0)
 	//LLHandle<LLFloater> mFinderHandle takes care of its own initialization
 {
 	init(inventory);
 	setRect(rect); // override XML
 }
-
 
 void LLInventoryView::init(LLInventoryModel* inventory)
 {
@@ -540,9 +540,9 @@ void LLInventoryView::init(LLInventoryModel* inventory)
 
 		// Load the persistent "Recent Items" settings.
 		// Note that the "All Items" and "Worn Items" settings do not persist per-account.
-		if(recent_items_panel)
+		if (recent_items_panel)
 		{
-			if(savedFilterState.has(recent_items_panel->getFilter()->getName()))
+			if (savedFilterState.has(recent_items_panel->getFilter()->getName()))
 			{
 				LLSD recent_items = savedFilterState.get(
 					recent_items_panel->getFilter()->getName());
@@ -594,7 +594,7 @@ LLInventoryView::~LLInventoryView( void )
 		filter->toLLSD(filterState);
 		filterRoot[filter->getName()] = filterState;
 	}
-	
+
 	LLInventoryPanel* worn_items_panel = getChild<LLInventoryPanel>("Worn Items");
 	if (worn_items_panel)
 	{
@@ -621,13 +621,16 @@ LLInventoryView::~LLInventoryView( void )
 
 void LLInventoryView::draw()
 {
- 	if (LLInventoryModelBackgroundFetch::instance().isEverythingFetched())
+ 	if (LLInventoryModelBackgroundFetch::instance().isEverythingFetched() &&
+		mLastCount != gInventory.getItemCount())
 	{
+		mLastCount = gInventory.getItemCount();
 		LLLocale locale(LLLocale::USER_LOCALE);
 		std::ostringstream title;
 		title << "Inventory";
 		std::string item_count_string;
-		LLResMgr::getInstance()->getIntegerString(item_count_string, gInventory.getItemCount());
+		LLResMgr::getInstance()->getIntegerString(item_count_string,
+												  mLastCount);
 		title << " (" << item_count_string << " items)";
 		title << mFilterText;
 		setTitle(title.str());
@@ -740,7 +743,7 @@ void LLInventoryView::onClose(bool app_quitting)
 			mSavedFolderState->setApply(FALSE);
 			mActivePanel->getRootFolder()->applyFunctorRecursively(*mSavedFolderState);
 		}
-		
+
 		// onClearSearch(this);
 
 		// pass up
@@ -754,9 +757,9 @@ BOOL LLInventoryView::handleKeyHere(KEY key, MASK mask)
 	if (root_folder)
 	{
 		// first check for user accepting current search results
-		if (mSearchEditor 
+		if (mSearchEditor
 			&& mSearchEditor->hasFocus()
-		    && (key == KEY_RETURN 
+		    && (key == KEY_RETURN
 		    	|| key == KEY_DOWN)
 		    && mask == MASK_NONE)
 		{
@@ -789,7 +792,6 @@ void LLInventoryView::changed(U32 mask)
 	}
 	title << mFilterText;
 	setTitle(title.str());
-
 }
 
 // static
@@ -946,7 +948,7 @@ void LLInventoryView::toggleFindOptions()
 void LLInventoryView::updateSortControls()
 {
 	U32 order = mActivePanel ? mActivePanel->getSortOrder()
-							 : gSavedSettings.getU32("InventorySortOrder");
+							 : gSavedSettings.getU32(LLInventoryPanel::DEFAULT_SORT_ORDER);
 	bool sort_by_date = order & LLInventoryFilter::SO_DATE;
 	bool folders_by_name = order & LLInventoryFilter::SO_FOLDERS_BY_NAME;
 	bool sys_folders_on_top = order & LLInventoryFilter::SO_SYSTEM_FOLDERS_TO_TOP;
@@ -1126,7 +1128,7 @@ BOOL LLInventoryView::handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop,
 			mFilterTabs->startDragAndDropDelayTimer();
 		}
 	}
-	
+
 	BOOL handled = LLFloater::handleDragAndDrop(x, y, mask, drop, cargo_type, cargo_data, accept, tooltip_msg);
 
 	return handled;
@@ -1265,7 +1267,7 @@ void LLInventoryPanel::draw()
 void LLInventoryPanel::setFilterTypes(U32 filter_types)
 {
 	mFolders->getFilter()->setFilterTypes(filter_types);
-}	
+}
 
 void LLInventoryPanel::setFilterPermMask(PermissionMask filter_perm_mask)
 {
@@ -1395,7 +1397,7 @@ void LLInventoryPanel::modelChanged(U32 mask)
 							llwarns << *id_it << " is in model but not in view, but ADD flag not set" << llendl;
 						}
 						buildNewViews(*id_it);
-						
+
 						// select any newly created object
 						// that has the auto rename at top of folder
 						// root set
@@ -1477,11 +1479,11 @@ void LLInventoryPanel::buildNewViews(const LLUUID& id)
 	LLInventoryObject* objectp = gInventory.getObject(id);
 
 	if (objectp)
-	{		
+	{
 		if (objectp->getType() <= LLAssetType::AT_NONE ||
 			objectp->getType() >= LLAssetType::AT_COUNT)
 		{
-			llwarns << "LLInventoryPanel::buildNewViews called with objectp->mType == " 
+			llwarns << "LLInventoryPanel::buildNewViews called with objectp->mType == "
 				<< ((S32) objectp->getType())
 				<< " (shouldn't happen)" << llendl;
 		}
@@ -1500,7 +1502,7 @@ void LLInventoryPanel::buildNewViews(const LLUUID& id)
 																	 new_listener->getIcon(),
 																	 mFolders,
 																	 new_listener);
-				
+
 				folderp->setItemSortOrder(mFolders->getSortOrder());
 				itemp = folderp;
 			}
@@ -1700,7 +1702,7 @@ void LLInventoryPanel::createNewItem(const std::string& name,
 	LLViewerAssetType::generateDescriptionFor(asset_type, desc);
 	next_owner_perm = (next_owner_perm) ? next_owner_perm : PERM_MOVE | PERM_TRANSFER;
 
-	
+
 	if (inv_type == LLInventoryType::IT_GESTURE)
 	{
 		LLPointer<LLInventoryCallback> cb = new CreateGestureCallback();
@@ -1715,8 +1717,8 @@ void LLInventoryPanel::createNewItem(const std::string& name,
 							  parent_id, LLTransactionID::tnull, name, desc, asset_type, inv_type,
 							  NOT_WEARABLE, next_owner_perm, cb);
 	}
-	
-}	
+
+}
 
 // static DEBUG ONLY:
 void LLInventoryPanel::dumpSelectionInformation(void* user_data)

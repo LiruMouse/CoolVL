@@ -419,7 +419,7 @@ BOOL LLUICtrl::focusNextItem(BOOL text_fields_only)
 {
 	// this assumes that this method is called on the focus root.
 	LLCtrlQuery query = getTabOrderQuery();
-	if (text_fields_only || LLUI::sConfigGroup->getBOOL("TabToTextFieldsOnly"))
+	if (text_fields_only || LLUI::sTabToTextFieldsOnly)
 	{
 		query.addPreFilter(LLUICtrl::LLTextInputFilter::getInstance());
 	}
@@ -431,7 +431,7 @@ BOOL LLUICtrl::focusPrevItem(BOOL text_fields_only)
 {
 	// this assumes that this method is called on the focus root.
 	LLCtrlQuery query = getTabOrderQuery();
-	if (text_fields_only || LLUI::sConfigGroup->getBOOL("TabToTextFieldsOnly"))
+	if (text_fields_only || LLUI::sTabToTextFieldsOnly)
 	{
 		query.addPreFilter(LLUICtrl::LLTextInputFilter::getInstance());
 	}

@@ -72,8 +72,7 @@ LLComboBox::LLComboBox(const std::string& name,
 	mPrearrangeCallback(NULL),
 	mTextEntryCallback(NULL),
 	mSuppressTentative(false),
-	mLabel(label),
-	mDropShadowButton(LLUI::sConfigGroup->getS32("DropShadowButton"))
+	mLabel(label)
 {
 	// Always use text box
 	// Text label button
@@ -495,7 +494,7 @@ void LLComboBox::setButtonVisible(BOOL visible)
 		LLRect text_entry_rect(0, getRect().getHeight(), getRect().getWidth(), 0);
 		if (visible)
 		{
-			text_entry_rect.mRight -= llmax(8,mArrowImage->getWidth()) + 2 * mDropShadowButton;
+			text_entry_rect.mRight -= llmax(8,mArrowImage->getWidth()) + 2 * LLUI::sDropShadowButton;
 		}
 		//mTextEntry->setRect(text_entry_rect);
 		mTextEntry->reshape(text_entry_rect.getWidth(), text_entry_rect.getHeight(), TRUE);
@@ -535,14 +534,14 @@ void LLComboBox::updateLayout()
 	LLRect rect = getLocalRect();
 	if (mAllowTextEntry)
 	{
-		mButton->setRect(LLRect(getRect().getWidth() - llmax(8, mArrowImage->getWidth()) - 2 * mDropShadowButton,
+		mButton->setRect(LLRect(getRect().getWidth() - llmax(8, mArrowImage->getWidth()) - 2 * LLUI::sDropShadowButton,
 								rect.mTop, rect.mRight, rect.mBottom));
 		mButton->setTabStop(FALSE);
 
 		if (!mTextEntry)
 		{
 			LLRect text_entry_rect(0, getRect().getHeight(), getRect().getWidth(), 0);
-			text_entry_rect.mRight -= llmax(8, mArrowImage->getWidth()) + 2 * mDropShadowButton;
+			text_entry_rect.mRight -= llmax(8, mArrowImage->getWidth()) + 2 * LLUI::sDropShadowButton;
 			// clear label on button
 			std::string cur_label = mButton->getLabelSelected();
 			mTextEntry = new LLLineEditor(std::string("combo_text_entry"),

@@ -113,13 +113,7 @@ protected:
 	S32				mMouseOffset;
 	LLRect			mDragStartThumbRect;
 
-	std::map<std::string, LLRect>	mThumbRects;
-	LLColor4		mTrackColor;
-	LLColor4		mThumbOutlineColor;
-	LLColor4		mThumbCenterColor;
-	LLColor4		mThumbCenterSelectedColor;
-	LLColor4		mDisabledThumbColor;
-	LLColor4		mTriangleColor;
+	std::map<std::string, LLRect> mThumbRects;
 
 	void			(*mMouseDownCallback)(LLUICtrl* ctrl, void* userdata);
 	void			(*mMouseUpCallback)(LLUICtrl* ctrl, void* userdata);

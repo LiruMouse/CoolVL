@@ -34,7 +34,7 @@
 
 #include "llpaneldirplaces.h"
 
-// linden library includes
+#include "llcheckboxctrl.h"
 #include "lldir.h"
 #include "llnotifications.h"
 #include "llparcel.h"
@@ -42,7 +42,6 @@
 #include "llregionflags.h"
 #include "message.h"
 
-// viewer project includes
 #include "llagent.h"
 #include "llfloaterdirectory.h"
 #include "llpaneldirbrowser.h"
@@ -153,26 +152,14 @@ void LLPanelDirPlaces::performQuery()
 		category = LLParcel::getCategoryFromString(catstring);
 	}
 
+	BOOL inc_pg		= !mIncPGCheck || mIncPGCheck->getValue().asBoolean();
+	BOOL inc_mature	= mIncMatureCheck && mIncMatureCheck->getValue().asBoolean();
+	BOOL inc_adult	= mIncAdultCheck && mIncAdultCheck->getValue().asBoolean();
+
 	U32 flags = 0x0;
-	bool adult_enabled = gAgent.canAccessAdult();
-	bool mature_enabled = gAgent.canAccessMature();
-
-	// if they can't have either of the others checked, force this one true
-	if (gSavedSettings.getBOOL("ShowPGSims") ||
-	    (!adult_enabled && !mature_enabled))
-	{
-		flags |= DFQ_INC_PG;
-	}
-
-	if (gSavedSettings.getBOOL("ShowMatureSims") && mature_enabled)
-	{
-		flags |= DFQ_INC_MATURE;
-	}
-
-	if (gSavedSettings.getBOOL("ShowAdultSims") && adult_enabled)
-	{
-		flags |= DFQ_INC_ADULT;
-	}
+	if (inc_pg)		flags |= DFQ_INC_PG;
+	if (inc_mature)	flags |= DFQ_INC_MATURE;
+	if (inc_adult)	flags |= DFQ_INC_ADULT;
 
 	// Pack old query flag in case we are talking to an old server
 	if ((flags & DFQ_INC_PG) == DFQ_INC_PG &&
@@ -223,6 +210,6 @@ void LLPanelDirPlaces::queryCore(const std::string& name,
 	// No longer support queries by region name, too many regions
 	// for combobox, no easy way to do autocomplete. JC
 	msg->addString("SimName", "");
-	msg->addS32Fast(_PREHASH_QueryStart,mSearchStart);
+	msg->addS32Fast(_PREHASH_QueryStart, mSearchStart);
 	gAgent.sendReliableMessage();
 }

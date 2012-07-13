@@ -277,8 +277,17 @@
 			 left="270" bottom_delta="0" width="100" height="16" follows="left|top">
 				seconds
 			</text>
+			<check_box name="teleport_history_departure_check" control_name="TeleportHistoryDeparture"
+			 label="Log the TP departure locations into the Teleport History"
+			 tool_tip="The teleport history always logs the arrival location. With this setting you may as well log the departure location."
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
 			<check_box name="preview_anim_in_world_check" control_name="PreviewAnimInWorld"
 			 label="Preview animations on the avatar instead on a dummy before uploading"
+			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
+			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
+			<check_box name="appearance_animation_check" control_name="AppearanceAnimation"
+			 label="Play the editing animation when entering appearance editing mode"
 			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
 			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
 			<check_box name="private_look_at_check" control_name="PrivateLookAt"
@@ -316,11 +325,6 @@
 			<check_box name="revoke_perms_on_stand_up_check" control_name="RevokePermsOnStandUp"
 			 label="On standing up, revoke permissions for the object your avatar was sitting on"
 			 tool_tip="When you sit on a scripted object, it automatically gains some permissions, such as being allowed to animate your avatar. Some buggy scripts do not properly detect the moment when you stand up and may, for example, wrongly keep animating your avatar. This setting prevents this from happening since then all permissions get automatically revoked when you stand up."
-			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
-			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
-			<check_box name="teleport_history_departure_check" control_name="TeleportHistoryDeparture"
-			 label="Log the TP departure locations into the Teleport History"
-			 tool_tip="The teleport history always logs the arrival location. With this setting you may as well log the departure location."
 			 font="SansSerifSmall" enabled="true" mouse_opaque="true"
 			 left="15" bottom_delta="-20" width="400" height="16" follows="left|top" />
 			<check_box name="rez_with_land_group_check" control_name="RezWithLandGroup"

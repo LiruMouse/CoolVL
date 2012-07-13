@@ -1,11 +1,11 @@
 /**
  * @file llpaneldirfind.cpp
- * @brief The "All" panel in the Search directory.
+ * @brief The "All", "All (web)" and "Showcase" panels in the Search directory.
  *
  * $LicenseInfo:firstyear=2001&license=viewergpl$
- * 
+ *
  * Copyright (c) 2001-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -32,38 +32,6 @@
 
 #include "llviewerprecompiledheaders.h"
 
-#include "llpaneldirfind.h"
-
-// linden library includes
-#include "llclassifiedflags.h"
-#include "llfontgl.h"
-#include "llparcel.h"
-#include "llqueryflags.h"
-#include "message.h"
-
-// viewer project includes
-#include "llagent.h"
-#include "llbutton.h"
-#include "llcheckboxctrl.h"
-#include "lllineeditor.h"
-#include "llcombobox.h"
-#include "llviewercontrol.h"
-#include "llmenucommands.h"
-#include "llmenugl.h"
-#include "llpluginclassmedia.h"
-#include "lltextbox.h"
-#include "lluiconstants.h"
-#include "llviewertexturelist.h"
-#include "llviewermessage.h"
-#include "llfloateravatarinfo.h"
-#include "lldir.h"
-#include "llviewercontrol.h"
-#include "lluictrlfactory.h"
-#include "llfloaterdirectory.h"
-#include "llpaneldirbrowser.h"
-#include "lluserauth.h"
-#include "llweb.h"
-
 #if LL_MSVC
 // disable boost::lexical_cast warning
 #pragma warning (disable:4702)
@@ -71,14 +39,42 @@
 #include "boost/tokenizer.hpp"
 #include "boost/lexical_cast.hpp"
 
+#include "llpaneldirfind.h"
+
+#include "llbutton.h"
+#include "llcheckboxctrl.h"
+#include "llclassifiedflags.h"
+#include "llcombobox.h"
+#include "lldir.h"
+#include "llfontgl.h"
+#include "lllineeditor.h"
+#include "llmenugl.h"
+#include "llparcel.h"
+#include "llpluginclassmedia.h"
+#include "llqueryflags.h"
+#include "lltextbox.h"
+#include "lluictrlfactory.h"
+#include "message.h"
+
+#include "llagent.h"
+#include "llfloateravatarinfo.h"
+#include "llfloaterdirectory.h"
+#include "llmenucommands.h"
+#include "llpaneldirbrowser.h"
+#include "lluiconstants.h"
+#include "lluserauth.h"
+#include "llviewercontrol.h"
+#include "llviewermessage.h"
+#include "llviewertexturelist.h"
+#include "llweb.h"
+
 std::string LLPanelDirFind::sSearchToken = "";
 
 //---------------------------------------------------------------------------
-// LLPanelDirFindAll - Google search appliance based search
+// LLPanelDirFindAll - Web search
 //---------------------------------------------------------------------------
 
-class LLPanelDirFindAll
-:	public LLPanelDirFind
+class LLPanelDirFindAll : public LLPanelDirFind
 {
 public:
 	LLPanelDirFindAll(const std::string& name, LLFloaterDirectory* floater);
@@ -96,10 +92,13 @@ LLPanelDirFindAll::LLPanelDirFindAll(const std::string& name, LLFloaterDirectory
 // LLPanelDirFind - Base class for all browser-based search tabs
 //---------------------------------------------------------------------------
 
-LLPanelDirFind::LLPanelDirFind(const std::string& name, LLFloaterDirectory* floater, const std::string& browser_name)
+LLPanelDirFind::LLPanelDirFind(const std::string& name,
+							   LLFloaterDirectory* floater,
+							   const std::string& browser_name)
 :	LLPanelDirBrowser(name, floater),
 	mWebBrowser(NULL),
-	mBrowserName(browser_name)
+	mBrowserName(browser_name),
+	mNewSearchCheck(NULL)
 {
 }
 
@@ -107,53 +106,40 @@ BOOL LLPanelDirFind::postBuild()
 {
 	LLPanelDirBrowser::postBuild();
 
-	childSetAction("back_btn", onClickBack, this);
-	childSetAction("forward_btn", onClickForward, this);
+	mBackButton = getChild<LLButton>("back_btn");
+	mBackButton->setClickedCallback(onClickBack, this);
 
-	// showcase doesn't have other buttons/UI elements
-	if (hasChild("incmature"))
+	mForwardButton = getChild<LLButton>("forward_btn");
+	mForwardButton->setClickedCallback(onClickForward, this);
+
+	mNewSearchCheck = getChild<LLCheckBoxCtrl>("new_search", TRUE, FALSE);
+
+	// Note: showcase doesn't have other buttons/UI elements
+	if (mNewSearchCheck)
 	{
+		mNewSearchCheck->setCommitCallback(onCommitNewSearch);
+		mNewSearchCheck->setCallbackUserData(this);
+
 		childSetCommitCallback("search_editor", onCommitSearch, this);
-		childSetCommitCallback("new_search", onCommitNewSearch, this);
 		childSetAction("search_btn", onClickSearch, this);
 		childSetAction("?", onClickHelp, this);
 
-		// Teens don't get mature checkbox
-		if (gAgent.wantsPGOnly())
-		{
-			childSetValue("incmature", FALSE);
-			childSetValue("incadult", FALSE);
-			childHide("incmature");
-			childHide("incadult");
-			childSetValue("incpg", TRUE);
-			childDisable("incpg");
-		}		
+		// Hide irrelevant UI elements in new search and show relevant ones
+		BOOL new_search = mNewSearchCheck->getValue().asBoolean();
 
-		if (!gAgent.canAccessMature())
-		{
-			childSetValue("incmature", FALSE);
-			childDisable("incmature");
-		}
-
-		if (!gAgent.canAccessAdult())
-		{
-			childSetValue("incadult", FALSE);
-			childDisable("incadult");
-		}
-
-		BOOL new_search = childGetValue("new_search").asBoolean();
 		childSetVisible("Category", new_search);
 		childSetVisible("OldCategory", !new_search);
-		childSetVisible("incpg", !new_search);
-		childSetVisible("incmature", !new_search);
-		childSetVisible("incadult", !new_search);
+
+		mIncPGCheck->setVisible(!new_search);
+		mIncMatureCheck->setVisible(!new_search);
+		mIncAdultCheck->setVisible(!new_search);
 	}
 
 	mWebBrowser = getChild<LLMediaCtrl>(mBrowserName);
 	if (mWebBrowser)
 	{
 		mWebBrowser->addObserver(this);
-		
+
 		// need to handle secondlife:///app/ URLs for direct teleports
 		mWebBrowser->setTrusted(true);
 
@@ -176,12 +162,12 @@ void LLPanelDirFind::draw()
 	// enable/disable buttons depending on state
 	if (mWebBrowser)
 	{
-		childSetEnabled("back_btn", mWebBrowser->canNavigateBack());
-		childSetEnabled("forward_btn", mWebBrowser->canNavigateForward());
+		mBackButton->setEnabled(mWebBrowser->canNavigateBack());
+		mForwardButton->setEnabled(mWebBrowser->canNavigateForward());
 	}
 
 	// showcase doesn't have those buttons/UI elements
-	if (hasChild("incmature") && !childGetValue("new_search").asBoolean())
+	if (mNewSearchCheck && !mNewSearchCheck->getValue().asBoolean())
 	{
 		updateMaturityCheckbox();
 	}
@@ -217,16 +203,17 @@ void LLPanelDirFindAll::search(const std::string& search_text)
 	std::string url;
 	std::string category;
 	std::string maturity;
-	BOOL inc_pg = childGetValue("incpg").asBoolean();
-	BOOL inc_mature = childGetValue("incmature").asBoolean();
-	BOOL inc_adult = childGetValue("incadult").asBoolean();
+
+	BOOL inc_pg = !mIncPGCheck || mIncPGCheck->getValue().asBoolean();
+	BOOL inc_mature = mIncMatureCheck && mIncMatureCheck->getValue().asBoolean();
+	BOOL inc_adult = mIncAdultCheck && mIncAdultCheck->getValue().asBoolean();
 	if (!inc_pg  && !inc_mature && !inc_adult)
 	{
 		LLNotifications::instance().add("NoContentToSearch");
 		return;
 	}
 
-	if (childGetValue("new_search").asBoolean())
+	if (mNewSearchCheck && mNewSearchCheck->getValue().asBoolean())
 	{
 		url = gSavedSettings.getString("SearchURL");
 
@@ -348,9 +335,9 @@ void LLPanelDirFind::onCommitNewSearch(LLUICtrl* ctrl, void* data)
 		bool new_search = check->get();
 		self->childSetVisible("Category", new_search);
 		self->childSetVisible("OldCategory", !new_search);
-		self->childSetVisible("incpg", !new_search);
-		self->childSetVisible("incmature", !new_search);
-		self->childSetVisible("incadult", !new_search);
+		self->mIncPGCheck->setVisible(!new_search);
+		self->mIncMatureCheck->setVisible(!new_search);
+		self->mIncAdultCheck->setVisible(!new_search);
 		self->search(self->childGetText("search_editor"));
 	}
 }
@@ -362,11 +349,11 @@ void LLPanelDirFind::handleMediaEvent(LLPluginClassMedia* self, EMediaEvent even
 		case MEDIA_EVENT_NAVIGATE_BEGIN:
 			childSetText("status_text", getString("loading_text"));
 		break;
-		
+
 		case MEDIA_EVENT_NAVIGATE_COMPLETE:
 			childSetText("status_text", getString("done_text"));
 		break;
-		
+
 		default:
 			// Having a default case makes the compiler happy.
 		break;
@@ -397,11 +384,29 @@ void LLPanelDirFindAllInterface::focus(LLPanelDirFindAll* panel)
 }
 
 //---------------------------------------------------------------------------
-// LLPanelDirFindAllOld - deprecated if new Google search works out. JC
+// LLPanelDirPopular (showcase, web based)
 //---------------------------------------------------------------------------
 
-LLPanelDirFindAllOld::LLPanelDirFindAllOld(const std::string& name, LLFloaterDirectory* floater)
-	:	LLPanelDirBrowser(name, floater)
+LLPanelDirPopular::LLPanelDirPopular(const std::string& name,
+									 LLFloaterDirectory* floater)
+:	LLPanelDirFind(name, floater, "showcase_browser")
+{
+	// *NOTE: This is now the "Showcase" section
+}
+
+// virtual
+void LLPanelDirPopular::search(const std::string& search_text)
+{
+	mWebBrowser->navigateTo(getString("default_search_page"));
+}
+
+//---------------------------------------------------------------------------
+// LLPanelDirFindAllOld (old style, UDP search).
+//---------------------------------------------------------------------------
+
+LLPanelDirFindAllOld::LLPanelDirFindAllOld(const std::string& name,
+										   LLFloaterDirectory* floater)
+:	LLPanelDirBrowser(name, floater)
 {
 	mMinSearchChars = 3;
 }
@@ -410,7 +415,8 @@ BOOL LLPanelDirFindAllOld::postBuild()
 {
 	LLPanelDirBrowser::postBuild();
 
-	childSetKeystrokeCallback("name", &LLPanelDirBrowser::onKeystrokeName, this);
+	childSetKeystrokeCallback("name", &LLPanelDirBrowser::onKeystrokeName,
+							  this);
 
 	childSetAction("Search", onClickSearch, this);
 	childDisable("Search");
@@ -441,16 +447,16 @@ void LLPanelDirFindAllOld::onCommitScope(LLUICtrl* ctrl, void* data)
 // static
 void LLPanelDirFindAllOld::onClickSearch(void *userdata)
 {
-	LLPanelDirFindAllOld *self = (LLPanelDirFindAllOld *)userdata;
+	LLPanelDirFindAllOld* self = (LLPanelDirFindAllOld *)userdata;
 
 	if (self->childGetValue("name").asString().length() < self->mMinSearchChars)
 	{
 		return;
 	};
 
-	BOOL inc_pg = self->childGetValue("incpg").asBoolean();
-	BOOL inc_mature = self->childGetValue("incmature").asBoolean();
-	BOOL inc_adult = self->childGetValue("incadult").asBoolean();
+	BOOL inc_pg = !self->mIncPGCheck || self->mIncPGCheck->getValue().asBoolean();
+	BOOL inc_mature = self->mIncMatureCheck && self->mIncMatureCheck->getValue().asBoolean();
+	BOOL inc_adult = self->mIncAdultCheck && self->mIncAdultCheck->getValue().asBoolean();
 	if (!(inc_pg || inc_mature || inc_adult))
 	{
 		LLNotifications::instance().add("NoContentToSearch");

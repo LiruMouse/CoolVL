@@ -69,20 +69,15 @@ protected:
 	LLTextBox*		getTitleBox() const				{ return mTitleBox; }
 	void			setTitleBox(LLTextBox*);
 
-private:
+protected:
 	S32				mDragLastScreenX;
 	S32				mDragLastScreenY;
 	S32				mLastMouseScreenX;
 	S32				mLastMouseScreenY;
 	LLCoordGL		mLastMouseDir;
-	LLColor4		mDragHighlightColor;
-	LLColor4		mDragShadowColor;
 	LLTextBox*		mTitleBox;
 	S32				mMaxTitleWidth;
 	BOOL			mForeground;
-
-	// Pixels near the edge to snap floaters.
-	static S32		sSnapMargin;
 };
 
 // Use this one for traditional top-of-window draggers

@@ -1,11 +1,11 @@
-/** 
+/**
  * @file llpaneldirbrowser.cpp
  * @brief LLPanelDirBrowser class implementation
  *
  * $LicenseInfo:firstyear=2001&license=viewergpl$
- * 
+ *
  * Copyright (c) 2001-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -43,7 +43,6 @@
 
 #include "llpaneldirbrowser.h"
 
-// linden library includes
 #include "llbutton.h"
 #include "llcheckboxctrl.h"
 #include "lldir.h"
@@ -54,11 +53,10 @@
 #include "lluictrlfactory.h"
 #include "message.h"
 
-// viewer project includes
 #include "llagent.h"
-#include "llappviewer.h"	// for gPacificDaylightTime
+#include "llappviewer.h"			// for gPacificDaylightTime
 #include "llfloateravatarinfo.h"
-#include "llfloaterdirectory.h" 
+#include "llfloaterdirectory.h"
 #include "llmenucommands.h"
 #include "llpanelavatar.h"
 #include "llpanelclassified.h"
@@ -80,7 +78,8 @@
 
 LLMap< const LLUUID, LLPanelDirBrowser* > gDirBrowserInstances;
 
-LLPanelDirBrowser::LLPanelDirBrowser(const std::string& name, LLFloaterDirectory* floater)
+LLPanelDirBrowser::LLPanelDirBrowser(const std::string& name,
+									 LLFloaterDirectory* floater)
 :	LLPanel(name),
 	mSearchID(),
 	mWantSelectID(),
@@ -91,25 +90,58 @@ LLPanelDirBrowser::LLPanelDirBrowser(const std::string& name, LLFloaterDirectory
 	mResultsReceived(0),
 	mMinSearchChars(1),
 	mResultsContents(),
-	mHaveSearchResults(FALSE),
-	mDidAutoSelect(TRUE),
+	mHaveSearchResults(false),
+	mDidAutoSelect(true),
 	mLastResultTimer(),
-	mFloaterDirectory(floater)
+	mFloaterDirectory(floater),
+	mLastWantPGOnly(true),
+	mLastCanAccessMature(true),
+	mLastCanAccessAdult(true),
+	mIncAdultCheck(NULL),
+	mIncMatureCheck(NULL),
+	mIncPGCheck(NULL),
+	mPrevButton(NULL),
+	mNextButton(NULL),
+	mResultsList(NULL)
 {
 	//updateResultCount();
 }
 
 BOOL LLPanelDirBrowser::postBuild()
 {
-	if (getChild<LLButton>("< Prev", TRUE, FALSE))
+	mIncAdultCheck = getChild<LLCheckBoxCtrl>("incadult", TRUE, FALSE);
+	if (mIncAdultCheck)
 	{
-		childSetCommitCallback("results", onCommitList, this);
+		mIncMatureCheck = getChild<LLCheckBoxCtrl>("incmature");
+		mIncPGCheck = getChild<LLCheckBoxCtrl>("incpg");
 
-		childSetAction("< Prev", onClickPrev, this);
-		childHide("< Prev");
+		// Note: each check box is associated with a control name. Changing the
+		// control automatically changes the check box but the other way
+		// around (i.e. doing a setValue() on the checkbox) is not true (only
+		// a click in the checkbox does change the control accordingly). This
+		// is why we must use gSavedSettings.setBOOL("control_name") to set
+		// the checkboxes in updateMaturityCheckbox(), thus the necessity to
+		// get the control names (we cache them for speed).
+		mControlNameAdult = mIncAdultCheck->getControlName();
+		mControlNameMature = mIncMatureCheck->getControlName();
+		mControlNamePG = mIncPGCheck->getControlName();
 
-		childSetAction("Next >", onClickNext, this);
-		childHide("Next >");
+		updateMaturityCheckbox(true);	// true to force an update
+	}
+
+	mPrevButton = getChild<LLButton>("< Prev", TRUE, FALSE);
+	if (mPrevButton)
+	{
+		mPrevButton->setClickedCallback(onClickPrev, this);
+		mPrevButton->setVisible(FALSE);
+
+		mNextButton = getChild<LLButton>("Next >", TRUE, FALSE);
+		mNextButton->setClickedCallback(onClickNext, this);
+		mNextButton->setVisible(FALSE);
+
+		mResultsList = getChild<LLScrollListCtrl>("results");
+		mResultsList->setCommitCallback(onCommitList);
+		mResultsList->setCallbackUserData(this);
 	}
 
 	return TRUE;
@@ -122,100 +154,97 @@ LLPanelDirBrowser::~LLPanelDirBrowser()
 	gDirBrowserInstances.removeData(mSearchID);
 }
 
-
 // virtual
 void LLPanelDirBrowser::draw()
 {
-	// HACK: If the results panel has data, we want to select the first
-	// item.  Unfortunately, we don't know when the find is actually done,
-	// so only do this if it's been some time since the last packet of
-	// results was received.
-	if (mLastResultTimer.getElapsedTimeF32() > 0.5)
+	// HACK: If the results panel has data, we want to select the first item.
+	// Unfortunately, we don't know when the find is actually done, so only do
+	// this if it's been some time since the last packet of results was
+	// received.
+	if (mLastResultTimer.getElapsedTimeF32() > 1.0f)
 	{
-		if (!mDidAutoSelect &&
-			!childHasFocus("results"))
+		if (!mDidAutoSelect && mResultsList && !mResultsList->hasFocus())
 		{
-			LLCtrlListInterface *list = childGetListInterface("results");
+			LLCtrlListInterface* list = mResultsList->getListInterface();
 			if (list)
 			{
 				if (list->getCanSelect())
 				{
 					list->selectFirstItem(); // select first item by default
-					childSetFocus("results", TRUE);
+					mResultsList->setFocus(TRUE);
 				}
 				// Request specific data from the server
 				onCommitList(NULL, this);
 			}
 		}
-		mDidAutoSelect = TRUE;
+		mDidAutoSelect = true;
 	}
-	
+
 	LLPanel::draw();
 }
-
 
 // virtual
 void LLPanelDirBrowser::nextPage()
 {
 	mSearchStart += mResultsPerPage;
-	childShow("< Prev");
-
+	if (mPrevButton) mPrevButton->setVisible(TRUE);
 	performQuery();
 }
-
 
 // virtual
 void LLPanelDirBrowser::prevPage()
 {
 	mSearchStart -= mResultsPerPage;
-	childSetVisible("< Prev", mSearchStart > 0);
-
+	if (mPrevButton) mPrevButton->setVisible(mSearchStart > 0);
 	performQuery();
 }
-
 
 void LLPanelDirBrowser::resetSearchStart()
 {
 	mSearchStart = 0;
-	childHide("Next >");
-	childHide("< Prev");
+	if (mPrevButton)
+	{
+		mPrevButton->setVisible(FALSE);
+		mNextButton->setVisible(FALSE);
+	}
 }
 
 // protected
 void LLPanelDirBrowser::updateResultCount()
 {
-	LLScrollListCtrl* list = getChild<LLScrollListCtrl>("results");
+	if (!mResultsList) return;
 
-	S32 result_count = list->getItemCount();
+	S32 result_count = mResultsList->getItemCount();
 	std::string result_text;
 
 	if (!mHaveSearchResults) result_count = 0;
 
-	if (childIsVisible("Next >")) 
+	if (mNextButton && mNextButton->getVisible())
 	{
 		// Item count be off by a few if bogus items sent from database
 		// Just use the number of results per page. JC
 		result_text = llformat(">%d found", mResultsPerPage);
 	}
-	else 
+	else
 	{
 		result_text = llformat("%d found", result_count);
 	}
-	
+
 	childSetValue("result_text", result_text);
-	
+
 	if (result_count == 0)
 	{
 		// add none found response
-		if (list->getItemCount() == 0)
+		if (mResultsList->getItemCount() == 0)
 		{
-			list->addCommentText(std::string("None found.")); // *TODO: Translate
-			list->operateOnAll(LLCtrlListInterface::OP_DESELECT);
+			// *TODO: Translate
+			mResultsList->addCommentText(std::string("None found."));
+			mResultsList->operateOnAll(LLCtrlListInterface::OP_DESELECT);
 		}
 	}
 	else
 	{
-		childEnable("results");
+		mResultsList->setEnabled(TRUE);
 	}
 }
 
@@ -226,7 +255,6 @@ void LLPanelDirBrowser::onClickPrev(void* data)
 	self->prevPage();
 }
 
-
 // static
 void LLPanelDirBrowser::onClickNext(void* data)
 {
@@ -235,29 +263,31 @@ void LLPanelDirBrowser::onClickNext(void* data)
 }
 
 // static
-std::string LLPanelDirBrowser::filterShortWords( const std::string source_string, 
-															int shortest_word_length, 
-																bool& was_filtered )
+std::string LLPanelDirBrowser::filterShortWords(const std::string source_string,
+												int shortest_word_length,
+												bool& was_filtered)
 {
 	// degenerate case
-	if ( source_string.length() < 1 ) 
+	if (source_string.length() < 1)
 		return "";
 
-	std::stringstream codec( source_string );
+	std::stringstream codec(source_string);
 	std::string each_word;
 	std::vector< std::string > all_words;
-    
-	while( codec >> each_word )
-        all_words.push_back( each_word );
 
-	std::ostringstream dest_string( "" ); 
+	while (codec >> each_word)
+	{
+        all_words.push_back(each_word);
+	}
+
+	std::ostringstream dest_string("");
 
 	was_filtered = false;
 
 	std::vector< std::string >::iterator iter = all_words.begin();
-	while( iter != all_words.end() )
+	while (iter != all_words.end())
 	{
-		if ( (int)(*iter).length() >= shortest_word_length )
+		if ((int)(*iter).length() >= shortest_word_length)
 		{
 			dest_string << *iter;
 			dest_string << " ";
@@ -268,61 +298,83 @@ std::string LLPanelDirBrowser::filterShortWords( const std::string source_string
 		}
 
 		++iter;
-	};
+	}
 
 	return dest_string.str();
 }
 
-void LLPanelDirBrowser::updateMaturityCheckbox()
+void LLPanelDirBrowser::updateMaturityCheckbox(bool force)
 {
-	BOOL godlike = gAgent.isGodlike();
-	// You only have a choice if your maturity is 'mature' or higher.
-	// Logic: if you're not at least mature, hide the mature and adult options
-	// After that, enable only the options you can legitimately choose.
-	// If you're PG only, show you the checkbox but don't let you change it.
-	// If you're God, you have everything.
-	bool mature_enabled = gAgent.canAccessMature() || godlike;
-	bool adult_enabled = gAgent.canAccessAdult() || godlike;
+	// You only have a choice if your maturity is 'mature' or higher. Logic: if
+	// you're not at least mature, hide the mature and adult options. After
+	// that, enable only the options you can legitimately choose. If you're PG
+	// only, show you the checkbox but don't let you change it. If you're God,
+	// you have everything.
 
-	// These check boxes can only be checked if you have the right access to use them
-	std::string control_name_pg = getChild<LLCheckBoxCtrl>("incpg")->getControlName();
-	std::string control_name_mature = getChild<LLCheckBoxCtrl>("incmature")->getControlName();
-	std::string control_name_adult = getChild<LLCheckBoxCtrl>("incadult")->getControlName();
+	bool pg_only_access = gAgent.wantsPGOnly();
+	bool mature_access = gAgent.canAccessMature();
+	bool adult_access = gAgent.canAccessAdult();
 
-	childSetValue("incpg", gSavedSettings.getBOOL(control_name_pg));
-	childSetValue("incmature", gSavedSettings.getBOOL(control_name_mature) && mature_enabled);
-	childSetValue("incadult", gSavedSettings.getBOOL(control_name_adult) && adult_enabled);
-	
-	// Teens don't get mature/adult choices
-	if (gAgent.wantsPGOnly())
+	if (!force && pg_only_access == mLastWantPGOnly &&
+		mature_access == mLastCanAccessMature &&
+		adult_access == mLastCanAccessAdult)
 	{
-		childHide("incmature");
-		childHide("incadult");
-		childSetValue("incpg", TRUE);
-		childDisable("incpg");
+		// Nothing to update
+		return;
 	}
 
-	childSetEnabled("incmature", mature_enabled);		
-	childSetEnabled("incadult", adult_enabled);
+	mLastWantPGOnly = pg_only_access;
+	mLastCanAccessMature = mature_access;
+	mLastCanAccessAdult = adult_access;
 
-	if (mature_enabled)
+	if (pg_only_access)
 	{
-		childEnable("incpg");
-		childSetVisible("incpg", TRUE);
-		childSetVisible("incmature", TRUE);
-		childSetVisible("incadult", TRUE);
+		// Teens don't get mature/adult choices
+		gSavedSettings.setBOOL(mControlNamePG, TRUE);
+		gSavedSettings.setBOOL(mControlNameMature, FALSE);
+		gSavedSettings.setBOOL(mControlNameAdult, FALSE);
+		mIncPGCheck->setEnabled(FALSE);
+		mIncMatureCheck->setVisible(FALSE);
+		mIncAdultCheck->setVisible(FALSE);
+	}
+	else
+	{
+		mIncPGCheck->setEnabled(TRUE);
+		mIncMatureCheck->setVisible(TRUE);
+		mIncAdultCheck->setVisible(TRUE);
+
+		if (mature_access)
+		{
+			mIncMatureCheck->setEnabled(TRUE);
+		}
+		else
+		{
+			gSavedSettings.setBOOL(mControlNameMature, FALSE);
+			mIncMatureCheck->setEnabled(FALSE);
+		}
+
+		if (adult_access)
+		{
+			mIncAdultCheck->setEnabled(TRUE);
+		}
+		else
+		{
+			gSavedSettings.setBOOL(mControlNameAdult, FALSE);
+			mIncAdultCheck->setEnabled(FALSE);
+		}
 	}
 }
 
 void LLPanelDirBrowser::selectByUUID(const LLUUID& id)
 {
-	LLCtrlListInterface *list = childGetListInterface("results");
+	if (!mResultsList) return;
+	LLCtrlListInterface* list = mResultsList->getListInterface();
 	if (!list) return;
-	BOOL found = list->setCurrentByID(id);
-	if (found)
+
+	if (list->setCurrentByID(id))
 	{
-		// we got it, don't wait for network
-		// Don't bother looking for this in the draw loop.
+		// we got it, don't wait for network. Don't bother looking for this in
+		// the draw loop.
 		mWantSelectID.setNull();
 		// Make sure UI updates.
 		onCommitList(NULL, this);
@@ -360,23 +412,23 @@ U32 LLPanelDirBrowser::getSelectedEventID() const
 
 void LLPanelDirBrowser::getSelectedInfo(LLUUID* id, S32 *type)
 {
-	LLCtrlListInterface *list = childGetListInterface("results");
+	if (!mResultsList) return;
+	LLCtrlListInterface* list = mResultsList->getListInterface();
 	if (!list) return;
 
-	LLSD id_sd = childGetValue("results");
-
+	LLSD id_sd = mResultsList->getValue();
 	*id = id_sd.asUUID();
-
 	std::string id_str = id_sd.asString();
 	*type = mResultsContents[id_str]["type"];
 }
-
 
 // static
 void LLPanelDirBrowser::onCommitList(LLUICtrl* ctrl, void* data)
 {
 	LLPanelDirBrowser* self = (LLPanelDirBrowser*)data;
-	LLCtrlListInterface *list = self->childGetListInterface("results");
+	if (!self || !self->mResultsList) return;
+
+	LLCtrlListInterface* list = self->mResultsList->getListInterface();
 	if (!list) return;
 
 	// Start with everyone invisible
@@ -384,13 +436,13 @@ void LLPanelDirBrowser::onCommitList(LLUICtrl* ctrl, void* data)
 	{
 		self->mFloaterDirectory->hideAllDetailPanels();
 	}
-	
-	if (FALSE == list->getCanSelect())
+
+	if (!list->getCanSelect())
 	{
 		return;
 	}
 
-	std::string id_str = self->childGetValue("results").asString();
+	std::string id_str = self->mResultsList->getValue().asString();
 	if (id_str.empty())
 	{
 		return;
@@ -412,19 +464,21 @@ void LLPanelDirBrowser::onCommitList(LLUICtrl* ctrl, void* data)
 		if (self->mFloaterDirectory && self->mFloaterDirectory->mPanelPlaceSmallp)
 		{
 			self->mFloaterDirectory->mPanelPlaceSmallp->setLandTypeString(land_type);
-		}	
+		}
 	}
 }
 
 void LLPanelDirBrowser::showDetailPanel(S32 type, LLSD id)
 {
-	switch(type)
+	switch (type)
 	{
 	case AVATAR_CODE:
 		if (mFloaterDirectory && mFloaterDirectory->mPanelAvatarp)
 		{
 			mFloaterDirectory->mPanelAvatarp->setVisible(TRUE);
-			mFloaterDirectory->mPanelAvatarp->setAvatarID(id.asUUID(), LLStringUtil::null, ONLINE_STATUS_NO);
+			mFloaterDirectory->mPanelAvatarp->setAvatarID(id.asUUID(),
+														  LLStringUtil::null,
+														  ONLINE_STATUS_NO);
 		}
 		break;
 	case EVENT_CODE:
@@ -478,7 +532,6 @@ void LLPanelDirBrowser::showDetailPanel(S32 type, LLSD id)
 	}
 }
 
-
 void LLPanelDirBrowser::showEvent(const U32 event_id)
 {
 	// Start with everyone invisible
@@ -493,26 +546,26 @@ void LLPanelDirBrowser::showEvent(const U32 event_id)
 	}
 }
 
-void LLPanelDirBrowser::processDirPeopleReply(LLMessageSystem *msg, void**)
+void LLPanelDirBrowser::processDirPeopleReply(LLMessageSystem* msg, void**)
 {
 	LLUUID query_id;
-	std::string   first_name;
-	std::string   last_name;
+	std::string first_name;
+	std::string last_name;
 	LLUUID agent_id;
 
 	msg->getUUIDFast(_PREHASH_QueryData,_PREHASH_QueryID, query_id);
 
 	LLPanelDirBrowser* self;
 	self = gDirBrowserInstances.getIfThere(query_id);
-	if (!self) 
+	if (!self || !self->mResultsList)
 	{
 		// data from an old query
 		return;
 	}
 
-	self->mHaveSearchResults = TRUE;
+	self->mHaveSearchResults = true;
 
-	LLCtrlListInterface *list = self->childGetListInterface("results");
+	LLCtrlListInterface* list = self->mResultsList->getListInterface();
 	if (!list) return;
 
 	if (!list->getCanSelect())
@@ -525,16 +578,15 @@ void LLPanelDirBrowser::processDirPeopleReply(LLMessageSystem *msg, void**)
 	self->mResultsReceived += rows;
 
 	rows = self->showNextButton(rows);
-
 	for (S32 i = 0; i < rows; i++)
-	{			
-		msg->getStringFast(_PREHASH_QueryReplies,_PREHASH_FirstName, first_name, i);
-		msg->getStringFast(_PREHASH_QueryReplies,_PREHASH_LastName,	last_name, i);
-		msg->getUUIDFast(  _PREHASH_QueryReplies,_PREHASH_AgentID, agent_id, i);
-		// msg->getU8Fast(    _PREHASH_QueryReplies,_PREHASH_Online, online, i);
+	{
+		msg->getStringFast(_PREHASH_QueryReplies, _PREHASH_FirstName, first_name, i);
+		msg->getStringFast(_PREHASH_QueryReplies, _PREHASH_LastName, last_name, i);
+		msg->getUUIDFast(_PREHASH_QueryReplies, _PREHASH_AgentID, agent_id, i);
+		//msg->getU8Fast(_PREHASH_QueryReplies, _PREHASH_Online, online, i);
 		// unused
-		// msg->getStringFast(_PREHASH_QueryReplies,_PREHASH_Group, group, i);
-		// msg->getS32Fast(   _PREHASH_QueryReplies,_PREHASH_Reputation, reputation, i);
+		//msg->getStringFast(_PREHASH_QueryReplies, _PREHASH_Group, group, i);
+		//msg->getS32Fast(_PREHASH_QueryReplies, _PREHASH_Reputation, reputation, i);
 
 		if (agent_id.isNull())
 		{
@@ -546,8 +598,8 @@ void LLPanelDirBrowser::processDirPeopleReply(LLMessageSystem *msg, void**)
 		LLSD row;
 		row["id"] = agent_id;
 
-		// We don't show online status in the finder anymore,
-		// so just use the 'offline' icon as the generic 'person' icon
+		// We don't show online status in the finder anymore, so just use the
+		// 'offline' icon as the generic 'person' icon
 		row["columns"][0]["column"] = "icon";
 		row["columns"][0]["type"] = "icon";
 		row["columns"][0]["value"] = "icon_avatar_offline.tga";
@@ -570,22 +622,21 @@ void LLPanelDirBrowser::processDirPeopleReply(LLMessageSystem *msg, void**)
 
 	// Poke the result received timer
 	self->mLastResultTimer.reset();
-	self->mDidAutoSelect = FALSE;
+	self->mDidAutoSelect = false;
 }
-
 
 void LLPanelDirBrowser::processDirPlacesReply(LLMessageSystem* msg, void**)
 {
-	LLUUID	agent_id;
-	LLUUID	query_id;
-	LLUUID	parcel_id;
+	LLUUID agent_id;
+	LLUUID query_id;
+	LLUUID parcel_id;
 	std::string	name;
-	BOOL	is_for_sale;
-	BOOL	is_auction;
-	F32		dwell;
-	
+	BOOL is_for_sale;
+	BOOL is_auction;
+	F32	dwell;
+
 	msg->getUUID("AgentData", "AgentID", agent_id);
-	msg->getUUID("QueryData", "QueryID", query_id );
+	msg->getUUID("QueryData", "QueryID", query_id);
 
 	if (msg->getNumberOfBlocks("StatusData"))
 	{
@@ -599,15 +650,16 @@ void LLPanelDirBrowser::processDirPlacesReply(LLMessageSystem* msg, void**)
 
 	LLPanelDirBrowser* self;
 	self = gDirBrowserInstances.getIfThere(query_id);
-	if (!self) 
+	if (!self)
 	{
 		// data from an old query
 		return;
 	}
 
-	self->mHaveSearchResults = TRUE;
+	self->mHaveSearchResults = true;
 
-	LLCtrlListInterface *list = self->childGetListInterface("results");
+	if (!self->mResultsList) return;
+	LLCtrlListInterface* list = self->mResultsList->getListInterface();
 	if (!list) return;
 
 	if (!list->getCanSelect())
@@ -620,7 +672,6 @@ void LLPanelDirBrowser::processDirPlacesReply(LLMessageSystem* msg, void**)
 	self->mResultsReceived += count;
 
 	count = self->showNextButton(count);
-
 	for (S32 i = 0; i < count ; i++)
 	{
 		msg->getUUID("QueryReplies", "ParcelID", parcel_id, i);
@@ -628,7 +679,7 @@ void LLPanelDirBrowser::processDirPlacesReply(LLMessageSystem* msg, void**)
 		msg->getBOOL("QueryReplies", "ForSale", is_for_sale, i);
 		msg->getBOOL("QueryReplies", "Auction", is_auction, i);
 		msg->getF32("QueryReplies", "Dwell", dwell, i);
-		
+
 		if (parcel_id.isNull())
 		{
 			continue;
@@ -637,7 +688,8 @@ void LLPanelDirBrowser::processDirPlacesReply(LLMessageSystem* msg, void**)
 		LLSD content;
 		S32 type;
 
-		LLSD row = self->createLandSale(parcel_id, is_auction, is_for_sale, name, &type);
+		LLSD row = self->createLandSale(parcel_id, is_auction, is_for_sale,
+										name, &type);
 
 		content["type"] = type;
 		content["name"] = name;
@@ -656,23 +708,22 @@ void LLPanelDirBrowser::processDirPlacesReply(LLMessageSystem* msg, void**)
 
 	// Poke the result received timer
 	self->mLastResultTimer.reset();
-	self->mDidAutoSelect = FALSE;
+	self->mDidAutoSelect = false;
 }
-
 
 void LLPanelDirBrowser::processDirEventsReply(LLMessageSystem* msg, void**)
 {
-	LLUUID	agent_id;
-	LLUUID	query_id;
-	LLUUID	owner_id;
+	LLUUID agent_id;
+	LLUUID query_id;
+	LLUUID owner_id;
 	std::string	name;
 	std::string	date;
-	BOOL	show_pg = gSavedSettings.getBOOL("ShowPGEvents");
-	BOOL	show_mature = gSavedSettings.getBOOL("ShowMatureEvents");
-	BOOL	show_adult = gSavedSettings.getBOOL("ShowAdultEvents");
+	BOOL show_pg = gSavedSettings.getBOOL("ShowPGEvents");
+	BOOL show_mature = gSavedSettings.getBOOL("ShowMatureEvents");
+	BOOL show_adult = gSavedSettings.getBOOL("ShowAdultEvents");
 
 	msg->getUUID("AgentData", "AgentID", agent_id);
-	msg->getUUID("QueryData", "QueryID", query_id );
+	msg->getUUID("QueryData", "QueryID", query_id);
 
 	LLPanelDirBrowser* self;
 	self = gDirBrowserInstances.getIfThere(query_id);
@@ -691,9 +742,10 @@ void LLPanelDirBrowser::processDirEventsReply(LLMessageSystem* msg, void**)
 		}
 	}
 
-	self->mHaveSearchResults = TRUE;
+	self->mHaveSearchResults = true;
 
-	LLCtrlListInterface *list = self->childGetListInterface("results");
+	if (!self->mResultsList) return;
+	LLCtrlListInterface* list = self->mResultsList->getListInterface();
 	if (!list) return;
 
 	if (!list->getCanSelect())
@@ -719,35 +771,34 @@ void LLPanelDirBrowser::processDirEventsReply(LLMessageSystem* msg, void**)
 //		msg->getString("QueryReplies", "Date", date, i);
 		msg->getU32("QueryReplies", "UnixTime", unix_time, i);
 		msg->getU32("QueryReplies", "EventFlags", event_flags, i);
-	
+
 		// Skip empty events
 		if (owner_id.isNull())
 		{
-			//RN: should this check event_id instead?
-			llwarns << "skipped event due to owner_id null, event_id " << event_id << llendl;
+			// RN: should this check event_id instead?
+			llwarns << "skipped event due to owner_id null, event_id "
+					<< event_id << llendl;
 			continue;
 		}
 
-		// skip events that don't match the flags
-		// there's no PG flag, so we make sure neither adult nor mature is set
-		if (((event_flags & (EVENT_FLAG_ADULT | EVENT_FLAG_MATURE)) == EVENT_FLAG_NONE) && !show_pg)
+		// skip events that don't match the flags; there's no PG flag, so we
+		// make sure neither adult nor mature is set
+		if (!show_pg &&
+			((event_flags & (EVENT_FLAG_ADULT | EVENT_FLAG_MATURE)) == EVENT_FLAG_NONE))
 		{
-			//llwarns << "Skipped pg event because we're not showing pg, event_id " << event_id << llendl;
 			continue;
 		}
-		
-		if ((event_flags & EVENT_FLAG_MATURE) && !show_mature)
+
+		if (!show_mature && (event_flags & EVENT_FLAG_MATURE))
 		{
-			//llwarns << "Skipped mature event because we're not showing mature, event_id " << event_id << llendl;
 			continue;
 		}
-		
-		if ((event_flags & EVENT_FLAG_ADULT) && !show_adult)
+
+		if (!show_adult && (event_flags & EVENT_FLAG_ADULT))
 		{
-			//llwarns << "Skipped adult event because we're not showing adult, event_id " << event_id << llendl;
 			continue;
 		}
-		
+
 		LLSD content;
 
 		content["type"] = EVENT_CODE;
@@ -806,22 +857,20 @@ void LLPanelDirBrowser::processDirEventsReply(LLMessageSystem* msg, void**)
 
 	// Poke the result received timer
 	self->mLastResultTimer.reset();
-	self->mDidAutoSelect = FALSE;
+	self->mDidAutoSelect = false;
 }
-
 
 // static
 void LLPanelDirBrowser::processDirGroupsReply(LLMessageSystem* msg, void**)
 {
-	S32		i;
-	
-	LLUUID	query_id;
-	LLUUID	group_id;
+	S32 i;
+	LLUUID query_id;
+	LLUUID group_id;
 	std::string	group_name;
-	S32     members;
-	F32     search_order;
+	S32 members;
+	F32 search_order;
 
-	msg->getUUIDFast(_PREHASH_QueryData,_PREHASH_QueryID, query_id );
+	msg->getUUIDFast(_PREHASH_QueryData,_PREHASH_QueryID, query_id);
 
 	LLPanelDirBrowser* self;
 	self = gDirBrowserInstances.getIfThere(query_id);
@@ -830,9 +879,10 @@ void LLPanelDirBrowser::processDirGroupsReply(LLMessageSystem* msg, void**)
 		return;
 	}
 
-	self->mHaveSearchResults = TRUE;
+	self->mHaveSearchResults = true;
 
-	LLCtrlListInterface *list = self->childGetListInterface("results");
+	if (!self->mResultsList) return;
+	LLCtrlListInterface* list = self->mResultsList->getListInterface();
 	if (!list) return;
 
 	if (!list->getCanSelect())
@@ -848,11 +898,13 @@ void LLPanelDirBrowser::processDirGroupsReply(LLMessageSystem* msg, void**)
 
 	for (i = 0; i < rows; i++)
 	{
-		msg->getUUIDFast(_PREHASH_QueryReplies, _PREHASH_GroupID,		group_id, i );
-		msg->getStringFast(_PREHASH_QueryReplies, _PREHASH_GroupName,	group_name,		i);
-		msg->getS32Fast(_PREHASH_QueryReplies, _PREHASH_Members,		members, i );
-		msg->getF32Fast(_PREHASH_QueryReplies, _PREHASH_SearchOrder,	search_order, i );
-		
+		msg->getUUIDFast(_PREHASH_QueryReplies, _PREHASH_GroupID, group_id, i);
+		msg->getStringFast(_PREHASH_QueryReplies, _PREHASH_GroupName,
+						   group_name, i);
+		msg->getS32Fast(_PREHASH_QueryReplies, _PREHASH_Members, members, i);
+		msg->getF32Fast(_PREHASH_QueryReplies, _PREHASH_SearchOrder,
+						search_order, i);
+
 		if (group_id.isNull())
 		{
 			continue;
@@ -889,24 +941,22 @@ void LLPanelDirBrowser::processDirGroupsReply(LLMessageSystem* msg, void**)
 
 	// Poke the result received timer
 	self->mLastResultTimer.reset();
-	self->mDidAutoSelect = FALSE;
+	self->mDidAutoSelect = false;
 }
-
 
 // static
 void LLPanelDirBrowser::processDirClassifiedReply(LLMessageSystem* msg, void**)
 {
-	S32		i;
-	S32		num_new_rows;
-
-	LLUUID	agent_id;
-	LLUUID	query_id;
+	S32 i;
+	S32 num_new_rows;
+	LLUUID agent_id;
+	LLUUID query_id;
 
 	msg->getUUID("AgentData", "AgentID", agent_id);
 	if (agent_id != gAgent.getID())
 	{
 		llwarns << "Message for wrong agent " << agent_id
-			<< " in processDirClassifiedReply" << llendl;
+				<< " in processDirClassifiedReply" << llendl;
 		return;
 	}
 
@@ -916,7 +966,7 @@ void LLPanelDirBrowser::processDirClassifiedReply(LLMessageSystem* msg, void**)
 	{
 		return;
 	}
-	
+
 	if (msg->getNumberOfBlocks("StatusData"))
 	{
 		U32 status;
@@ -927,9 +977,10 @@ void LLPanelDirBrowser::processDirClassifiedReply(LLMessageSystem* msg, void**)
 		}
 	}
 
-	self->mHaveSearchResults = TRUE;
+	self->mHaveSearchResults = true;
 
-	LLCtrlListInterface *list = self->childGetListInterface("results");
+	if (!self->mResultsList) return;
+	LLCtrlListInterface* list = self->mResultsList->getListInterface();
 	if (!list) return;
 
 	if (!list->getCanSelect())
@@ -942,7 +993,7 @@ void LLPanelDirBrowser::processDirClassifiedReply(LLMessageSystem* msg, void**)
 	self->mResultsReceived += num_new_rows;
 
 	num_new_rows = self->showNextButton(num_new_rows);
-	for (i = 0; i < num_new_rows; i++)
+	for (i = 0; i < num_new_rows; ++i)
 	{
 		LLUUID classified_id;
 		std::string name;
@@ -955,7 +1006,7 @@ void LLPanelDirBrowser::processDirClassifiedReply(LLMessageSystem* msg, void**)
 		msg->getU32("QueryReplies","ExpirationDate",expiration_date,i);
 		msg->getS32("QueryReplies","PriceForListing",price_for_listing,i);
 
-		if ( classified_id.notNull() )
+		if (classified_id.notNull())
 		{
 			self->addClassified(list, classified_id, name, creation_date, price_for_listing);
 
@@ -970,28 +1021,28 @@ void LLPanelDirBrowser::processDirClassifiedReply(LLMessageSystem* msg, void**)
 
 	// Poke the result received timer
 	self->mLastResultTimer.reset();
-	self->mDidAutoSelect = FALSE;
+	self->mDidAutoSelect = false;
 }
 
-void LLPanelDirBrowser::processDirLandReply(LLMessageSystem *msg, void**)
+void LLPanelDirBrowser::processDirLandReply(LLMessageSystem* msg, void**)
 {
-	LLUUID	agent_id;
-	LLUUID	query_id;
-	LLUUID	parcel_id;
+	LLUUID agent_id;
+	LLUUID query_id;
+	LLUUID parcel_id;
 	std::string	name;
 	std::string land_sku;
 	std::string land_type;
-	BOOL	auction;
-	BOOL	for_sale;
-	S32		sale_price;
-	S32		actual_area;
+	BOOL auction;
+	BOOL for_sale;
+	S32	sale_price;
+	S32	actual_area;
 
 	msg->getUUID("AgentData", "AgentID", agent_id);
-	msg->getUUID("QueryData", "QueryID", query_id );
+	msg->getUUID("QueryData", "QueryID", query_id);
 
 	LLPanelDirBrowser* browser;
 	browser = gDirBrowserInstances.getIfThere(query_id);
-	if (!browser) 
+	if (!browser)
 	{
 		// data from an old query
 		return;
@@ -1000,9 +1051,10 @@ void LLPanelDirBrowser::processDirLandReply(LLMessageSystem *msg, void**)
 	// Only handled by LLPanelDirLand
 	LLPanelDirLand* self = (LLPanelDirLand*)browser;
 
-	self->mHaveSearchResults = TRUE;
+	self->mHaveSearchResults = true;
 
-	LLCtrlListInterface *list = self->childGetListInterface("results");
+	if (!self->mResultsList) return;
+	LLCtrlListInterface* list = self->mResultsList->getListInterface();
 	if (!list) return;
 
 	if (!list->getCanSelect())
@@ -1020,9 +1072,9 @@ void LLPanelDirBrowser::processDirLandReply(LLMessageSystem *msg, void**)
 	S32 i;
 	S32 count = msg->getNumberOfBlocks("QueryReplies");
 	self->mResultsReceived += count;
-	
+
 	S32 non_auction_count = 0;
-	for (i = 0; i < count; i++)
+	for (i = 0; i < count; ++i)
 	{
 		msg->getUUID("QueryReplies", "ParcelID", parcel_id, i);
 		msg->getString("QueryReplies", "Name", name, i);
@@ -1033,7 +1085,8 @@ void LLPanelDirBrowser::processDirLandReply(LLMessageSystem *msg, void**)
 
 		if (msg->getSizeFast(_PREHASH_QueryReplies, i, _PREHASH_ProductSKU) > 0)
 		{
-			msg->getStringFast(	_PREHASH_QueryReplies, _PREHASH_ProductSKU, land_sku, i);
+			msg->getStringFast(_PREHASH_QueryReplies, _PREHASH_ProductSKU,
+							   land_sku, i);
 			LL_DEBUGS("Land SKU") << "Land sku: " << land_sku << LL_ENDL;
 			land_type = LLProductInfoRequestManager::instance().getDescriptionForSku(land_sku);
 		}
@@ -1052,7 +1105,8 @@ void LLPanelDirBrowser::processDirLandReply(LLMessageSystem *msg, void**)
 		LLSD content;
 		S32 type;
 
-		LLSD row = self->createLandSale(parcel_id, auction, for_sale,  name, &type);
+		LLSD row = self->createLandSale(parcel_id, auction, for_sale,  name,
+										&type);
 
 		content["type"] = type;
 		content["name"] = name;
@@ -1106,19 +1160,23 @@ void LLPanelDirBrowser::processDirLandReply(LLMessageSystem *msg, void**)
 		self->mResultsContents[parcel_id.asString()] = content;
 	}
 
-	// All auction results are shown on the first page
-	// But they don't count towards the 100 / page limit
-	// So figure out the next button here, when we know how many aren't auctions
+	// All auction results are shown on the first page. But they don't count
+	// towards the 100 / page limit. So figure out the next button here, when
+	// we know how many aren't auctions
 	count = self->showNextButton(non_auction_count);
 
 	self->updateResultCount();
 
 	// Poke the result received timer
 	self->mLastResultTimer.reset();
-	self->mDidAutoSelect = FALSE;
+	self->mDidAutoSelect = false;
 }
 
-void LLPanelDirBrowser::addClassified(LLCtrlListInterface *list, const LLUUID& pick_id, const std::string& name, const U32 creation_date, const S32 price_for_listing)
+void LLPanelDirBrowser::addClassified(LLCtrlListInterface* list,
+									  const LLUUID& pick_id,
+									  const std::string& name,
+									  const U32 creation_date,
+									  const S32 price_for_listing)
 {
 	std::string type = llformat("%d", CLASSIFIED_CODE);
 
@@ -1140,14 +1198,16 @@ void LLPanelDirBrowser::addClassified(LLCtrlListInterface *list, const LLUUID& p
 	list->addElement(row);
 }
 
-LLSD LLPanelDirBrowser::createLandSale(const LLUUID& parcel_id, BOOL is_auction, BOOL is_for_sale,  const std::string& name, S32 *type)
+LLSD LLPanelDirBrowser::createLandSale(const LLUUID& parcel_id,
+									   BOOL is_auction, BOOL is_for_sale,
+									   const std::string& name, S32* type)
 {
 	LLSD row;
 	row["id"] = parcel_id;
 	LLUUID image_id;
 
 	// Icon and type
-	if(is_auction)
+	if (is_auction)
 	{
 		row["columns"][0]["column"] = "icon";
 		row["columns"][0]["type"] = "icon";
@@ -1181,7 +1241,8 @@ LLSD LLPanelDirBrowser::createLandSale(const LLUUID& parcel_id, BOOL is_auction,
 
 void LLPanelDirBrowser::newClassified()
 {
-	LLCtrlListInterface *list = childGetListInterface("results");
+	if (!mResultsList) return;
+	LLCtrlListInterface* list = mResultsList->getListInterface();
 	if (!list) return;
 
 	if (mFloaterDirectory->mPanelClassifiedp)
@@ -1197,7 +1258,9 @@ void LLPanelDirBrowser::newClassified()
 		LLUUID classified_id = mFloaterDirectory->mPanelClassifiedp->getClassifiedID();
 
 		// Put it in the list on the left
-		addClassified(list, classified_id, mFloaterDirectory->mPanelClassifiedp->getClassifiedName(),0,0);
+		addClassified(list, classified_id,
+					  mFloaterDirectory->mPanelClassifiedp->getClassifiedName(),
+					  0, 0);
 
 		// Select it.
 		list->setCurrentByID(classified_id);
@@ -1209,28 +1272,29 @@ void LLPanelDirBrowser::newClassified()
 
 void LLPanelDirBrowser::setupNewSearch()
 {
-	LLScrollListCtrl* list = getChild<LLScrollListCtrl>("results");
-
 	gDirBrowserInstances.removeData(mSearchID);
 	// Make a new query ID
 	mSearchID.generate();
 
 	gDirBrowserInstances.addData(mSearchID, this);
 
-	// ready the list for results
-	list->operateOnAll(LLCtrlListInterface::OP_DELETE);
-	list->addCommentText(std::string("Searching...")); // *TODO: Translate
-	childDisable("results");
+	if (mResultsList)
+	{
+		// ready the list for results
+		mResultsList->operateOnAll(LLCtrlListInterface::OP_DELETE);
+		// *TODO: Translate
+		mResultsList->addCommentText(std::string("Searching..."));
+		mResultsList->setEnabled(FALSE);
+	}
 
 	mResultsReceived = 0;
-	mHaveSearchResults = FALSE;
+	mHaveSearchResults = false;
 
 	// Set all panels to be invisible
 	mFloaterDirectory->hideAllDetailPanels();
 
 	updateResultCount();
 }
-
 
 // static
 // called from classifieds, events, groups, land, people, and places
@@ -1245,14 +1309,12 @@ void LLPanelDirBrowser::onClickSearchCore(void* userdata)
 	LLFloaterDirectory::sOldSearchCount++;
 }
 
-
 // static
-void LLPanelDirBrowser::sendDirFindQuery(
-	LLMessageSystem* msg,
-	const LLUUID& query_id,
-	const std::string& text,
-	U32 flags,
-	S32 query_start)
+void LLPanelDirBrowser::sendDirFindQuery(LLMessageSystem* msg,
+										 const LLUUID& query_id,
+										 const std::string& text,
+										 U32 flags,
+										 S32 query_start)
 {
 	msg->newMessage("DirFindQuery");
 	msg->nextBlock("AgentData");
@@ -1266,13 +1328,12 @@ void LLPanelDirBrowser::sendDirFindQuery(
 	gAgent.sendReliableMessage();
 }
 
-
 void LLPanelDirBrowser::onKeystrokeName(LLLineEditor* line, void* data)
 {
-	LLPanelDirBrowser *self = (LLPanelDirBrowser*)data;
+	LLPanelDirBrowser* self = (LLPanelDirBrowser*)data;
 	if (line->getLength() >= (S32)self->mMinSearchChars)
 	{
-		self->setDefaultBtn( "Search" );
+		self->setDefaultBtn("Search");
 		self->childEnable("Search");
 	}
 	else
@@ -1294,23 +1355,26 @@ void LLPanelDirBrowser::onVisibilityChange(BOOL new_visibility)
 
 S32 LLPanelDirBrowser::showNextButton(S32 rows)
 {
-	// HACK: This hack doesn't work for llpaneldirfind (ALL) 
-	// because other data is being returned as well.
-	if ( getName() != "find_all_old_panel")
+	if (!mPrevButton) return rows;
+
+	// HACK: This hack doesn't work for llpaneldirfind (ALL) because other data
+	// is being returned as well.
+	if (getName() != "find_all_old_panel")
 	{
-		// HACK: The (mResultsPerPage)+1th entry indicates there are 'more'
+		// HACK: The mResultsPerPage+1th entry indicates there are 'more'
 		bool show_next = (mResultsReceived > mResultsPerPage);
-		childSetVisible("Next >", show_next);
+		mNextButton->setVisible(show_next);
 		if (show_next)
 		{
-			rows -= (mResultsReceived - mResultsPerPage);
+			rows -= mResultsReceived - mResultsPerPage;
 		}
 	}
-	else
+	else if (mPrevButton)
 	{
 		// Hide page buttons
-		childHide("Next >");
-		childHide("< Prev");
+		mPrevButton->setVisible(FALSE);
+		mNextButton->setVisible(FALSE);
 	}
+
 	return rows;
 }

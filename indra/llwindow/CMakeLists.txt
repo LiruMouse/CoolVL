@@ -121,42 +121,15 @@ endif (SOLARIS)
 set_source_files_properties(${llwindow_HEADER_FILES}
                             PROPERTIES HEADER_FILE_ONLY TRUE)
 
-if (SERVER AND NOT WINDOWS AND NOT DARWIN)
-  set(server_SOURCE_FILES
-       llwindowmesaheadless.cpp
-       )
-  set(server_HEADER_FILES
-       llwindowmesaheadless.h
-       )
-  copy_server_sources(
-      llwindow
-      )
-
-
-  set_source_files_properties(
-    ${server_SOURCE_FILES}
-    PROPERTIES
-    COMPILE_FLAGS "-DLL_MESA=1 -DLL_MESA_HEADLESS=1"
-    )
-  add_library (llwindowheadless
-    ${llwindow_SOURCE_FILES}
-    ${server_SOURCE_FILES}
-    )
-  add_dependencies(llwindowheadless prepare)
-  # *TODO: This should probably have target_link_libraries
-endif (SERVER AND NOT WINDOWS AND NOT DARWIN)
-
 if (llwindow_HEADER_FILES)
   list(APPEND llwindow_SOURCE_FILES ${llwindow_HEADER_FILES})
 endif (llwindow_HEADER_FILES)
   list(APPEND viewer_SOURCE_FILES ${viewer_HEADER_FILES})
 
-if (VIEWER)
-  add_library (llwindow
-    ${llwindow_SOURCE_FILES}
-    ${viewer_SOURCE_FILES}
-    )
-  add_dependencies(llwindow prepare)
-  target_link_libraries (llwindow ${llwindow_LINK_LIBRARIES})
-endif (VIEWER)
+add_library (llwindow
+  ${llwindow_SOURCE_FILES}
+  ${viewer_SOURCE_FILES}
+  )
+add_dependencies(llwindow prepare)
+target_link_libraries (llwindow ${llwindow_LINK_LIBRARIES})
 

@@ -287,8 +287,12 @@ public:
 	bool isAdult() const;
 	void setTeen(bool teen);
 	void setMaturity(char text);
-	static int convertTextToMaturity(char text);
-	bool sendMaturityPreferenceToServer(int preferredMaturity);
+	static U8 convertTextToMaturity(char text);
+	bool sendMaturityPreferenceToServer(U8 preferredMaturity);
+
+	// Maturity callbacks for PreferredMaturity control variable
+	void handleMaturity(const LLSD& newvalue);
+	bool validateMaturity(const LLSD& newvalue);
 
 	const LLAgentAccess&  getAgentAccess();
 

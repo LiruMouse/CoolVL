@@ -99,9 +99,6 @@ private:
 	LLUIImage*		mTrackHighlightImage;
 
 	LLRect			mThumbRect;
-	LLColor4		mTrackColor;
-	LLColor4		mThumbOutlineColor;
-	LLColor4		mThumbCenterColor;
 
 	void			(*mMouseDownCallback)(LLUICtrl* ctrl, void* userdata);
 	void			(*mMouseUpCallback)(LLUICtrl* ctrl, void* userdata);

@@ -45,6 +45,7 @@
 #include "llrender.h"
 #include "llspellcheck.h"
 #include "llsys.h"
+#include "llui.h"
 #include "llversionviewer.h"
 
 #include "llagent.h"
@@ -708,6 +709,12 @@ static bool handleMainloopTimeoutDefaultChanged(const LLSD& newvalue)
 	return true;
 }
 
+static bool handleUISettingsChanged(const LLSD& newvalue)
+{
+	LLUI::refreshSettings();
+	return true;
+}
+
 ////////////////////////////////////////////////////////////////////////////
 
 void settings_setup_listeners()
@@ -904,4 +911,16 @@ void settings_setup_listeners()
 	gSavedSettings.getControl("SwapShoutWhisperShortcuts")->getSignal()->connect(boost::bind(&handleSwapShoutWhisperShortcutsChanged, _2));
 	gSavedSettings.getControl("YieldTime")->getSignal()->connect(boost::bind(&handleYieldTimeChanged, _2));
 	gSavedSettings.getControl("MainloopTimeoutDefault")->getSignal()->connect(boost::bind(&handleMainloopTimeoutDefaultChanged, _2));
+	gSavedSettings.getControl("ButtonFlashCount")->getSignal()->connect(boost::bind(&handleUISettingsChanged, _2));
+	gSavedSettings.getControl("ButtonFlashRate")->getSignal()->connect(boost::bind(&handleUISettingsChanged, _2));
+	gSavedSettings.getControl("ColumnHeaderDropDownDelay")->getSignal()->connect(boost::bind(&handleUISettingsChanged, _2));
+	gSavedSettings.getControl("DropShadowButton")->getSignal()->connect(boost::bind(&handleUISettingsChanged, _2));
+	gSavedSettings.getControl("DropShadowFloater")->getSignal()->connect(boost::bind(&handleUISettingsChanged, _2));
+	gSavedSettings.getControl("DropShadowTooltip")->getSignal()->connect(boost::bind(&handleUISettingsChanged, _2));
+	gSavedSettings.getControl("MenuAccessKeyTime")->getSignal()->connect(boost::bind(&handleUISettingsChanged, _2));
+	gSavedSettings.getControl("PieMenuLineWidth")->getSignal()->connect(boost::bind(&handleUISettingsChanged, _2));
+	gSavedSettings.getControl("SnapMargin")->getSignal()->connect(boost::bind(&handleUISettingsChanged, _2));
+	gSavedSettings.getControl("TabToTextFieldsOnly")->getSignal()->connect(boost::bind(&handleUISettingsChanged, _2));
+	gSavedSettings.getControl("TypeAheadTimeout")->getSignal()->connect(boost::bind(&handleUISettingsChanged, _2));
+	gSavedSettings.getControl("UseAltKeyForMenus")->getSignal()->connect(boost::bind(&handleUISettingsChanged, _2));
 }

@@ -39,14 +39,13 @@ class LLPanelDirGroups : public LLPanelDirBrowser
 {
 public:
 	LLPanelDirGroups(const std::string& name, LLFloaterDirectory* floater);
-	virtual ~LLPanelDirGroups();
-
-	/*virtual*/ void draw();
+	/*virtual*/ ~LLPanelDirGroups();
 
 	/*virtual*/ BOOL postBuild();
-
+	/*virtual*/ void draw();
 	/*virtual*/ void performQuery();
 
+protected:
 	static void onClickSearch(void *userdata);
 };
 

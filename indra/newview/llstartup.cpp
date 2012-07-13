@@ -2073,7 +2073,7 @@ bool idle_startup()
 			text = LLUserAuth::getInstance()->mResult["agent_region_access"].asString();
 			if (!text.empty())
 			{
-				int preferredMaturity = LLAgent::convertTextToMaturity(text[0]);
+				U8 preferredMaturity = LLAgent::convertTextToMaturity(text[0]);
 				gSavedSettings.setU32("PreferredMaturity", preferredMaturity);
 			}
 			// OGPX TODO: so regionhandles need to change in the viewer. If two regions on two 
@@ -2272,6 +2272,14 @@ bool idle_startup()
 				// agent_access can be 'A', 'M', and 'PG'.
 				gAgent.setMaturity(text[0]);
 			}
+			// this is the value of their preference setting for that content
+			// which will always be <= agent_access_max
+			text = LLUserAuth::getInstance()->getResponse("agent_region_access");
+			if (!text.empty())
+			{
+				U8 preferredMaturity = LLAgent::convertTextToMaturity(text[0]);
+				gSavedSettings.setU32("PreferredMaturity", preferredMaturity);
+			}
 
 			// This token is used by the new style web search in SL
 			std::string search_token = LLUserAuth::getInstance()->getResponse("search_token");
@@ -2281,14 +2289,6 @@ bool idle_startup()
 			}
 			LLPanelDirFind::setSearchToken(search_token);
 
-			// this is the value of their preference setting for that content
-			// which will always be <= agent_access_max
-			text = LLUserAuth::getInstance()->getResponse("agent_region_access");
-			if (!text.empty())
-			{
-				int preferredMaturity = LLAgent::convertTextToMaturity(text[0]);
-				gSavedSettings.setU32("PreferredMaturity", preferredMaturity);
-			}
 			// During the AO transition, this flag was true. Transition is now
 			// over and all the related code was removed: let's log a warning
 			// should a grid still advertize it...

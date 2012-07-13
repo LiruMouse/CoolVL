@@ -31,7 +31,6 @@ set(cmake_SOURCE_FILES
     FindHunSpell.cmake
     FindMono.cmake
     FindMT.cmake
-    FindMySQL.cmake
     FindNDOF.cmake
     FindOpenJPEG.cmake
     FindXmlRpcEpi.cmake
@@ -49,7 +48,6 @@ set(cmake_SOURCE_FILES
     LLCommon.cmake
     LLConvexDecomposition.cmake
     LLCrashLogger.cmake
-    LLDatabase.cmake
     LLImage.cmake
     LLImageJ2COJ.cmake
     LLInventory.cmake
@@ -59,7 +57,6 @@ set(cmake_SOURCE_FILES
     LLPlugin.cmake
     LLPrimitive.cmake
     LLRender.cmake
-    LLScene.cmake
     LLUI.cmake
     LLVFS.cmake
     LLWindow.cmake
@@ -67,7 +64,6 @@ set(cmake_SOURCE_FILES
     LScript.cmake
     Linking.cmake
     MonoEmbed.cmake
-    MySQL.cmake
     NDOF.cmake
     OPENAL.cmake
     OpenGL.cmake
@@ -92,10 +88,6 @@ set(master_SOURCE_FILES
     ../CMakeLists.txt
     ../develop.py
     )
-
-if (SERVER)
-  list(APPEND master_SOURCE_FILES ../Server.cmake)
-endif (SERVER)
 
 source_group("Master Rules" FILES ${master_SOURCE_FILES})
 

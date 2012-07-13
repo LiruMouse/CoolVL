@@ -3394,9 +3394,7 @@ void LLFolderView::draw()
 		setShowSingleSelection(FALSE);
 	}
 
-	static LLCachedControl<F32> type_ahead_timeout(gSavedSettings,
-												   "TypeAheadTimeout");
-	if (mSearchTimer.getElapsedTimeF32() > type_ahead_timeout)
+	if (mSearchTimer.getElapsedTimeF32() > LLUI::sTypeAheadTimeout)
 	{
 		mSearchString.clear();
 	}
@@ -4202,7 +4200,7 @@ BOOL LLFolderView::handleUnicodeCharHere(llwchar uni_char)
 		}
 
 		// Do text search
-		if (mSearchTimer.getElapsedTimeF32() > gSavedSettings.getF32("TypeAheadTimeout"))
+		if (mSearchTimer.getElapsedTimeF32() > LLUI::sTypeAheadTimeout)
 		{
 			mSearchString.clear();
 		}

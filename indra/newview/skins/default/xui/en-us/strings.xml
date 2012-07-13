@@ -1969,6 +1969,65 @@ Teleports avatar to a landmark stored in the object's inventory. If no landmark 
 llTeleportAgent(key avatar, vector global_coordinates, vector region_coordinates, vector look_at)
 Teleports avatar to region_coordinates within a region at the specified global_coordinates. The agent lands facing the position defined by look_at local coordinates. To run this function the script must request and obtain the PERMISSION_TELEPORT permission.
   </string>
+  <string name="LSLTipText_llCreateCharacter">
+llCreateCharacter(list options)
+Creates a pathfinding entity, known as a "character", from the object containing the script. Required to activate use of pathfinding functions.
+'options' is a list containing the configuration options (CHARACTER_DESIRED_SPEED, CHARACTER_RADIUS, CHARACTER_LENGTH, CHARACTER_ORIENTATION, TRAVERSAL_TYPE, CHARACTER_TYPE, CHARACTER_AVOIDANCE_MODE, CHARACTER_MAX_ACCEL, CHARACTER_MAX_DECEL, CHARACTER_DESIRED_TURN_SPEED, CHARACTER_MAX_TURN_RADIUS, CHARACTER_MAX_SPEED), each followed with their associated value.
+  </string>
+  <string name="LSLTipText_llDeleteCharacter">
+llDeleteCharacter()
+Convert the object back to a standard object, removing all pathfinding properties.
+  </string>
+  <string name="LSLTipText_llEvade">
+llEvade(key target, list options)
+'target' is the avatar or object UUID to evade.
+'options' is currently not used.
+  </string>
+  <string name="LSLTipText_llExecCharacterCmd">
+llExecCharacterCmd(integer command, list options)
+Currently known 'command's allow stopping the current pathfinding operation (CHARACTER_CMD_SMOOTH_STOP and CHARACTER_CMD_STOP) or causing the character to jump (CHARACTER_CMD_JUMP).
+The 'options' list is used to pass command parameters (currenly only used for CHARACTER_CMD_JUMP).
+  </string>
+  <string name="LSLTipText_llFleeFrom">
+llFleeFrom(vector position, float distance, list options)
+Directs a character to keep a specific 'distance' (in meters) from a specific 'position' (in region coordinates) in the region or adjacent regions. 'options' is currently not used.
+  </string>
+  <string name="LSLTipText_llGetClosestNavPoint">
+list llGetClosestNavPoint(vector point, list options)
+Used to get a point on the navmesh that is the closest point to 'point'.
+Returns a list containing a single vector which is the closest point on the navmesh to the point provided or an empty list.
+'point' is in region-local space.
+'options' is a list of options (GCNP_RADIUS, GCNP_STATIC, CHARACTER_TYPE), each followed with their associated parameter.
+  </string>
+  <string name="LSLTipText_llNavigateTo">
+llNavigateTo(vector pos, list options)
+Directs an object to travel to a defined position in the region or adjacent regions.
+'pos' is the position in region coordinates for the character to navigate to.
+'options' is a list of options (FORCE_DIRECT_PATH only for now), each followed with their associated parameter.
+  </string>
+  <string name="LSLTipText_llPatrolPoints">
+llPatrolPoints(list points, list options)
+Sets the object patrolling between the points specified in points.
+'points' is a list of vectors for the character to travel through sequentially. The list must contain at least two entries.
+'options' is a list of options (PATROL_PAUSE_AT_WAYPOINTS only for now), each followed with their associated parameter.
+  </string>
+  <string name="LSLTipText_llPursue">
+llPursue(key target, list options)
+'target' is the avatar or object UUID to pursue
+'options' is a list of options (PURSUIT_OFFSET, REQUIRE_LINE_OF_SIGHT, PURSUIT_FUZZ_FACTOR, PURSUIT_INTERCEPT, PURSUIT_GOAL_TOLERANCE), each followed with their associated value.
+  </string>
+  <string name="LSLTipText_llUpdateCharacter">
+llUpdateCharacter(list options)
+Updates settings for a character (same settings as for llCreateCharacter()).
+'options' is a list containing the configuration options (CHARACTER_DESIRED_SPEED, CHARACTER_RADIUS, CHARACTER_LENGTH, CHARACTER_ORIENTATION, TRAVERSAL_TYPE, CHARACTER_TYPE, CHARACTER_AVOIDANCE_MODE, CHARACTER_MAX_ACCEL, CHARACTER_MAX_DECEL, CHARACTER_DESIRED_TURN_SPEED, CHARACTER_MAX_TURN_RADIUS, CHARACTER_MAX_SPEED), each followed with their associated value.
+  </string>
+  <string name="LSLTipText_llWanderWithin">
+llWanderWithin(vector origin, vector dist list options)
+Sets a character to wander about a central spot within a specified radius.
+'origin' central point to wander about.
+'dist' sets how far the character may wander from origin, along each world-aligned axis.
+'options' is a list containing options (WANDER_PAUSE_AT_WAYPOINTS) with their associated parameter.
+  </string>
 
   <!-- OSSL functions
   ** DATA SOURCES **

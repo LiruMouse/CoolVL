@@ -38,44 +38,51 @@
 #include "llfloater.h"
 #include "llvoinventorylistener.h"
 
-//class LLTool;
+class LLButton;
 class LLObjectSelection;
 class LLScrollListCtrl;
 class LLUICtrl;
 
 class LLFloaterInspect : public LLFloater, public LLVOInventoryListener
 {
+private:
+	LLFloaterInspect();
 public:
-	virtual ~LLFloaterInspect(void);
+	/*virtual*/ ~LLFloaterInspect(void);
+
+	/*virtual*/ BOOL postBuild();
+	/*virtual*/ void draw();
+	/*virtual*/ void refresh();
+	/*virtual*/ void onFocusReceived();
+	/*virtual*/ void inventoryChanged(LLViewerObject* obj,
+									  InventoryObjectList* inv, S32, void*);
+
 	static void show(void* ignored = NULL);
-	virtual BOOL postBuild();
+	static BOOL isVisible();
 	static void dirty();
 	static LLUUID getSelectedUUID();
-	virtual void draw();
-	virtual void refresh();
-	virtual void inventoryChanged(LLViewerObject* obj, InventoryObjectList* inv, S32, void*);
-	static BOOL isVisible();
-	virtual void onFocusReceived();
-	static void onClickCreatorProfile(void* ctrl);
-	static void onClickOwnerProfile(void* ctrl);
-	static void onClickRefresh(void* data);
-	static void onClickClose(void* data);
-	static void onSelectObject(LLUICtrl* ctrl, void* user_data);
-	LLScrollListCtrl* mObjectList;
-
-protected:
-	// protected members
-	LLFloaterInspect();
-	void setDirty() { mDirty = TRUE; }
-	bool mDirty;
 
 private:
-	// static data
-	static LLFloaterInspect* sInstance;
+	static void onClickCreatorProfile(void* ctrl);
+	static void onClickOwnerProfile(void* ctrl);
+	static void onClickWeights(void* data);
+	static void onClickRefresh(void* data);
+	static void onClickClose(void* data);
+	static void onSelectObject(LLUICtrl*, void*);
 
-	LLSafeHandle<LLObjectSelection> mObjectSelection;
-	std::map<LLUUID, std::pair<S32, S32> > mInventoryNums; //<scripts, total>
-	LLUUID mQueuedInventoryRequest;
+private:
+	bool									mDirty;
+
+	LLSafeHandle<LLObjectSelection>			mObjectSelection;
+	std::map<LLUUID, std::pair<S32, S32> >	mInventoryNums; //<scripts, total>
+	LLUUID									mQueuedInventoryRequest;
+
+	LLScrollListCtrl*						mObjectList;
+	LLButton*								mButtonOwner;
+	LLButton*								mButtonCreator;
+	LLButton*								mButtonWeights;
+
+	static LLFloaterInspect*				sInstance;
 };
 
 #endif //LL_LLFLOATERINSPECT_H

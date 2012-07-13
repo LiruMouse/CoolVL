@@ -119,11 +119,6 @@ private:
 	LLFrameTimer	mDefaultBtnTimer;
 	// For Dialogs that take a line as text as input:
 	LLLineEditor*	mLineEditor;
-
-	S32				mDropShadowFloater;
-	LLColor4		mColorDropShadow;
-	LLColor4		mAlertBoxColor;
-	LLColor4		mAlertCautionBoxColor;
 };
 
 #endif  // LL_ALERTDIALOG_H

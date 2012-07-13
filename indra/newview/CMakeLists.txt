@@ -193,6 +193,7 @@ set(viewer_SOURCE_FILES
     llfloaternewim.cpp
     llfloaternotificationsconsole.cpp
     llfloaterobjectiminfo.cpp
+    llfloaterobjectweights.cpp
     llfloateropenobject.cpp
     llfloaterparcel.cpp
     llfloaterpay.cpp
@@ -293,7 +294,6 @@ set(viewer_SOURCE_FILES
     llpaneldirland.cpp
     llpaneldirpeople.cpp
     llpaneldirplaces.cpp
-    llpaneldirpopular.cpp
     llpaneldisplay.cpp
 	llpaneleditwearable.cpp
     llpanelevent.cpp
@@ -310,7 +310,6 @@ set(viewer_SOURCE_FILES
     llpanelland.cpp
     llpanellandaudio.cpp
     llpanellandmedia.cpp
-    llpanellandobjects.cpp
     llpanellandoptions.cpp
     llpanellogin.cpp
     llpanelmediahud.cpp
@@ -625,6 +624,7 @@ set(viewer_HEADER_FILES
     llfloaternewim.h
     llfloaternotificationsconsole.h
     llfloaterobjectiminfo.h
+    llfloaterobjectweights.h
     llfloateropenobject.h
     llfloaterparcel.h
     llfloaterpay.h
@@ -724,7 +724,6 @@ set(viewer_HEADER_FILES
     llpaneldirland.h
     llpaneldirpeople.h
     llpaneldirplaces.h
-    llpaneldirpopular.h
     llpaneldisplay.h
 	llpaneleditwearable.h
     llpanelevent.h
@@ -741,7 +740,6 @@ set(viewer_HEADER_FILES
     llpanelland.h
     llpanellandaudio.h
     llpanellandmedia.h
-    llpanellandobjects.h
     llpanellandoptions.h
     llpanelLCD.h
     llpanellogin.h

@@ -125,13 +125,13 @@ LLLineEditor::LLLineEditor(const std::string& name,
 	mLastSelectionStart(-1),
 	mLastSelectionEnd(-1),
 	mPrevalidateFunc(prevalidate_func),
-	mCursorColor(LLUI::sColorsGroup->getColor("TextCursorColor")),
-	mFgColor(LLUI::sColorsGroup->getColor("TextFgColor")),
-	mReadOnlyFgColor(LLUI::sColorsGroup->getColor("TextFgReadOnlyColor")),
-	mTentativeFgColor(LLUI::sColorsGroup->getColor("TextFgTentativeColor")),
-	mWriteableBgColor(LLUI::sColorsGroup->getColor("TextBgWriteableColor")),
-	mReadOnlyBgColor(LLUI::sColorsGroup->getColor("TextBgReadOnlyColor")),
-	mFocusBgColor(LLUI::sColorsGroup->getColor("TextBgFocusColor")),
+	mCursorColor(LLUI::sTextCursorColor),
+	mFgColor(LLUI::sTextFgColor),
+	mReadOnlyFgColor(LLUI::sTextFgReadOnlyColor),
+	mTentativeFgColor(LLUI::sTextFgTentativeColor),
+	mWriteableBgColor(LLUI::sTextBgWriteableColor),
+	mReadOnlyBgColor(LLUI::sTextBgReadOnlyColor),
+	mFocusBgColor(LLUI::sTextBgFocusColor),
 	mBorderThickness(border_thickness),
 	mIgnoreArrowKeys(FALSE),
 	mIgnoreTab(TRUE),
@@ -3211,7 +3211,7 @@ LLSearchEditor::LLSearchEditor(const std::string& name,
 									  NULL, LLStringUtil::null);
 	mClearSearchButton->setFollowsRight();
 	mClearSearchButton->setFollowsTop();
-	mClearSearchButton->setImageColor(LLUI::sColorsGroup->getColor("TextFgTentativeColor"));
+	mClearSearchButton->setImageColor(LLUI::sTextFgTentativeColor);
 	mClearSearchButton->setTabStop(FALSE);
 	mSearchEdit->addChild(mClearSearchButton);
 

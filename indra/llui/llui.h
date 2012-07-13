@@ -192,6 +192,8 @@ public:
 	static void glRectToScreen(const LLRect& gl, LLRect *screen);
 	static void setHtmlHelp(LLHtmlHelp* html_help);
 
+	static void refreshSettings();
+
 	//
 	// Data
 	//
@@ -204,6 +206,75 @@ public:
 	static LLWindow*		sWindow;
 	static BOOL             sShowXUINames;
 	static LLHtmlHelp*		sHtmlHelp;
+
+	static S32	sButtonFlashCount;
+	static F32	sButtonFlashRate;
+	static F32	sColumnHeaderDropDownDelay;
+	static S32	sDropShadowButton;
+	static S32	sDropShadowFloater;
+	static S32	sDropShadowTooltip;
+	static F32	sMenuAccessKeyTime;
+	static F32	sPieMenuLineWidth;
+	static S32	sSnapMargin;
+	static BOOL	sTabToTextFieldsOnly;
+	static F32	sTypeAheadTimeout;
+	static BOOL	sUseAltKeyForMenus;
+
+	static LLColor4 sAlertBoxColor;
+	static LLColor4 sAlertCautionBoxColor;
+	static LLColor4 sAlertCautionTextColor;
+	static LLColor4 sAlertTextColor;
+	static LLColor4 sButtonFlashBgColor;
+	static LLColor4 sButtonImageColor;
+	static LLColor4 sButtonLabelColor;
+	static LLColor4 sButtonLabelDisabledColor;
+	static LLColor4 sButtonLabelSelectedColor;
+	static LLColor4 sButtonLabelSelectedDisabledColor;
+	static LLColor4 sColorDropShadow;
+	static LLColor4 sDefaultBackgroundColor;
+	static LLColor4 sDefaultHighlightDark;
+	static LLColor4 sDefaultHighlightLight;
+	static LLColor4 sDefaultShadowDark;
+	static LLColor4 sDefaultShadowLight;
+	static LLColor4 sFloaterButtonImageColor;
+	static LLColor4 sFloaterFocusBorderColor;
+	static LLColor4 sFloaterUnfocusBorderColor;
+	static LLColor4 sFocusBackgroundColor;
+	static LLColor4 sLabelDisabledColor;
+	static LLColor4 sLabelSelectedColor;
+	static LLColor4 sLabelTextColor;
+	static LLColor4 sLoginProgressBarBgColor;
+	static LLColor4 sMultiSliderThumbCenterColor;
+	static LLColor4 sMultiSliderThumbCenterSelectedColor;
+	static LLColor4 sMultiSliderTrackColor;
+	static LLColor4 sMultiSliderTriangleColor;
+	static LLColor4 sPieMenuBgColor;
+	static LLColor4 sPieMenuLineColor;
+	static LLColor4 sPieMenuSelectedColor;
+	static LLColor4 sScrollbarThumbColor;
+	static LLColor4 sScrollbarTrackColor;
+	static LLColor4 sScrollBgReadOnlyColor;
+	static LLColor4 sScrollBGStripeColor;
+	static LLColor4 sScrollBgWriteableColor;
+	static LLColor4 sScrollDisabledColor;
+	static LLColor4 sScrollHighlightedColor;
+	static LLColor4 sScrollSelectedBGColor;
+	static LLColor4 sScrollSelectedFGColor;
+	static LLColor4 sScrollUnselectedColor;
+	static LLColor4 sSliderThumbCenterColor;
+	static LLColor4 sSliderThumbOutlineColor;
+	static LLColor4 sSliderTrackColor;
+	static LLColor4 sTextBgFocusColor;
+	static LLColor4 sTextBgReadOnlyColor;
+	static LLColor4 sTextBgWriteableColor;
+	static LLColor4 sTextCursorColor;
+	static LLColor4 sTextDefaultColor;
+	static LLColor4 sTextEmbeddedItemColor;
+	static LLColor4 sTextEmbeddedItemReadOnlyColor;
+	static LLColor4 sTextFgColor;
+	static LLColor4 sTextFgReadOnlyColor;
+	static LLColor4 sTextFgTentativeColor;
+	static LLColor4 sTitleBarFocusColor;
 };
 
 //	FactoryPolicy is a static class that controls the creation and lookup of UI elements, 

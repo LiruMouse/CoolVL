@@ -32,16 +32,15 @@
 
 #include "llviewerprecompiledheaders.h"
 
-#include "llpaneldirevents.h"
-
 #include <sstream>
 
-// linden library includes
+#include "llpaneldirevents.h"
+
+#include "llbutton.h"
+#include "llcheckboxctrl.h"
 #include "llqueryflags.h"
-#include "llresmgr.h"
 #include "message.h"
 
-// viewer project includes
 #include "llagent.h"
 #include "llappviewer.h"
 #include "lleventinfo.h"
@@ -52,8 +51,9 @@
 
 BOOL gDisplayEventHack = FALSE;
 
-LLPanelDirEvents::LLPanelDirEvents(const std::string& name, LLFloaterDirectory* floater)
-	:	LLPanelDirBrowser(name, floater),
+LLPanelDirEvents::LLPanelDirEvents(const std::string& name,
+								   LLFloaterDirectory* floater)
+:	LLPanelDirBrowser(name, floater),
 	mDoneQuery(FALSE),
 	mDay(0)
 {
@@ -75,9 +75,10 @@ BOOL LLPanelDirEvents::postBuild()
 	childSetAction("Search", LLPanelDirBrowser::onClickSearchCore, this);
 	setDefaultBtn("Search");
 
-	childSetAction("Delete", onClickDelete, this);
-	childDisable("Delete");
-	childHide("Delete");
+	mDeleteButton = getChild<LLButton>("Delete");
+	mDeleteButton->setClickedCallback(onClickDelete, this);
+	mDeleteButton->setEnabled(FALSE);
+	mDeleteButton->setVisible(FALSE);
 
 	onDateModeCallback(NULL, this);
 
@@ -101,19 +102,16 @@ LLPanelDirEvents::~LLPanelDirEvents()
 void LLPanelDirEvents::draw()
 {
 	refresh();
-
 	LLPanelDirBrowser::draw();
 }
 
 void LLPanelDirEvents::refresh()
 {
-	BOOL godlike = gAgent.isGodlike();
-	childSetVisible("Delete", godlike);
-	childSetEnabled("Delete", godlike);
-
+	bool godlike = gAgent.isGodlike();
+	mDeleteButton->setEnabled(godlike);
+	mDeleteButton->setVisible(godlike);
 	updateMaturityCheckbox();
 }
-
 
 void LLPanelDirEvents::setDay(S32 day)
 {
@@ -146,8 +144,8 @@ void LLPanelDirEvents::performQuery()
 void LLPanelDirEvents::performQueryOrDelete(U32 event_id)
 {
 	S32 relative_day = mDay;
-	// Update the date field to show the date IN THE SERVER'S
-	// TIME ZONE, as that is what will be displayed in each event
+	// Update the date field to show the date IN THE SERVER'S TIME ZONE, as
+	// that is what will be displayed in each event
 
 	// Get time UTC
 	time_t utc_time = time_corrected();
@@ -171,24 +169,28 @@ void LLPanelDirEvents::performQueryOrDelete(U32 event_id)
 
 	mDoneQuery = TRUE;
 
+	BOOL inc_pg		= !mIncPGCheck || mIncPGCheck->getValue().asBoolean();
+	BOOL inc_mature	= mIncMatureCheck && mIncMatureCheck->getValue().asBoolean();
+	BOOL inc_adult	= mIncAdultCheck && mIncAdultCheck->getValue().asBoolean();
+
 	U32 scope = DFQ_DATE_EVENTS;
-	if ( gAgent.wantsPGOnly()) scope |= DFQ_PG_SIMS_ONLY;
-	if ( childGetValue("incpg").asBoolean() ) scope |= DFQ_INC_PG;
-	if ( childGetValue("incmature").asBoolean() ) scope |= DFQ_INC_MATURE;
-	if ( childGetValue("incadult").asBoolean() ) scope |= DFQ_INC_ADULT;
-	
+	if (gAgent.wantsPGOnly())	scope |= DFQ_PG_SIMS_ONLY;
+	if (inc_pg)					scope |= DFQ_INC_PG;
+	if (inc_mature)				scope |= DFQ_INC_MATURE;
+	if (inc_adult)				scope |= DFQ_INC_ADULT;
+
 	// Add old query flags in case we are talking to an old server
-	if ( childGetValue("incpg").asBoolean() && !childGetValue("incmature").asBoolean())
+	if (inc_pg && !inc_mature)
 	{
 		scope |= DFQ_PG_EVENTS_ONLY;
 	}
-	
-	if ( !( scope & (DFQ_INC_PG | DFQ_INC_MATURE | DFQ_INC_ADULT )))
+
+	if (!(scope & (DFQ_INC_PG | DFQ_INC_MATURE | DFQ_INC_ADULT)))
 	{
 		LLNotifications::instance().add("NoContentToSearch");
 		return;
 	}
-	
+
 	setupNewSearch();
 
 	std::ostringstream params;
@@ -213,7 +215,6 @@ void LLPanelDirEvents::performQueryOrDelete(U32 event_id)
 	// send the message
 	if (0 == event_id)
 	{
-		
 		sendDirFindQuery(gMessageSystem, mSearchID, params.str(), scope, mSearchStart);
 	}
 	else
@@ -260,7 +261,7 @@ void LLPanelDirEvents::onDateModeCallback(LLUICtrl* ctrl, void *data)
 // static
 void LLPanelDirEvents::onClickToday(void *userdata)
 {
-	LLPanelDirEvents *self = (LLPanelDirEvents *)userdata;
+	LLPanelDirEvents* self = (LLPanelDirEvents*)userdata;
 	self->resetSearchStart();
 	self->setDay(0);
 	self->performQuery();
@@ -287,7 +288,7 @@ void LLPanelDirEvents::onForwardBtn(void* data)
 // static
 void LLPanelDirEvents::onClickDelete(void *userdata)
 {
-	LLPanelDirEvents *self = (LLPanelDirEvents *)userdata;
+	LLPanelDirEvents* self = (LLPanelDirEvents*)userdata;
 	if (!self) return;
 
 	U32 event_id;

@@ -525,7 +525,9 @@ void LLInventoryModelBackgroundFetch::bulkFetch(std::string url)
 	U32 folder_count = 0;
 	U32 max_batch_size = 5;
 
-	U32 sort_order = gSavedSettings.getU32(LLInventoryPanel::DEFAULT_SORT_ORDER) & 0x1;
+	static LLCachedControl<U32> inventory_sort_order(gSavedSettings,
+													 LLInventoryPanel::DEFAULT_SORT_ORDER);
+	U32 sort_order = (U32)inventory_sort_order & 0x1;
 
 	uuid_vec_t recursive_cats;
 

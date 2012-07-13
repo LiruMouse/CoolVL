@@ -1,10 +1,6 @@
 # -*- cmake -*-
 include(Prebuilt)
 
-# If you want to enable or disable TCMALLOC in viewer builds, this is the place.
-# set ON or OFF as desired.
-set (USE_TCMALLOC ON)
-
 if (STANDALONE)
   include(FindGooglePerfTools)
 else (STANDALONE)
@@ -46,13 +42,6 @@ if (WINDOWS)
 endif (WINDOWS)
 
 if (USE_GOOGLE_PERFTOOLS)
-  if (USE_TCMALLOC)
-    set(TCMALLOC_FLAG -DLL_USE_TCMALLOC=1)
-  else (USE_TCMALLOC)
-    set(TCMALLOC_FLAG -ULL_USE_TCMALLOC)
-  endif (USE_TCMALLOC)
   include_directories(${GOOGLE_PERFTOOLS_INCLUDE_DIR})
   set(GOOGLE_PERFTOOLS_LIBRARIES ${TCMALLOC_LIBRARIES} ${STACKTRACE_LIBRARIES} ${PROFILER_LIBRARIES})
-else (USE_GOOGLE_PERFTOOLS)
-  set(TCMALLOC_FLAG -ULL_USE_TCMALLOC)
 endif (USE_GOOGLE_PERFTOOLS)

@@ -504,7 +504,7 @@ void LLScriptLibrary::init()
 	// Server v11.10.18.243270 new function:
 	addFunction(10.f, 0.f, dummy_func, "llManageEstateAccess", "i", "ik");
 
-	// Server RC magnum v11.10.31.244254 new function:
+	// Server RC Magnum v11.10.31.244254 new function:
 	addFunction(10.f, 0.f, dummy_func, "llSetKeyframedMotion", NULL, "ll");
 
 	// Server RC Le Tigre v11.10.30.245889 new function:
@@ -520,6 +520,19 @@ void LLScriptLibrary::init()
 	addFunction(10.f, 0.f, dummy_func, "llAttachToAvatarTemp", NULL, "i");
 	addFunction(10.f, 0.f, dummy_func, "llTeleportAgent", NULL, "ksvv");
 	addFunction(10.f, 0.f, dummy_func, "llTeleportAgentGlobalCoords", NULL, "kvvv");
+
+	// Pathfinding LSL functions:
+	addFunction(10.f, 0.f, dummy_func, "llCreateCharacter", NULL, "l");
+	addFunction(10.f, 0.f, dummy_func, "llDeleteCharacter", NULL, NULL);
+	addFunction(10.f, 0.f, dummy_func, "llEvade", NULL, "kl");
+	addFunction(10.f, 0.f, dummy_func, "llExecCharacterCmd", NULL, "il");
+	addFunction(10.f, 0.f, dummy_func, "llFleeFrom", NULL, "vfl");
+	addFunction(10.f, 0.f, dummy_func, "llGetClosestNavPoint", "l", "vl");
+	addFunction(10.f, 0.f, dummy_func, "llNavigateTo", NULL, "vl");
+	addFunction(10.f, 0.f, dummy_func, "llPatrolPoints", NULL, "ll");
+	addFunction(10.f, 0.f, dummy_func, "llPursue", NULL, "kl");
+	addFunction(10.f, 0.f, dummy_func, "llUpdateCharacter", NULL, "l");
+	addFunction(10.f, 0.f, dummy_func, "llWanderWithin", NULL, "vvl");
 
     // OpenSIM Functions to be added below
     // -----------------------------------

@@ -76,10 +76,16 @@
 	 bottom_delta="113" left="138" height="10" width="350" follows="left|top">
 		Avatar names displaying type for name tags, chat, IM, radar...
 	</text>
+	<text name="no_display_names_text_box" type="string" length="1" visible="false" mouse_opaque="true"
+	 bg_visible="false" border_drop_shadow_visible="false" border_visible="false" drop_shadow_visible="true"
+	 font="SansSerifSmall" v_pad="0" h_pad="0" halign="left"
+	 bottom_delta="0" left_delta="0" height="10" width="350" follows="left|top">
+		This grid does not use display names.
+	</text>
 	<text name="display_names_text_box2" type="string" length="1" enabled="true" mouse_opaque="true"
 	 bg_visible="false" border_drop_shadow_visible="false" border_visible="false" drop_shadow_visible="true"
 	 font="SansSerifSmall" v_pad="0" h_pad="0" halign="left"
-	 bottom_delta="-12" left="138" height="10" width="350" follows="left|top">
+	 bottom_delta="-12" left_delta="0" height="10" width="350" follows="left|top">
 		(the legacy name is always used when no display name exists):
 	</text>
 	<radio_group name="display_names_usage" control_name="DisplayNamesUsage"
@@ -106,7 +112,7 @@
 	 label="Always use legacy name for friends list and notifications" font="SansSerifSmall"
 	 tool_tip="The problem with display names, is that they can change... It's usually easier to keep track of your friends via their legacy name"
 	 bottom_delta="-20" left="135" height="16" width="370" follows="left|top" />
-	<check_box name="legacy_names_for_friends_check" control_name="OmitResidentAsLastName"
+	<check_box name="omit_resident_last_name_check" control_name="OmitResidentAsLastName"
 	 radio_style="false" enabled="true" mouse_opaque="true"
 	 label="Never display 'Resident' as the last name in legacy names" font="SansSerifSmall"
 	 tool_tip="With this option checked, new residents will not be listed with 'Resident' as their last name in their legacy name"
@@ -199,9 +205,10 @@
 	 bg_visible="false" border_drop_shadow_visible="false" border_visible="false" drop_shadow_visible="true"
 	 font="SansSerifSmall" v_pad="0" h_pad="0" halign="left"
 	 bottom_delta="0" left="293" height="18" width="400" follows="left|top">
-		(Requires restart for full effect)
+		(requires restart for full effect)
 	</text>
 	<combo_box name="language_combobox" enabled="true" mouse_opaque="true"
+	 tool_tip="Please note that by lack of translators, the Cool VL Viewer only provides an English UI. This setting will therefore only affect scripts, when the 'Share language with objects' setting is also checked."
 	 allow_text_entry="true" max_chars="135"
 	 bottom_delta="4" left="132" height="16" width="146" follows="left|top">
 		<combo_item type="string" length="1" enabled="true" name="System Default Language" value="default">

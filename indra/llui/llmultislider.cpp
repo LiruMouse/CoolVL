@@ -79,12 +79,6 @@ LLMultiSlider::LLMultiSlider(const std::string& name,
 	mUseTriangle(use_triangle),
 	mMouseOffset(0),
 	mDragStartThumbRect(0, getRect().getHeight(), MULTI_THUMB_WIDTH, 0),
-	mTrackColor(LLUI::sColorsGroup->getColor("MultiSliderTrackColor")),
-	mThumbOutlineColor(LLUI::sColorsGroup->getColor("MultiSliderThumbOutlineColor")),
-	mThumbCenterColor(LLUI::sColorsGroup->getColor("MultiSliderThumbCenterColor")),
-	mThumbCenterSelectedColor(LLUI::sColorsGroup->getColor("MultiSliderThumbCenterSelectedColor")),
-	mDisabledThumbColor(LLUI::sColorsGroup->getColor("MultiSliderDisabledThumbColor")),
-	mTriangleColor(LLUI::sColorsGroup->getColor("MultiSliderTriangleColor")),
 	mMouseDownCallback(NULL),
 	mMouseUpCallback(NULL)
 {
@@ -473,7 +467,8 @@ void LLMultiSlider::draw()
 	if (mDrawTrack)
 	{
 		track_rect.stretch(-1);
-		rounded_square->draw(track_rect, mTrackColor % opacity);
+		rounded_square->draw(track_rect,
+							 LLUI::sMultiSliderTrackColor % opacity);
 	}
 
 	// if we're supposed to use a drawn triangle
@@ -488,14 +483,14 @@ void LLMultiSlider::draw()
 						   it->second.mTop + EXTRA_TRIANGLE_HEIGHT,
 						   it->second.mLeft + it->second.getWidth() / 2,
 						   it->second.mBottom - EXTRA_TRIANGLE_HEIGHT,
-						   mTriangleColor, TRUE);
+						   LLUI::sMultiSliderTriangleColor, TRUE);
 		}
 	}
 	else if (gFocusMgr.getMouseCapture() == this)
 	{
 		// draw drag start
 		rounded_square->drawSolid(mDragStartThumbRect,
-								  mThumbCenterColor % 0.3f);
+								  LLUI::sMultiSliderThumbCenterColor % 0.3f);
 
 		// draw the highlight
 		if (hasFocus())
@@ -510,7 +505,7 @@ void LLMultiSlider::draw()
 		for (it = begin; it != end; ++it)
 		{
 			// choose the color
-			curThumbColor = mThumbCenterColor;
+			curThumbColor = LLUI::sMultiSliderThumbCenterColor;
 			if (it->first == mCurSlider)
 			{
 				// don't draw now, draw last
@@ -526,7 +521,7 @@ void LLMultiSlider::draw()
 		if (cur_sldr_it != end)
 		{
 			rounded_square->drawSolid(cur_sldr_it->second,
-									  mThumbCenterSelectedColor);
+									  LLUI::sMultiSliderThumbCenterSelectedColor);
 		}
 	}
 	else
@@ -544,12 +539,12 @@ void LLMultiSlider::draw()
 		for (it = begin; it != end; ++it)
 		{
 			// choose the color
-			curThumbColor = mThumbCenterColor;
+			curThumbColor = LLUI::sMultiSliderThumbCenterColor;
 			if (it->first == mCurSlider)
 			{
 				cur_sldr_it = it;
 				continue;
-				//curThumbColor = mThumbCenterSelectedColor;
+				//curThumbColor = LLUI::sMultiSliderThumbCenterSelectedColor;
 			}
 
 			rounded_square->drawSolid(it->second, curThumbColor % opacity);
@@ -558,7 +553,7 @@ void LLMultiSlider::draw()
 		if (cur_sldr_it != end)
 		{
 			rounded_square->drawSolid(cur_sldr_it->second,
-									  mThumbCenterSelectedColor % opacity);
+									  LLUI::sMultiSliderThumbCenterSelectedColor % opacity);
 		}
 	}
 

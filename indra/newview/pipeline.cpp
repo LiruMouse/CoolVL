@@ -1549,6 +1549,17 @@ void LLPipeline::updateMovedList(LLDrawable::drawable_vector_t& moved_list)
 		if (done)
 		{
 			drawablep->clearState(LLDrawable::ON_MOVE_LIST);
+			if (drawablep->isState(LLDrawable::ANIMATED_CHILD))
+			{	// will likely not receive any future world matrix updates
+				// -- this keeps attachments from getting stuck in space and
+				// falling off your avatar
+				drawablep->clearState(LLDrawable::ANIMATED_CHILD);
+				markRebuild(drawablep, LLDrawable::REBUILD_VOLUME, TRUE);
+				if (drawablep->getVObj())
+				{
+					drawablep->getVObj()->dirtySpatialGroup(TRUE);
+				}
+			}
 			iter = moved_list.erase(curiter);
 		}
 	}

@@ -315,7 +315,7 @@ class LinuxSetup(UnixSetup):
                              'server': 'OFF',
                              'viewer': 'ON'})
         cmd = (('cmake -DCMAKE_BUILD_TYPE:STRING=%(type)s '
-                '-G %(generator)r -DSERVER:BOOL=%(server)s '
+                '-G %(generator)r '
                 '-DVIEWER:BOOL=%(viewer)s -DSTANDALONE:BOOL=%(standalone)s '
                 '-DUNATTENDED:BOOL=%(unattended)s '
                 '-DWORD_SIZE:STRING=%(word_size)s '
@@ -734,15 +734,10 @@ Commands:
 
 Command-options for "configure":
   We use cmake variables to change the build configuration.
-  -DSERVER:BOOL=OFF        Don't configure simulator/dataserver/etc
-  -DVIEWER:BOOL=OFF        Don't configure the viewer
   -DPACKAGE:BOOL=ON        Create "package" target to make installers
   -DLOCALIZESETUP:BOOL=ON  Create one win_setup target per supported language
 
-Examples:
-  Set up a viewer-only project for your system:
-    develop.py configure -DSERVER:BOOL=OFF
-  
+Example:
   Set up a Visual Studio 2005 project with "package" target:
     develop.py -G vc80 configure -DPACKAGE:BOOL=ON
 '''
@@ -758,7 +753,7 @@ def main(arguments):
         print >> sys.stderr, 'Error:', err
         print >> sys.stderr, """
 Note: You must pass -D options to cmake after the "configure" command
-For example: develop.py configure -DSERVER:BOOL=OFF"""
+For example: develop.py configure -DLOCALIZESETUP:BOOL=ON"""
         print >> sys.stderr, usage_msg.strip()
         sys.exit(1)
 

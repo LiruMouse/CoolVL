@@ -67,9 +67,9 @@ static LLRegisterWidget<LLPanel> r1("panel");
 void LLPanel::init()
 {
 	// mRectControl
-	mBgColorAlpha        = LLUI::sColorsGroup->getColor("DefaultBackgroundColor");
-	mBgColorOpaque       = LLUI::sColorsGroup->getColor("FocusBackgroundColor");
-	mDefaultBtnHighlight = LLUI::sColorsGroup->getColor("DefaultHighlightLight");
+	mBgColorAlpha        = LLUI::sDefaultBackgroundColor;
+	mBgColorOpaque       = LLUI::sFocusBackgroundColor;
+	mDefaultBtnHighlight = LLUI::sDefaultHighlightLight;
 	mBgVisible = FALSE;
 	mBgOpaque = FALSE;
 	mBorder = NULL;
@@ -616,6 +616,7 @@ void LLPanel::setPanelParameters(LLXMLNodePtr node, LLView* parent)
 std::string LLPanel::getString(const std::string& name,
 							   const LLStringUtil::format_map_t& args) const
 {
+	LL_DEBUGS("GetStringCalls") << "Requested UI string: " << name << LL_ENDL;
 	ui_string_map_t::const_iterator found_it = mUIStrings.find(name);
 	if (found_it != mUIStrings.end())
 	{
@@ -631,6 +632,7 @@ std::string LLPanel::getString(const std::string& name,
 
 std::string LLPanel::getString(const std::string& name) const
 {
+	LL_DEBUGS("GetStringCalls") << "Requested UI string: " << name << LL_ENDL;
 	ui_string_map_t::const_iterator found_it = mUIStrings.find(name);
 	if (found_it != mUIStrings.end())
 	{
@@ -937,7 +939,7 @@ void LLPanel::childSetTabChangeCallback(const std::string& id,
 	LLTabContainer* child = getChild<LLTabContainer>(id);
 	if (child)
 	{
-		LLPanel *panel = child->getPanelByName(tabname);
+		LLPanel* panel = child->getPanelByName(tabname);
 		if (panel)
 		{
 			child->setTabChangeCallback(panel, on_tab_clicked);

@@ -67,29 +67,11 @@ set_source_files_properties(${llrender_HEADER_FILES}
 
 list(APPEND llrender_SOURCE_FILES ${llrender_HEADER_FILES})
 
-if (SERVER AND NOT WINDOWS AND NOT DARWIN)
-  copy_server_sources(
-      llgl
-      llrender
-      )
+list(APPEND llrender_SOURCE_FILES
+     llgl.cpp
+     llrender.cpp
+     llrendertarget.cpp
+     )
 
-
-  set_source_files_properties(
-    ${server_SOURCE_FILES}
-    PROPERTIES
-    COMPILE_FLAGS "-DLL_MESA=1 -DLL_MESA_HEADLESS=1"
-    )
-  add_library (llrenderheadless
-    ${llrender_SOURCE_FILES}
-    ${server_SOURCE_FILES}
-    )
-  add_dependencies(llrenderheadless prepare)
-else (SERVER AND NOT WINDOWS AND NOT DARWIN)
-  list(APPEND llrender_SOURCE_FILES
-      llgl.cpp
-      llrender.cpp
-      llrendertarget.cpp
-      )
-endif (SERVER AND NOT WINDOWS AND NOT DARWIN)
 add_library (llrender ${llrender_SOURCE_FILES})
 add_dependencies(llrender prepare)

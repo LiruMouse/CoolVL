@@ -23,6 +23,7 @@
 #include "llfloateravatarlist.h"
 
 #include "llavatarconstants.h"
+#include "llbutton.h"
 #include "llcachename.h"
 #include "llfasttimer.h"
 #include "llradiogroup.h"
@@ -71,8 +72,8 @@ void announce(std::string msg)
 	static LLCachedControl<S32> radar_chat_keys_channel(gSavedSettings,
 														"RadarChatKeysChannel");
 	//llinfos << "Radar broadcasting key: " << key.asString()
-	// << " - on channel " << gSavedSettings.getS32("RadarChatKeysChannel")
-	// << llendl;
+	//		<< " - on channel: "
+	//		<< gSavedSettings.getS32("RadarChatKeysChannel") << llendl;
 	gMessageSystem->newMessage("ScriptDialogReply");
 	gMessageSystem->nextBlock("AgentData");
 	gMessageSystem->addUUID("AgentID", gAgentID);
@@ -85,7 +86,8 @@ void announce(std::string msg)
 	gAgent.sendReliableMessage();
 }
 
-void chat_avatar_status(std::string name, LLUUID key, ERadarAlertType type, bool entering)
+void chat_avatar_status(std::string name, LLUUID key, ERadarAlertType type,
+						bool entering)
 {
 	static LLCachedControl<bool> radar_chat_alerts(gSavedSettings,
 												   "RadarChatAlerts");
@@ -147,7 +149,7 @@ void chat_avatar_status(std::string name, LLUUID key, ERadarAlertType type, bool
 }
 
 LLAvatarListEntry::LLAvatarListEntry(const LLUUID& id,
-									 const std::string &name,
+									 const std::string& name,
 									 const LLVector3d &position)
 :	mID(id),
 	mName(name),
@@ -166,7 +168,8 @@ LLAvatarListEntry::LLAvatarListEntry(const LLUUID& id,
 }
 
 void LLAvatarListEntry::setPosition(LLVector3d position, bool this_sim,
-									bool drawn, bool chatrange, bool shoutrange)
+									bool drawn, bool chatrange,
+									bool shoutrange)
 {
 	if (drawn)
 	{
@@ -269,6 +272,47 @@ LLFloaterAvatarList::~LLFloaterAvatarList()
 	sInstance = NULL;
 }
 
+BOOL LLFloaterAvatarList::postBuild()
+{
+	// Default values
+	mTracking = FALSE;
+
+	mFocusButton = getChild<LLButton>("focus_btn");
+	mPrevInListButton = getChild<LLButton>("prev_in_list_btn");
+	mNextInListButton = getChild<LLButton>("next_in_list_btn");
+
+	// Set callbacks
+	mFocusButton->setClickedCallback(onClickFocus, this);
+	mPrevInListButton->setClickedCallback(onClickPrevInList, this);
+	mNextInListButton->setClickedCallback(onClickNextInList, this);
+	childSetAction("profile_btn", onClickProfile, this);
+	childSetAction("im_btn", onClickIM, this);
+	childSetAction("offer_btn", onClickTeleportOffer, this);
+	childSetAction("track_btn", onClickTrack, this);
+	childSetAction("mark_btn", onClickMark, this);
+	childSetAction("prev_marked_btn", onClickPrevMarked, this);
+	childSetAction("next_marked_btn", onClickNextMarked, this);
+	childSetAction("get_key_btn", onClickGetKey, this);
+	childSetAction("freeze_btn", onClickFreeze, this);
+	childSetAction("eject_btn", onClickEject, this);
+	childSetAction("mute_btn", onClickMute, this);
+	childSetAction("ar_btn", onClickAR, this);
+	childSetAction("teleport_btn", onClickTeleport, this);
+	childSetAction("estate_eject_btn", onClickEjectFromEstate, this);
+	childSetAction("send_keys_btn", onClickSendKeys, this);
+
+	// Get a pointer to the scroll list from the interface
+	mAvatarList = getChild<LLScrollListCtrl>("avatar_list");
+	mAvatarList->sortByColumn("distance", TRUE);
+	mAvatarList->setCommitOnSelectionChange(TRUE);
+	childSetCommitCallback("avatar_list", onSelectName, this);
+	refreshAvatarList();
+
+	gIdleCallbacks.addFunction(LLFloaterAvatarList::callbackIdle);
+
+	return TRUE;
+}
+
 //static
 void LLFloaterAvatarList::toggle(void*)
 {
@@ -341,46 +385,6 @@ void LLFloaterAvatarList::onClose(bool app_quitting)
 	}
 }
 
-BOOL LLFloaterAvatarList::postBuild()
-{
-	// Default values
-	mTracking = FALSE;
-
-	// Set callbacks
-	childSetAction("profile_btn", onClickProfile, this);
-	childSetAction("im_btn", onClickIM, this);
-	childSetAction("offer_btn", onClickTeleportOffer, this);
-	childSetAction("track_btn", onClickTrack, this);
-	childSetAction("mark_btn", onClickMark, this);
-	childSetAction("focus_btn", onClickFocus, this);
-	childSetAction("prev_in_list_btn", onClickPrevInList, this);
-	childSetAction("next_in_list_btn", onClickNextInList, this);
-	childSetAction("prev_marked_btn", onClickPrevMarked, this);
-	childSetAction("next_marked_btn", onClickNextMarked, this);
-	
-	childSetAction("get_key_btn", onClickGetKey, this);
-
-	childSetAction("freeze_btn", onClickFreeze, this);
-	childSetAction("eject_btn", onClickEject, this);
-	childSetAction("mute_btn", onClickMute, this);
-	childSetAction("ar_btn", onClickAR, this);
-	childSetAction("teleport_btn", onClickTeleport, this);
-	childSetAction("estate_eject_btn", onClickEjectFromEstate, this);
-
-	childSetAction("send_keys_btn", onClickSendKeys, this);
-
-	// Get a pointer to the scroll list from the interface
-	mAvatarList = getChild<LLScrollListCtrl>("avatar_list");
-	mAvatarList->sortByColumn("distance", TRUE);
-	mAvatarList->setCommitOnSelectionChange(TRUE);
-	childSetCommitCallback("avatar_list", onSelectName, this);
-	refreshAvatarList();
-
-	gIdleCallbacks.addFunction(LLFloaterAvatarList::callbackIdle);
-
-	return TRUE;
-}
-
 void LLFloaterAvatarList::updateAvatarList()
 {
 	if (sInstance != this) return;
@@ -407,7 +411,7 @@ void LLFloaterAvatarList::updateAvatarList()
 		for (i = 0; i < count; ++i)
 		{
 			std::string name;
-			const LLUUID &avid = avatar_ids[i];
+			const LLUUID& avid = avatar_ids[i];
 			if (avid.isNull())
 			{
 				continue;
@@ -424,7 +428,7 @@ void LLFloaterAvatarList::updateAvatarList()
 
 				if (name.empty() && !gCacheName->getFullName(avid, name))
 				{
-					continue; //prevent (Loading...)
+					continue; // prevent (Loading...)
 				}
 
 				std::string display_name = name;
@@ -552,9 +556,8 @@ void LLFloaterAvatarList::refreshAvatarList()
 	// Don't update list when interface is hidden
 	if (!sInstance->getVisible()) return;
 
-	// We rebuild the list fully each time it's refreshed
-	// The assumption is that it's faster to refill it and sort than
-	// to rebuild the whole list.
+	// We rebuild the list fully each time it's refreshed. The assumption is
+	// that it's faster to refill it and sort than to rebuild the whole list.
 	LLDynamicArray<LLUUID> selected = mAvatarList->getSelectedIDs();
 	S32 scrollpos = mAvatarList->getScrollPos();
 
@@ -739,8 +742,8 @@ void LLFloaterAvatarList::refreshAvatarList()
 // static
 void LLFloaterAvatarList::onClickIM(void* userdata)
 {
-	//llinfos << "LLFloaterFriends::onClickIM()" << llendl;
 	LLFloaterAvatarList* self = (LLFloaterAvatarList*)userdata;
+	if (!self) return;
 
 	LLDynamicArray<LLUUID> ids = self->mAvatarList->getSelectedIDs();
 	if (gIMMgr && ids.size() > 0)
@@ -769,6 +772,7 @@ void LLFloaterAvatarList::onClickIM(void* userdata)
 void LLFloaterAvatarList::onClickTeleportOffer(void* userdata)
 {
 	LLFloaterAvatarList* self = (LLFloaterAvatarList*)userdata;
+	if (!self) return;
 
 	LLDynamicArray<LLUUID> ids = self->mAvatarList->getSelectedIDs();
 	if (ids.size() > 0)
@@ -781,6 +785,7 @@ void LLFloaterAvatarList::onClickTeleportOffer(void* userdata)
 void LLFloaterAvatarList::onClickTrack(void* userdata)
 {
 	LLFloaterAvatarList* self = (LLFloaterAvatarList*)userdata;
+	if (!self) return;
 	
  	LLScrollListItem* item = self->mAvatarList->getFirstSelected();
 	if (!item) return;
@@ -869,8 +874,9 @@ LLAvatarListEntry* LLFloaterAvatarList::getAvatarEntry(LLUUID avatar)
 void LLFloaterAvatarList::onClickMark(void* userdata)
 {
 	LLFloaterAvatarList* self = (LLFloaterAvatarList*)userdata;
-	LLDynamicArray<LLUUID> ids = self->mAvatarList->getSelectedIDs();
+	if (!self) return;
 
+	LLDynamicArray<LLUUID> ids = self->mAvatarList->getSelectedIDs();
 	for (LLDynamicArray<LLUUID>::iterator itr = ids.begin(); itr != ids.end();
 		 ++itr)
 	{
@@ -887,7 +893,8 @@ void LLFloaterAvatarList::onClickMark(void* userdata)
 void LLFloaterAvatarList::onClickFocus(void* userdata)
 {
 	LLFloaterAvatarList* self = (LLFloaterAvatarList*)userdata;
-	
+	if (!self) return;
+
  	LLScrollListItem* item = self->mAvatarList->getFirstSelected();
 	if (item)
 	{
@@ -994,8 +1001,7 @@ void LLFloaterAvatarList::focusOnNext(BOOL marked_only)
 			continue;
 		}
 
-		if (next == NULL &&
-			((!marked_only && entry->isDrawn()) || entry->isMarked()))
+		if (!next && ((!marked_only && entry->isDrawn()) || entry->isMarked()))
 		{
 			next = entry;
 		}
@@ -1012,7 +1018,7 @@ void LLFloaterAvatarList::focusOnNext(BOOL marked_only)
 		} 
 	}
 
-	if (next != NULL)
+	if (next)
 	{
 		removeFocusFromAll();
 		next->setFocus(TRUE);
@@ -1025,37 +1031,50 @@ void LLFloaterAvatarList::focusOnNext(BOOL marked_only)
 void LLFloaterAvatarList::onClickPrevInList(void* userdata)
 {
 	LLFloaterAvatarList* self = (LLFloaterAvatarList*)userdata;
-	self->focusOnPrev(FALSE);
+	if (self)
+	{
+		self->focusOnPrev(FALSE);
+	}
 }
 
 //static
 void LLFloaterAvatarList::onClickNextInList(void* userdata)
 {
 	LLFloaterAvatarList* self = (LLFloaterAvatarList*)userdata;
-	self->focusOnNext(FALSE);
+	if (self)
+	{
+		self->focusOnNext(FALSE);
+	}
 }
 
 //static
 void LLFloaterAvatarList::onClickPrevMarked(void* userdata)
 {
 	LLFloaterAvatarList* self = (LLFloaterAvatarList*)userdata;
-	self->focusOnPrev(TRUE);
+	if (self)
+	{
+		self->focusOnPrev(TRUE);
+	}
 }
 
 //static
 void LLFloaterAvatarList::onClickNextMarked(void* userdata)
 {
 	LLFloaterAvatarList* self = (LLFloaterAvatarList*)userdata;
-	self->focusOnNext(TRUE);
+	if (self)
+	{
+		self->focusOnNext(TRUE);
+	}
 }
 
 //static
 void LLFloaterAvatarList::onClickGetKey(void* userdata)
 {
 	LLFloaterAvatarList* self = (LLFloaterAvatarList*)userdata;
- 	LLScrollListItem* item = self->mAvatarList->getFirstSelected();
+	if (!self) return;
 
-	if (NULL == item) return;
+ 	LLScrollListItem* item = self->mAvatarList->getFirstSelected();
+	if (!item) return;
 
 	LLUUID agent_id = item->getUUID();
 
@@ -1069,10 +1088,14 @@ void LLFloaterAvatarList::onClickGetKey(void* userdata)
 void LLFloaterAvatarList::onClickSendKeys(void* userdata)
 {
 	LLFloaterAvatarList* self = (LLFloaterAvatarList*)userdata;
+	if (!self) return;
+
 	LLAvatarListEntry* entry;
 
 	if (self->mAvatars.size() == 0)
+	{
 		return;
+	}
 
 	for (avatar_list_iterator_t iter = self->mAvatars.begin(),
 								end = self->mAvatars.end();
@@ -1096,11 +1119,10 @@ static void send_freeze(const LLUUID& avatar_id, bool freeze)
 		flags |= 0x1;
 	}
 
-	LLMessageSystem* msg = gMessageSystem;
 	LLVOAvatar* avatarp = gObjectList.findAvatar(avatar_id);
-
 	if (avatarp && avatarp->getRegion())
 	{
+		LLMessageSystem* msg = gMessageSystem;
 		msg->newMessage("FreezeUser");
 		msg->nextBlock("AgentData");
 		msg->addUUID("AgentID", gAgentID);
@@ -1114,9 +1136,7 @@ static void send_freeze(const LLUUID& avatar_id, bool freeze)
 
 static void send_eject(const LLUUID& avatar_id, bool ban)
 {	
-	LLMessageSystem* msg = gMessageSystem;
 	LLVOAvatar* avatarp = gObjectList.findAvatar(avatar_id);
-
 	if (avatarp && avatarp->getRegion())
 	{
 		U32 flags = 0x0;
@@ -1126,6 +1146,7 @@ static void send_eject(const LLUUID& avatar_id, bool ban)
 			flags |= 0x1;
 		}
 
+		LLMessageSystem* msg = gMessageSystem;
 		msg->newMessage("EjectUser");
 		msg->nextBlock("AgentData");
 		msg->addUUID("AgentID", gAgentID);
@@ -1139,15 +1160,14 @@ static void send_eject(const LLUUID& avatar_id, bool ban)
 
 static void send_estate_message(const char* request, const LLUUID& target)
 {
-
-	LLMessageSystem* msg = gMessageSystem;
 	LLUUID invoice;
-
 	// This seems to provide an ID so that the sim can say which request it's
-	// replying to. I think this can be ignored for now.
+	// replying to.
 	invoice.generate();
 
 	llinfos << "Sending estate request '" << request << "'" << llendl;
+
+	LLMessageSystem* msg = gMessageSystem;
 	msg->newMessage("EstateOwnerMessage");
 	msg->nextBlockFast(_PREHASH_AgentData);
 	msg->addUUIDFast(_PREHASH_AgentID, gAgentID);
@@ -1168,38 +1188,38 @@ static void send_estate_message(const char* request, const LLUUID& target)
 	msg->sendReliable(gAgent.getRegion()->getHost());
 }
 
-static void cmd_freeze(const LLUUID& avatar, const std::string &name)
+static void cmd_freeze(const LLUUID& avatar, const std::string& name)
 {
 	send_freeze(avatar, true);
 }
 
-static void cmd_unfreeze(const LLUUID& avatar, const std::string &name)
+static void cmd_unfreeze(const LLUUID& avatar, const std::string& name)
 {
 	send_freeze(avatar, false);
 }
 
-static void cmd_eject(const LLUUID& avatar, const std::string &name)
+static void cmd_eject(const LLUUID& avatar, const std::string& name)
 {
 	send_eject(avatar, false);
 }
 
-static void cmd_ban(const LLUUID& avatar, const std::string &name)
+static void cmd_ban(const LLUUID& avatar, const std::string& name)
 {
 	send_eject(avatar, true);
 }
 
-static void cmd_profile(const LLUUID& avatar, const std::string &name)
+static void cmd_profile(const LLUUID& avatar, const std::string& name)
 {
 	LLFloaterAvatarInfo::showFromDirectory(avatar);
 }
 
-static void cmd_estate_eject(const LLUUID &avatar, const std::string &name)
+static void cmd_estate_eject(const LLUUID& avatar, const std::string& name)
 {
 	send_estate_message("teleporthomeuser", avatar);
 }
 
-void LLFloaterAvatarList::doCommand(void (*func)(const LLUUID &avatar,
-												 const std::string &name))
+void LLFloaterAvatarList::doCommand(void (*func)(const LLUUID& avatar,
+												 const std::string& name))
 {
 	LLDynamicArray<LLUUID> ids = mAvatarList->getSelectedIDs();
 
@@ -1256,12 +1276,13 @@ LLUUID LLFloaterAvatarList::getSelectedID()
 }
 
 //static 
-void LLFloaterAvatarList::callbackFreeze(const LLSD& notification, const LLSD& response)
+void LLFloaterAvatarList::callbackFreeze(const LLSD& notification,
+										 const LLSD& response)
 {
-	S32 option = LLNotification::getSelectedOption(notification, response);
-
 	LLFloaterAvatarList* self = sInstance;
+	if (!self) return;
 
+	S32 option = LLNotification::getSelectedOption(notification, response);
 	if (option == 0)
 	{
 		self->doCommand(cmd_freeze);
@@ -1273,12 +1294,13 @@ void LLFloaterAvatarList::callbackFreeze(const LLSD& notification, const LLSD& r
 }
 
 //static 
-void LLFloaterAvatarList::callbackEject(const LLSD& notification, const LLSD& response)
+void LLFloaterAvatarList::callbackEject(const LLSD& notification,
+										const LLSD& response)
 {
-	S32 option = LLNotification::getSelectedOption(notification, response);
-
 	LLFloaterAvatarList* self = sInstance;
+	if (!self) return;
  
+	S32 option = LLNotification::getSelectedOption(notification, response);
 	if (option == 0)
 	{
 		self->doCommand(cmd_eject);
@@ -1290,12 +1312,13 @@ void LLFloaterAvatarList::callbackEject(const LLSD& notification, const LLSD& re
 }
 
 //static 
-void LLFloaterAvatarList::callbackEjectFromEstate(const LLSD& notification, const LLSD& response)
+void LLFloaterAvatarList::callbackEjectFromEstate(const LLSD& notification,
+												  const LLSD& response)
 {
-	S32 option = LLNotification::getSelectedOption(notification, response);
-
 	LLFloaterAvatarList* self = sInstance;
+	if (!self) return;
 
+	S32 option = LLNotification::getSelectedOption(notification, response);
 	if (option == 0)
 	{
 		self->doCommand(cmd_estate_eject);
@@ -1352,6 +1375,7 @@ void LLFloaterAvatarList::onClickEject(void* userdata)
 void LLFloaterAvatarList::onClickMute(void* userdata)
 {
 	LLFloaterAvatarList* self = (LLFloaterAvatarList*)userdata;
+	if (!self) return;
 
 	LLMuteList* ml = LLMuteList::getInstance();
 	if (!ml) return;
@@ -1397,6 +1421,8 @@ void LLFloaterAvatarList::onClickEjectFromEstate(void* userdata)
 void LLFloaterAvatarList::onClickAR(void* userdata)
 {
 	LLFloaterAvatarList* self = (LLFloaterAvatarList*)userdata;
+	if (!self) return;
+
  	LLScrollListItem* item = self->mAvatarList->getFirstSelected();
 	if (item)
 	{
@@ -1413,13 +1439,18 @@ void LLFloaterAvatarList::onClickAR(void* userdata)
 void LLFloaterAvatarList::onClickProfile(void* userdata)
 {
 	LLFloaterAvatarList* self = (LLFloaterAvatarList*)userdata;
-	self->doCommand(cmd_profile);
+	if (self)
+	{
+		self->doCommand(cmd_profile);
+	}
 }
 
 //static
 void LLFloaterAvatarList::onClickTeleport(void* userdata)
 {
 	LLFloaterAvatarList* self = (LLFloaterAvatarList*)userdata;
+	if (!self) return;
+
  	LLScrollListItem* item = self->mAvatarList->getFirstSelected();
 	if (item)
 	{
@@ -1438,6 +1469,7 @@ void LLFloaterAvatarList::onClickTeleport(void* userdata)
 void LLFloaterAvatarList::onSelectName(LLUICtrl*, void* userdata)
 {
 	LLFloaterAvatarList* self = (LLFloaterAvatarList*)userdata;
+	if (!self) return;
 
  	LLScrollListItem* item = self->mAvatarList->getFirstSelected();
 	if (item)
@@ -1447,9 +1479,9 @@ void LLFloaterAvatarList::onSelectName(LLUICtrl*, void* userdata)
 		if (entry)
 		{
 			BOOL enabled = entry->isDrawn();
-			self->childSetEnabled("focus_btn", enabled);
-			self->childSetEnabled("prev_in_list_btn", enabled);
-			self->childSetEnabled("next_in_list_btn", enabled);
+			self->mFocusButton->setEnabled(enabled);
+			self->mPrevInListButton->setEnabled(enabled);
+			self->mNextInListButton->setEnabled(enabled);
 		}
 	}
 }

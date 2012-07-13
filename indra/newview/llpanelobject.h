@@ -1,11 +1,11 @@
-/** 
+/**
  * @file llpanelobject.h
  * @brief Object editing (position, scale, etc.) in the tools floater
  *
  * $LicenseInfo:firstyear=2004&license=viewergpl$
- * 
+ *
  * Copyright (c) 2004-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -13,17 +13,17 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
@@ -55,53 +55,56 @@ class LLPanelObject : public LLPanel
 {
 public:
 	LLPanelObject(const std::string& name);
-	virtual ~LLPanelObject();
+	/*virtual*/ ~LLPanelObject();
 
-	virtual BOOL	postBuild();
-	virtual void	draw();
-	virtual void 	clearCtrls();
+	/*virtual*/ BOOL postBuild();
+	/*virtual*/ void draw();
+	/*virtual*/ void clearCtrls();
 
-	void			refresh();
+	/*virtual*/ void refresh();
 
-	static BOOL		precommitValidate(LLUICtrl* ctrl,void* userdata);
+private:
+	static BOOL precommitValidate(LLUICtrl* ctrl,void* userdata);
 
-	static void		onCommitLock(LLUICtrl *ctrl, void *data);
-	static void 	onCommitPosition(LLUICtrl* ctrl, void* userdata);
-	static void 	onCommitScale(LLUICtrl* ctrl, void* userdata);
-	static void 	onCommitRotation(LLUICtrl* ctrl, void* userdata);
-	static void 	onCommitTemporary(LLUICtrl* ctrl, void* userdata);
-	static void 	onCommitPhantom(LLUICtrl* ctrl, void* userdata);
-	static void 	onCommitPhysics(LLUICtrl* ctrl, void* userdata);
-	static void 	onCommitCastShadows(LLUICtrl* ctrl, void* userdata);
+	static void onCommitLock(LLUICtrl *ctrl, void *data);
+	static void onCommitPosition(LLUICtrl* ctrl, void* userdata);
+	static void onCommitScale(LLUICtrl* ctrl, void* userdata);
+	static void onCommitRotation(LLUICtrl* ctrl, void* userdata);
+	static void onCommitTemporary(LLUICtrl* ctrl, void* userdata);
+	static void onCommitPhantom(LLUICtrl* ctrl, void* userdata);
+	static void onCommitPhysics(LLUICtrl* ctrl, void* userdata);
+	static void onCommitCastShadows(LLUICtrl* ctrl, void* userdata);
 
-	static void 	onCommitParametric(LLUICtrl* ctrl, void* userdata);
+	static void onCommitParametric(LLUICtrl* ctrl, void* userdata);
 
-	static void     onCommitSculpt(LLUICtrl* ctrl, void* userdata);
-	static void     onCancelSculpt(LLUICtrl* ctrl, void* userdata);
-	static void     onSelectSculpt(LLUICtrl* ctrl, void* userdata);
-	static BOOL     onDropSculpt(LLUICtrl* ctrl, LLInventoryItem* item, void* ud);
-	static void     onCommitSculptType(LLUICtrl *ctrl, void* userdata);
+	static void onCommitSculpt(LLUICtrl* ctrl, void* userdata);
+	static void onCancelSculpt(LLUICtrl* ctrl, void* userdata);
+	static void onSelectSculpt(LLUICtrl* ctrl, void* userdata);
+	static BOOL onDropSculpt(LLUICtrl* ctrl, LLInventoryItem* item, void* ud);
+	static void onCommitSculptType(LLUICtrl *ctrl, void* userdata);
 
-	static void     onCommitCopyPaste(LLUICtrl *ctrl, void* userdata);
-	static void 	onClickCopy(void* user_data);
-	static void 	onClickPaste(void* user_data);
+	static void onCommitCopyPaste(LLUICtrl *ctrl, void* userdata);
+	static void onClickCopy(void* userdata);
+	static void onClickPaste(void* userdata);
 
-protected:
-	void			getState();
-	void			setCopyPasteState();
+	void getState();
+	void setCopyPasteState();
 
-	void			sendRotation(BOOL btn_down);
-	void			sendScale(BOOL btn_down);
-	void			sendPosition(BOOL btn_down);
-	void			sendIsPhysical();
-	void			sendIsTemporary();
-	void			sendIsPhantom();
-	void			sendCastShadows();
-	void            sendSculpt();
+	void sendRotation(BOOL btn_down);
+	void sendScale(BOOL btn_down);
+	void sendPosition(BOOL btn_down);
+	void sendIsPhysical();
+	void sendIsTemporary();
+	void sendIsPhantom();
+	void sendCastShadows();
+	void sendSculpt();
 
-	void 			getVolumeParams(LLVolumeParams& volume_params);
+	void getVolumeParams(LLVolumeParams& volume_params);
 
-protected:
+private:
+	LLTextBox*		mLabelSelectSingle;
+	LLTextBox*		mLabelEditObject;
+
 	// Per-object options
 	LLTextBox*		mLabelBaseType;
 	LLComboBox*		mComboBaseType;
@@ -112,14 +115,15 @@ protected:
 
 	LLTextBox*		mLabelHollow;
 	LLSpinCtrl*		mSpinHollow;
+	LLTextBox*		mLabelHollowShape;
 
-	LLTextBox*		mLabelHoleType;
 	LLComboBox*		mComboHoleType;
 
 	LLTextBox*		mLabelTwist;
 	LLSpinCtrl*		mSpinTwist;
 	LLSpinCtrl*		mSpinTwistBegin;
 
+	LLTextBox*		mLabelScaleHole;
 	LLSpinCtrl*		mSpinScaleX;
 	LLSpinCtrl*		mSpinScaleY;
 
@@ -131,10 +135,14 @@ protected:
 	LLSpinCtrl*		mSpinShearY;
 
 	// Advanced Path
+	LLTextBox*		mLabelAdvancedCut;
+	LLTextBox*		mLabelAdvancedDimple;
+	LLTextBox*		mLabelAdvancedSlice;
+
 	LLSpinCtrl*		mCtrlPathBegin;
 	LLSpinCtrl*		mCtrlPathEnd;
 
-	LLTextBox*		mLabelTaper;
+	LLTextBox*		mLabelScaleTaper;
 	LLSpinCtrl*		mSpinTaperX;
 	LLSpinCtrl*		mSpinTaperY;
 

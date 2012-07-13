@@ -19,10 +19,11 @@
 #include "llfloaterreporter.h"
 #include "llframetimer.h"
 #include "lluuid.h"
-#include "llscrolllistctrl.h"
 #include "lltimer.h"
 
+class LLButton;
 class LLFloaterAvatarList;
+class LLScrollListCtrl;
 
 /**
  * @brief This class is used to hold data about avatars.
@@ -242,13 +243,8 @@ private:
 	 */
 	void focusOnNext(BOOL marked_only);
 
-	/**
-	 * @brief Handler for the "refresh" button click.
-	 * I am unsure whether this is actually necessary at the time.
-	 *
-	 * LL: By convention, button callbacks are named onClickButtonLabel
-	 * @param userdata Pointer to user data (LLFloaterAvatarList instance)
-	 */
+	void stopTracker();
+	void refreshTracker();
 
 	static void onClickProfile(void* userdata);
 	static void onClickIM(void* userdata);
@@ -289,30 +285,32 @@ private:
 	/**
 	 * @brief Pointer to the avatar scroll list
 	 */
-	LLScrollListCtrl* mAvatarList;
+	LLScrollListCtrl*		mAvatarList;
 
-	std::map<LLUUID, LLAvatarListEntry>	mAvatars;
+	LLButton*				mFocusButton;
+	LLButton*				mPrevInListButton;
+	LLButton*				mNextInListButton;
+
+	typedef std::map<LLUUID, LLAvatarListEntry> avatar_list_t;
 	typedef std::map<LLUUID, LLAvatarListEntry>::iterator avatar_list_iterator_t;
+	avatar_list_t			mAvatars;
 
 	/**
 	 * @brief Update rate (updates per second)
 	 */
-	LLCachedControl<U32> mUpdatesPerSecond;
+	LLCachedControl<U32>	mUpdatesPerSecond;
 
 	/**
 	 * @brief Update timer
 	 */
-	static LLFrameTimer sUpdateTimer;
+	static LLFrameTimer		sUpdateTimer;
 	
-	void stopTracker();
-	void refreshTracker();
-
 	// tracking data
-	BOOL mTracking;			// Tracking ?
-	LLUUID mTrackedAvatar;	// Who we are tracking
+	BOOL					mTracking;			// Tracking ?
+	LLUUID					mTrackedAvatar;		// Who we are tracking
 
 	/**
 	 * @brief Avatar the camera is focused on
 	 */
-	LLUUID mFocusedAvatar;
+	LLUUID					mFocusedAvatar;
 };

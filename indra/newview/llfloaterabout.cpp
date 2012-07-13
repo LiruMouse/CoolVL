@@ -1,12 +1,12 @@
-/** 
+/**
  * @file llfloaterabout.cpp
  * @author James Cook
  * @brief The about box from Help->About
  *
  * $LicenseInfo:firstyear=2001&license=viewergpl$
- * 
+ *
  * Copyright (c) 2001-2009, Linden Research, Inc.
- * 
+ *
  * Second Life Viewer Source Code
  * The source code in this file ("Source Code") is provided by Linden Lab
  * to you under the terms of the GNU General Public License, version 2.0
@@ -14,23 +14,23 @@
  * ("Other License"), formally executed by you and Linden Lab.  Terms of
  * the GPL can be found in doc/GPL-license.txt in this distribution, or
  * online at http://secondlifegrid.net/programs/open_source/licensing/gplv2
- * 
+ *
  * There are special exceptions to the terms and conditions of the GPL as
  * it is applied to this Source Code. View the full text of the exception
  * in the file doc/FLOSS-exception.txt in this software distribution, or
  * online at
  * http://secondlifegrid.net/programs/open_source/licensing/flossexception
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge
  * that you have read and understood your obligations described above,
  * and agree to abide by those obligations.
- * 
+ *
  * ALL LINDEN LAB SOURCE CODE IS PROVIDED "AS IS." LINDEN LAB MAKES NO
  * WARRANTIES, EXPRESS, IMPLIED OR OTHERWISE, REGARDING ITS ACCURACY,
  * COMPLETENESS OR PERFORMANCE.
  * $/LicenseInfo$
  */
- 
+
 #include "llviewerprecompiledheaders.h"
 
 #if LL_WINDOWS
@@ -50,7 +50,7 @@
 #include "llversionviewer.h"
 
 #include "llagent.h"
-#include "llappviewer.h" 
+#include "llappviewer.h"
 #include "llmediactrl.h"
 #include "lltrans.h"
 #include "llviewercontrol.h"
@@ -94,7 +94,7 @@ public:
 ///----------------------------------------------------------------------------
 
 // Default constructor
-LLFloaterAbout::LLFloaterAbout() 
+LLFloaterAbout::LLFloaterAbout()
 :	LLFloater(std::string("floater_about"))
 {
 	LLUICtrlFactory::getInstance()->buildFloater(this, "floater_about.xml");
@@ -187,7 +187,7 @@ static std::string get_viewer_release_notes_url()
 
 void LLFloaterAbout::setSupportText(const std::string& server_release_notes_url)
 {
-	LLColor4 fg_color = gColors.getColor("TextFgReadOnlyColor");
+	LLColor4 fg_color = LLUI::sTextFgReadOnlyColor;
 	LLViewerTextEditor* support_widget = getChild<LLViewerTextEditor>("support",
 																	  true);
 
